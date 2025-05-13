@@ -1,0 +1,8 @@
+{
+	"recommendations": [
+		"biomejs.biome",
+		"github.vscode-github-actions",
+		"aaron-bond.better-comments",
+		"ahmadalli.vscode-nginx-conf"
+	]
+}

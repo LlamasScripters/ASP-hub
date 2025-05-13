@@ -1,6 +1,6 @@
 services:
   client:
-    image: node:20-alpine
+    image: node:22.15.0-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host"
     ports:
@@ -11,7 +11,7 @@ services:
       - NODE_ENV=development
     
   server:
-    image: node:20-alpine
+    image: node:22.15.0-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     ports:
@@ -20,17 +20,14 @@ services:
       - ./server:/app
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_USER=root
-      - DB_PASSWORD=password
-      - DB_NAME=asp_db
+      - DATABASE_URL=postgresql://root:password@postgres:5432/asp_db
       - MONGO_URI=mongodb://root:password@mongo:27017/asp_mongo?authSource=admin
     depends_on:
       - postgres
       - mongo
     
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17.4-alpine
     ports:
       - "5432:5432"
     volumes:
@@ -41,7 +38,7 @@ services:
       - POSTGRES_DB=asp_db
     
   mongo:
-    image: mongo:6.0
+    image: mongo:8.0.9
     ports:
       - "27017:27017"
     volumes:
