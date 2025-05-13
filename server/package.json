@@ -9,7 +9,10 @@
 		"start": "node dist/index.js",
 		"test": "node --test",
 		"lint": "biome check  .",
-		"lint:fix": "biome check  --write ."
+		"lint:fix": "biome check  --write .",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
 	},
 	"keywords": [],
 	"author": "",
@@ -17,6 +20,7 @@
 	"description": "",
 	"dependencies": {
 		"bcrypt": "^6.0.0",
+		"better-auth": "1.2.7",
 		"body-parser": "^2.2.0",
 		"cors": "^2.8.5",
 		"dotenv": "^16.5.0",
@@ -39,6 +43,7 @@
 		"@types/node": "^22.15.17",
 		"@types/pg": "^8.15.1",
 		"drizzle-kit": "^0.31.1",
+		"drizzle-seed": "0.3.1",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3"
 	}

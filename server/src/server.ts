@@ -1,0 +1,32 @@
+import { auth } from "@/lib/auth.js";
+import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+
+const server = express();
+
+server.use(helmet());
+server.use(
+	cors({
+		origin: process.env.CLIENT_URL.split(","),
+		credentials: true,
+	}),
+);
+
+server.all("/api/auth/*splat", toNodeHandler(auth));
+//@ts-ignore
+server.get("/api/me", async (req, res) => {
+	const session = await auth.api.getSession({
+		headers: fromNodeHeaders(req.headers),
+	});
+	return res.json(session);
+});
+
+server.use(express.json());
+
+server.get("/api", (req, res) => {
+	res.json({ message: "ASP API is running!" });
+});
+
+export default server;
