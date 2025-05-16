@@ -3,11 +3,14 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
 	component: RouteComponent,
-	beforeLoad: async () => {
-		const { data: session } = await authClient.getSession();
-		if (!session) {
-			return redirect({ to: "/auth/login" });
+	loader: async ({ abortController }) => {
+		const { data } = await authClient.getSession({
+			fetchOptions: { signal: abortController.signal },
+		});
+		if (!data) {
+			throw redirect({ to: "/auth/login" });
 		}
+		return { user: data.user };
 	},
 });
 

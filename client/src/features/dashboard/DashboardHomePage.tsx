@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { UserLoggedIn } from "@/lib/auth-client";
 import {
 	BarChart3,
 	Calendar,
@@ -54,14 +55,14 @@ const users = [
 	},
 ];
 
-export default function DashboardHomePage() {
+export default function DashboardHomePage({ user }: { user: UserLoggedIn }) {
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
 					<p className="text-muted-foreground">
-						Bienvenue, Moussa. Voici un aperçu de l'association.
+						Bienvenue, {user.firstName}. Voici un aperçu de l'association.
 					</p>
 				</div>
 				<div className="flex items-center gap-2">

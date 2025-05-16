@@ -2,7 +2,7 @@ services:
   client:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm run dev -- --host"
     ports:
       - 3000:3000
     volumes:
@@ -23,8 +23,8 @@ services:
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/asp_db
       - MONGO_URI=mongodb://root:password@mongo:27017/asp_mongo?authSource=admin
       - BETTER_AUTH_SECRET=secret
-      - BETTER_AUTH_URL=http://localhost:5173
-      - CLIENT_URL=http://localhost:5173
+      - BETTER_AUTH_URL=http://localhost:3000
+      - CLIENT_URL=http://localhost:3000
     depends_on:
       - postgres
       - mongo
