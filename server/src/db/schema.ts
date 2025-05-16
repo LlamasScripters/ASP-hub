@@ -1,6 +1,7 @@
+import { type SQL, sql } from "drizzle-orm";
 import {
 	boolean,
-	integer,
+	date,
 	pgTable,
 	text,
 	timestamp,
@@ -10,11 +11,14 @@ import {
 
 export const users = pgTable("users", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	name: varchar("name", { length: 255 }).notNull(),
+	firstName: varchar("first_name", { length: 255 }).notNull(),
+	lastName: varchar("last_name", { length: 255 }).notNull(),
 	email: varchar("email", { length: 255 }).notNull().unique(),
-	password: text("password").notNull(),
-	age: integer("age"),
-	isActive: boolean("is_active").default(true).notNull(),
+	name: text("name").generatedAlwaysAs(
+		(): SQL => sql`coalesce(${users.firstName} || ' ' || ${users.lastName})`,
+	),
+	dateOfBirth: date("date_of_birth"),
+	acceptTerms: boolean("accept_terms").notNull(),
 	emailVerified: boolean("email_verified").notNull().default(false),
 	image: text("image"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -22,10 +26,11 @@ export const users = pgTable("users", {
 		.$onUpdate(() => new Date())
 		.notNull()
 		.defaultNow(),
+	deletedAt: timestamp("deleted_at"),
 });
 
 export const sessions = pgTable("sessions", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().defaultRandom(),
 	expiresAt: timestamp("expires_at").notNull(),
 	token: text("token").notNull().unique(),
 	createdAt: timestamp("created_at").notNull(),
@@ -38,7 +43,7 @@ export const sessions = pgTable("sessions", {
 });
 
 export const accounts = pgTable("accounts", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().defaultRandom(),
 	accountId: text("account_id").notNull(),
 	providerId: text("provider_id").notNull(),
 	userId: uuid("user_id")
@@ -56,7 +61,7 @@ export const accounts = pgTable("accounts", {
 });
 
 export const verifications = pgTable("verifications", {
-	id: text("id").primaryKey(),
+	id: uuid("id").primaryKey().defaultRandom(),
 	identifier: text("identifier").notNull(),
 	value: text("value").notNull(),
 	expiresAt: timestamp("expires_at").notNull(),

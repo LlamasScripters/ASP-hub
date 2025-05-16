@@ -3,12 +3,11 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "vite build && tsc",
+		"build": "tsc -b && vite build",
 		"dev": "vite --port 3000",
 		"lint": "biome check  .",
 		"lint:fix": "biome check  --write .",
 		"serve": "vite preview",
-		"start": "vite --port 3000",
 		"test": "vitest run"
 	},
 	"dependencies": {

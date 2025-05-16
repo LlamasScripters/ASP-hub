@@ -15,27 +15,23 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
-import { Route as DashboardDashboardImport } from './routes/dashboard/_dashboard'
-import { Route as AuthLayoutImport } from './routes/auth/_layout'
-import { Route as DashboardDashboardIndexImport } from './routes/dashboard/_dashboard.index'
-import { Route as DashboardDashboardSocialImport } from './routes/dashboard/_dashboard.social'
-import { Route as DashboardDashboardMembersImport } from './routes/dashboard/_dashboard.members'
-import { Route as DashboardDashboardActivitiesImport } from './routes/dashboard/_dashboard.activities'
+import { Route as AuthAuthImport } from './routes/auth/_auth'
 import { Route as AuthAuthRegisterImport } from './routes/auth/_auth.register'
 import { Route as AuthAuthLoginImport } from './routes/auth/_auth.login'
+import { Route as AuthenticatedDashboardDashboardImport } from './routes/_authenticated/dashboard/_dashboard'
+import { Route as AuthenticatedDashboardDashboardIndexImport } from './routes/_authenticated/dashboard/_dashboard.index'
+import { Route as AuthenticatedDashboardDashboardSocialImport } from './routes/_authenticated/dashboard/_dashboard.social'
+import { Route as AuthenticatedDashboardDashboardMembersImport } from './routes/_authenticated/dashboard/_dashboard.members'
+import { Route as AuthenticatedDashboardDashboardActivitiesImport } from './routes/_authenticated/dashboard/_dashboard.activities'
 
 // Create Virtual Routes
 
-const DashboardImport = createFileRoute('/dashboard')()
 const AuthImport = createFileRoute('/auth')()
+const AuthenticatedDashboardImport = createFileRoute(
+  '/_authenticated/dashboard',
+)()
 
 // Create/Update Routes
-
-const DashboardRoute = DashboardImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const AuthRoute = AuthImport.update({
   id: '/auth',
@@ -48,58 +44,68 @@ const AuthenticatedRoute = AuthenticatedImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const DashboardDashboardRoute = DashboardDashboardImport.update({
-  id: '/_dashboard',
-  getParentRoute: () => DashboardRoute,
-} as any)
-
-const AuthLayoutRoute = AuthLayoutImport.update({
-  id: '/_layout',
+const AuthAuthRoute = AuthAuthImport.update({
+  id: '/_auth',
   getParentRoute: () => AuthRoute,
 } as any)
-
-const DashboardDashboardIndexRoute = DashboardDashboardIndexImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardDashboardRoute,
-} as any)
-
-const DashboardDashboardSocialRoute = DashboardDashboardSocialImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => DashboardDashboardRoute,
-} as any)
-
-const DashboardDashboardMembersRoute = DashboardDashboardMembersImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => DashboardDashboardRoute,
-} as any)
-
-const DashboardDashboardActivitiesRoute =
-  DashboardDashboardActivitiesImport.update({
-    id: '/activities',
-    path: '/activities',
-    getParentRoute: () => DashboardDashboardRoute,
-  } as any)
 
 const AuthAuthRegisterRoute = AuthAuthRegisterImport.update({
-  id: '/_auth/register',
+  id: '/register',
   path: '/register',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AuthAuthRoute,
 } as any)
 
 const AuthAuthLoginRoute = AuthAuthLoginImport.update({
-  id: '/_auth/login',
+  id: '/login',
   path: '/login',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AuthAuthRoute,
 } as any)
+
+const AuthenticatedDashboardDashboardRoute =
+  AuthenticatedDashboardDashboardImport.update({
+    id: '/_dashboard',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardIndexRoute =
+  AuthenticatedDashboardDashboardIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardSocialRoute =
+  AuthenticatedDashboardDashboardSocialImport.update({
+    id: '/social',
+    path: '/social',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardMembersRoute =
+  AuthenticatedDashboardDashboardMembersImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
+
+const AuthenticatedDashboardDashboardActivitiesRoute =
+  AuthenticatedDashboardDashboardActivitiesImport.update({
+    id: '/activities',
+    path: '/activities',
+    getParentRoute: () => AuthenticatedDashboardDashboardRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -119,26 +125,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthImport
       parentRoute: typeof rootRoute
     }
-    '/auth/_layout': {
-      id: '/auth/_layout'
+    '/auth/_auth': {
+      id: '/auth/_auth'
       path: '/auth'
       fullPath: '/auth'
-      preLoaderRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof AuthAuthImport
       parentRoute: typeof AuthRoute
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardImport
-      parentRoute: typeof rootRoute
-    }
-    '/dashboard/_dashboard': {
-      id: '/dashboard/_dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardDashboardImport
-      parentRoute: typeof DashboardRoute
     }
     '/_authenticated/': {
       id: '/_authenticated/'
@@ -147,146 +139,182 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard/_dashboard': {
+      id: '/_authenticated/dashboard/_dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/auth/_auth/login': {
       id: '/auth/_auth/login'
       path: '/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthAuthLoginImport
-      parentRoute: typeof AuthImport
+      parentRoute: typeof AuthAuthImport
     }
     '/auth/_auth/register': {
       id: '/auth/_auth/register'
       path: '/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthAuthRegisterImport
-      parentRoute: typeof AuthImport
+      parentRoute: typeof AuthAuthImport
     }
-    '/dashboard/_dashboard/activities': {
-      id: '/dashboard/_dashboard/activities'
+    '/_authenticated/dashboard/_dashboard/activities': {
+      id: '/_authenticated/dashboard/_dashboard/activities'
       path: '/activities'
       fullPath: '/dashboard/activities'
-      preLoaderRoute: typeof DashboardDashboardActivitiesImport
-      parentRoute: typeof DashboardDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardActivitiesImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
     }
-    '/dashboard/_dashboard/members': {
-      id: '/dashboard/_dashboard/members'
+    '/_authenticated/dashboard/_dashboard/members': {
+      id: '/_authenticated/dashboard/_dashboard/members'
       path: '/members'
       fullPath: '/dashboard/members'
-      preLoaderRoute: typeof DashboardDashboardMembersImport
-      parentRoute: typeof DashboardDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardMembersImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
     }
-    '/dashboard/_dashboard/social': {
-      id: '/dashboard/_dashboard/social'
+    '/_authenticated/dashboard/_dashboard/social': {
+      id: '/_authenticated/dashboard/_dashboard/social'
       path: '/social'
       fullPath: '/dashboard/social'
-      preLoaderRoute: typeof DashboardDashboardSocialImport
-      parentRoute: typeof DashboardDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardSocialImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
     }
-    '/dashboard/_dashboard/': {
-      id: '/dashboard/_dashboard/'
+    '/_authenticated/dashboard/_dashboard/': {
+      id: '/_authenticated/dashboard/_dashboard/'
       path: '/'
       fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardDashboardIndexImport
-      parentRoute: typeof DashboardDashboardImport
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardIndexImport
+      parentRoute: typeof AuthenticatedDashboardDashboardImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthenticatedDashboardDashboardRouteChildren {
+  AuthenticatedDashboardDashboardActivitiesRoute: typeof AuthenticatedDashboardDashboardActivitiesRoute
+  AuthenticatedDashboardDashboardMembersRoute: typeof AuthenticatedDashboardDashboardMembersRoute
+  AuthenticatedDashboardDashboardSocialRoute: typeof AuthenticatedDashboardDashboardSocialRoute
+  AuthenticatedDashboardDashboardIndexRoute: typeof AuthenticatedDashboardDashboardIndexRoute
+}
+
+const AuthenticatedDashboardDashboardRouteChildren: AuthenticatedDashboardDashboardRouteChildren =
+  {
+    AuthenticatedDashboardDashboardActivitiesRoute:
+      AuthenticatedDashboardDashboardActivitiesRoute,
+    AuthenticatedDashboardDashboardMembersRoute:
+      AuthenticatedDashboardDashboardMembersRoute,
+    AuthenticatedDashboardDashboardSocialRoute:
+      AuthenticatedDashboardDashboardSocialRoute,
+    AuthenticatedDashboardDashboardIndexRoute:
+      AuthenticatedDashboardDashboardIndexRoute,
+  }
+
+const AuthenticatedDashboardDashboardRouteWithChildren =
+  AuthenticatedDashboardDashboardRoute._addFileChildren(
+    AuthenticatedDashboardDashboardRouteChildren,
+  )
+
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardDashboardRoute: typeof AuthenticatedDashboardDashboardRouteWithChildren
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardDashboardRoute:
+      AuthenticatedDashboardDashboardRouteWithChildren,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface AuthRouteChildren {
-  AuthLayoutRoute: typeof AuthLayoutRoute
+interface AuthAuthRouteChildren {
   AuthAuthLoginRoute: typeof AuthAuthLoginRoute
   AuthAuthRegisterRoute: typeof AuthAuthRegisterRoute
 }
 
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthLayoutRoute: AuthLayoutRoute,
+const AuthAuthRouteChildren: AuthAuthRouteChildren = {
   AuthAuthLoginRoute: AuthAuthLoginRoute,
   AuthAuthRegisterRoute: AuthAuthRegisterRoute,
 }
 
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
-interface DashboardDashboardRouteChildren {
-  DashboardDashboardActivitiesRoute: typeof DashboardDashboardActivitiesRoute
-  DashboardDashboardMembersRoute: typeof DashboardDashboardMembersRoute
-  DashboardDashboardSocialRoute: typeof DashboardDashboardSocialRoute
-  DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
-}
-
-const DashboardDashboardRouteChildren: DashboardDashboardRouteChildren = {
-  DashboardDashboardActivitiesRoute: DashboardDashboardActivitiesRoute,
-  DashboardDashboardMembersRoute: DashboardDashboardMembersRoute,
-  DashboardDashboardSocialRoute: DashboardDashboardSocialRoute,
-  DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
-}
-
-const DashboardDashboardRouteWithChildren =
-  DashboardDashboardRoute._addFileChildren(DashboardDashboardRouteChildren)
-
-interface DashboardRouteChildren {
-  DashboardDashboardRoute: typeof DashboardDashboardRouteWithChildren
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardDashboardRoute: DashboardDashboardRouteWithChildren,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
+const AuthAuthRouteWithChildren = AuthAuthRoute._addFileChildren(
+  AuthAuthRouteChildren,
 )
+
+interface AuthRouteChildren {
+  AuthAuthRoute: typeof AuthAuthRouteWithChildren
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthAuthRoute: AuthAuthRouteWithChildren,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteWithChildren
-  '/auth': typeof AuthLayoutRoute
-  '/dashboard': typeof DashboardDashboardRouteWithChildren
+  '/auth': typeof AuthAuthRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardDashboardRouteWithChildren
   '/auth/login': typeof AuthAuthLoginRoute
   '/auth/register': typeof AuthAuthRegisterRoute
-  '/dashboard/activities': typeof DashboardDashboardActivitiesRoute
-  '/dashboard/members': typeof DashboardDashboardMembersRoute
-  '/dashboard/social': typeof DashboardDashboardSocialRoute
-  '/dashboard/': typeof DashboardDashboardIndexRoute
+  '/dashboard/activities': typeof AuthenticatedDashboardDashboardActivitiesRoute
+  '/dashboard/members': typeof AuthenticatedDashboardDashboardMembersRoute
+  '/dashboard/social': typeof AuthenticatedDashboardDashboardSocialRoute
+  '/dashboard/': typeof AuthenticatedDashboardDashboardIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/auth': typeof AuthLayoutRoute
-  '/dashboard': typeof DashboardDashboardIndexRoute
+  '/auth': typeof AuthAuthRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardDashboardIndexRoute
   '/auth/login': typeof AuthAuthLoginRoute
   '/auth/register': typeof AuthAuthRegisterRoute
-  '/dashboard/activities': typeof DashboardDashboardActivitiesRoute
-  '/dashboard/members': typeof DashboardDashboardMembersRoute
-  '/dashboard/social': typeof DashboardDashboardSocialRoute
+  '/dashboard/activities': typeof AuthenticatedDashboardDashboardActivitiesRoute
+  '/dashboard/members': typeof AuthenticatedDashboardDashboardMembersRoute
+  '/dashboard/social': typeof AuthenticatedDashboardDashboardSocialRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/auth/_layout': typeof AuthLayoutRoute
-  '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/_dashboard': typeof DashboardDashboardRouteWithChildren
+  '/auth/_auth': typeof AuthAuthRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/_dashboard': typeof AuthenticatedDashboardDashboardRouteWithChildren
   '/auth/_auth/login': typeof AuthAuthLoginRoute
   '/auth/_auth/register': typeof AuthAuthRegisterRoute
-  '/dashboard/_dashboard/activities': typeof DashboardDashboardActivitiesRoute
-  '/dashboard/_dashboard/members': typeof DashboardDashboardMembersRoute
-  '/dashboard/_dashboard/social': typeof DashboardDashboardSocialRoute
-  '/dashboard/_dashboard/': typeof DashboardDashboardIndexRoute
+  '/_authenticated/dashboard/_dashboard/activities': typeof AuthenticatedDashboardDashboardActivitiesRoute
+  '/_authenticated/dashboard/_dashboard/members': typeof AuthenticatedDashboardDashboardMembersRoute
+  '/_authenticated/dashboard/_dashboard/social': typeof AuthenticatedDashboardDashboardSocialRoute
+  '/_authenticated/dashboard/_dashboard/': typeof AuthenticatedDashboardDashboardIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -294,8 +322,8 @@ export interface FileRouteTypes {
   fullPaths:
     | ''
     | '/auth'
-    | '/dashboard'
     | '/'
+    | '/dashboard'
     | '/auth/login'
     | '/auth/register'
     | '/dashboard/activities'
@@ -305,8 +333,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
-    | '/dashboard'
     | '/'
+    | '/dashboard'
     | '/auth/login'
     | '/auth/register'
     | '/dashboard/activities'
@@ -316,29 +344,27 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
-    | '/auth/_layout'
-    | '/dashboard'
-    | '/dashboard/_dashboard'
+    | '/auth/_auth'
     | '/_authenticated/'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/_dashboard'
     | '/auth/_auth/login'
     | '/auth/_auth/register'
-    | '/dashboard/_dashboard/activities'
-    | '/dashboard/_dashboard/members'
-    | '/dashboard/_dashboard/social'
-    | '/dashboard/_dashboard/'
+    | '/_authenticated/dashboard/_dashboard/activities'
+    | '/_authenticated/dashboard/_dashboard/members'
+    | '/_authenticated/dashboard/_dashboard/social'
+    | '/_authenticated/dashboard/_dashboard/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  DashboardRoute: typeof DashboardRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  DashboardRoute: DashboardRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -352,71 +378,74 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_authenticated",
-        "/auth",
-        "/dashboard"
+        "/auth"
       ]
     },
     "/_authenticated": {
       "filePath": "_authenticated.tsx",
       "children": [
-        "/_authenticated/"
+        "/_authenticated/",
+        "/_authenticated/dashboard"
       ]
     },
     "/auth": {
       "filePath": "auth",
       "children": [
-        "/auth/_layout",
+        "/auth/_auth"
+      ]
+    },
+    "/auth/_auth": {
+      "filePath": "auth/_auth.tsx",
+      "parent": "/auth",
+      "children": [
         "/auth/_auth/login",
         "/auth/_auth/register"
-      ]
-    },
-    "/auth/_layout": {
-      "filePath": "auth/_layout.tsx",
-      "parent": "/auth"
-    },
-    "/dashboard": {
-      "filePath": "dashboard",
-      "children": [
-        "/dashboard/_dashboard"
-      ]
-    },
-    "/dashboard/_dashboard": {
-      "filePath": "dashboard/_dashboard.tsx",
-      "parent": "/dashboard",
-      "children": [
-        "/dashboard/_dashboard/activities",
-        "/dashboard/_dashboard/members",
-        "/dashboard/_dashboard/social",
-        "/dashboard/_dashboard/"
       ]
     },
     "/_authenticated/": {
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/dashboard": {
+      "filePath": "_authenticated/dashboard",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/dashboard/_dashboard"
+      ]
+    },
+    "/_authenticated/dashboard/_dashboard": {
+      "filePath": "_authenticated/dashboard/_dashboard.tsx",
+      "parent": "/_authenticated/dashboard",
+      "children": [
+        "/_authenticated/dashboard/_dashboard/activities",
+        "/_authenticated/dashboard/_dashboard/members",
+        "/_authenticated/dashboard/_dashboard/social",
+        "/_authenticated/dashboard/_dashboard/"
+      ]
+    },
     "/auth/_auth/login": {
       "filePath": "auth/_auth.login.tsx",
-      "parent": "/auth"
+      "parent": "/auth/_auth"
     },
     "/auth/_auth/register": {
       "filePath": "auth/_auth.register.tsx",
-      "parent": "/auth"
+      "parent": "/auth/_auth"
     },
-    "/dashboard/_dashboard/activities": {
-      "filePath": "dashboard/_dashboard.activities.tsx",
-      "parent": "/dashboard/_dashboard"
+    "/_authenticated/dashboard/_dashboard/activities": {
+      "filePath": "_authenticated/dashboard/_dashboard.activities.tsx",
+      "parent": "/_authenticated/dashboard/_dashboard"
     },
-    "/dashboard/_dashboard/members": {
-      "filePath": "dashboard/_dashboard.members.tsx",
-      "parent": "/dashboard/_dashboard"
+    "/_authenticated/dashboard/_dashboard/members": {
+      "filePath": "_authenticated/dashboard/_dashboard.members.tsx",
+      "parent": "/_authenticated/dashboard/_dashboard"
     },
-    "/dashboard/_dashboard/social": {
-      "filePath": "dashboard/_dashboard.social.tsx",
-      "parent": "/dashboard/_dashboard"
+    "/_authenticated/dashboard/_dashboard/social": {
+      "filePath": "_authenticated/dashboard/_dashboard.social.tsx",
+      "parent": "/_authenticated/dashboard/_dashboard"
     },
-    "/dashboard/_dashboard/": {
-      "filePath": "dashboard/_dashboard.index.tsx",
-      "parent": "/dashboard/_dashboard"
+    "/_authenticated/dashboard/_dashboard/": {
+      "filePath": "_authenticated/dashboard/_dashboard.index.tsx",
+      "parent": "/_authenticated/dashboard/_dashboard"
     }
   }
 }

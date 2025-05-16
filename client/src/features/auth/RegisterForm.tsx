@@ -1,132 +1,192 @@
-import { authClient } from "@/lib/auth-client";
+import { authClient, getSignInErrorMessage } from "@/lib/auth-client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const formSchema = z
+	.object({
+		firstName: z
+			.string()
+			.min(2, "Le prénom doit contenir au moins 2 caractères"),
+		lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+		email: z.string().email("Adresse email invalide"),
+		password: z
+			.string()
+			.min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+		confirmPassword: z.string(),
+		acceptTerms: z.boolean().refine((data) => data === true, {
+			message: "Vous devez accepter les conditions d'utilisation",
+		}),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Les mots de passe ne correspondent pas",
+		path: ["confirmPassword"],
+	});
 
 export function RegisterForm() {
-	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setError(null);
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			firstName: "",
+			lastName: "",
+			email: "",
+			password: "",
+			confirmPassword: "",
+			acceptTerms: false,
+		},
+	});
 
-		const formData = new FormData(e.currentTarget);
-		const name = formData.get("name") as string;
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
-		const confirmPassword = formData.get("confirm-password") as string;
-
-		console.group("RegisterForm");
-		console.log("name", name);
-		console.log("email", email);
-		console.log("password", password);
-		console.log("confirmPassword", confirmPassword);
-		console.groupEnd();
-
-		if (password !== confirmPassword) {
-			setError("Passwords do not match");
-			return;
-		}
-
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
 
 		try {
 			const { error } = await authClient.signUp.email({
-				email,
-				password,
-				name,
+				email: values.email,
+				password: values.password,
+				name: `${values.firstName} ${values.lastName}`,
+				firstName: values.firstName,
+				lastName: values.lastName,
+				acceptTerms: values.acceptTerms,
 			});
 
-			if (error?.message) {
-				setError(error.message);
+			if (error?.code) {
+				form.setError("root", {
+					message: getSignInErrorMessage(error.code),
+				});
 			}
 		} catch (err) {
-			setError("An unexpected error occurred");
+			form.setError("root", {
+				message: "Une erreur inattendue s'est produite",
+			});
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div className="w-full max-w-md space-y-8">
-			<div>
-				<h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-					Create your account
-				</h2>
-			</div>
-			<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-				<div className="space-y-4">
-					<div>
-						<label htmlFor="name" className="sr-only">
-							Full Name
-						</label>
-						<input
-							id="name"
-							name="name"
-							type="text"
-							autoComplete="name"
-							required
-							className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							placeholder="Full Name"
-						/>
-					</div>
-					<div>
-						<label htmlFor="email" className="sr-only">
-							Email address
-						</label>
-						<input
-							id="email"
-							name="email"
-							type="email"
-							autoComplete="email"
-							required
-							className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							placeholder="Email address"
-						/>
-					</div>
-					<div>
-						<label htmlFor="password" className="sr-only">
-							Password
-						</label>
-						<input
-							id="password"
-							name="password"
-							type="password"
-							autoComplete="new-password"
-							required
-							className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							placeholder="Password"
-						/>
-					</div>
-					<div>
-						<label htmlFor="confirm-password" className="sr-only">
-							Confirm Password
-						</label>
-						<input
-							id="confirm-password"
-							name="confirm-password"
-							type="password"
-							autoComplete="new-password"
-							required
-							className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							placeholder="Confirm Password"
-						/>
-					</div>
-				</div>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+				<FormField
+					control={form.control}
+					name="firstName"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Prénom</FormLabel>
+							<FormControl>
+								<Input placeholder="Prénom" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
-				{error && (
-					<div className="text-red-500 text-sm text-center">{error}</div>
+				<FormField
+					control={form.control}
+					name="lastName"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nom</FormLabel>
+							<FormControl>
+								<Input placeholder="Nom" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="email"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Email</FormLabel>
+							<FormControl>
+								<Input type="email" placeholder="Adresse email" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="password"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Mot de passe</FormLabel>
+							<FormControl>
+								<Input type="password" placeholder="Mot de passe" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="confirmPassword"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Confirmer le mot de passe</FormLabel>
+							<FormControl>
+								<Input
+									type="password"
+									placeholder="Confirmer le mot de passe"
+									{...field}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="acceptTerms"
+					render={({ field }) => (
+						<FormItem>
+							<div className="flex flex-row items-start space-x-3 space-y-0">
+								<FormControl>
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+										id="acceptTerms"
+									/>
+								</FormControl>
+								<div className="space-y-1 leading-none">
+									<FormLabel>J'accepte les conditions d'utilisation</FormLabel>
+								</div>
+							</div>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				{form.formState.errors.root && (
+					<div className="text-sm font-medium text-destructive">
+						{form.formState.errors.root.message}
+					</div>
 				)}
 
-				<div>
-					<button
-						type="submit"
-						disabled={isLoading}
-						className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
-					>
-						{isLoading ? "Creating account..." : "Create account"}
-					</button>
-				</div>
+				<Button type="submit" className="w-full" disabled={isLoading}>
+					{isLoading ? "Création du compte..." : "Créer un compte"}
+				</Button>
 			</form>
-		</div>
+		</Form>
 	);
 }

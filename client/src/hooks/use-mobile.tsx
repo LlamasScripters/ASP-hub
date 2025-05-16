@@ -1,23 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-const MOBILE_WIDTH_THRESHOLD = 768
+const MOBILE_WIDTH_THRESHOLD = 768;
 
 export function useMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+	const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_WIDTH_THRESHOLD)
-    }
+	useEffect(() => {
+		const checkIfMobile = () => {
+			setIsMobile(window.innerWidth < MOBILE_WIDTH_THRESHOLD);
+		};
 
-    checkIfMobile()
+		checkIfMobile();
 
-    window.addEventListener("resize", checkIfMobile)
+		window.addEventListener("resize", checkIfMobile);
 
-    return () => {
-      window.removeEventListener("resize", checkIfMobile)
-    }
-  }, [])
+		return () => {
+			window.removeEventListener("resize", checkIfMobile);
+		};
+	}, []);
 
-  return isMobile
+	return isMobile;
 }

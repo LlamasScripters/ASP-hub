@@ -7,12 +7,20 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"server/drizzle"
+		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"server/drizzle"
+		]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -22,7 +30,11 @@
 		"rules": {
 			"recommended": true
 		},
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"server/drizzle"
+		]
 	},
 	"javascript": {
 		"formatter": {

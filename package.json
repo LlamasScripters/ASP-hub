@@ -5,6 +5,8 @@
 		"lint-staged": "16.0.0"
 	},
 	"scripts": {
-		"prepare": "husky"
+		"prepare": "husky",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write ."
 	}
 }
