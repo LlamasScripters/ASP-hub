@@ -14,9 +14,7 @@ export const users = pgTable("users", {
 	firstName: varchar("first_name", { length: 255 }).notNull(),
 	lastName: varchar("last_name", { length: 255 }).notNull(),
 	email: varchar("email", { length: 255 }).notNull().unique(),
-	name: text("name").generatedAlwaysAs(
-		(): SQL => sql`coalesce(${users.firstName} || ' ' || ${users.lastName})`,
-	),
+	name: text("name"),
 	dateOfBirth: date("date_of_birth"),
 	acceptTerms: boolean("accept_terms").notNull(),
 	emailVerified: boolean("email_verified").notNull().default(false),
