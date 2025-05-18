@@ -1,10 +1,20 @@
 services:
+  nginx:
+    image: nginx:1.27.5-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - client
+      - server
+
   client:
     image: node:22.15.0-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host"
-    ports:
-      - 3000:3000
+    expose:
+      - 5173
     volumes:
       - ./client:/app
     environment:
@@ -14,17 +24,12 @@ services:
     image: node:22.15.0-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev"
-    ports:
-      - 8000:8000
+    expose:
+      - 3000
     volumes:
       - ./server:/app
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/asp_db
-      - MONGO_URI=mongodb://root:password@mongo:27017/asp_mongo?authSource=admin
-      - BETTER_AUTH_SECRET=secret
-      - BETTER_AUTH_URL=http://localhost:3000
-      - CLIENT_URL=http://localhost:3000
+    env_file:
+      - ./server/.env
     depends_on:
       - postgres
       - mongo

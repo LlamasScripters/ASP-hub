@@ -2,7 +2,9 @@ import {
 	Link,
 	Outlet,
 	createFileRoute,
+	useLoaderData,
 	useLocation,
+	useNavigate,
 } from "@tanstack/react-router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
 	BarChart3,
@@ -133,8 +136,20 @@ function DashboardNavigation() {
 }
 
 function DashboardLayout() {
+	const navigate = useNavigate();
 	const isMobile = useMobile();
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const { user } = useLoaderData({ from: "/_authenticated" });
+
+	const handleLogout = async () => {
+		await authClient.signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					navigate({ to: "/auth/login" });
+				},
+			},
+		});
+	};
 
 	return (
 		<div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -241,11 +256,10 @@ function DashboardLayout() {
 									className="relative w-8 h-8 rounded-full"
 								>
 									<Avatar className="w-8 h-8">
-										<AvatarImage
-											src="/placeholder.svg?height=32&width=32"
-											alt="Avatar"
-										/>
-										<AvatarFallback>MT</AvatarFallback>
+										<AvatarImage src={user.image ?? ""} alt={user.name} />
+										<AvatarFallback>
+											{user.firstName[0]} {user.lastName[0]}
+										</AvatarFallback>
 									</Avatar>
 								</Button>
 							</DropdownMenuTrigger>
@@ -263,11 +277,16 @@ function DashboardLayout() {
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem>
-									<Link to="/" className="flex items-center w-full">
+								<DropdownMenuItem asChild>
+									<Button
+										type="button"
+										variant="ghost"
+										className="flex items-center w-full"
+										onClick={handleLogout}
+									>
 										<LogOut className="w-4 h-4 mr-2" />
 										Déconnexion
-									</Link>
+									</Button>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>

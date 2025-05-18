@@ -7,6 +7,7 @@ export const Route = createFileRoute("/_authenticated")({
 		const { data } = await authClient.getSession({
 			fetchOptions: { signal: abortController.signal },
 		});
+
 		if (!data) {
 			throw redirect({ to: "/auth/login" });
 		}
