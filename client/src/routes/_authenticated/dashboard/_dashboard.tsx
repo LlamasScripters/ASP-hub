@@ -111,7 +111,7 @@ const navigationItems = [
 		icon: <MessageSquare className="w-5 h-5" />,
 	},
 	{
-		href: "/dashboard/settings",
+		href: "/user/settings",
 		label: "Paramètres",
 		icon: <Settings className="w-5 h-5" />,
 	},
@@ -267,12 +267,12 @@ function DashboardLayout() {
 								<DropdownMenuLabel>Mon compte</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem>
-									<Link to="/dashboard/profile" className="flex w-full">
+									<Link to="/user/profile" className="flex w-full">
 										Profil
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuItem>
-									<Link to="/dashboard/settings" className="flex w-full">
+									<Link to="/user/settings" className="flex w-full">
 										Paramètres
 									</Link>
 								</DropdownMenuItem>

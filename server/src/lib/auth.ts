@@ -2,8 +2,10 @@ import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
+	appName: "ASP Hub",
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		usePlural: true,
@@ -22,6 +24,10 @@ export const auth = betterAuth({
 			},
 			lastName: {
 				type: "string",
+				required: true,
+			},
+			dateOfBirth: {
+				type: "date",
 				required: true,
 			},
 		},
@@ -52,4 +58,9 @@ export const auth = betterAuth({
 			}),
 		},
 	},
+	plugins: [
+		twoFactor({
+			issuer: "ASP Hub",
+		}),
+	],
 });

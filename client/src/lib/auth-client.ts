@@ -1,4 +1,7 @@
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import {
+	inferAdditionalFields,
+	twoFactorClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import type { auth } from "../../../server/src/lib/auth";
 
@@ -16,7 +19,7 @@ export const getSignInErrorMessage = (code: string) => {
 };
 
 export const authClient = createAuthClient({
-	plugins: [inferAdditionalFields<typeof auth>()],
+	plugins: [inferAdditionalFields<typeof auth>(), twoFactorClient()],
 });
 
 export type UserLoggedIn = (typeof authClient.$Infer)["Session"]["user"];

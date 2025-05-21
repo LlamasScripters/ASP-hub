@@ -1,4 +1,3 @@
-import { type SQL, sql } from "drizzle-orm";
 import {
 	boolean,
 	date,
@@ -20,6 +19,7 @@ export const users = pgTable("users", {
 	emailVerified: boolean("email_verified").notNull().default(false),
 	image: text("image"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
+	twoFactorEnabled: boolean("two_factor_enabled"),
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => new Date())
 		.notNull()
@@ -63,8 +63,17 @@ export const verifications = pgTable("verifications", {
 	identifier: text("identifier").notNull(),
 	value: text("value").notNull(),
 	expiresAt: timestamp("expires_at").notNull(),
-	createdAt: timestamp("created_at"),
-	updatedAt: timestamp("updated_at"),
+	createdAt: timestamp("created_at").$defaultFn(() => new Date()),
+	updatedAt: timestamp("updated_at").$defaultFn(() => new Date()),
+});
+
+export const twoFactors = pgTable("two_factors", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	secret: text("secret").notNull(),
+	backupCodes: text("backup_codes").notNull(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
 });
 
 export type InsertUser = typeof users.$inferInsert;
@@ -75,3 +84,5 @@ export type InsertAccount = typeof accounts.$inferInsert;
 export type SelectAccount = typeof accounts.$inferSelect;
 export type InsertVerification = typeof verifications.$inferInsert;
 export type SelectVerification = typeof verifications.$inferSelect;
+export type InsertTwoFactor = typeof twoFactors.$inferInsert;
+export type SelectTwoFactor = typeof twoFactors.$inferSelect;
