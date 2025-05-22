@@ -12,7 +12,7 @@ const ReactCompilerConfig = {
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
-		TanStackRouterVite({ autoCodeSplitting: true }),
+		TanStackRouterVite({ autoCodeSplitting: true, quoteStyle: "double" }),
 		viteReact({
 			babel: {
 				plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],

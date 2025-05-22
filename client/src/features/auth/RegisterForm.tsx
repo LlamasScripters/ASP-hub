@@ -1,5 +1,6 @@
-import { authClient, getSignInErrorMessage } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -39,6 +40,7 @@ const formSchema = z
 
 export function RegisterForm() {
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -65,9 +67,14 @@ export function RegisterForm() {
 				acceptTerms: values.acceptTerms,
 			});
 
-			if (error?.code) {
+			if (!error) {
+				navigate({ to: "/auth/account-created" });
+				return;
+			}
+
+			if (error.code) {
 				form.setError("root", {
-					message: getSignInErrorMessage(error.code),
+					message: getAuthErrorMessage(error.code),
 				});
 			}
 		} catch (err) {

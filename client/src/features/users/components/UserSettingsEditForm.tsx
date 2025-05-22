@@ -1,9 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { ImageUploadButton } from "@/components/ImageUploadButton";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
 	Form,
 	FormControl,
@@ -13,20 +17,26 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const formSchema = z.object({
 	firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
 	lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
 	email: z.string().email("Adresse email invalide"),
-	dateOfBirth: z.coerce.date(),
-	image: z.string().url("L'URL de l'image est invalide").nullish(),
+	dateOfBirth: z.coerce.date().nullable(),
+	image: z.string().url("L'URL de l'image est invalide").nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface UserSettingsEditFormProps {
-	initialData: {
+	user: {
 		firstName: string;
 		lastName: string;
 		email: string;
@@ -37,7 +47,7 @@ interface UserSettingsEditFormProps {
 }
 
 export function UserSettingsEditForm({
-	initialData,
+	user,
 	onSuccess,
 }: UserSettingsEditFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -45,11 +55,11 @@ export function UserSettingsEditForm({
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			firstName: initialData.firstName,
-			lastName: initialData.lastName,
-			email: initialData.email,
-			dateOfBirth: initialData.dateOfBirth,
-			image: initialData.image ?? null,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			dateOfBirth: user.dateOfBirth,
+			image: user.image ?? null,
 		},
 	});
 
@@ -126,15 +136,35 @@ export function UserSettingsEditForm({
 					control={form.control}
 					name="dateOfBirth"
 					render={({ field }) => (
-						<FormItem>
+						<FormItem className="flex flex-col">
 							<FormLabel>Date de naissance</FormLabel>
-							<FormControl>
-								<Input
-									type="date"
-									{...field}
-									value={field.value.toISOString().split("T")[0]}
-								/>
-							</FormControl>
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										variant={"outline"}
+										className={cn(
+											"w-[240px]",
+											!field.value && "text-muted-foreground",
+										)}
+									>
+										<CalendarIcon />
+										{field.value ? (
+											format(field.value, "P", { locale: fr })
+										) : (
+											<span>Choisir une date</span>
+										)}
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0" align="start">
+									<Calendar
+										mode="single"
+										selected={field.value ?? undefined}
+										onSelect={field.onChange}
+										hideNavigation={false}
+										locale={fr}
+									/>
+								</PopoverContent>
+							</Popover>
 							<FormMessage />
 						</FormItem>
 					)}

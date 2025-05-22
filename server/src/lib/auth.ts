@@ -3,6 +3,7 @@ import * as schema from "@/db/schema.js";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { twoFactor } from "better-auth/plugins";
+import { sendConfirmationEmail } from "./email.js";
 
 export const auth = betterAuth({
 	appName: "ASP Hub",
@@ -28,7 +29,7 @@ export const auth = betterAuth({
 			},
 			dateOfBirth: {
 				type: "date",
-				required: true,
+				required: false,
 			},
 		},
 	},
@@ -45,6 +46,20 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+		requireEmailVerification: true,
+	},
+	emailVerification: {
+		sendOnSignUp: true,
+		autoSignInAfterVerification: false,
+		sendVerificationEmail: async ({ user, url, token }) => {
+			await sendConfirmationEmail(
+				{
+					email: user.email,
+					fullname: user.name,
+				},
+				token,
+			);
+		},
 	},
 	socialProviders: {
 		google: {

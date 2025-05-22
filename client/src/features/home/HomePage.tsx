@@ -53,7 +53,7 @@ export default function HomePage() {
 				</div>
 			</header>
 			<main className="flex-1">
-				<section className="py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+				<section className="py-20 bg-linear-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
 					<div className="container px-4 mx-auto sm:px-6">
 						<div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
 							<div className="flex flex-col justify-center space-y-6">

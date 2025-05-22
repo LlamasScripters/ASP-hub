@@ -32,7 +32,7 @@ services:
       - ./server/.env
     depends_on:
       - postgres
-      - mongo
+      - mongo    
     
   postgres:
     image: postgres:17.5-alpine

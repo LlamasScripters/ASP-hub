@@ -6,5 +6,6 @@ declare namespace NodeJS {
 		BETTER_AUTH_SECRET: string;
 		BETTER_AUTH_URL: string;
 		CLIENT_URL: string;
+		BREVO_API_KEY: string;
 	}
 }

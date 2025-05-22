@@ -1,19 +1,26 @@
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-// import { useNavigate } from "@tanstack/react-router";
 
 export function LoginWithGoogleButton() {
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleGoogleSignIn = async () => {
 		setIsLoading(true);
 		try {
-			await authClient.signIn.social({
-				provider: "google",
-			});
+			await authClient.signIn.social(
+				{
+					provider: "google",
+				},
+				{
+					onSuccess: () => {
+						navigate({ to: "/dashboard" });
+					},
+				},
+			);
 		} catch (error) {
 			console.error("Erreur lors de la connexion avec Google:", error);
 		} finally {

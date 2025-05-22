@@ -19,6 +19,7 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@getbrevo/brevo": "2.2.0",
 		"bcrypt": "^6.0.0",
 		"better-auth": "1.2.7",
 		"body-parser": "^2.2.0",

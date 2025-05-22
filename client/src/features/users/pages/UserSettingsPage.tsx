@@ -28,7 +28,7 @@ export function UserSettingsPage({ user }: { user: UserLoggedIn }) {
 				</CardHeader>
 				<CardContent>
 					<UserSettingsEditForm
-						initialData={{
+						user={{
 							firstName: user.firstName,
 							lastName: user.lastName,
 							email: user.email,

@@ -8,8 +8,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,6 +25,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -37,13 +39,20 @@ export function LoginForm() {
 		setIsLoading(true);
 
 		try {
-			const { error } = await authClient.signIn.email({
-				email: values.email,
-				password: values.password,
-			});
+			const { error } = await authClient.signIn.email(
+				{
+					email: values.email,
+					password: values.password,
+				},
+				{
+					onSuccess: () => {
+						navigate({ to: "/dashboard" });
+					},
+				},
+			);
 
-			if (error?.message) {
-				form.setError("root", { message: error.message });
+			if (error?.code) {
+				form.setError("root", { message: getAuthErrorMessage(error.code) });
 			}
 		} catch (err) {
 			form.setError("root", {

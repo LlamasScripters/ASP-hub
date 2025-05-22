@@ -1,9 +1,7 @@
 import DashboardActivitiesPage from "@/features/dashboard/DashboardActivitiesPage";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute(
-	"/_authenticated/dashboard/_dashboard/activities",
-)({
+export const Route = createFileRoute("/_authenticated/dashboard/activities")({
 	component: DashboardActivitiesRoute,
 });
 
