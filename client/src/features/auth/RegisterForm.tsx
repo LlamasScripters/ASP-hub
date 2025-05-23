@@ -1,5 +1,6 @@
-import { authClient, getSignInErrorMessage } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,6 +16,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { LoginWithGoogleButton } from "./LoginWithGoogleButton";
 
 const formSchema = z
 	.object({
@@ -38,6 +40,7 @@ const formSchema = z
 
 export function RegisterForm() {
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -64,9 +67,14 @@ export function RegisterForm() {
 				acceptTerms: values.acceptTerms,
 			});
 
-			if (error?.code) {
+			if (!error) {
+				navigate({ to: "/auth/account-created" });
+				return;
+			}
+
+			if (error.code) {
 				form.setError("root", {
-					message: getSignInErrorMessage(error.code),
+					message: getAuthErrorMessage(error.code),
 				});
 			}
 		} catch (err) {
@@ -79,114 +87,135 @@ export function RegisterForm() {
 	};
 
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-				<FormField
-					control={form.control}
-					name="firstName"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Prénom</FormLabel>
-							<FormControl>
-								<Input placeholder="Prénom" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="lastName"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nom</FormLabel>
-							<FormControl>
-								<Input placeholder="Nom" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="email"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Email</FormLabel>
-							<FormControl>
-								<Input type="email" placeholder="Adresse email" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="password"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Mot de passe</FormLabel>
-							<FormControl>
-								<Input type="password" placeholder="Mot de passe" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="confirmPassword"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Confirmer le mot de passe</FormLabel>
-							<FormControl>
-								<Input
-									type="password"
-									placeholder="Confirmer le mot de passe"
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="acceptTerms"
-					render={({ field }) => (
-						<FormItem>
-							<div className="flex flex-row items-start space-x-3 space-y-0">
+		<div className="space-y-6">
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+					<FormField
+						control={form.control}
+						name="firstName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Prénom</FormLabel>
 								<FormControl>
-									<Checkbox
-										checked={field.value}
-										onCheckedChange={field.onChange}
-										id="acceptTerms"
+									<Input placeholder="Prénom" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="lastName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Nom</FormLabel>
+								<FormControl>
+									<Input placeholder="Nom" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email</FormLabel>
+								<FormControl>
+									<Input type="email" placeholder="Adresse email" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Mot de passe</FormLabel>
+								<FormControl>
+									<Input
+										type="password"
+										placeholder="Mot de passe"
+										{...field}
 									/>
 								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>J'accepte les conditions d'utilisation</FormLabel>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="confirmPassword"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Confirmer le mot de passe</FormLabel>
+								<FormControl>
+									<Input
+										type="password"
+										placeholder="Confirmer le mot de passe"
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="acceptTerms"
+						render={({ field }) => (
+							<FormItem>
+								<div className="flex flex-row items-start space-x-3 space-y-0">
+									<FormControl>
+										<Checkbox
+											checked={field.value}
+											onCheckedChange={field.onChange}
+											id="acceptTerms"
+										/>
+									</FormControl>
+									<div className="space-y-1 leading-none">
+										<FormLabel>
+											J'accepte les conditions d'utilisation
+										</FormLabel>
+									</div>
 								</div>
-							</div>
-							<FormMessage />
-						</FormItem>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					{form.formState.errors.root && (
+						<div className="text-sm font-medium text-destructive">
+							{form.formState.errors.root.message}
+						</div>
 					)}
-				/>
 
-				{form.formState.errors.root && (
-					<div className="text-sm font-medium text-destructive">
-						{form.formState.errors.root.message}
-					</div>
-				)}
+					<Button type="submit" className="w-full" disabled={isLoading}>
+						{isLoading ? "Création du compte..." : "Créer un compte"}
+					</Button>
+				</form>
+			</Form>
 
-				<Button type="submit" className="w-full" disabled={isLoading}>
-					{isLoading ? "Création du compte..." : "Créer un compte"}
-				</Button>
-			</form>
-		</Form>
+			<div className="relative">
+				<div className="absolute inset-0 flex items-center">
+					<span className="w-full border-t" />
+				</div>
+				<div className="relative flex justify-center text-xs uppercase">
+					<span className="bg-background px-2 text-muted-foreground">
+						Ou continuer avec
+					</span>
+				</div>
+			</div>
+
+			<LoginWithGoogleButton />
+		</div>
 	);
 }

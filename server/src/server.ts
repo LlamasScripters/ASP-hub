@@ -3,13 +3,14 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import usersRouter from "./features/users/users.controller.js";
 
 const server = express();
 
 server.use(helmet());
 server.use(
 	cors({
-		origin: process.env.CLIENT_URL.split(","),
+		origin: process.env.CLIENT_URL,
 		credentials: true,
 	}),
 );
@@ -24,6 +25,7 @@ server.get("/api/me", async (req, res) => {
 });
 
 server.use(express.json());
+server.use("/api/users", usersRouter);
 
 server.get("/api", (req, res) => {
 	res.json({ message: "ASP API is running!" });
