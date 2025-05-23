@@ -24,25 +24,20 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import type { User } from "../../../../../server/src/db/schema";
 
 const formSchema = z.object({
 	firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
 	lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
 	email: z.string().email("Adresse email invalide"),
-	dateOfBirth: z.coerce.date().nullable(),
+	dateOfBirth: z.string().date().nullable(),
 	image: z.string().url("L'URL de l'image est invalide").nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface UserSettingsEditFormProps {
-	user: {
-		firstName: string;
-		lastName: string;
-		email: string;
-		dateOfBirth?: Date;
-		image?: string | null;
-	};
+	user: User;
 	onSuccess?: () => void;
 }
 

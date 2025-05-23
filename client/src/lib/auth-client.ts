@@ -70,7 +70,7 @@ export function getAuthErrorMessage(code: string) {
 }
 
 export const authClient = createAuthClient({
-	plugins: [inferAdditionalFields<typeof auth>(), twoFactorClient()],
+	plugins: [twoFactorClient(), inferAdditionalFields<typeof auth>()],
 });
 
 export type UserLoggedIn = (typeof authClient.$Infer)["Session"]["user"];
