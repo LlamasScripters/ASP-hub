@@ -11,7 +11,8 @@ import {
 export const users = pgTable("users", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	firstName: varchar("first_name", { length: 255 }).notNull(),
-	lastName: varchar("last_name", { length: 255 }).notNull(),
+	// lastName defaults to empty string because social login may not provide it
+	lastName: varchar("last_name", { length: 255 }).notNull().default(""),
 	email: varchar("email", { length: 255 }).notNull().unique(),
 	name: text("name").notNull(),
 	dateOfBirth: date("date_of_birth"),
