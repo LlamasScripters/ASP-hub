@@ -1,12 +1,3 @@
-import {
-	Link,
-	Outlet,
-	createFileRoute,
-	redirect,
-	useLocation,
-	useNavigate,
-} from "@tanstack/react-router";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +10,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { useMobile } from "@/hooks/use-mobile";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { cn } from "@/lib/utils";
+import {
+	Link,
+	Outlet,
+	createFileRoute,
+	redirect,
+	useLocation,
+	useNavigate,
+} from "@tanstack/react-router";
 import {
 	BarChart3,
 	Bell,
@@ -43,15 +43,18 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated")({
 	component: AuthenticatedLayout,
-	loader: async ({ abortController }) => {
-		const { data } = await authClient.getSession({
-			fetchOptions: { signal: abortController.signal },
+	loader: async ({ context: { queryClient }, abortController }) => {
+		const queryOptions = getLoggedInUserQueryOptions({
+			signal: abortController.signal,
 		});
 
-		if (!data) {
+		const userLoggedIn = await queryClient.ensureQueryData(queryOptions);
+
+		if (!userLoggedIn) {
 			throw redirect({ to: "/auth/login" });
 		}
-		return { user: data.user };
+
+		return { user: userLoggedIn };
 	},
 });
 

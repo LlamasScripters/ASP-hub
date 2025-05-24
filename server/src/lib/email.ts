@@ -8,7 +8,7 @@ apiInstance.setApiKey(
 
 const templateIds = Object.freeze({
 	confirmation: 7,
-	forgotPassword: -1, // TODO: add forgot password template id
+	forgotPassword: 8, // Update this with the actual template id from Brevo
 });
 
 interface User {
@@ -77,7 +77,7 @@ export async function sendForgotPasswordEmail(
 	user: User,
 	forgotPasswordToken: string,
 ): Promise<void> {
-	const url = new URL("/reset-password", process.env.APP_URL);
+	const url = new URL("/auth/reset-password", process.env.CLIENT_URL);
 	url.searchParams.append("token", forgotPasswordToken);
 	await sendEmail(user, templateIds.forgotPassword, {
 		TOKEN_URL: url.toString(),

@@ -3,9 +3,8 @@ import {
 	twoFactorClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import type { auth } from "../../../server/src/lib/auth";
 
-type ErrorCode = keyof typeof authClient.$ERROR_CODES;
+type ErrorCode = keyof typeof authClient.$ERROR_CODES | "PASSWORD_TOO_WEAK";
 
 const errorCodes: readonly ErrorCode[] = Object.freeze([
 	"USER_NOT_FOUND",
@@ -25,6 +24,7 @@ const errorCodes: readonly ErrorCode[] = Object.freeze([
 	"EMAIL_NOT_VERIFIED",
 	"PASSWORD_TOO_SHORT",
 	"PASSWORD_TOO_LONG",
+	"PASSWORD_TOO_WEAK",
 	"USER_ALREADY_EXISTS",
 	"EMAIL_CAN_NOT_BE_UPDATED",
 	"CREDENTIAL_ACCOUNT_NOT_FOUND",
@@ -48,6 +48,7 @@ const errorCodesMap: Record<ErrorCode, string> = {
 	EMAIL_NOT_VERIFIED: "Email non vérifié",
 	PASSWORD_TOO_SHORT: "Mot de passe trop court",
 	PASSWORD_TOO_LONG: "Mot de passe trop long",
+	PASSWORD_TOO_WEAK: "Mot de passe trop faible",
 	SOCIAL_ACCOUNT_ALREADY_LINKED: "Compte social déjà lié",
 	PROVIDER_NOT_FOUND: "Fournisseur non trouvé",
 	INVALID_TOKEN: "Token invalide",
@@ -70,7 +71,39 @@ export function getAuthErrorMessage(code: string) {
 }
 
 export const authClient = createAuthClient({
-	plugins: [twoFactorClient(), inferAdditionalFields<typeof auth>()],
+	plugins: [
+		twoFactorClient(),
+		inferAdditionalFields({
+			user: {
+				acceptTerms: {
+					type: "boolean",
+				},
+				firstName: {
+					type: "string",
+				},
+				lastName: {
+					type: "string",
+				},
+				dateOfBirth: {
+					type: "date",
+				},
+			},
+		}),
+	],
 });
 
 export type UserLoggedIn = (typeof authClient.$Infer)["Session"]["user"];
+
+/**
+ * This type is used to type the accounts returned by the `authClient.listAccounts` method.
+ *
+ * @see https://better-auth.com/docs/api-reference/client/list-accounts
+ */
+export type ClientAccount = {
+	id: string;
+	provider: string;
+	createdAt: Date;
+	updatedAt: Date;
+	accountId: string;
+	scopes: string[];
+};
