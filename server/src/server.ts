@@ -4,7 +4,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import usersRouter from "./features/users/users.controller.js";
-import complexRouter from "./features/room-booking/complexes.controller.js";
+import complexesRouter from "./features/room-booking/complexes.controller.js";
 
 const server = express();
 
@@ -27,7 +27,7 @@ server.get("/api/me", async (req, res) => {
 
 server.use(express.json());
 server.use("/api/users", usersRouter);
-server.use("/api/complexes", complexRouter);
+server.use("/api/complexes", complexesRouter);
 
 server.get("/api", (req, res) => {
 	res.json({ message: "ASP API is running!" });

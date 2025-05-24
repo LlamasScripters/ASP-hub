@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { complexService } from "./complexes.service.js";
 
-const complexRouter = Router();
+const complexesRouter = Router();
 
 const complexSchema = z.object({
 	name: z.string().min(1).max(100),
@@ -14,7 +14,7 @@ const complexSchema = z.object({
 	parkingCapacity: z.number().int().min(0),
 });
 
-complexRouter.get("/", async (req: Request, res: Response) => {
+complexesRouter.get("/", async (req: Request, res: Response) => {
 	const complexes = await complexService.getAll();
 	res.json({
 		message: "List of complexes retrieved successfully",
@@ -23,7 +23,7 @@ complexRouter.get("/", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-complexRouter.get("/:id", async (req: Request, res: Response) => {
+complexesRouter.get("/:id", async (req: Request, res: Response) => {
 	const complex = await complexService.getById(req.params.id);
 	if (!complex) {
 		return res.status(404).json({ error: "Complex not found" });
@@ -35,7 +35,7 @@ complexRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-complexRouter.post("/", async (req: Request, res: Response) => {
+complexesRouter.post("/", async (req: Request, res: Response) => {
 	const parse = complexSchema.safeParse(req.body);
 	if (!parse.success) {
 		return res.status(400).json({ error: parse.error.flatten() });
@@ -48,7 +48,7 @@ complexRouter.post("/", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-complexRouter.put("/:id", async (req: Request, res: Response) => {
+complexesRouter.put("/:id", async (req: Request, res: Response) => {
 	const parse = complexSchema.partial().safeParse(req.body);
 	if (!parse.success) {
 		return res.status(400).json({ error: parse.error.flatten() });
@@ -64,7 +64,7 @@ complexRouter.put("/:id", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-complexRouter.delete("/:id", async (req: Request, res: Response) => {
+complexesRouter.delete("/:id", async (req: Request, res: Response) => {
 	const complex = await complexService.getById(req.params.id);
 	if (!complex) {
 		return res.status(404).json({ error: "Complex not found" });
@@ -75,4 +75,4 @@ complexRouter.delete("/:id", async (req: Request, res: Response) => {
 	});
 });
 
-export default complexRouter;
+export default complexesRouter;
