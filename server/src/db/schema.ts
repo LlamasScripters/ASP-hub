@@ -88,7 +88,7 @@ export const reservationStatusEnum = pgEnum("reservation_status", [
 	"rescheduled",
 ]);
 
-export const complexs = pgTable("complexs", {
+export const complexes = pgTable("complexes", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	name: varchar("name", { length: 255 }).notNull(),
 	street: varchar("street", { length: 255 }).notNull(),
@@ -108,7 +108,7 @@ export const rooms = pgTable("rooms", {
 	isIndoor: boolean("is_indoor").notNull().default(true),
 	accreditation: varchar("accreditation", { length: 255 }),
 	complexId: uuid("complex_id")
-		.references(() => complexs.id, { onDelete: "cascade" })
+		.references(() => complexes.id, { onDelete: "cascade" })
 		.notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
@@ -141,8 +141,8 @@ export type Verification = typeof verifications.$inferSelect;
 export type InsertTwoFactor = typeof twoFactors.$inferInsert;
 export type SelectTwoFactor = typeof twoFactors.$inferSelect;
 // Complexes
-export type InsertComplex = typeof complexs.$inferInsert;
-export type SelectComplex = typeof complexs.$inferSelect;
+export type InsertComplex = typeof complexes.$inferInsert;
+export type SelectComplex = typeof complexes.$inferSelect;
 // Rooms
 export type InsertRoom = typeof rooms.$inferInsert;
 export type SelectRoom = typeof rooms.$inferSelect;
