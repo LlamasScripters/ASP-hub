@@ -8,53 +8,33 @@ apiInstance.setApiKey(
 
 const templateIds = Object.freeze({
 	confirmation: 7,
-	forgotPassword: 8, // Update this with the actual template id from Brevo
+	resetPassword: 8,
 });
 
-interface User {
-	email: string;
-	fullname: string;
+interface UserBrevo {
+	email: brevo.SendSmtpEmailToInner["email"];
+	name: NonNullable<brevo.SendSmtpEmailToInner["name"]>;
 }
 
 interface EmailParams {
 	[key: string]: string;
 }
 
-/**
- *
- * @param {object} user
- * @param {string} user.email
- * @param {string} user.fullname
- * @param {number} templateId
- * @param {object} params
- */
 export async function sendEmail(
-	user: User,
+	user: UserBrevo,
 	templateId: number,
 	params: EmailParams,
 ): Promise<void> {
 	const sendSmtpEmail = new brevo.SendSmtpEmail();
-	sendSmtpEmail.to = [
-		{
-			email: user.email,
-			name: user.fullname,
-		},
-	];
+	sendSmtpEmail.to = [user];
 	sendSmtpEmail.templateId = templateId;
 	sendSmtpEmail.params = params;
 
 	await apiInstance.sendTransacEmail(sendSmtpEmail);
 }
 
-/**
- *
- * @param {object} user
- * @param {string} user.email
- * @param {string} user.fullname
- * @param {string} confirmationToken
- */
 export async function sendConfirmationEmail(
-	user: User,
+	user: UserBrevo,
 	confirmationToken: string,
 ): Promise<void> {
 	const url = new URL("/auth/verify", process.env.CLIENT_URL);
@@ -62,25 +42,17 @@ export async function sendConfirmationEmail(
 
 	await sendEmail(user, templateIds.confirmation, {
 		TOKEN_URL: url.toString(),
-		FULLNAME: user.fullname,
+		FULLNAME: user.name,
 	});
 }
 
-/**
- *
- * @param {object} user
- * @param {string} user.email
- * @param {string} user.fullname
- * @param {string} forgotPasswordToken
- */
-export async function sendForgotPasswordEmail(
-	user: User,
-	forgotPasswordToken: string,
+export async function sendResetPasswordEmail(
+	user: UserBrevo,
+	resetPasswordToken: string,
 ): Promise<void> {
 	const url = new URL("/auth/reset-password", process.env.CLIENT_URL);
-	url.searchParams.append("token", forgotPasswordToken);
-	await sendEmail(user, templateIds.forgotPassword, {
+	url.searchParams.append("token", resetPasswordToken);
+	await sendEmail(user, templateIds.resetPassword, {
 		TOKEN_URL: url.toString(),
-		FULLNAME: user.fullname,
 	});
 }

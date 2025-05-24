@@ -4,7 +4,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { twoFactor } from "better-auth/plugins";
-import { sendConfirmationEmail, sendForgotPasswordEmail } from "./email.js";
+import { sendConfirmationEmail, sendResetPasswordEmail } from "./email.js";
 import { checkPasswordStrength } from "./password.js";
 
 const SESSION_DURATION = 5 * 60;
@@ -54,10 +54,10 @@ export const auth = betterAuth({
 		requireEmailVerification: true,
 		minPasswordLength: MIN_PASSWORD_LENGTH,
 		sendResetPassword: async ({ user, url, token }) => {
-			await sendForgotPasswordEmail(
+			await sendResetPasswordEmail(
 				{
 					email: user.email,
-					fullname: user.name,
+					name: user.name,
 				},
 				token,
 			);
@@ -70,7 +70,7 @@ export const auth = betterAuth({
 			await sendConfirmationEmail(
 				{
 					email: user.email,
-					fullname: user.name,
+					name: user.name,
 				},
 				token,
 			);
