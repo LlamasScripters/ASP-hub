@@ -1,0 +1,96 @@
+import type { InsertReservation, SelectReservation } from "@/db/schema.js";
+import { reservations } from "@/db/schema.js";
+import { db } from "../../db/index.js";
+import { and, eq, or, lt, gt, ne } from "drizzle-orm";
+
+export const reservationsService = {
+	create: async (data: InsertReservation): Promise<SelectReservation | null> => {
+
+		const conflicting = await db
+			.select()
+			.from(reservations)
+			.where(
+				and(
+					eq(reservations.roomId, data.roomId),
+					or(
+						// Début dans la plage existante
+                        //@ts-ignore
+						and(gt(data.startAt, reservations.startAt), lt(data.startAt, reservations.endAt)),
+						// Fin dans la plage existante
+                        //@ts-ignore
+						and(gt(data.endAt, reservations.startAt), lt(data.endAt, reservations.endAt)),
+						// La nouvelle réservation englobe une existante
+                        //@ts-ignore
+						and(lt(data.startAt, reservations.startAt), gt(data.endAt, reservations.endAt)),
+						// Identique
+                        //@ts-ignore
+						and(eq(data.startAt, reservations.startAt), eq(data.endAt, reservations.endAt))
+					)
+				)
+			);
+
+		if (conflicting.length > 0) {
+			return null; // indique qu’il y a un conflit
+		}
+
+		const [created] = await db.insert(reservations).values(data).returning();
+		return created;
+	},
+
+	getAll: async (): Promise<SelectReservation[]> => {
+		return await db.select().from(reservations);
+	},
+
+	getById: async (id: string): Promise<SelectReservation | undefined> => {
+		const [res] = await db.select().from(reservations).where(eq(reservations.id, id));
+		return res;
+	},
+
+	update: async (
+		id: string,
+		data: Partial<InsertReservation>
+	): Promise<SelectReservation | "conflict" | "not_found"> => {
+		const [current] = await db.select().from(reservations).where(eq(reservations.id, id));
+		if (!current) return "not_found";
+
+		const startAt = data.startAt ?? current.startAt;
+		const endAt = data.endAt ?? current.endAt;
+		const roomId = data.roomId ?? current.roomId;
+
+		const conflicting = await db
+			.select()
+			.from(reservations)
+			.where(
+				and(
+					eq(reservations.roomId, roomId),
+					ne(reservations.id, id), // Exclure la réservation actuelle
+					or(
+                        //@ts-ignore
+						and(gt(startAt, reservations.startAt), lt(startAt, reservations.endAt)),
+                        //@ts-ignore
+						and(gt(endAt, reservations.startAt), lt(endAt, reservations.endAt)),
+                        //@ts-ignore
+						and(lt(startAt, reservations.startAt), gt(endAt, reservations.endAt)),
+                        //@ts-ignore
+						and(eq(startAt, reservations.startAt), eq(endAt, reservations.endAt))
+					)
+				)
+			);
+
+		if (conflicting.length > 0) {
+			return "conflict";
+		}
+
+		const [updated] = await db
+			.update(reservations)
+			.set(data)
+			.where(eq(reservations.id, id))
+			.returning();
+
+		return updated;
+	},
+
+	delete: async (id: string): Promise<void> => {
+		await db.delete(reservations).where(eq(reservations.id, id));
+	}
+};
