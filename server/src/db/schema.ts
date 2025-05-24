@@ -2,10 +2,12 @@ import {
 	boolean,
 	date,
 	pgTable,
+	pgEnum,
 	text,
 	timestamp,
 	uuid,
 	varchar,
+	integer,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -77,6 +79,68 @@ export const twoFactors = pgTable("two_factors", {
 		.references(() => users.id, { onDelete: "cascade" }),
 });
 
+export const statusEnum = pgEnum("status", [
+  "pending",
+  "confirmed",
+  "cancelled",
+  "completed",
+  "no_show",
+  "rescheduled",
+]);
+
+export const statusEnumValues = [
+  "pending",
+  "confirmed",
+  "cancelled",
+  "completed",
+  "no_show",
+  "rescheduled",
+] as const;
+
+export type ReservationStatus = typeof statusEnumValues[number];
+
+export const complexs = pgTable("complexs", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: varchar("name", { length: 255 }).notNull(),
+	street: varchar("street", { length: 255 }).notNull(),
+	city: varchar("city", { length: 100 }).notNull(),
+	postalCode: varchar("postal_code", { length: 20 }).notNull(),
+	numberOfElevators: integer("number_of_elevators").notNull().default(0),
+	accessibleForReducedMobility: boolean("accessible_for_reduced_mobility").notNull().default(false),
+	parkingCapacity: integer("parking_capacity").notNull().default(0),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+});
+
+export const rooms = pgTable("rooms", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: varchar("name", { length: 255 }).notNull(),
+	sportType: varchar("sport_type", { length: 100 }).notNull(),
+	isIndoor: boolean("is_indoor").notNull().default(true),
+	accreditation: varchar("accreditation", { length: 255 }),
+	complexId: uuid("complex_id")
+		.references(() => complexs.id, { onDelete: "cascade" })
+		.notNull(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+});
+
+export const reservations = pgTable("reservations", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	title: varchar("title", { length: 255 }).notNull(),
+	startAt: timestamp("start_at").notNull(),
+	endAt: timestamp("end_at").notNull(),
+	roomId: uuid("room_id")
+		.references(() => rooms.id, { onDelete: "cascade" })
+		.notNull(),
+	userId: uuid("user_id")
+		.references(() => users.id, { onDelete: "cascade" })
+		.notNull(),
+	status: statusEnum("status").notNull().default("pending"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+});
+
 export type InsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertSession = typeof sessions.$inferInsert;
@@ -86,4 +150,14 @@ export type Account = typeof accounts.$inferSelect;
 export type InsertVerification = typeof verifications.$inferInsert;
 export type Verification = typeof verifications.$inferSelect;
 export type InsertTwoFactor = typeof twoFactors.$inferInsert;
-export type TwoFactor = typeof twoFactors.$inferSelect;
+export type SelectTwoFactor = typeof twoFactors.$inferSelect;
+// Complexes
+export type InsertComplex = typeof complexs.$inferInsert;
+export type SelectComplex = typeof complexs.$inferSelect;
+// Rooms
+export type InsertRoom = typeof rooms.$inferInsert;
+export type SelectRoom = typeof rooms.$inferSelect;
+// Reservations
+export type InsertReservation = typeof reservations.$inferInsert;
+export type SelectReservation = typeof reservations.$inferSelect;
+
