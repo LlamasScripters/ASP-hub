@@ -8,6 +8,13 @@
       "when": 1748511993954,
       "tag": "0000_free_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1748092875804,
+      "tag": "0004_charming_inhumans",
+      "breakpoints": true
     }
   ]
 }

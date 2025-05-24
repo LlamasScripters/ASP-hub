@@ -79,25 +79,14 @@ export const twoFactors = pgTable("two_factors", {
 		.references(() => users.id, { onDelete: "cascade" }),
 });
 
-export const statusEnum = pgEnum("status", [
-  "pending",
-  "confirmed",
-  "cancelled",
-  "completed",
-  "no_show",
-  "rescheduled",
+export const reservationStatusEnum = pgEnum("reservation_status", [
+	"pending",
+	"confirmed",
+	"cancelled",
+	"completed",
+	"no_show",
+	"rescheduled",
 ]);
-
-export const statusEnumValues = [
-  "pending",
-  "confirmed",
-  "cancelled",
-  "completed",
-  "no_show",
-  "rescheduled",
-] as const;
-
-export type ReservationStatus = typeof statusEnumValues[number];
 
 export const complexs = pgTable("complexs", {
 	id: uuid("id").primaryKey().defaultRandom(),
@@ -133,10 +122,10 @@ export const reservations = pgTable("reservations", {
 	roomId: uuid("room_id")
 		.references(() => rooms.id, { onDelete: "cascade" })
 		.notNull(),
-	userId: uuid("user_id")
+	bookerId: uuid("booker_id")
 		.references(() => users.id, { onDelete: "cascade" })
 		.notNull(),
-	status: statusEnum("status").notNull().default("pending"),
+	status: reservationStatusEnum("status").notNull().default("pending"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
 });
@@ -160,4 +149,14 @@ export type SelectRoom = typeof rooms.$inferSelect;
 // Reservations
 export type InsertReservation = typeof reservations.$inferInsert;
 export type SelectReservation = typeof reservations.$inferSelect;
+
+export const reservationStatusEnumValues = [
+  "pending",
+  "confirmed",
+  "cancelled",
+  "completed",
+  "no_show",
+  "rescheduled",
+] as const;
+export type ReservationStatus = typeof reservationStatusEnumValues[number];
 
