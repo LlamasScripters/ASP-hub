@@ -1,4 +1,4 @@
-import type { InsertUser, SelectUser } from "@/db/schema.js";
+import type { InsertUser, User } from "@/db/schema.js";
 import { users } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
@@ -8,7 +8,7 @@ export const usersService = {
 		const [user] = await db.insert(users).values(data).returning();
 		return user;
 	},
-	updateUser: async (id: string, data: Partial<SelectUser>) => {
+	updateUser: async (id: string, data: Partial<User>) => {
 		const [user] = await db
 			.update(users)
 			.set(data)

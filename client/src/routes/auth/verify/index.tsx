@@ -1,5 +1,5 @@
 import VerifyEmailErrorPage from "@/features/auth/verify-email/VerifyEmailErrorPage";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";

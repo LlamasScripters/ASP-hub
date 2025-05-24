@@ -8,9 +8,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -86,7 +86,17 @@ export function LoginForm() {
 						name="password"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Mot de passe</FormLabel>
+								<div className="flex items-center justify-between">
+									<FormLabel>Mot de passe</FormLabel>
+									<Button variant="link" asChild className="px-0 font-normal">
+										<Link
+											to="/auth/forgot-password"
+											className="text-sm text-muted-foreground hover:text-primary"
+										>
+											Mot de passe oublié ?
+										</Link>
+									</Button>
+								</div>
 								<FormControl>
 									<Input
 										type="password"
