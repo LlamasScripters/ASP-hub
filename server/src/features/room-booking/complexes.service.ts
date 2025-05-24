@@ -3,7 +3,7 @@ import { complexes } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 
-export const complexService = {
+export const complexesService = {
 	create: async (data: InsertComplex) => {
 		const [complex] = await db.insert(complexes).values(data).returning();
 		return complex;

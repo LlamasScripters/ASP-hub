@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { z } from "zod";
-import { complexService } from "./complexes.service.js";
+import { complexesService } from "./complexes.service.js";
 
 const complexesRouter = Router();
 
@@ -15,7 +15,7 @@ const complexSchema = z.object({
 });
 
 complexesRouter.get("/", async (req: Request, res: Response) => {
-	const complexes = await complexService.getAll();
+	const complexes = await complexesService.getAll();
 	res.json({
 		message: "List of complexes retrieved successfully",
 		data: complexes
@@ -24,7 +24,7 @@ complexesRouter.get("/", async (req: Request, res: Response) => {
 
 //@ts-ignore
 complexesRouter.get("/:id", async (req: Request, res: Response) => {
-	const complex = await complexService.getById(req.params.id);
+	const complex = await complexesService.getById(req.params.id);
 	if (!complex) {
 		return res.status(404).json({ error: "Complex not found" });
 	}
@@ -40,7 +40,7 @@ complexesRouter.post("/", async (req: Request, res: Response) => {
 	if (!parse.success) {
 		return res.status(400).json({ error: parse.error.flatten() });
 	}
-	const created = await complexService.create(parse.data);
+	const created = await complexesService.create(parse.data);
 	res.status(201).json({
 		message: "Complex created successfully",
 		data: created
@@ -53,7 +53,7 @@ complexesRouter.put("/:id", async (req: Request, res: Response) => {
 	if (!parse.success) {
 		return res.status(400).json({ error: parse.error.flatten() });
 	}
-	const updated = await complexService.update(req.params.id, parse.data);
+	const updated = await complexesService.update(req.params.id, parse.data);
 	if (!updated) {
 		return res.status(404).json({ error: "Complex not found" });
 	}
@@ -65,11 +65,11 @@ complexesRouter.put("/:id", async (req: Request, res: Response) => {
 
 //@ts-ignore
 complexesRouter.delete("/:id", async (req: Request, res: Response) => {
-	const complex = await complexService.getById(req.params.id);
+	const complex = await complexesService.getById(req.params.id);
 	if (!complex) {
 		return res.status(404).json({ error: "Complex not found" });
 	}
-	await complexService.delete(req.params.id);
+	await complexesService.delete(req.params.id);
 	res.status(200).json({
 		message: "Complex deleted successfully"
 	});
