@@ -24,6 +24,7 @@ import { Route as AuthLayoutImport } from "./routes/auth/_layout"
 import { Route as AuthVerifyIndexImport } from "./routes/auth/verify/index"
 import { Route as AuthenticatedDashboardIndexImport } from "./routes/_authenticated/dashboard/index"
 import { Route as AuthVerifyVerifyImport } from "./routes/auth/verify/_verify"
+import { Route as AuthenticatedUserSettingsImport } from "./routes/_authenticated/user/settings"
 import { Route as AuthenticatedUserProfileImport } from "./routes/_authenticated/user/profile"
 import { Route as AuthenticatedDashboardSocialImport } from "./routes/_authenticated/dashboard/social"
 import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenticated/dashboard/members"
@@ -112,6 +113,12 @@ const AuthenticatedDashboardIndexRoute =
 const AuthVerifyVerifyRoute = AuthVerifyVerifyImport.update({
   id: "/_verify",
   getParentRoute: () => AuthVerifyRoute,
+} as any)
+
+const AuthenticatedUserSettingsRoute = AuthenticatedUserSettingsImport.update({
+  id: "/user/settings",
+  path: "/user/settings",
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 const AuthenticatedUserProfileRoute = AuthenticatedUserProfileImport.update({
@@ -248,6 +255,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedUserProfileImport
       parentRoute: typeof AuthenticatedImport
     }
+    "/_authenticated/user/settings": {
+      id: "/_authenticated/user/settings"
+      path: "/user/settings"
+      fullPath: "/user/settings"
+      preLoaderRoute: typeof AuthenticatedUserSettingsImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/auth/verify": {
       id: "/auth/verify"
       path: "/verify"
@@ -300,6 +314,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardMembersRoute: typeof AuthenticatedDashboardMembersRoute
   AuthenticatedDashboardSocialRoute: typeof AuthenticatedDashboardSocialRoute
   AuthenticatedUserProfileRoute: typeof AuthenticatedUserProfileRoute
+  AuthenticatedUserSettingsRoute: typeof AuthenticatedUserSettingsRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -308,6 +323,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardMembersRoute: AuthenticatedDashboardMembersRoute,
   AuthenticatedDashboardSocialRoute: AuthenticatedDashboardSocialRoute,
   AuthenticatedUserProfileRoute: AuthenticatedUserProfileRoute,
+  AuthenticatedUserSettingsRoute: AuthenticatedUserSettingsRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
 }
 
@@ -377,6 +393,7 @@ export interface FileRoutesByFullPath {
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/user/profile": typeof AuthenticatedUserProfileRoute
+  "/user/settings": typeof AuthenticatedUserSettingsRoute
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
@@ -397,6 +414,7 @@ export interface FileRoutesByTo {
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/user/profile": typeof AuthenticatedUserProfileRoute
+  "/user/settings": typeof AuthenticatedUserSettingsRoute
   "/auth/verify": typeof AuthVerifyIndexRoute
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
@@ -418,6 +436,7 @@ export interface FileRoutesById {
   "/_authenticated/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/_authenticated/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/_authenticated/user/profile": typeof AuthenticatedUserProfileRoute
+  "/_authenticated/user/settings": typeof AuthenticatedUserSettingsRoute
   "/auth/verify": typeof AuthVerifyRouteWithChildren
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute
@@ -441,6 +460,7 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user/profile"
+    | "/user/settings"
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/"
@@ -460,6 +480,7 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user/profile"
+    | "/user/settings"
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/error"
@@ -479,6 +500,7 @@ export interface FileRouteTypes {
     | "/_authenticated/dashboard/members"
     | "/_authenticated/dashboard/social"
     | "/_authenticated/user/profile"
+    | "/_authenticated/user/settings"
     | "/auth/verify"
     | "/auth/verify/_verify"
     | "/_authenticated/dashboard/"
@@ -525,6 +547,7 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/members",
         "/_authenticated/dashboard/social",
         "/_authenticated/user/profile",
+        "/_authenticated/user/settings",
         "/_authenticated/dashboard/"
       ]
     },
@@ -578,6 +601,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/user/profile": {
       "filePath": "_authenticated/user/profile.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/user/settings": {
+      "filePath": "_authenticated/user/settings.tsx",
       "parent": "/_authenticated"
     },
     "/auth/verify": {
