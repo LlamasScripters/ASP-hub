@@ -18,12 +18,19 @@ export const roomsService = {
 		return room;
 	},
 
-	update: async (id: string, data: Partial<InsertRoom>): Promise<SelectRoom | undefined> => {
-		const [updated] = await db.update(rooms).set(data).where(eq(rooms.id, id)).returning();
+	update: async (
+		id: string,
+		data: Partial<InsertRoom>,
+	): Promise<SelectRoom | undefined> => {
+		const [updated] = await db
+			.update(rooms)
+			.set(data)
+			.where(eq(rooms.id, id))
+			.returning();
 		return updated;
 	},
 
 	delete: async (id: string): Promise<void> => {
 		await db.delete(rooms).where(eq(rooms.id, id));
-	}
+	},
 };

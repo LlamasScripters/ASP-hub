@@ -1,13 +1,13 @@
 import {
 	boolean,
 	date,
-	pgTable,
+	integer,
 	pgEnum,
+	pgTable,
 	text,
 	timestamp,
 	uuid,
 	varchar,
-	integer,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -95,10 +95,15 @@ export const complexes = pgTable("complexes", {
 	city: varchar("city", { length: 100 }).notNull(),
 	postalCode: varchar("postal_code", { length: 20 }).notNull(),
 	numberOfElevators: integer("number_of_elevators").notNull().default(0),
-	accessibleForReducedMobility: boolean("accessible_for_reduced_mobility").notNull().default(false),
+	accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
+		.notNull()
+		.default(false),
 	parkingCapacity: integer("parking_capacity").notNull().default(0),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
 });
 
 export const rooms = pgTable("rooms", {
@@ -111,7 +116,10 @@ export const rooms = pgTable("rooms", {
 		.references(() => complexes.id, { onDelete: "cascade" })
 		.notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
 });
 
 export const reservations = pgTable("reservations", {
@@ -127,7 +135,10 @@ export const reservations = pgTable("reservations", {
 		.notNull(),
 	status: reservationStatusEnum("status").notNull().default("pending"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date())
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
 });
 
 export type InsertUser = typeof users.$inferInsert;
@@ -151,12 +162,11 @@ export type InsertReservation = typeof reservations.$inferInsert;
 export type SelectReservation = typeof reservations.$inferSelect;
 
 export const reservationStatusEnumValues = [
-  "pending",
-  "confirmed",
-  "cancelled",
-  "completed",
-  "no_show",
-  "rescheduled",
+	"pending",
+	"confirmed",
+	"cancelled",
+	"completed",
+	"no_show",
+	"rescheduled",
 ] as const;
-export type ReservationStatus = typeof reservationStatusEnumValues[number];
-
+export type ReservationStatus = (typeof reservationStatusEnumValues)[number];

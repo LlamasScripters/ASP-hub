@@ -14,11 +14,17 @@ export const complexesService = {
 	},
 
 	getById: async (id: string): Promise<SelectComplex | undefined> => {
-		const [complex] = await db.select().from(complexes).where(eq(complexes.id, id));
+		const [complex] = await db
+			.select()
+			.from(complexes)
+			.where(eq(complexes.id, id));
 		return complex;
 	},
 
-	update: async (id: string, data: Partial<InsertComplex>): Promise<SelectComplex | undefined> => {
+	update: async (
+		id: string,
+		data: Partial<InsertComplex>,
+	): Promise<SelectComplex | undefined> => {
 		const [updated] = await db
 			.update(complexes)
 			.set(data)
@@ -29,5 +35,5 @@ export const complexesService = {
 
 	delete: async (id: string): Promise<void> => {
 		await db.delete(complexes).where(eq(complexes.id, id));
-	}
+	},
 };
