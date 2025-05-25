@@ -94,6 +94,14 @@ export const clubsService = {
 			.orderBy(asc(sections.name));
 	},
 
+	async getSectionById(clubId: string, sectionId: string) {
+		const [section] = await db
+			.select()
+			.from(sections)
+			.where(and(eq(sections.id, sectionId), eq(sections.clubId, clubId)));
+		return section;
+	},
+	  
 	async createSection(data: InsertSection) {
 		const [section] = await db.insert(sections).values(data).returning();
 		return section;

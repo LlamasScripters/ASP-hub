@@ -317,6 +317,19 @@ clubsRouter.get("/:clubId/sections", async (req: Request, res: Response) => {
   }
 });
 
+clubsRouter.get("/:clubId/sections/:sectionId", async (req: Request, res: Response) => {
+  try {
+    const { clubId, sectionId } = req.params;
+    const section = await clubsService.getSectionById(clubId, sectionId);
+
+    res.json(section);
+  } catch (error) {
+    console.error("Erreur getSectionById:", error);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+
 clubsRouter.post("/:clubId/sections", async (req: Request, res: Response) => {
   try {
     const sectionData = { ...req.body, clubId: req.params.clubId };
