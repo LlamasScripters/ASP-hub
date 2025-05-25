@@ -26,7 +26,7 @@ interface EnrichedCategory extends Category {
 }
 
 export function AllCategoriesPage() {
-  const { clubId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/categories/" });
+  const { clubId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/" });
   const [categories, setCategories] = useState<EnrichedCategory[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,7 +149,7 @@ export function AllCategoriesPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <Link 
-                to="/dashboard/clubs/$clubId" 
+                to="/admin/dashboard/clubs/$clubId" 
                 params={{ clubId }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -256,7 +256,7 @@ export function AllCategoriesPage() {
                   <Plus className="mr-2 h-5 w-5" />
                   Créer une catégorie
                 </Button>
-                <Link to="/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+                <Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
                   <Button variant="outline" size="lg">
                     <FolderOpen className="mr-2 h-5 w-5" />
                     Voir les sections
@@ -321,7 +321,7 @@ export function AllCategoriesPage() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Link 
-                              to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit" 
+                              to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit" 
                               params={{ clubId, sectionId: cat.sectionId, categoryId: cat.id }}
                             >
                               <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary">

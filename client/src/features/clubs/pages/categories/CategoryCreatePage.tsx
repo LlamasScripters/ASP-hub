@@ -3,7 +3,7 @@ import { CategoryForm } from "../../components/catogories/CategoryForm";
 import { useParams } from "@tanstack/react-router";
 
 export function CategoryCreatePage() {
-  const { clubId, sectionId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create" });
+  const { clubId, sectionId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create" });
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Créer une catégorie</h1>

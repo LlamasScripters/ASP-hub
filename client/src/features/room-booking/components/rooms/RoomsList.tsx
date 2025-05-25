@@ -77,7 +77,7 @@ export function RoomsList({
 	};
 
 	const handleSeeDetails = (roomId: string) => {
-		navigate({ to: `/facilities/rooms/${roomId}` });
+		navigate({ to: `/admin/facilities/rooms/${roomId}` });
 	};
 
 	const formatDate = (dateString: string) => {

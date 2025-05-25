@@ -87,7 +87,7 @@ export function SectionForm({
       }
 
       toast.success(mode === "create" ? "Section créée avec succès !" : "Section modifiée avec succès !");
-      navigate({ to: "/dashboard/clubs/$clubId/sections", params: { clubId } });
+      navigate({ to: "/admin/dashboard/clubs/$clubId/sections", params: { clubId } });
     } catch (error) {
       console.error('Erreur:', error);
       toast.error("Une erreur est survenue lors de la sauvegarde");
@@ -97,7 +97,7 @@ export function SectionForm({
   };
 
   const handleCancel = () => {
-    navigate({ to: "/dashboard/clubs/$clubId/sections", params: { clubId } });
+    navigate({ to: "/admin/dashboard/clubs/$clubId/sections", params: { clubId } });
   };
 
   if (isLoading && mode === "edit") {

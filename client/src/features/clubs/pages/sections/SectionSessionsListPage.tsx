@@ -36,7 +36,7 @@ interface EnrichedSession extends Omit<SessionSport, 'categoryId'> {
 }
 
 export function SectionSessionsListPage() {
-  const { clubId, sectionId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/" });
+  const { clubId, sectionId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/" });
   const [sessions, setSessions] = useState<EnrichedSession[]>([]);
   const [sectionName, setSectionName] = useState("");
   const [sortField, setSortField] = useState<SortField>('startDate');
@@ -235,7 +235,7 @@ export function SectionSessionsListPage() {
         </div>
         {sessions.length > 0 && sessions[0].categoryId && (
           <Link
-            to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+            to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
             params={{ clubId, sectionId, categoryId: sessions[0].categoryId }}
           >
             <Button className="w-full md:w-auto">
@@ -428,7 +428,7 @@ export function SectionSessionsListPage() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link 
-                            to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" 
+                            to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" 
                             params={{ clubId, sectionId, categoryId: s.categoryId!, sessionId: s.id }}
                           >
                             <Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary">

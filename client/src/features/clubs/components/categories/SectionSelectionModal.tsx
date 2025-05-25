@@ -37,7 +37,7 @@ export function SectionSelectionModal({ isOpen, onClose, clubId }: SectionSelect
 
   const handleSectionSelect = (sectionId: string) => {
     navigate({
-      to: "/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
+      to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
       params: { clubId, sectionId }
     });
     onClose();
@@ -72,7 +72,7 @@ export function SectionSelectionModal({ isOpen, onClose, clubId }: SectionSelect
               <Button
                 onClick={() => {
                   navigate({
-                    to: "/dashboard/clubs/$clubId/sections/create",
+                    to: "/admin/dashboard/clubs/$clubId/sections/create",
                     params: { clubId }
                   });
                   onClose();

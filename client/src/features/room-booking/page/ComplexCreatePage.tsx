@@ -15,13 +15,13 @@ export function ComplexCreatePage() {
 		setShowSuccessAlert(true);
 		setTimeout(() => {
 			setIsNavigating(true);
-			navigate({ to: `/facilities/complexes/${newComplex.id}` });
+			navigate({ to: `/admin/facilities/complexes/${newComplex.id}` });
 		}, 1500);
 	};
 
 	const handleCancel = () => {
 		setIsNavigating(true);
-		navigate({ to: "/facilities/complexes" });
+		navigate({ to: "/admin/facilities/complexes" });
 	};
 
 	return (

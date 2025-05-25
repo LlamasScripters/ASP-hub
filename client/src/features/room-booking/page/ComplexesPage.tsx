@@ -117,13 +117,13 @@ export function ComplexesPage({
 	};
 
 	const handleCreateClick = () => {
-		navigate({ to: "/facilities/complexes/create" });
+		navigate({ to: "/admin/facilities/complexes/create" });
 	};
 
 	const handleEditClick = (complexId: string) => {
 		const complex = initialComplexes.find((c) => c.id === complexId);
 		if (complex) {
-			navigate({ to: `/facilities/complexes/${complexId}/edit` });
+			navigate({ to: `/admin/facilities/complexes/${complexId}/edit` });
 		} else {
 			console.error(`Complex with id ${complexId} not found`);
 		}

@@ -7,17 +7,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { UserLoggedIn } from "@/lib/auth/auth-client";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 import { Link } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
 import { Calendar, Edit, Mail, User as UserIcon } from "lucide-react";
 import UserAccountsCard from "../components/UserAccountsCard";
 
-export default function UserProfilePage({
-	user,
-}: {
-	user: UserLoggedIn;
-}) {
+export default function UserProfilePage() {
+	const { user } = AuthenticatedRoute.useLoaderData();
 	return (
 		<div className="container max-w-4xl py-6 space-y-6">
 			<Card>

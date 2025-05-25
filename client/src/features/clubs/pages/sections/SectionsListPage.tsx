@@ -24,7 +24,7 @@ interface EnrichedSection extends Section {
 }
 
 export function SectionsListPage() {
-  const { clubId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/" });
+  const { clubId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/" });
   const [sections, setSections] = useState<EnrichedSection[]>([]);
   const [allCategories, setAllCategories] = useState<any[]>([]);
   const [categoriesCountBySection, setCategoriesCountBySection] = useState<Record<string, number>>({});
@@ -153,7 +153,7 @@ export function SectionsListPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <Link 
-                to="/dashboard/clubs/$clubId" 
+                to="/admin/dashboard/clubs/$clubId" 
                 params={{ clubId }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -168,7 +168,7 @@ export function SectionsListPage() {
               Gérez et organisez les sections sportives de votre club
             </p>
           </div>
-          <Link to="/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
+          <Link to="/admin/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
             <Button size="lg" className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
               Créer une section
@@ -234,7 +234,7 @@ export function SectionsListPage() {
               <p className="text-muted-foreground mb-6 max-w-md">
                 Commencez par créer votre première section pour organiser les activités sportives de votre club.
               </p>
-              <Link to="/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
+              <Link to="/admin/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
                 <Button size="lg">
                   <Plus className="mr-2 h-5 w-5" />
                   Créer votre première section
@@ -282,7 +282,7 @@ export function SectionsListPage() {
                 <CardContent className="space-y-3">
                   <div className="space-y-2">
                     <Link 
-                      to="/dashboard/clubs/$clubId/sections/$sectionId/categories" 
+                      to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories" 
                       params={{ clubId, sectionId: section.id }}
                       className="block"
                     >
@@ -296,7 +296,7 @@ export function SectionsListPage() {
                     </Link>
                     
                     <Link 
-                      to="/dashboard/clubs/$clubId/sections/$sectionId/sessions" 
+                      to="/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions" 
                       params={{ clubId, sectionId: section.id }}
                       className="block"
                     >
@@ -310,7 +310,7 @@ export function SectionsListPage() {
                     </Link>
 
                     <Link 
-                      to="/dashboard/clubs/$clubId/sections/$sectionId/edit" 
+                      to="/admin/dashboard/clubs/$clubId/sections/$sectionId/edit" 
                       params={{ clubId, sectionId: section.id }}
                       className="block"
                     >

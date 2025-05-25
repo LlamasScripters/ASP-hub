@@ -7,20 +7,18 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 
-import type { ClientAccount, UserLoggedIn } from "@/lib/auth/auth-client";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
+import { Route as UserRoute } from "@/routes/_authenticated/(nonadmin)/_nonadmin/user/_user";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { UserPasswordAskResetForm } from "../components/UserPasswordAskResetForm";
 import { UserPasswordUpdateForm } from "../components/UserPasswordUpdateForm";
 import UserSettingsUpdateForm from "../components/UserSettingsUpdateForm";
 
-export default function UserSettingsPage({
-	user,
-	accounts,
-}: {
-	user: UserLoggedIn;
-	accounts: ClientAccount[];
-}) {
+export default function UserSettingsPage() {
+	const { user } = AuthenticatedRoute.useLoaderData();
+	const { accounts } = UserRoute.useLoaderData();
+
 	const hasPassword = accounts.some(
 		(account) => account.provider === "credential",
 	);

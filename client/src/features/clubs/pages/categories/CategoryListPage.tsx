@@ -31,7 +31,7 @@ interface Filters {
 }
 
 export function CategoriesListPage() {
-  const { clubId, sectionId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/" });
+  const { clubId, sectionId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/" });
   const [categories, setCategories] = useState<Category[]>([]);
   const [sectionName, setSectionName] = useState("");
   const [sortField, setSortField] = useState<SortField>('name');
@@ -166,7 +166,7 @@ export function CategoriesListPage() {
             Gérez les catégories de la section <span className="font-medium">{sectionName}</span>
           </p>
         </div>
-        <Link to="/dashboard/clubs/$clubId/sections/$sectionId/categories/create" params={{ clubId, sectionId }}>
+        <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create" params={{ clubId, sectionId }}>
           <Button className="w-full md:w-auto">
             <Users className="mr-2 h-4 w-4" />
             Créer une catégorie
@@ -314,7 +314,7 @@ export function CategoriesListPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit" params={{ clubId, sectionId, categoryId: c.id }}>
+                          <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit" params={{ clubId, sectionId, categoryId: c.id }}>
                             <Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary">
                               <Edit className="mr-1 h-3 w-3" />
                               Modifier
