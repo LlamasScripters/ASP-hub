@@ -6,7 +6,7 @@ import { roomsService } from "./rooms.service.js";
 const roomsRouter = Router();
 
 const roomSchema = z.object({
-	name: z.string().min(1).max(100),
+	name: z.string().min(1).max(255),
 	sportType: z.string().min(1).max(100),
 	isIndoor: z.boolean(),
 	accreditation: z.string().max(255).optional(),

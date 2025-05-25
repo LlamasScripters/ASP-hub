@@ -5,10 +5,10 @@ import { complexesService } from "./complexes.service.js";
 const complexesRouter = Router();
 
 const complexSchema = z.object({
-	name: z.string().min(1).max(100),
-	street: z.string().min(1).max(100),
+	name: z.string().min(1).max(255),
+	street: z.string().min(1).max(255),
 	city: z.string().min(1).max(100),
-	postalCode: z.string().min(5).max(10),
+	postalCode: z.string().min(5).max(20),
 	numberOfElevators: z.number().int().min(0),
 	accessibleForReducedMobility: z.boolean(),
 	parkingCapacity: z.number().int().min(0),
