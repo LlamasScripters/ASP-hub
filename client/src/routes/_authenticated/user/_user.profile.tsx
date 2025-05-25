@@ -1,7 +1,7 @@
-import UserSettingsPage from "@/features/users/pages/UserSettingsPage";
+import UserProfilePage from "@/features/users/pages/UserProfilePage";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_authenticated/user/_user/settings")({
+export const Route = createFileRoute("/_authenticated/user/_user/profile")({
 	component: RouteComponent,
 });
 
@@ -9,5 +9,5 @@ function RouteComponent() {
 	const { user } = useLoaderData({ from: "/_authenticated" });
 	const { accounts } = useLoaderData({ from: "/_authenticated/user/_user" });
 
-	return <UserSettingsPage user={user} accounts={accounts} />;
+	return <UserProfilePage user={user} accounts={accounts} />;
 }

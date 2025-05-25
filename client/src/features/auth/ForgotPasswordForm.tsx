@@ -8,9 +8,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -22,7 +22,6 @@ const forgotPasswordFormSchema = z.object({
 type FormValues = z.infer<typeof forgotPasswordFormSchema>;
 
 export function ForgotPasswordForm() {
-	const [isLoading, setIsLoading] = useState(false);
 	const [isSuccess, setIsSuccess] = useState(false);
 
 	const form = useForm<FormValues>({
@@ -32,25 +31,26 @@ export function ForgotPasswordForm() {
 		},
 	});
 
-	const onSubmit = async (values: FormValues) => {
-		setIsLoading(true);
-
-		try {
+	const { mutate: submitForgotPassword } = useMutation({
+		mutationFn: async (values: FormValues) => {
 			const { error } = await authClient.forgetPassword({
 				email: values.email,
 				redirectTo: "/auth/reset-password",
 			});
-
-			// Better Auth doesn't return an error if the user doesn't exist for security reasons
-			// So we always show success message
+			return { error };
+		},
+		onSuccess: () => {
 			setIsSuccess(true);
-		} catch (err) {
+		},
+		onError: () => {
 			form.setError("root", {
 				message: "Une erreur inattendue s'est produite",
 			});
-		} finally {
-			setIsLoading(false);
-		}
+		},
+	});
+
+	const onSubmit = (values: FormValues) => {
+		submitForgotPassword(values);
 	};
 
 	if (isSuccess) {
@@ -69,17 +69,9 @@ export function ForgotPasswordForm() {
 					</p>
 					<Button
 						variant="outline"
-						onClick={() => {
-							setIsSuccess(false);
-							form.reset();
-						}}
+						onClick={() => submitForgotPassword(form.getValues())}
 					>
 						Renvoyer
-					</Button>
-				</div>
-				<div className="text-center">
-					<Button asChild variant="link">
-						<Link to="/auth/login">Retour à la connexion</Link>
 					</Button>
 				</div>
 			</div>
@@ -114,17 +106,17 @@ export function ForgotPasswordForm() {
 						</div>
 					)}
 
-					<Button type="submit" disabled={isLoading} className="w-full">
-						{isLoading ? "Envoi en cours..." : "Envoyer le lien"}
+					<Button
+						type="submit"
+						disabled={form.formState.isSubmitting}
+						className="w-full"
+					>
+						{form.formState.isSubmitting
+							? "Envoi en cours..."
+							: "Envoyer le lien"}
 					</Button>
 				</form>
 			</Form>
-
-			<div className="text-center">
-				<Button asChild variant="link">
-					<Link to="/auth/login">Retour à la connexion</Link>
-				</Button>
-			</div>
 		</div>
 	);
 }

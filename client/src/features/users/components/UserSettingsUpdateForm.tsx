@@ -41,11 +41,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface UserSettingsEditFormProps {
+interface UserSettingsUpdateFormProps {
 	user: UserLoggedIn;
 }
 
-export function UserSettingsEditForm({ user }: UserSettingsEditFormProps) {
+export default function UserSettingsUpdateForm({
+	user,
+}: UserSettingsUpdateFormProps) {
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {

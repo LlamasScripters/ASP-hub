@@ -25,7 +25,6 @@ import { Route as AuthLayoutImport } from "./routes/auth/_layout"
 import { Route as AuthVerifyIndexImport } from "./routes/auth/verify/index"
 import { Route as AuthenticatedDashboardIndexImport } from "./routes/_authenticated/dashboard/index"
 import { Route as AuthVerifyVerifyImport } from "./routes/auth/verify/_verify"
-import { Route as AuthenticatedUserProfileImport } from "./routes/_authenticated/user/profile"
 import { Route as AuthenticatedUserUserImport } from "./routes/_authenticated/user/_user"
 import { Route as AuthenticatedDashboardSocialImport } from "./routes/_authenticated/dashboard/social"
 import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenticated/dashboard/members"
@@ -33,6 +32,7 @@ import { Route as AuthenticatedDashboardActivitiesImport } from "./routes/_authe
 import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
+import { Route as AuthenticatedUserUserProfileImport } from "./routes/_authenticated/user/_user.profile"
 
 // Create Virtual Routes
 
@@ -130,12 +130,6 @@ const AuthVerifyVerifyRoute = AuthVerifyVerifyImport.update({
   getParentRoute: () => AuthVerifyRoute,
 } as any)
 
-const AuthenticatedUserProfileRoute = AuthenticatedUserProfileImport.update({
-  id: "/profile",
-  path: "/profile",
-  getParentRoute: () => AuthenticatedUserRoute,
-} as any)
-
 const AuthenticatedUserUserRoute = AuthenticatedUserUserImport.update({
   id: "/_user",
   getParentRoute: () => AuthenticatedUserRoute,
@@ -178,6 +172,13 @@ const AuthenticatedUserUserSettingsRoute =
   AuthenticatedUserUserSettingsImport.update({
     id: "/settings",
     path: "/settings",
+    getParentRoute: () => AuthenticatedUserUserRoute,
+  } as any)
+
+const AuthenticatedUserUserProfileRoute =
+  AuthenticatedUserUserProfileImport.update({
+    id: "/profile",
+    path: "/profile",
     getParentRoute: () => AuthenticatedUserUserRoute,
   } as any)
 
@@ -290,13 +291,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedUserUserImport
       parentRoute: typeof AuthenticatedUserRoute
     }
-    "/_authenticated/user/profile": {
-      id: "/_authenticated/user/profile"
-      path: "/profile"
-      fullPath: "/user/profile"
-      preLoaderRoute: typeof AuthenticatedUserProfileImport
-      parentRoute: typeof AuthenticatedUserImport
-    }
     "/auth/verify": {
       id: "/auth/verify"
       path: "/verify"
@@ -325,6 +319,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyIndexImport
       parentRoute: typeof AuthVerifyImport
     }
+    "/_authenticated/user/_user/profile": {
+      id: "/_authenticated/user/_user/profile"
+      path: "/profile"
+      fullPath: "/user/profile"
+      preLoaderRoute: typeof AuthenticatedUserUserProfileImport
+      parentRoute: typeof AuthenticatedUserUserImport
+    }
     "/_authenticated/user/_user/settings": {
       id: "/_authenticated/user/_user/settings"
       path: "/settings"
@@ -352,10 +353,12 @@ declare module "@tanstack/react-router" {
 // Create and export the route tree
 
 interface AuthenticatedUserUserRouteChildren {
+  AuthenticatedUserUserProfileRoute: typeof AuthenticatedUserUserProfileRoute
   AuthenticatedUserUserSettingsRoute: typeof AuthenticatedUserUserSettingsRoute
 }
 
 const AuthenticatedUserUserRouteChildren: AuthenticatedUserUserRouteChildren = {
+  AuthenticatedUserUserProfileRoute: AuthenticatedUserUserProfileRoute,
   AuthenticatedUserUserSettingsRoute: AuthenticatedUserUserSettingsRoute,
 }
 
@@ -366,12 +369,10 @@ const AuthenticatedUserUserRouteWithChildren =
 
 interface AuthenticatedUserRouteChildren {
   AuthenticatedUserUserRoute: typeof AuthenticatedUserUserRouteWithChildren
-  AuthenticatedUserProfileRoute: typeof AuthenticatedUserProfileRoute
 }
 
 const AuthenticatedUserRouteChildren: AuthenticatedUserRouteChildren = {
   AuthenticatedUserUserRoute: AuthenticatedUserUserRouteWithChildren,
-  AuthenticatedUserProfileRoute: AuthenticatedUserProfileRoute,
 }
 
 const AuthenticatedUserRouteWithChildren =
@@ -462,10 +463,10 @@ export interface FileRoutesByFullPath {
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/user": typeof AuthenticatedUserUserRouteWithChildren
-  "/user/profile": typeof AuthenticatedUserProfileRoute
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
@@ -485,9 +486,9 @@ export interface FileRoutesByTo {
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/user": typeof AuthenticatedUserUserRouteWithChildren
-  "/user/profile": typeof AuthenticatedUserProfileRoute
   "/auth/verify": typeof AuthVerifyIndexRoute
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
+  "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
@@ -510,11 +511,11 @@ export interface FileRoutesById {
   "/_authenticated/dashboard/social": typeof AuthenticatedDashboardSocialRoute
   "/_authenticated/user": typeof AuthenticatedUserRouteWithChildren
   "/_authenticated/user/_user": typeof AuthenticatedUserUserRouteWithChildren
-  "/_authenticated/user/profile": typeof AuthenticatedUserProfileRoute
   "/auth/verify": typeof AuthVerifyRouteWithChildren
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/_authenticated/user/_user/profile": typeof AuthenticatedUserUserProfileRoute
   "/_authenticated/user/_user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
@@ -536,10 +537,10 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
-    | "/user/profile"
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/"
+    | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
@@ -558,9 +559,9 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
-    | "/user/profile"
     | "/auth/verify"
     | "/dashboard"
+    | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
@@ -581,11 +582,11 @@ export interface FileRouteTypes {
     | "/_authenticated/dashboard/social"
     | "/_authenticated/user"
     | "/_authenticated/user/_user"
-    | "/_authenticated/user/profile"
     | "/auth/verify"
     | "/auth/verify/_verify"
     | "/_authenticated/dashboard/"
     | "/auth/verify/"
+    | "/_authenticated/user/_user/profile"
     | "/_authenticated/user/_user/settings"
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
@@ -689,20 +690,16 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/user",
       "parent": "/_authenticated",
       "children": [
-        "/_authenticated/user/_user",
-        "/_authenticated/user/profile"
+        "/_authenticated/user/_user"
       ]
     },
     "/_authenticated/user/_user": {
       "filePath": "_authenticated/user/_user.tsx",
       "parent": "/_authenticated/user",
       "children": [
+        "/_authenticated/user/_user/profile",
         "/_authenticated/user/_user/settings"
       ]
-    },
-    "/_authenticated/user/profile": {
-      "filePath": "_authenticated/user/profile.tsx",
-      "parent": "/_authenticated/user"
     },
     "/auth/verify": {
       "filePath": "auth/verify",
@@ -727,6 +724,10 @@ export const routeTree = rootRoute
     "/auth/verify/": {
       "filePath": "auth/verify/index.tsx",
       "parent": "/auth/verify"
+    },
+    "/_authenticated/user/_user/profile": {
+      "filePath": "_authenticated/user/_user.profile.tsx",
+      "parent": "/_authenticated/user/_user"
     },
     "/_authenticated/user/_user/settings": {
       "filePath": "_authenticated/user/_user.settings.tsx",

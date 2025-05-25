@@ -1,6 +1,5 @@
 import { authClient } from "@/lib/auth/auth-client";
 import { authConfig } from "@/lib/auth/auth-config";
-import type { User } from "@backend/db/schema";
 import { queryOptions } from "@tanstack/react-query";
 
 export const usersConfig = {
@@ -9,14 +8,14 @@ export const usersConfig = {
 
 export const getLoggedInUserQueryOptions = ({
 	signal,
-}: { signal: AbortSignal }) =>
+}: { signal?: AbortSignal } = {}) =>
 	queryOptions({
 		queryKey: ["user", "me"],
 		queryFn: async () => {
 			const { data } = await authClient.getSession({
 				fetchOptions: { signal },
 			});
-			return (data?.user as User) ?? null;
+			return data?.user ?? null;
 		},
 		staleTime: authConfig.sessionDuration,
 		gcTime: authConfig.sessionDuration,
@@ -24,7 +23,7 @@ export const getLoggedInUserQueryOptions = ({
 
 export const listAccountsQueryOptions = (
 	userId: string,
-	{ signal }: { signal: AbortSignal },
+	{ signal }: { signal?: AbortSignal } = {},
 ) =>
 	queryOptions({
 		queryKey: ["user", userId, "accounts"],

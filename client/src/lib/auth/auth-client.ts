@@ -87,6 +87,9 @@ export const authClient = createAuthClient({
 				dateOfBirth: {
 					type: "date",
 				},
+				deletedAt: {
+					type: "date",
+				},
 			},
 		}),
 	],

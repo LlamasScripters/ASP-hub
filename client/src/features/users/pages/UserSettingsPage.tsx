@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -6,17 +7,18 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 
-import type { ClientAccount } from "@/lib/auth/auth-client";
-import type { User } from "@backend/db/schema.js";
+import type { ClientAccount, UserLoggedIn } from "@/lib/auth/auth-client";
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { UserPasswordAskResetForm } from "../components/UserPasswordAskResetForm";
 import { UserPasswordUpdateForm } from "../components/UserPasswordUpdateForm";
-import { UserSettingsEditForm } from "../components/UserSettingsEditForm";
+import UserSettingsUpdateForm from "../components/UserSettingsUpdateForm";
 
-export function UserSettingsPage({
+export default function UserSettingsPage({
 	user,
 	accounts,
 }: {
-	user: User;
+	user: UserLoggedIn;
 	accounts: ClientAccount[];
 }) {
 	const hasPassword = accounts.some(
@@ -29,6 +31,15 @@ export function UserSettingsPage({
 
 	return (
 		<div className="container max-w-2xl py-6 space-y-6">
+			<div className="flex items-center gap-2">
+				<Button variant="link" size="sm" className="gap-2" asChild>
+					<Link to="/user/profile">
+						<ArrowLeft className="h-4 w-4" />
+						Retour au profil
+					</Link>
+				</Button>
+			</div>
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Informations personnelles</CardTitle>
@@ -37,7 +48,7 @@ export function UserSettingsPage({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<UserSettingsEditForm user={user} />
+					<UserSettingsUpdateForm user={user} />
 				</CardContent>
 			</Card>
 

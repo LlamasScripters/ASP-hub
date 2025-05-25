@@ -1,4 +1,4 @@
-import type { z } from "zod/v4";
+import type { z } from "zod";
 
 export function formatZodError(error: z.ZodError): Record<string, string> {
 	const errors = error.issues.reduce(
