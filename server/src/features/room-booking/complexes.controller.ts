@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { complexesService } from "./complexes.service.js";
 
@@ -16,10 +16,7 @@ const complexSchema = z.object({
 
 complexesRouter.get("/", async (req: Request, res: Response) => {
 	const complexes = await complexesService.getAll();
-	res.json({
-		message: "List of complexes retrieved successfully",
-		data: complexes
-	});
+	res.json(complexes);
 });
 
 //@ts-ignore
@@ -28,10 +25,7 @@ complexesRouter.get("/:id", async (req: Request, res: Response) => {
 	if (!complex) {
 		return res.status(404).json({ error: "Complex not found" });
 	}
-	res.json({
-		message: "Complex retrieved successfully",
-		data: complex
-	});
+	res.json(complex);
 });
 
 //@ts-ignore
@@ -41,10 +35,7 @@ complexesRouter.post("/", async (req: Request, res: Response) => {
 		return res.status(400).json({ error: parse.error.flatten() });
 	}
 	const created = await complexesService.create(parse.data);
-	res.status(201).json({
-		message: "Complex created successfully",
-		data: created
-	});
+	res.status(201).json(created);
 });
 
 //@ts-ignore
@@ -57,10 +48,7 @@ complexesRouter.put("/:id", async (req: Request, res: Response) => {
 	if (!updated) {
 		return res.status(404).json({ error: "Complex not found" });
 	}
-	res.json({
-		message: "Complex updated successfully",
-		data: updated
-	});
+	res.json(updated);
 });
 
 //@ts-ignore
@@ -70,9 +58,7 @@ complexesRouter.delete("/:id", async (req: Request, res: Response) => {
 		return res.status(404).json({ error: "Complex not found" });
 	}
 	await complexesService.delete(req.params.id);
-	res.status(200).json({
-		message: "Complex deleted successfully"
-	});
+	res.status(200).json({ message: "Complex deleted successfully" });
 });
 
 export default complexesRouter;
