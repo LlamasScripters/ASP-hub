@@ -7,6 +7,7 @@ import complexesRouter from "./features/room-booking/complexes.controller.js";
 import reservationsRouter from "./features/room-booking/reservations.controller.js";
 import roomsRouter from "./features/room-booking/rooms.controller.js";
 import usersRouter from "./features/users/users.controller.js";
+import clubsRouter from "./features/clubs/clubs.controller.js";
 
 const server = express();
 
@@ -32,6 +33,7 @@ server.use("/api/users", usersRouter);
 server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
 server.use("/api/reservations", reservationsRouter);
+server.use("/api/clubs", clubsRouter);
 
 server.get("/api", (req, res) => {
 	res.json({ message: "ASP API is running!" });

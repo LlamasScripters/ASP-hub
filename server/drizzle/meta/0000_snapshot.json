@@ -1,5 +1,5 @@
 {
-  "id": "2a32e8ea-d497-4506-b1fb-3747d7d30179",
+  "id": "85a4df6a-2e5c-4343-b832-3dc7af202df1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -753,10 +753,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "session_participants_session_id_sessions_id_fk": {
-          "name": "session_participants_session_id_sessions_id_fk",
+        "session_participants_session_id_sessions_sport_id_fk": {
+          "name": "session_participants_session_id_sessions_sport_id_fk",
           "tableFrom": "session_participants",
-          "tableTo": "sessions",
+          "tableTo": "sessions_sport",
           "columnsFrom": [
             "session_id"
           ],
