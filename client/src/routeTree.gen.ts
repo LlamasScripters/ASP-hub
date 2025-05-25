@@ -16,6 +16,7 @@ import { Route as rootRoute } from "./routes/__root"
 import { Route as AuthenticatedImport } from "./routes/_authenticated"
 import { Route as IndexImport } from "./routes/index"
 import { Route as AuthSendVerificationEmailImport } from "./routes/auth/send-verification-email"
+import { Route as AuthResetPasswordImport } from "./routes/auth/reset-password"
 import { Route as AuthRegisterImport } from "./routes/auth/register"
 import { Route as AuthLoginImport } from "./routes/auth/login"
 import { Route as AuthForgotPasswordImport } from "./routes/auth/forgot-password"
@@ -24,18 +25,20 @@ import { Route as AuthLayoutImport } from "./routes/auth/_layout"
 import { Route as AuthVerifyIndexImport } from "./routes/auth/verify/index"
 import { Route as AuthenticatedDashboardIndexImport } from "./routes/_authenticated/dashboard/index"
 import { Route as AuthVerifyVerifyImport } from "./routes/auth/verify/_verify"
-import { Route as AuthenticatedUserSettingsImport } from "./routes/_authenticated/user/settings"
-import { Route as AuthenticatedUserProfileImport } from "./routes/_authenticated/user/profile"
+import { Route as AuthenticatedUserUserImport } from "./routes/_authenticated/user/_user"
 import { Route as AuthenticatedDashboardSocialImport } from "./routes/_authenticated/dashboard/social"
 import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenticated/dashboard/members"
 import { Route as AuthenticatedDashboardActivitiesImport } from "./routes/_authenticated/dashboard/activities"
 import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
+import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
+import { Route as AuthenticatedUserUserProfileImport } from "./routes/_authenticated/user/_user.profile"
 
 // Create Virtual Routes
 
 const AuthImport = createFileRoute("/auth")()
 const AuthVerifyImport = createFileRoute("/auth/verify")()
+const AuthenticatedUserImport = createFileRoute("/_authenticated/user")()
 
 // Create/Update Routes
 
@@ -62,9 +65,21 @@ const AuthVerifyRoute = AuthVerifyImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthenticatedUserRoute = AuthenticatedUserImport.update({
+  id: "/user",
+  path: "/user",
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 const AuthSendVerificationEmailRoute = AuthSendVerificationEmailImport.update({
   id: "/send-verification-email",
   path: "/send-verification-email",
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthResetPasswordRoute = AuthResetPasswordImport.update({
+  id: "/reset-password",
+  path: "/reset-password",
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -115,16 +130,9 @@ const AuthVerifyVerifyRoute = AuthVerifyVerifyImport.update({
   getParentRoute: () => AuthVerifyRoute,
 } as any)
 
-const AuthenticatedUserSettingsRoute = AuthenticatedUserSettingsImport.update({
-  id: "/user/settings",
-  path: "/user/settings",
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-
-const AuthenticatedUserProfileRoute = AuthenticatedUserProfileImport.update({
-  id: "/user/profile",
-  path: "/user/profile",
-  getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedUserUserRoute = AuthenticatedUserUserImport.update({
+  id: "/_user",
+  getParentRoute: () => AuthenticatedUserRoute,
 } as any)
 
 const AuthenticatedDashboardSocialRoute =
@@ -159,6 +167,20 @@ const AuthVerifyVerifyErrorRoute = AuthVerifyVerifyErrorImport.update({
   path: "/error",
   getParentRoute: () => AuthVerifyVerifyRoute,
 } as any)
+
+const AuthenticatedUserUserSettingsRoute =
+  AuthenticatedUserUserSettingsImport.update({
+    id: "/settings",
+    path: "/settings",
+    getParentRoute: () => AuthenticatedUserUserRoute,
+  } as any)
+
+const AuthenticatedUserUserProfileRoute =
+  AuthenticatedUserUserProfileImport.update({
+    id: "/profile",
+    path: "/profile",
+    getParentRoute: () => AuthenticatedUserUserRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -220,6 +242,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof AuthImport
     }
+    "/auth/reset-password": {
+      id: "/auth/reset-password"
+      path: "/reset-password"
+      fullPath: "/auth/reset-password"
+      preLoaderRoute: typeof AuthResetPasswordImport
+      parentRoute: typeof AuthImport
+    }
     "/auth/send-verification-email": {
       id: "/auth/send-verification-email"
       path: "/send-verification-email"
@@ -248,19 +277,19 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedDashboardSocialImport
       parentRoute: typeof AuthenticatedImport
     }
-    "/_authenticated/user/profile": {
-      id: "/_authenticated/user/profile"
-      path: "/user/profile"
-      fullPath: "/user/profile"
-      preLoaderRoute: typeof AuthenticatedUserProfileImport
+    "/_authenticated/user": {
+      id: "/_authenticated/user"
+      path: "/user"
+      fullPath: "/user"
+      preLoaderRoute: typeof AuthenticatedUserImport
       parentRoute: typeof AuthenticatedImport
     }
-    "/_authenticated/user/settings": {
-      id: "/_authenticated/user/settings"
-      path: "/user/settings"
-      fullPath: "/user/settings"
-      preLoaderRoute: typeof AuthenticatedUserSettingsImport
-      parentRoute: typeof AuthenticatedImport
+    "/_authenticated/user/_user": {
+      id: "/_authenticated/user/_user"
+      path: "/user"
+      fullPath: "/user"
+      preLoaderRoute: typeof AuthenticatedUserUserImport
+      parentRoute: typeof AuthenticatedUserRoute
     }
     "/auth/verify": {
       id: "/auth/verify"
@@ -290,6 +319,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyIndexImport
       parentRoute: typeof AuthVerifyImport
     }
+    "/_authenticated/user/_user/profile": {
+      id: "/_authenticated/user/_user/profile"
+      path: "/profile"
+      fullPath: "/user/profile"
+      preLoaderRoute: typeof AuthenticatedUserUserProfileImport
+      parentRoute: typeof AuthenticatedUserUserImport
+    }
+    "/_authenticated/user/_user/settings": {
+      id: "/_authenticated/user/_user/settings"
+      path: "/settings"
+      fullPath: "/user/settings"
+      preLoaderRoute: typeof AuthenticatedUserUserSettingsImport
+      parentRoute: typeof AuthenticatedUserUserImport
+    }
     "/auth/verify/_verify/error": {
       id: "/auth/verify/_verify/error"
       path: "/error"
@@ -309,12 +352,37 @@ declare module "@tanstack/react-router" {
 
 // Create and export the route tree
 
+interface AuthenticatedUserUserRouteChildren {
+  AuthenticatedUserUserProfileRoute: typeof AuthenticatedUserUserProfileRoute
+  AuthenticatedUserUserSettingsRoute: typeof AuthenticatedUserUserSettingsRoute
+}
+
+const AuthenticatedUserUserRouteChildren: AuthenticatedUserUserRouteChildren = {
+  AuthenticatedUserUserProfileRoute: AuthenticatedUserUserProfileRoute,
+  AuthenticatedUserUserSettingsRoute: AuthenticatedUserUserSettingsRoute,
+}
+
+const AuthenticatedUserUserRouteWithChildren =
+  AuthenticatedUserUserRoute._addFileChildren(
+    AuthenticatedUserUserRouteChildren,
+  )
+
+interface AuthenticatedUserRouteChildren {
+  AuthenticatedUserUserRoute: typeof AuthenticatedUserUserRouteWithChildren
+}
+
+const AuthenticatedUserRouteChildren: AuthenticatedUserRouteChildren = {
+  AuthenticatedUserUserRoute: AuthenticatedUserUserRouteWithChildren,
+}
+
+const AuthenticatedUserRouteWithChildren =
+  AuthenticatedUserRoute._addFileChildren(AuthenticatedUserRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardActivitiesRoute: typeof AuthenticatedDashboardActivitiesRoute
   AuthenticatedDashboardMembersRoute: typeof AuthenticatedDashboardMembersRoute
   AuthenticatedDashboardSocialRoute: typeof AuthenticatedDashboardSocialRoute
-  AuthenticatedUserProfileRoute: typeof AuthenticatedUserProfileRoute
-  AuthenticatedUserSettingsRoute: typeof AuthenticatedUserSettingsRoute
+  AuthenticatedUserRoute: typeof AuthenticatedUserRouteWithChildren
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -322,8 +390,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardActivitiesRoute: AuthenticatedDashboardActivitiesRoute,
   AuthenticatedDashboardMembersRoute: AuthenticatedDashboardMembersRoute,
   AuthenticatedDashboardSocialRoute: AuthenticatedDashboardSocialRoute,
-  AuthenticatedUserProfileRoute: AuthenticatedUserProfileRoute,
-  AuthenticatedUserSettingsRoute: AuthenticatedUserSettingsRoute,
+  AuthenticatedUserRoute: AuthenticatedUserRouteWithChildren,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
 }
 
@@ -364,6 +431,7 @@ interface AuthRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSendVerificationEmailRoute: typeof AuthSendVerificationEmailRoute
   AuthVerifyRoute: typeof AuthVerifyRouteWithChildren
 }
@@ -374,6 +442,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSendVerificationEmailRoute: AuthSendVerificationEmailRoute,
   AuthVerifyRoute: AuthVerifyRouteWithChildren,
 }
@@ -388,15 +457,17 @@ export interface FileRoutesByFullPath {
   "/auth/forgot-password": typeof AuthForgotPasswordRoute
   "/auth/login": typeof AuthLoginRoute
   "/auth/register": typeof AuthRegisterRoute
+  "/auth/reset-password": typeof AuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
   "/dashboard/activities": typeof AuthenticatedDashboardActivitiesRoute
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
-  "/user/profile": typeof AuthenticatedUserProfileRoute
-  "/user/settings": typeof AuthenticatedUserSettingsRoute
+  "/user": typeof AuthenticatedUserUserRouteWithChildren
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/user/profile": typeof AuthenticatedUserUserProfileRoute
+  "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
 }
@@ -409,14 +480,16 @@ export interface FileRoutesByTo {
   "/auth/forgot-password": typeof AuthForgotPasswordRoute
   "/auth/login": typeof AuthLoginRoute
   "/auth/register": typeof AuthRegisterRoute
+  "/auth/reset-password": typeof AuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
   "/dashboard/activities": typeof AuthenticatedDashboardActivitiesRoute
   "/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatedDashboardSocialRoute
-  "/user/profile": typeof AuthenticatedUserProfileRoute
-  "/user/settings": typeof AuthenticatedUserSettingsRoute
+  "/user": typeof AuthenticatedUserUserRouteWithChildren
   "/auth/verify": typeof AuthVerifyIndexRoute
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
+  "/user/profile": typeof AuthenticatedUserUserProfileRoute
+  "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
 }
@@ -431,16 +504,19 @@ export interface FileRoutesById {
   "/auth/forgot-password": typeof AuthForgotPasswordRoute
   "/auth/login": typeof AuthLoginRoute
   "/auth/register": typeof AuthRegisterRoute
+  "/auth/reset-password": typeof AuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
   "/_authenticated/dashboard/activities": typeof AuthenticatedDashboardActivitiesRoute
   "/_authenticated/dashboard/members": typeof AuthenticatedDashboardMembersRoute
   "/_authenticated/dashboard/social": typeof AuthenticatedDashboardSocialRoute
-  "/_authenticated/user/profile": typeof AuthenticatedUserProfileRoute
-  "/_authenticated/user/settings": typeof AuthenticatedUserSettingsRoute
+  "/_authenticated/user": typeof AuthenticatedUserRouteWithChildren
+  "/_authenticated/user/_user": typeof AuthenticatedUserUserRouteWithChildren
   "/auth/verify": typeof AuthVerifyRouteWithChildren
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/_authenticated/user/_user/profile": typeof AuthenticatedUserUserProfileRoute
+  "/_authenticated/user/_user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
 }
@@ -455,15 +531,17 @@ export interface FileRouteTypes {
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
+    | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/dashboard/activities"
     | "/dashboard/members"
     | "/dashboard/social"
-    | "/user/profile"
-    | "/user/settings"
+    | "/user"
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/"
+    | "/user/profile"
+    | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
   fileRoutesByTo: FileRoutesByTo
@@ -475,14 +553,16 @@ export interface FileRouteTypes {
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
+    | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/dashboard/activities"
     | "/dashboard/members"
     | "/dashboard/social"
-    | "/user/profile"
-    | "/user/settings"
+    | "/user"
     | "/auth/verify"
     | "/dashboard"
+    | "/user/profile"
+    | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
   id:
@@ -495,16 +575,19 @@ export interface FileRouteTypes {
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
+    | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/_authenticated/dashboard/activities"
     | "/_authenticated/dashboard/members"
     | "/_authenticated/dashboard/social"
-    | "/_authenticated/user/profile"
-    | "/_authenticated/user/settings"
+    | "/_authenticated/user"
+    | "/_authenticated/user/_user"
     | "/auth/verify"
     | "/auth/verify/_verify"
     | "/_authenticated/dashboard/"
     | "/auth/verify/"
+    | "/_authenticated/user/_user/profile"
+    | "/_authenticated/user/_user/settings"
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
   fileRoutesById: FileRoutesById
@@ -546,8 +629,7 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/activities",
         "/_authenticated/dashboard/members",
         "/_authenticated/dashboard/social",
-        "/_authenticated/user/profile",
-        "/_authenticated/user/settings",
+        "/_authenticated/user",
         "/_authenticated/dashboard/"
       ]
     },
@@ -559,6 +641,7 @@ export const routeTree = rootRoute
         "/auth/forgot-password",
         "/auth/login",
         "/auth/register",
+        "/auth/reset-password",
         "/auth/send-verification-email",
         "/auth/verify"
       ]
@@ -583,6 +666,10 @@ export const routeTree = rootRoute
       "filePath": "auth/register.tsx",
       "parent": "/auth"
     },
+    "/auth/reset-password": {
+      "filePath": "auth/reset-password.tsx",
+      "parent": "/auth"
+    },
     "/auth/send-verification-email": {
       "filePath": "auth/send-verification-email.tsx",
       "parent": "/auth"
@@ -599,13 +686,20 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/dashboard/social.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/user/profile": {
-      "filePath": "_authenticated/user/profile.tsx",
-      "parent": "/_authenticated"
+    "/_authenticated/user": {
+      "filePath": "_authenticated/user",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/user/_user"
+      ]
     },
-    "/_authenticated/user/settings": {
-      "filePath": "_authenticated/user/settings.tsx",
-      "parent": "/_authenticated"
+    "/_authenticated/user/_user": {
+      "filePath": "_authenticated/user/_user.tsx",
+      "parent": "/_authenticated/user",
+      "children": [
+        "/_authenticated/user/_user/profile",
+        "/_authenticated/user/_user/settings"
+      ]
     },
     "/auth/verify": {
       "filePath": "auth/verify",
@@ -630,6 +724,14 @@ export const routeTree = rootRoute
     "/auth/verify/": {
       "filePath": "auth/verify/index.tsx",
       "parent": "/auth/verify"
+    },
+    "/_authenticated/user/_user/profile": {
+      "filePath": "_authenticated/user/_user.profile.tsx",
+      "parent": "/_authenticated/user/_user"
+    },
+    "/_authenticated/user/_user/settings": {
+      "filePath": "_authenticated/user/_user.settings.tsx",
+      "parent": "/_authenticated/user/_user"
     },
     "/auth/verify/_verify/error": {
       "filePath": "auth/verify/_verify.error.tsx",

@@ -11,9 +11,10 @@ import {
 export const users = pgTable("users", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	firstName: varchar("first_name", { length: 255 }).notNull(),
-	lastName: varchar("last_name", { length: 255 }).notNull(),
+	// lastName defaults to empty string because social login may not provide it
+	lastName: varchar("last_name", { length: 255 }).notNull().default(""),
 	email: varchar("email", { length: 255 }).notNull().unique(),
-	name: text("name"),
+	name: text("name").notNull(),
 	dateOfBirth: date("date_of_birth"),
 	acceptTerms: boolean("accept_terms").notNull(),
 	emailVerified: boolean("email_verified").notNull().default(false),
@@ -77,12 +78,12 @@ export const twoFactors = pgTable("two_factors", {
 });
 
 export type InsertUser = typeof users.$inferInsert;
-export type SelectUser = typeof users.$inferSelect;
+export type User = typeof users.$inferSelect;
 export type InsertSession = typeof sessions.$inferInsert;
-export type SelectSession = typeof sessions.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
 export type InsertAccount = typeof accounts.$inferInsert;
-export type SelectAccount = typeof accounts.$inferSelect;
+export type Account = typeof accounts.$inferSelect;
 export type InsertVerification = typeof verifications.$inferInsert;
-export type SelectVerification = typeof verifications.$inferSelect;
+export type Verification = typeof verifications.$inferSelect;
 export type InsertTwoFactor = typeof twoFactors.$inferInsert;
-export type SelectTwoFactor = typeof twoFactors.$inferSelect;
+export type TwoFactor = typeof twoFactors.$inferSelect;

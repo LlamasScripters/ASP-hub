@@ -2,8 +2,13 @@ import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { twoFactor } from "better-auth/plugins";
-import { sendConfirmationEmail } from "./email.js";
+import { sendConfirmationEmail, sendResetPasswordEmail } from "./email.js";
+import { checkPasswordStrength } from "./password.js";
+
+const SESSION_DURATION = 5 * 60;
+const MIN_PASSWORD_LENGTH = 12;
 
 export const auth = betterAuth({
 	appName: "ASP Hub",
@@ -36,7 +41,7 @@ export const auth = betterAuth({
 	session: {
 		cookieCache: {
 			enabled: true,
-			maxAge: 5 * 60,
+			maxAge: SESSION_DURATION,
 		},
 	},
 	advanced: {
@@ -47,6 +52,16 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
+		minPasswordLength: MIN_PASSWORD_LENGTH,
+		sendResetPassword: async ({ user, url, token }) => {
+			await sendResetPasswordEmail(
+				{
+					email: user.email,
+					name: user.name,
+				},
+				token,
+			);
+		},
 	},
 	emailVerification: {
 		sendOnSignUp: true,
@@ -55,7 +70,7 @@ export const auth = betterAuth({
 			await sendConfirmationEmail(
 				{
 					email: user.email,
-					fullname: user.name,
+					name: user.name,
 				},
 				token,
 			);
@@ -72,6 +87,27 @@ export const auth = betterAuth({
 				acceptTerms: true,
 			}),
 		},
+	},
+	hooks: {
+		before: createAuthMiddleware(async (ctx) => {
+			if (!ctx.body) {
+				return;
+			}
+
+			if (!ctx.body.newPassword) {
+				console.groupEnd();
+				return;
+			}
+
+			const { isStrong } = checkPasswordStrength(ctx.body.newPassword);
+
+			if (!isStrong) {
+				throw new APIError("UNPROCESSABLE_ENTITY", {
+					message: "Password too weak",
+					code: "PASSWORD_TOO_WEAK",
+				});
+			}
+		}),
 	},
 	plugins: [
 		twoFactor({

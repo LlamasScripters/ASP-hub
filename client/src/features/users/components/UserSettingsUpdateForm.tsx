@@ -1,10 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
 import { ImageUploadButton } from "@/components/ImageUploadButton";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,74 +15,79 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { type UserLoggedIn, authClient } from "@/lib/auth/auth-client";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import { type FieldErrors, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
 
 const formSchema = z.object({
-	firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-	lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-	email: z.string().email("Adresse email invalide"),
-	dateOfBirth: z.coerce.date().nullable(),
-	image: z.string().url("L'URL de l'image est invalide").nullable(),
+	firstName: z
+		.string()
+		.min(2, "Le prénom doit contenir au moins 2 caractères")
+		.optional(),
+	lastName: z
+		.string()
+		.min(2, "Le nom doit contenir au moins 2 caractères")
+		.optional(),
+	dateOfBirth: z.coerce.date().optional(),
+	image: z.string().url("L'URL de l'image est invalide").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface UserSettingsEditFormProps {
-	user: {
-		firstName: string;
-		lastName: string;
-		email: string;
-		dateOfBirth?: Date;
-		image?: string | null;
-	};
-	onSuccess?: () => void;
+interface UserSettingsUpdateFormProps {
+	user: UserLoggedIn;
 }
 
-export function UserSettingsEditForm({
+export default function UserSettingsUpdateForm({
 	user,
-	onSuccess,
-}: UserSettingsEditFormProps) {
-	const [isLoading, setIsLoading] = useState(false);
-
+}: UserSettingsUpdateFormProps) {
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			firstName: user.firstName,
-			lastName: user.lastName,
-			email: user.email,
-			dateOfBirth: user.dateOfBirth,
-			image: user.image ?? null,
+			firstName: user.firstName ?? undefined,
+			lastName: user.lastName ?? undefined,
+			dateOfBirth: user.dateOfBirth ?? undefined,
+			image: user.image ?? undefined,
 		},
 	});
 
-	const onSubmit = async (values: FormValues) => {
-		setIsLoading(true);
-
-		try {
-			// TODO: Implement update user settings API call
-			// const { error } = await authClient.updateUser({
-			//   ...values,
-			// });
-
-			// if (error) {
-			//   form.setError("root", { message: error.message });
-			//   return;
-			// }
-
-			onSuccess?.();
-		} catch (err) {
-			form.setError("root", {
-				message: "Une erreur inattendue s'est produite",
+	const updateUserMutation = useMutation({
+		mutationFn: async (values: FormValues) => {
+			await authClient.updateUser({
+				firstName: values.firstName ?? undefined,
+				lastName: values.lastName ?? undefined,
+				dateOfBirth: values.dateOfBirth
+					? new Date(values.dateOfBirth)
+					: undefined,
+				image: values.image ?? undefined,
 			});
-		} finally {
-			setIsLoading(false);
-		}
+		},
+	});
+
+	const onSubmit = (values: FormValues) => {
+		updateUserMutation.mutate(values);
+	};
+
+	const onInvalidSubmit = (errors: FieldErrors<FormValues>) => {
+		const firstError = Object.values(errors)[0];
+		toast.error(
+			firstError?.message ?? "Une erreur est survenue, veuillez réessayer.",
+		);
 	};
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+			<form
+				onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}
+				className="space-y-4"
+			>
 				<FormField
 					control={form.control}
 					name="firstName"
@@ -112,20 +110,6 @@ export function UserSettingsEditForm({
 							<FormLabel>Nom</FormLabel>
 							<FormControl>
 								<Input placeholder="Nom" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="email"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Email</FormLabel>
-							<FormControl>
-								<Input type="email" placeholder="Adresse email" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -193,8 +177,10 @@ export function UserSettingsEditForm({
 					</div>
 				)}
 
-				<Button type="submit" disabled={isLoading}>
-					{isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
+				<Button type="submit" disabled={form.formState.isSubmitting}>
+					{form.formState.isSubmitting
+						? "Enregistrement..."
+						: "Enregistrer les modifications"}
 				</Button>
 			</form>
 		</Form>
