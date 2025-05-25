@@ -435,15 +435,39 @@ clubsRouter.get("/:clubId/sections/:sectionId/categories/:categoryId/sessions", 
   }
 });
 
-clubsRouter.post("/:clubId/sections/:sectionId/categories/:categoryId/sessions", async (req: Request, res: Response) => {
+clubsRouter.post("/:clubId/sections/:sectionId/categories/:categoryId/sessions", async (req, res) => {
   try {
-    const data = { ...req.body, categoryId: req.params.categoryId };
-    const created = await clubsService.createSession(data);
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      type,
+      status,
+      maxParticipants,
+    } = req.body;
+
+    const categoryId = req.params.categoryId;
+
+    const created = await clubsService.createSession({
+      categoryId,
+      title,
+      description,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      location,
+      type,
+      status,
+      maxParticipants: maxParticipants ? Number(maxParticipants) : null,
+    });
+
     res.status(201).json(created);
   } catch (error) {
     console.error("Erreur createSession:", error);
     res.status(500).json({ error: "Erreur lors de la création de la session" });
   }
 });
+
 
 export default clubsRouter;
