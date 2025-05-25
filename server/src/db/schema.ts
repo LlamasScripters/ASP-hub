@@ -242,7 +242,7 @@ export const sessionParticipants = pgTable("session_participants", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	sessionId: uuid("session_id")
 		.notNull()
-		.references(() => sessions.id, { onDelete: "cascade" }),
+		.references(() => sessionsSport.id, { onDelete: "cascade" }),
 	userId: uuid("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
