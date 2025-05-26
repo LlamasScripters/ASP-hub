@@ -31,16 +31,33 @@ import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenti
 import { Route as AuthenticatedDashboardActivitiesImport } from "./routes/_authenticated/dashboard/activities"
 import { Route as AuthenticatedFacilitiesRoomsIndexImport } from "./routes/_authenticated/facilities/rooms/index"
 import { Route as AuthenticatedFacilitiesComplexesIndexImport } from "./routes/_authenticated/facilities/complexes/index"
+import { Route as AuthenticatedDashboardClubsIndexImport } from "./routes/_authenticated/dashboard/clubs/index"
 import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
 import { Route as AuthenticatedUserUserProfileImport } from "./routes/_authenticated/user/_user.profile"
 import { Route as AuthenticatedFacilitiesComplexesCreateImport } from "./routes/_authenticated/facilities/complexes/create"
+import { Route as AuthenticatedDashboardClubsCreateImport } from "./routes/_authenticated/dashboard/clubs/create"
 import { Route as AuthenticatedFacilitiesRoomsRoomIdIndexImport } from "./routes/_authenticated/facilities/rooms/$roomId/index"
 import { Route as AuthenticatedFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/facilities/complexes/$complexId/index"
+import { Route as AuthenticatedDashboardClubsClubIdIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/index"
 import { Route as AuthenticatedFacilitiesRoomsRoomIdEditImport } from "./routes/_authenticated/facilities/rooms/$roomId.edit"
 import { Route as AuthenticatedFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/facilities/complexes/$complexId.edit"
 import { Route as AuthenticatedFacilitiesComplexesComplexIdCreateRoomImport } from "./routes/_authenticated/facilities/complexes/$complexId.create-room"
+import { Route as AuthenticatedDashboardClubsClubIdEditImport } from "./routes/_authenticated/dashboard/clubs/$clubId/edit"
+import { Route as AuthenticatedDashboardClubsClubIdSessionsIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sessions/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/index"
+import { Route as AuthenticatedDashboardClubsClubIdCategoriesIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/categories/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsCreateImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/create"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdEditImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/index"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+import { Route as AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditImport } from "./routes/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
 
 // Create Virtual Routes
 
@@ -178,6 +195,13 @@ const AuthenticatedFacilitiesComplexesIndexRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
+const AuthenticatedDashboardClubsIndexRoute =
+  AuthenticatedDashboardClubsIndexImport.update({
+    id: "/dashboard/clubs/",
+    path: "/dashboard/clubs/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 const AuthVerifyVerifySuccessRoute = AuthVerifyVerifySuccessImport.update({
   id: "/success",
   path: "/success",
@@ -211,6 +235,13 @@ const AuthenticatedFacilitiesComplexesCreateRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
+const AuthenticatedDashboardClubsCreateRoute =
+  AuthenticatedDashboardClubsCreateImport.update({
+    id: "/dashboard/clubs/create",
+    path: "/dashboard/clubs/create",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 const AuthenticatedFacilitiesRoomsRoomIdIndexRoute =
   AuthenticatedFacilitiesRoomsRoomIdIndexImport.update({
     id: "/facilities/rooms/$roomId/",
@@ -222,6 +253,13 @@ const AuthenticatedFacilitiesComplexesComplexIdIndexRoute =
   AuthenticatedFacilitiesComplexesComplexIdIndexImport.update({
     id: "/facilities/complexes/$complexId/",
     path: "/facilities/complexes/$complexId/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdIndexRoute =
+  AuthenticatedDashboardClubsClubIdIndexImport.update({
+    id: "/dashboard/clubs/$clubId/",
+    path: "/dashboard/clubs/$clubId/",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -245,6 +283,116 @@ const AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute =
     path: "/facilities/complexes/$complexId/create-room",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+
+const AuthenticatedDashboardClubsClubIdEditRoute =
+  AuthenticatedDashboardClubsClubIdEditImport.update({
+    id: "/dashboard/clubs/$clubId/edit",
+    path: "/dashboard/clubs/$clubId/edit",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSessionsIndexRoute =
+  AuthenticatedDashboardClubsClubIdSessionsIndexImport.update({
+    id: "/dashboard/clubs/$clubId/sessions/",
+    path: "/dashboard/clubs/$clubId/sessions/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsIndexRoute =
+  AuthenticatedDashboardClubsClubIdSectionsIndexImport.update({
+    id: "/dashboard/clubs/$clubId/sections/",
+    path: "/dashboard/clubs/$clubId/sections/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdCategoriesIndexRoute =
+  AuthenticatedDashboardClubsClubIdCategoriesIndexImport.update({
+    id: "/dashboard/clubs/$clubId/categories/",
+    path: "/dashboard/clubs/$clubId/categories/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsCreateRoute =
+  AuthenticatedDashboardClubsClubIdSectionsCreateImport.update({
+    id: "/dashboard/clubs/$clubId/sections/create",
+    path: "/dashboard/clubs/$clubId/sections/create",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexImport.update({
+    id: "/dashboard/clubs/$clubId/sections/$sectionId/",
+    path: "/dashboard/clubs/$clubId/sections/$sectionId/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdEditImport.update({
+    id: "/dashboard/clubs/$clubId/sections/$sectionId/edit",
+    path: "/dashboard/clubs/$clubId/sections/$sectionId/edit",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexImport.update({
+    id: "/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
+    path: "/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+
+const AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute =
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditImport.update(
+    {
+      id: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit",
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit",
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -383,6 +531,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyIndexImport
       parentRoute: typeof AuthVerifyImport
     }
+    "/_authenticated/dashboard/clubs/create": {
+      id: "/_authenticated/dashboard/clubs/create"
+      path: "/dashboard/clubs/create"
+      fullPath: "/dashboard/clubs/create"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/facilities/complexes/create": {
       id: "/_authenticated/facilities/complexes/create"
       path: "/facilities/complexes/create"
@@ -418,6 +573,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyVerifySuccessImport
       parentRoute: typeof AuthVerifyVerifyImport
     }
+    "/_authenticated/dashboard/clubs/": {
+      id: "/_authenticated/dashboard/clubs/"
+      path: "/dashboard/clubs"
+      fullPath: "/dashboard/clubs"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/facilities/complexes/": {
       id: "/_authenticated/facilities/complexes/"
       path: "/facilities/complexes"
@@ -430,6 +592,13 @@ declare module "@tanstack/react-router" {
       path: "/facilities/rooms"
       fullPath: "/facilities/rooms"
       preLoaderRoute: typeof AuthenticatedFacilitiesRoomsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/edit": {
+      id: "/_authenticated/dashboard/clubs/$clubId/edit"
+      path: "/dashboard/clubs/$clubId/edit"
+      fullPath: "/dashboard/clubs/$clubId/edit"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdEditImport
       parentRoute: typeof AuthenticatedImport
     }
     "/_authenticated/facilities/complexes/$complexId/create-room": {
@@ -453,6 +622,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFacilitiesRoomsRoomIdEditImport
       parentRoute: typeof AuthenticatedImport
     }
+    "/_authenticated/dashboard/clubs/$clubId/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/"
+      path: "/dashboard/clubs/$clubId"
+      fullPath: "/dashboard/clubs/$clubId"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/facilities/complexes/$complexId/": {
       id: "/_authenticated/facilities/complexes/$complexId/"
       path: "/facilities/complexes/$complexId"
@@ -465,6 +641,97 @@ declare module "@tanstack/react-router" {
       path: "/facilities/rooms/$roomId"
       fullPath: "/facilities/rooms/$roomId"
       preLoaderRoute: typeof AuthenticatedFacilitiesRoomsRoomIdIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/create": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/create"
+      path: "/dashboard/clubs/$clubId/sections/create"
+      fullPath: "/dashboard/clubs/$clubId/sections/create"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/categories/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/categories/"
+      path: "/dashboard/clubs/$clubId/categories"
+      fullPath: "/dashboard/clubs/$clubId/categories"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdCategoriesIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/"
+      path: "/dashboard/clubs/$clubId/sections"
+      fullPath: "/dashboard/clubs/$clubId/sections"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sessions/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sessions/"
+      path: "/dashboard/clubs/$clubId/sessions"
+      fullPath: "/dashboard/clubs/$clubId/sessions"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSessionsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/edit"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/edit"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdEditImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": {
+      id: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+      path: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+      fullPath: "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+      preLoaderRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditImport
       parentRoute: typeof AuthenticatedImport
     }
   }
@@ -504,14 +771,31 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardSocialRoute: typeof AuthenticatedDashboardSocialRoute
   AuthenticatedUserRoute: typeof AuthenticatedUserRouteWithChildren
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedDashboardClubsCreateRoute: typeof AuthenticatedDashboardClubsCreateRoute
   AuthenticatedFacilitiesComplexesCreateRoute: typeof AuthenticatedFacilitiesComplexesCreateRoute
+  AuthenticatedDashboardClubsIndexRoute: typeof AuthenticatedDashboardClubsIndexRoute
   AuthenticatedFacilitiesComplexesIndexRoute: typeof AuthenticatedFacilitiesComplexesIndexRoute
   AuthenticatedFacilitiesRoomsIndexRoute: typeof AuthenticatedFacilitiesRoomsIndexRoute
+  AuthenticatedDashboardClubsClubIdEditRoute: typeof AuthenticatedDashboardClubsClubIdEditRoute
   AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute: typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   AuthenticatedFacilitiesComplexesComplexIdEditRoute: typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
   AuthenticatedFacilitiesRoomsRoomIdEditRoute: typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
+  AuthenticatedDashboardClubsClubIdIndexRoute: typeof AuthenticatedDashboardClubsClubIdIndexRoute
   AuthenticatedFacilitiesComplexesComplexIdIndexRoute: typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
   AuthenticatedFacilitiesRoomsRoomIdIndexRoute: typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsCreateRoute: typeof AuthenticatedDashboardClubsClubIdSectionsCreateRoute
+  AuthenticatedDashboardClubsClubIdCategoriesIndexRoute: typeof AuthenticatedDashboardClubsClubIdCategoriesIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsIndexRoute: typeof AuthenticatedDashboardClubsClubIdSectionsIndexRoute
+  AuthenticatedDashboardClubsClubIdSessionsIndexRoute: typeof AuthenticatedDashboardClubsClubIdSessionsIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute: typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -520,22 +804,55 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardSocialRoute: AuthenticatedDashboardSocialRoute,
   AuthenticatedUserRoute: AuthenticatedUserRouteWithChildren,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedDashboardClubsCreateRoute:
+    AuthenticatedDashboardClubsCreateRoute,
   AuthenticatedFacilitiesComplexesCreateRoute:
     AuthenticatedFacilitiesComplexesCreateRoute,
+  AuthenticatedDashboardClubsIndexRoute: AuthenticatedDashboardClubsIndexRoute,
   AuthenticatedFacilitiesComplexesIndexRoute:
     AuthenticatedFacilitiesComplexesIndexRoute,
   AuthenticatedFacilitiesRoomsIndexRoute:
     AuthenticatedFacilitiesRoomsIndexRoute,
+  AuthenticatedDashboardClubsClubIdEditRoute:
+    AuthenticatedDashboardClubsClubIdEditRoute,
   AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute:
     AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute,
   AuthenticatedFacilitiesComplexesComplexIdEditRoute:
     AuthenticatedFacilitiesComplexesComplexIdEditRoute,
   AuthenticatedFacilitiesRoomsRoomIdEditRoute:
     AuthenticatedFacilitiesRoomsRoomIdEditRoute,
+  AuthenticatedDashboardClubsClubIdIndexRoute:
+    AuthenticatedDashboardClubsClubIdIndexRoute,
   AuthenticatedFacilitiesComplexesComplexIdIndexRoute:
     AuthenticatedFacilitiesComplexesComplexIdIndexRoute,
   AuthenticatedFacilitiesRoomsRoomIdIndexRoute:
     AuthenticatedFacilitiesRoomsRoomIdIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsCreateRoute:
+    AuthenticatedDashboardClubsClubIdSectionsCreateRoute,
+  AuthenticatedDashboardClubsClubIdCategoriesIndexRoute:
+    AuthenticatedDashboardClubsClubIdCategoriesIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsIndexRoute:
+    AuthenticatedDashboardClubsClubIdSectionsIndexRoute,
+  AuthenticatedDashboardClubsClubIdSessionsIndexRoute:
+    AuthenticatedDashboardClubsClubIdSessionsIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute,
+  AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute:
+    AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -610,18 +927,35 @@ export interface FileRoutesByFullPath {
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/dashboard/clubs/create": typeof AuthenticatedDashboardClubsCreateRoute
   "/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/dashboard/clubs": typeof AuthenticatedDashboardClubsIndexRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
   "/facilities/rooms": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/dashboard/clubs/$clubId/edit": typeof AuthenticatedDashboardClubsClubIdEditRoute
   "/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
   "/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
+  "/dashboard/clubs/$clubId": typeof AuthenticatedDashboardClubsClubIdIndexRoute
   "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
   "/facilities/rooms/$roomId": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
+  "/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedDashboardClubsClubIdSectionsCreateRoute
+  "/dashboard/clubs/$clubId/categories": typeof AuthenticatedDashboardClubsClubIdCategoriesIndexRoute
+  "/dashboard/clubs/$clubId/sections": typeof AuthenticatedDashboardClubsClubIdSectionsIndexRoute
+  "/dashboard/clubs/$clubId/sessions": typeof AuthenticatedDashboardClubsClubIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/sessions": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
 }
 
 export interface FileRoutesByTo {
@@ -640,18 +974,35 @@ export interface FileRoutesByTo {
   "/user": typeof AuthenticatedUserUserRouteWithChildren
   "/auth/verify": typeof AuthVerifyIndexRoute
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
+  "/dashboard/clubs/create": typeof AuthenticatedDashboardClubsCreateRoute
   "/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/dashboard/clubs": typeof AuthenticatedDashboardClubsIndexRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
   "/facilities/rooms": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/dashboard/clubs/$clubId/edit": typeof AuthenticatedDashboardClubsClubIdEditRoute
   "/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
   "/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
+  "/dashboard/clubs/$clubId": typeof AuthenticatedDashboardClubsClubIdIndexRoute
   "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
   "/facilities/rooms/$roomId": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
+  "/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedDashboardClubsClubIdSectionsCreateRoute
+  "/dashboard/clubs/$clubId/categories": typeof AuthenticatedDashboardClubsClubIdCategoriesIndexRoute
+  "/dashboard/clubs/$clubId/sections": typeof AuthenticatedDashboardClubsClubIdSectionsIndexRoute
+  "/dashboard/clubs/$clubId/sessions": typeof AuthenticatedDashboardClubsClubIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/sessions": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
 }
 
 export interface FileRoutesById {
@@ -675,18 +1026,35 @@ export interface FileRoutesById {
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/_authenticated/dashboard/clubs/create": typeof AuthenticatedDashboardClubsCreateRoute
   "/_authenticated/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/_authenticated/user/_user/profile": typeof AuthenticatedUserUserProfileRoute
   "/_authenticated/user/_user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/_authenticated/dashboard/clubs/": typeof AuthenticatedDashboardClubsIndexRoute
   "/_authenticated/facilities/complexes/": typeof AuthenticatedFacilitiesComplexesIndexRoute
   "/_authenticated/facilities/rooms/": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/edit": typeof AuthenticatedDashboardClubsClubIdEditRoute
   "/_authenticated/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/_authenticated/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
   "/_authenticated/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
+  "/_authenticated/dashboard/clubs/$clubId/": typeof AuthenticatedDashboardClubsClubIdIndexRoute
   "/_authenticated/facilities/complexes/$complexId/": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
   "/_authenticated/facilities/rooms/$roomId/": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedDashboardClubsClubIdSectionsCreateRoute
+  "/_authenticated/dashboard/clubs/$clubId/categories/": typeof AuthenticatedDashboardClubsClubIdCategoriesIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/": typeof AuthenticatedDashboardClubsClubIdSectionsIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sessions/": typeof AuthenticatedDashboardClubsClubIdSessionsIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
 }
 
 export interface FileRouteTypes {
@@ -708,18 +1076,35 @@ export interface FileRouteTypes {
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/"
+    | "/dashboard/clubs/create"
     | "/facilities/complexes/create"
     | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
+    | "/dashboard/clubs"
     | "/facilities/complexes"
     | "/facilities/rooms"
+    | "/dashboard/clubs/$clubId/edit"
     | "/facilities/complexes/$complexId/create-room"
     | "/facilities/complexes/$complexId/edit"
     | "/facilities/rooms/$roomId/edit"
+    | "/dashboard/clubs/$clubId"
     | "/facilities/complexes/$complexId"
     | "/facilities/rooms/$roomId"
+    | "/dashboard/clubs/$clubId/sections/create"
+    | "/dashboard/clubs/$clubId/categories"
+    | "/dashboard/clubs/$clubId/sections"
+    | "/dashboard/clubs/$clubId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/dashboard/clubs/$clubId/sections/$sectionId"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -737,18 +1122,35 @@ export interface FileRouteTypes {
     | "/user"
     | "/auth/verify"
     | "/dashboard"
+    | "/dashboard/clubs/create"
     | "/facilities/complexes/create"
     | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
+    | "/dashboard/clubs"
     | "/facilities/complexes"
     | "/facilities/rooms"
+    | "/dashboard/clubs/$clubId/edit"
     | "/facilities/complexes/$complexId/create-room"
     | "/facilities/complexes/$complexId/edit"
     | "/facilities/rooms/$roomId/edit"
+    | "/dashboard/clubs/$clubId"
     | "/facilities/complexes/$complexId"
     | "/facilities/rooms/$roomId"
+    | "/dashboard/clubs/$clubId/sections/create"
+    | "/dashboard/clubs/$clubId/categories"
+    | "/dashboard/clubs/$clubId/sections"
+    | "/dashboard/clubs/$clubId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/dashboard/clubs/$clubId/sections/$sectionId"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+    | "/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
   id:
     | "__root__"
     | "/"
@@ -770,18 +1172,35 @@ export interface FileRouteTypes {
     | "/auth/verify/_verify"
     | "/_authenticated/dashboard/"
     | "/auth/verify/"
+    | "/_authenticated/dashboard/clubs/create"
     | "/_authenticated/facilities/complexes/create"
     | "/_authenticated/user/_user/profile"
     | "/_authenticated/user/_user/settings"
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
+    | "/_authenticated/dashboard/clubs/"
     | "/_authenticated/facilities/complexes/"
     | "/_authenticated/facilities/rooms/"
+    | "/_authenticated/dashboard/clubs/$clubId/edit"
     | "/_authenticated/facilities/complexes/$complexId/create-room"
     | "/_authenticated/facilities/complexes/$complexId/edit"
     | "/_authenticated/facilities/rooms/$roomId/edit"
+    | "/_authenticated/dashboard/clubs/$clubId/"
     | "/_authenticated/facilities/complexes/$complexId/"
     | "/_authenticated/facilities/rooms/$roomId/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/create"
+    | "/_authenticated/dashboard/clubs/$clubId/categories/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/"
+    | "/_authenticated/dashboard/clubs/$clubId/sessions/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/"
+    | "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
   fileRoutesById: FileRoutesById
 }
 
@@ -823,14 +1242,31 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/social",
         "/_authenticated/user",
         "/_authenticated/dashboard/",
+        "/_authenticated/dashboard/clubs/create",
         "/_authenticated/facilities/complexes/create",
+        "/_authenticated/dashboard/clubs/",
         "/_authenticated/facilities/complexes/",
         "/_authenticated/facilities/rooms/",
+        "/_authenticated/dashboard/clubs/$clubId/edit",
         "/_authenticated/facilities/complexes/$complexId/create-room",
         "/_authenticated/facilities/complexes/$complexId/edit",
         "/_authenticated/facilities/rooms/$roomId/edit",
+        "/_authenticated/dashboard/clubs/$clubId/",
         "/_authenticated/facilities/complexes/$complexId/",
-        "/_authenticated/facilities/rooms/$roomId/"
+        "/_authenticated/facilities/rooms/$roomId/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/create",
+        "/_authenticated/dashboard/clubs/$clubId/categories/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/",
+        "/_authenticated/dashboard/clubs/$clubId/sessions/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
+        "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
       ]
     },
     "/auth": {
@@ -925,6 +1361,10 @@ export const routeTree = rootRoute
       "filePath": "auth/verify/index.tsx",
       "parent": "/auth/verify"
     },
+    "/_authenticated/dashboard/clubs/create": {
+      "filePath": "_authenticated/dashboard/clubs/create.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/facilities/complexes/create": {
       "filePath": "_authenticated/facilities/complexes/create.tsx",
       "parent": "/_authenticated"
@@ -945,12 +1385,20 @@ export const routeTree = rootRoute
       "filePath": "auth/verify/_verify.success.tsx",
       "parent": "/auth/verify/_verify"
     },
+    "/_authenticated/dashboard/clubs/": {
+      "filePath": "_authenticated/dashboard/clubs/index.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/facilities/complexes/": {
       "filePath": "_authenticated/facilities/complexes/index.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/facilities/rooms/": {
       "filePath": "_authenticated/facilities/rooms/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/edit": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/edit.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/facilities/complexes/$complexId/create-room": {
@@ -965,12 +1413,68 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/facilities/rooms/$roomId.edit.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/dashboard/clubs/$clubId/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/index.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/facilities/complexes/$complexId/": {
       "filePath": "_authenticated/facilities/complexes/$complexId/index.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/facilities/rooms/$roomId/": {
       "filePath": "_authenticated/facilities/rooms/$roomId/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/create": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/create.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/categories/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/categories/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sessions/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sessions/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/edit.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/create.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/sessions/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": {
+      "filePath": "_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit.tsx",
       "parent": "/_authenticated"
     }
   }

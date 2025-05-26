@@ -1,0 +1,378 @@
+// client/src/features/clubs/pages/sections/SectionsListPage.tsx
+import { useEffect, useState } from "react";
+import { useParams, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Edit, Eye, Calendar, Users, FolderOpen, ArrowLeft, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import type { Section } from "../../types";
+
+interface EnrichedSection extends Section {
+  categoriesCount?: number;
+}
+
+export function SectionsListPage() {
+  const { clubId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/" });
+  const [sections, setSections] = useState<EnrichedSection[]>([]);
+  const [allCategories, setAllCategories] = useState<any[]>([]);
+  const [categoriesCountBySection, setCategoriesCountBySection] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteSection, setDeleteSection] = useState<EnrichedSection | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const sectionsRes = await fetch(`/api/clubs/${clubId}/sections`);
+        if (!sectionsRes.ok) throw new Error('Erreur lors du chargement des sections');
+        const sectionsData = await sectionsRes.json();
+        setSections(sectionsData);
+
+        const allCategoriesData: any[] = [];
+        const countBySection: Record<string, number> = {};
+        
+        for (const section of sectionsData) {
+          try {
+            const cats = await fetch(`/api/clubs/${clubId}/sections/${section.id}/categories`);
+            if (cats.ok) {
+              const categoriesData = await cats.json();
+              console.log(`Section ${section.name} (${section.id}):`, categoriesData);
+              allCategoriesData.push(...categoriesData);
+              countBySection[section.id] = categoriesData.length;
+            } else {
+              countBySection[section.id] = 0;
+            }
+          } catch (error) {
+            console.error(`Erreur lors du chargement des catégories pour la section ${section.id}:`, error);
+            countBySection[section.id] = 0;
+          }
+        }
+        
+        console.log('Toutes les catégories récupérées:', allCategoriesData);
+        console.log('Compteurs par section:', countBySection);
+        
+        setAllCategories(allCategoriesData);
+        setCategoriesCountBySection(countBySection);
+
+      } catch (error) {
+        console.error('Erreur:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [clubId]);
+
+  // Fonction pour obtenir le nombre de catégories par section
+  const getCategoriesCountForSection = (sectionId: string) => {
+    return categoriesCountBySection[sectionId] || 0;
+  };
+
+  const handleDeleteSection = async () => {
+    if (!deleteSection) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/clubs/${clubId}/sections/${deleteSection.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+      
+      // Retirer la section de la liste
+      setSections(prev => prev.filter(section => section.id !== deleteSection.id));
+      // Mettre à jour les compteurs
+      setCategoriesCountBySection(prev => {
+        const newCount = { ...prev };
+        delete newCount[deleteSection.id];
+        return newCount;
+      });
+      // Retirer les catégories de cette section
+      setAllCategories(prev => prev.filter(cat => cat.sectionId !== deleteSection.id));
+      setDeleteSection(null);
+      toast.success("Section supprimée avec succès");
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error("Erreur lors de la suppression de la section");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (isLoading) {  
+    return (
+      <div className="container mx-auto p-4 sm:p-6 space-y-8 max-w-7xl">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+            <Skeleton className="h-10 w-40" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-48" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-4 sm:p-6 space-y-8 max-w-7xl">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Link 
+                to="/dashboard/clubs/$clubId" 
+                params={{ clubId }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Link>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
+                <FolderOpen className="h-8 w-8 text-primary" />
+                Sections du club
+              </h1>
+            </div>
+            <p className="text-lg text-muted-foreground">
+              Gérez et organisez les sections sportives de votre club
+            </p>
+          </div>
+          <Link to="/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
+            <Button size="lg" className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Créer une section
+            </Button>
+          </Link>
+        </div>
+
+        {/* Statistiques rapides */}
+        {sections.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FolderOpen className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total sections</p>
+                    <p className="text-2xl font-bold">{sections.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total catégories</p>
+                    <p className="text-2xl font-bold">{allCategories.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                    <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Sections actives</p>
+                    <p className="text-2xl font-bold">{sections.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Sections Grid */}
+        {sections.length === 0 ? (
+          <Card className="border-dashed border-2 border-muted-foreground/25">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="p-4 bg-muted/30 rounded-full mb-4">
+                <FolderOpen className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Aucune section créée
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Commencez par créer votre première section pour organiser les activités sportives de votre club.
+              </p>
+              <Link to="/dashboard/clubs/$clubId/sections/create" params={{ clubId }}>
+                <Button size="lg">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Créer votre première section
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sections.map((section) => (
+              <Card key={section.id} className="group hover:shadow-lg transition-all duration-200 hover:border-primary/20">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full border border-primary/20" 
+                        style={{ backgroundColor: section.color || "#3b82f6" }}
+                      />
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs font-medium"
+                      >
+                        Section
+                      </Badge>
+                    </div>
+                    {(() => {
+                      const categoryCount = getCategoriesCountForSection(section.id);
+                      return (
+                        <Badge variant="outline" className="text-xs">
+                          {categoryCount} catégorie{categoryCount !== 1 ? 's' : ''}
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+                      {section.name}
+                    </CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                      {section.description || "Aucune description disponible"}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <Link 
+                      to="/dashboard/clubs/$clubId/sections/$sectionId/categories" 
+                      params={{ clubId, sectionId: section.id }}
+                      className="block"
+                    >
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start hover:bg-primary/5 hover:border-primary/20 hover:text-primary group"
+                      >
+                        <Eye className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
+                        Voir les catégories
+                      </Button>
+                    </Link>
+                    
+                    <Link 
+                      to="/dashboard/clubs/$clubId/sections/$sectionId/sessions" 
+                      params={{ clubId, sectionId: section.id }}
+                      className="block"
+                    >
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:hover:bg-blue-950/20 group"
+                      >
+                        <Calendar className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
+                        Gérer les sessions
+                      </Button>
+                    </Link>
+
+                    <Link 
+                      to="/dashboard/clubs/$clubId/sections/$sectionId/edit" 
+                      params={{ clubId, sectionId: section.id }}
+                      className="block"
+                    >
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-muted/50 text-muted-foreground hover:text-foreground group"
+                      >
+                        <Edit className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
+                        Modifier la section
+                      </Button>
+                    </Link>
+
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start hover:bg-destructive/10 text-muted-foreground hover:text-destructive group"
+                      onClick={() => setDeleteSection(section)}
+                    >
+                      <Trash2 className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
+                      Supprimer la section
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal de confirmation de suppression */}
+      <AlertDialog open={!!deleteSection} onOpenChange={() => setDeleteSection(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la section</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer la section <strong>"{deleteSection?.name}"</strong> ?
+              <br /><br />
+              <span className="text-destructive font-medium">⚠️ Cette action est irréversible</span>
+              <br /><br />
+              La suppression de cette section entraînera également :
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>La suppression de toutes les catégories de cette section</li>
+                <li>La suppression de toutes les sessions associées</li>
+                <li>La perte de tous les participants inscrits</li>
+                <li>La suppression de l'historique complet des activités</li>
+                <li>La perte de toutes les données statistiques</li>
+              </ul>
+              <br />
+              Toutes ces données seront définitivement perdues et ne pourront pas être récupérées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSection}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Suppression..." : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
