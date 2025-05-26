@@ -18,6 +18,10 @@ export const roomsService = {
 		return room;
 	},
 
+	getByComplexId: async (complexId: string): Promise<SelectRoom[]> => {
+		return await db.select().from(rooms).where(eq(rooms.complexId, complexId));
+	},
+
 	update: async (
 		id: string,
 		data: Partial<InsertRoom>,
