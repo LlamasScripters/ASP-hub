@@ -1,6 +1,7 @@
 import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { complexesService } from "./complexes.service.js";
+import { roomsService } from "./rooms.service.js";
 
 const complexesRouter = Router();
 
@@ -26,6 +27,16 @@ complexesRouter.get("/:id", async (req: Request, res: Response) => {
 		return res.status(404).json({ error: "Complex not found" });
 	}
 	res.json(complex);
+});
+
+//@ts-ignore
+complexesRouter.get("/:id/rooms", async (req: Request, res: Response) => {
+	const complex = await complexesService.getById(req.params.id);
+	if (!complex) {
+		return res.status(404).json({ error: "Complex not found" });
+	}
+	const rooms = await roomsService.getByComplexId(req.params.id);
+	res.json(rooms);
 });
 
 //@ts-ignore

@@ -29,6 +29,7 @@ import { Route as AuthenticatedUserUserImport } from "./routes/_authenticated/us
 import { Route as AuthenticatedDashboardSocialImport } from "./routes/_authenticated/dashboard/social"
 import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenticated/dashboard/members"
 import { Route as AuthenticatedDashboardActivitiesImport } from "./routes/_authenticated/dashboard/activities"
+import { Route as AuthenticatedFacilitiesComplexesIndexImport } from "./routes/_authenticated/facilities/complexes/index"
 import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
@@ -153,6 +154,13 @@ const AuthenticatedDashboardActivitiesRoute =
   AuthenticatedDashboardActivitiesImport.update({
     id: "/dashboard/activities",
     path: "/dashboard/activities",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedFacilitiesComplexesIndexRoute =
+  AuthenticatedFacilitiesComplexesIndexImport.update({
+    id: "/facilities/complexes/",
+    path: "/facilities/complexes/",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -347,6 +355,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyVerifySuccessImport
       parentRoute: typeof AuthVerifyVerifyImport
     }
+    "/_authenticated/facilities/complexes/": {
+      id: "/_authenticated/facilities/complexes/"
+      path: "/facilities/complexes"
+      fullPath: "/facilities/complexes"
+      preLoaderRoute: typeof AuthenticatedFacilitiesComplexesIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
   }
 }
 
@@ -384,6 +399,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardSocialRoute: typeof AuthenticatedDashboardSocialRoute
   AuthenticatedUserRoute: typeof AuthenticatedUserRouteWithChildren
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedFacilitiesComplexesIndexRoute: typeof AuthenticatedFacilitiesComplexesIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -392,6 +408,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardSocialRoute: AuthenticatedDashboardSocialRoute,
   AuthenticatedUserRoute: AuthenticatedUserRouteWithChildren,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedFacilitiesComplexesIndexRoute:
+    AuthenticatedFacilitiesComplexesIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -470,6 +488,7 @@ export interface FileRoutesByFullPath {
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -492,6 +511,7 @@ export interface FileRoutesByTo {
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
 }
 
 export interface FileRoutesById {
@@ -519,6 +539,7 @@ export interface FileRoutesById {
   "/_authenticated/user/_user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/_authenticated/facilities/complexes/": typeof AuthenticatedFacilitiesComplexesIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -544,6 +565,7 @@ export interface FileRouteTypes {
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
+    | "/facilities/complexes"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -565,6 +587,7 @@ export interface FileRouteTypes {
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
+    | "/facilities/complexes"
   id:
     | "__root__"
     | "/"
@@ -590,6 +613,7 @@ export interface FileRouteTypes {
     | "/_authenticated/user/_user/settings"
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
+    | "/_authenticated/facilities/complexes/"
   fileRoutesById: FileRoutesById
 }
 
@@ -630,7 +654,8 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/members",
         "/_authenticated/dashboard/social",
         "/_authenticated/user",
-        "/_authenticated/dashboard/"
+        "/_authenticated/dashboard/",
+        "/_authenticated/facilities/complexes/"
       ]
     },
     "/auth": {
@@ -740,6 +765,10 @@ export const routeTree = rootRoute
     "/auth/verify/_verify/success": {
       "filePath": "auth/verify/_verify.success.tsx",
       "parent": "/auth/verify/_verify"
+    },
+    "/_authenticated/facilities/complexes/": {
+      "filePath": "_authenticated/facilities/complexes/index.tsx",
+      "parent": "/_authenticated"
     }
   }
 }
