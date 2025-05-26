@@ -152,7 +152,33 @@ clubsRouter.get("/sessions/:sessionId", async (req: Request, res: Response) => {
 
 clubsRouter.put("/sessions/:sessionId", async (req: Request, res: Response) => {
   try {
-    const updated = await clubsService.updateSession(req.params.sessionId, req.body);
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      type,
+      status,
+      maxParticipants,
+      notes,
+      categoryId,
+    } = req.body;
+
+    const updateData: any = {};
+    
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (startDate !== undefined) updateData.startDate = new Date(startDate);
+    if (endDate !== undefined) updateData.endDate = new Date(endDate);
+    if (location !== undefined) updateData.location = location;
+    if (type !== undefined) updateData.type = type;
+    if (status !== undefined) updateData.status = status;
+    if (maxParticipants !== undefined) updateData.maxParticipants = maxParticipants ? Number(maxParticipants) : null;
+    if (notes !== undefined) updateData.notes = notes;
+    if (categoryId !== undefined) updateData.categoryId = categoryId;
+
+    const updated = await clubsService.updateSession(req.params.sessionId, updateData);
     res.json(updated);
   } catch (error) {
     console.error("Erreur updateSession:", error);
@@ -381,6 +407,20 @@ clubsRouter.post("/:clubId/sections/:sectionId/categories", async (req: Request,
   } catch (error) {
     console.error("Erreur createCategory:", error);
     res.status(500).json({ error: "Erreur lors de la création de la catégorie" });
+  }
+});
+
+clubsRouter.get("/:clubId/sections/:sectionId/categories/:categoryId", async (req: Request, res: Response) => {
+  try {
+    const category = await clubsService.getCategoryById(req.params.categoryId);
+    if (!category) {
+      res.status(404).json({ error: "Catégorie non trouvée" });
+      return;
+    }
+    res.json(category);
+  } catch (error) {
+    console.error("Erreur getCategoryById:", error);
+    res.status(500).json({ error: "Erreur lors de la récupération de la catégorie" });
   }
 });
 

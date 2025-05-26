@@ -170,6 +170,14 @@ export const clubsService = {
 			.orderBy(asc(categories.name));
 	},
 
+	async getCategoryById(id: string) {
+		const [category] = await db
+			.select()
+			.from(categories)
+			.where(and(eq(categories.id, id), eq(categories.isActive, true)));
+		return category;
+	},
+
 	async createCategory(data: InsertCategory) {
 		const [category] = await db.insert(categories).values(data).returning();
 		return category;
