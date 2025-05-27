@@ -87,7 +87,6 @@ export function ComplexDetailsPage({
 		setSelectedRoom(null);
 	};
 
-	// Calculer les statistiques des salles
 	const totalRooms = initialRooms.length;
 	const indoorRooms = initialRooms.filter((room) => room.isIndoor).length;
 	const outdoorRooms = totalRooms - indoorRooms;

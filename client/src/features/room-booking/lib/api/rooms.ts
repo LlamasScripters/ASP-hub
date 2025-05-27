@@ -70,6 +70,15 @@ export class RoomsApiClient {
 			},
 		);
 
+		if (response.status === 404) {
+			return {
+				data: [],
+				total: 0,
+				page: 1,
+				limit: 20,
+			};
+		}
+
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}

@@ -28,7 +28,6 @@ import { useRooms } from "@room-booking/hooks/useRooms";
 import type { Room } from "@room-booking/hooks/useRooms";
 // @ts-ignore
 import {
-	Building,
 	Calendar,
 	Loader2,
 	MoreHorizontal,
@@ -168,7 +167,7 @@ export function RoomsList({
 									<TableRow key={room.id}>
 										<TableCell>
 											<div className="flex items-center">
-												<Building className="w-4 h-4 mr-3 text-muted-foreground" />
+												<Warehouse className="w-4 h-4 mr-3 text-muted-foreground" />
 												<div>
 													<div className="font-medium">{room.name}</div>
 													<div className="text-sm text-muted-foreground">
@@ -244,7 +243,7 @@ export function RoomsList({
 								<TableRow>
 									<TableCell colSpan={6} className="h-24 text-center">
 										<div className="text-center">
-											<Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+											<Warehouse className="w-12 h-12 mx-auto text-gray-400 mb-4" />
 											<h3 className="text-lg font-medium text-gray-900 mb-2">
 												Aucune salle trouvée
 											</h3>
