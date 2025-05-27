@@ -13,9 +13,31 @@ const roomSchema = z.object({
 	complexId: z.string().uuid(),
 });
 
+const roomQuerySchema = z
+	.object({
+		page: z.string().optional(),
+		limit: z.string().optional(),
+	})
+	.transform((data) => ({
+		page: Number.parseInt(data.page || "1", 10),
+		limit: Number.parseInt(data.limit || "20", 10),
+	}));
+
 //@ts-ignore
 roomsRouter.get("/", async (req: Request, res: Response) => {
-	const rooms = await roomsService.getAll();
+	const query = roomQuerySchema.safeParse(req.query);
+	if (!query.success) {
+		return res.status(400).json({ error: query.error.flatten() });
+	}
+
+	const { page, limit } = query.data;
+	if (page < 1 || limit < 1) {
+		return res
+			.status(400)
+			.json({ error: "Page and limit must be greater than 0" });
+	}
+
+	const rooms = await roomsService.getAllPaginated(page, limit);
 	return res.json(rooms);
 });
 

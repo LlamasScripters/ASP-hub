@@ -1,6 +1,6 @@
 import type { InsertRoom, SelectRoom } from "@/db/schema.js";
 import { rooms } from "@/db/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 
 export const roomsService = {
@@ -20,6 +20,57 @@ export const roomsService = {
 
 	getByComplexId: async (complexId: string): Promise<SelectRoom[]> => {
 		return await db.select().from(rooms).where(eq(rooms.complexId, complexId));
+	},
+
+	getAllPaginated: async (
+		page: number,
+		limit: number,
+	): Promise<{
+		data: SelectRoom[];
+		total: number;
+		page: number;
+		limit: number;
+	}> => {
+		const offset = (page - 1) * limit;
+		const data = await db.select().from(rooms).limit(limit).offset(offset);
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(rooms);
+		return {
+			data,
+			total: count,
+			page,
+			limit,
+		};
+	},
+
+	getByComplexIdPaginated: async (
+		complexId: string,
+		page: number,
+		limit: number,
+	): Promise<{
+		data: SelectRoom[];
+		total: number;
+		page: number;
+		limit: number;
+	}> => {
+		const offset = (page - 1) * limit;
+		const data = await db
+			.select()
+			.from(rooms)
+			.where(eq(rooms.complexId, complexId))
+			.limit(limit)
+			.offset(offset);
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(rooms)
+			.where(eq(rooms.complexId, complexId));
+		return {
+			data,
+			total: count,
+			page,
+			limit,
+		};
 	},
 
 	update: async (

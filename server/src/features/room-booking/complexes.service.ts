@@ -1,6 +1,6 @@
 import type { InsertComplex, SelectComplex } from "@/db/schema.js";
 import { complexes } from "@/db/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 
 export const complexesService = {
@@ -11,6 +11,31 @@ export const complexesService = {
 
 	getAll: async (): Promise<SelectComplex[]> => {
 		return await db.select().from(complexes);
+	},
+
+	getAllPaginated: async (
+		page: number,
+		limit: number,
+	): Promise<{
+		data: SelectComplex[];
+		total: number;
+		page: number;
+		limit: number;
+	}> => {
+		const offset = (page - 1) * limit;
+
+		const data = await db.select().from(complexes).limit(limit).offset(offset);
+
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(complexes);
+
+		return {
+			data,
+			total: count,
+			page,
+			limit,
+		};
 	},
 
 	getById: async (id: string): Promise<SelectComplex | undefined> => {

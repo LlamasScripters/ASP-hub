@@ -15,8 +15,41 @@ const complexSchema = z.object({
 	parkingCapacity: z.number().int().min(0),
 });
 
+const complexQuerySchema = z
+	.object({
+		page: z.string().optional(),
+		limit: z.string().optional(),
+	})
+	.transform((data) => ({
+		page: Number.parseInt(data.page || "1", 10),
+		limit: Number.parseInt(data.limit || "20", 10),
+	}));
+
+const roomQuerySchema = z
+	.object({
+		page: z.string().optional(),
+		limit: z.string().optional(),
+	})
+	.transform((data) => ({
+		page: Number.parseInt(data.page || "1", 10),
+		limit: Number.parseInt(data.limit || "20", 10),
+	}));
+
+// @ts-ignore
 complexesRouter.get("/", async (req: Request, res: Response) => {
-	const complexes = await complexesService.getAll();
+	const query = complexQuerySchema.safeParse(req.query);
+	if (!query.success) {
+		return res.status(400).json({ error: query.error.flatten() });
+	}
+
+	const { page, limit } = query.data;
+	if (page < 1 || limit < 1) {
+		return res
+			.status(400)
+			.json({ error: "Page and limit must be greater than 0" });
+	}
+
+	const complexes = await complexesService.getAllPaginated(page, limit);
 	res.json(complexes);
 });
 
@@ -31,11 +64,26 @@ complexesRouter.get("/:id", async (req: Request, res: Response) => {
 
 //@ts-ignore
 complexesRouter.get("/:id/rooms", async (req: Request, res: Response) => {
-	const complex = await complexesService.getById(req.params.id);
-	if (!complex) {
-		return res.status(404).json({ error: "Complex not found" });
+	const query = roomQuerySchema.safeParse(req.query);
+	if (!query.success) {
+		return res.status(400).json({ error: query.error.flatten() });
 	}
-	const rooms = await roomsService.getByComplexId(req.params.id);
+
+	const { page, limit } = query.data;
+	if (page < 1 || limit < 1) {
+		return res
+			.status(400)
+			.json({ error: "Page and limit must be greater than 0" });
+	}
+
+	const rooms = await roomsService.getByComplexIdPaginated(
+		req.params.id,
+		page,
+		limit,
+	);
+	if (rooms.data.length === 0) {
+		return res.status(404).json({ error: "No rooms found for this complex" });
+	}
 	res.json(rooms);
 });
 
