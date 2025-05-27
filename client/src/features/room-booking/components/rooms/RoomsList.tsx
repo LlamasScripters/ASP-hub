@@ -26,15 +26,16 @@ import {
 } from "@/components/ui/table";
 import { useRooms } from "@room-booking/hooks/useRooms";
 import type { Room } from "@room-booking/hooks/useRooms";
-// @ts-ignore
 import {
 	Calendar,
+	CircleOff,
 	Loader2,
 	MoreHorizontal,
 	Plus,
 	Search,
 	TreePine,
 	Warehouse,
+	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
 
@@ -243,7 +244,7 @@ export function RoomsList({
 								<TableRow>
 									<TableCell colSpan={6} className="h-24 text-center">
 										<div className="text-center">
-											<Warehouse className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+											<CircleOff className="w-12 h-12 mx-auto text-gray-400 mb-4" />
 											<h3 className="text-lg font-medium text-gray-900 mb-2">
 												Aucune salle trouvée
 											</h3>

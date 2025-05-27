@@ -37,8 +37,14 @@ import type {
 	Room,
 	UpdateRoomData,
 } from "@room-booking/hooks/useRooms";
-// @ts-ignore
-import { Building, Info, Loader2, Settings, Warehouse } from "lucide-react";
+import {
+	Building,
+	Info,
+	Loader2,
+	Settings,
+	Warehouse,
+	//@ts-ignore
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 

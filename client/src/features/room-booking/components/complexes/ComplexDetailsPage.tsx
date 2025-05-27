@@ -25,6 +25,7 @@ import {
 	TreePine,
 	Users,
 	Warehouse,
+	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
 

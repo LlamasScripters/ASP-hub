@@ -16,7 +16,6 @@ import {
 	useComplexes,
 } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-// @ts-ignore
 import {
 	Activity,
 	AlertCircle,
@@ -29,6 +28,7 @@ import {
 	RefreshCw,
 	TrendingUp,
 	Users,
+	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
 

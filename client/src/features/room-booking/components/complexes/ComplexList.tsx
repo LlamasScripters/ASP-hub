@@ -27,7 +27,6 @@ import {
 import { useComplexes } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
-// @ts-ignore
 import {
 	Accessibility,
 	Building,
@@ -35,11 +34,13 @@ import {
 	Car,
 	ChevronLeft,
 	ChevronRight,
+	CircleOff,
 	Loader2,
 	MapPin,
 	MoreHorizontal,
 	Plus,
 	Search,
+	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
 
@@ -277,7 +278,7 @@ export function ComplexList({
 									<TableRow>
 										<TableCell colSpan={6} className="h-24 text-center">
 											<div className="text-center">
-												<Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+												<CircleOff className="w-12 h-12 mx-auto text-gray-400 mb-4" />
 												<h3 className="text-lg font-medium text-gray-900 mb-2">
 													Aucun complexe trouvé
 												</h3>
