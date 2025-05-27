@@ -11,12 +11,12 @@ export const Route = createFileRoute("/_authenticated/facilities/complexes/")({
 	component: ComplexesRoute,
 	loader: async ({ abortController }): Promise<ComplexesLoaderData> => {
 		try {
-			const complexes = await complexesApi.getComplexes(
-				{ page: 1, limit: 50 },
+			const response = await complexesApi.getComplexes(
+				{ page: 1, limit: 50 }, // Charger plus d'éléments initialement
 				{ signal: abortController.signal },
 			);
 
-			return { complexes };
+			return { complexes: response.data };
 		} catch (error) {
 			console.error("Error loading complexes:", error);
 			throw error;

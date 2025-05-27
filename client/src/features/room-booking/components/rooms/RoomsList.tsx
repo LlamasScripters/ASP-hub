@@ -34,7 +34,8 @@ import {
 	MoreHorizontal,
 	Plus,
 	Search,
-	Users,
+	TreePine,
+	Warehouse,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -58,11 +59,13 @@ export function RoomsList({
 		initialData: initialRooms,
 	});
 
+	// Handle search
 	const handleSearch = (value: string) => {
 		setSearchTerm(value);
 		updateFilters({ search: value || undefined });
 	};
 
+	// Handle delete
 	const handleDelete = async (room: Room) => {
 		if (
 			window.confirm(
@@ -73,6 +76,7 @@ export function RoomsList({
 		}
 	};
 
+	// Format date
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
 			day: "2-digit",
@@ -81,32 +85,23 @@ export function RoomsList({
 		});
 	};
 
-	const getRoomTypeLabel = (type?: string) => {
-		const labels: Record<string, string> = {
-			gym: "Gymnase",
-			pool: "Piscine",
-			court: "Court",
-			field: "Terrain",
-			studio: "Studio",
-			meeting: "Salle de réunion",
-			other: "Autre",
-		};
-		return labels[type || "other"] || "Non spécifié";
-	};
-
-	const getRoomTypeBadgeColor = (type?: string) => {
+	const getSportTypeBadgeColor = (sportType: string) => {
 		const colors: Record<string, string> = {
-			gym: "bg-blue-100 text-blue-800",
-			pool: "bg-cyan-100 text-cyan-800",
-			court: "bg-green-100 text-green-800",
-			field: "bg-emerald-100 text-emerald-800",
-			studio: "bg-purple-100 text-purple-800",
-			meeting: "bg-orange-100 text-orange-800",
-			other: "bg-gray-100 text-gray-800",
+			Football: "bg-green-100 text-green-800",
+			Basketball: "bg-orange-100 text-orange-800",
+			Tennis: "bg-yellow-100 text-yellow-800",
+			Volleyball: "bg-blue-100 text-blue-800",
+			Handball: "bg-red-100 text-red-800",
+			Natation: "bg-cyan-100 text-cyan-800",
+			Gymnastique: "bg-purple-100 text-purple-800",
+			Judo: "bg-indigo-100 text-indigo-800",
+			Danse: "bg-pink-100 text-pink-800",
+			Fitness: "bg-emerald-100 text-emerald-800",
 		};
-		return colors[type || "other"] || colors.other;
+		return colors[sportType] || "bg-gray-100 text-gray-800";
 	};
 
+	// Use initial data if no search is active and no loading
 	const displayRooms = searchTerm || loading ? rooms : initialRooms;
 
 	return (
@@ -124,7 +119,7 @@ export function RoomsList({
 					<div className="relative flex-1">
 						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 						<Input
-							placeholder="Rechercher une salle par nom..."
+							placeholder="Rechercher une salle par nom ou sport..."
 							className="pl-8"
 							value={searchTerm}
 							onChange={(e) => handleSearch(e.target.value)}
@@ -142,9 +137,9 @@ export function RoomsList({
 						<TableHeader>
 							<TableRow>
 								<TableHead>Salle</TableHead>
+								<TableHead>Sport</TableHead>
 								<TableHead>Type</TableHead>
-								<TableHead>Capacité</TableHead>
-								<TableHead>Statut</TableHead>
+								<TableHead>Accréditation</TableHead>
 								<TableHead>Créée le</TableHead>
 								<TableHead className="w-[80px]">Actions</TableHead>
 							</TableRow>
@@ -176,35 +171,40 @@ export function RoomsList({
 												<Building className="w-4 h-4 mr-3 text-muted-foreground" />
 												<div>
 													<div className="font-medium">{room.name}</div>
-													{room.equipment && (
-														<div className="text-sm text-muted-foreground">
-															{room.equipment}
-														</div>
-													)}
+													<div className="text-sm text-muted-foreground">
+														ID: {room.id.slice(0, 8)}...
+													</div>
 												</div>
 											</div>
 										</TableCell>
 										<TableCell>
-											<Badge className={getRoomTypeBadgeColor(room.type)}>
-												{getRoomTypeLabel(room.type)}
+											<Badge className={getSportTypeBadgeColor(room.sportType)}>
+												{room.sportType}
 											</Badge>
 										</TableCell>
 										<TableCell>
-											{room.capacity ? (
-												<div className="flex items-center">
-													<Users className="w-4 h-4 mr-2 text-muted-foreground" />
-													{room.capacity} personnes
-												</div>
+											<div className="flex items-center gap-2">
+												{room.isIndoor ? (
+													<>
+														<Warehouse className="w-4 h-4 text-blue-600" />
+														<span className="text-sm">Intérieure</span>
+													</>
+												) : (
+													<>
+														<TreePine className="w-4 h-4 text-green-600" />
+														<span className="text-sm">Extérieure</span>
+													</>
+												)}
+											</div>
+										</TableCell>
+										<TableCell>
+											{room.accreditation ? (
+												<div className="text-sm">{room.accreditation}</div>
 											) : (
-												<span className="text-muted-foreground">
-													Non spécifiée
+												<span className="text-muted-foreground text-sm">
+													Aucune
 												</span>
 											)}
-										</TableCell>
-										<TableCell>
-											<Badge variant={room.isActive ? "default" : "secondary"}>
-												{room.isActive ? "Active" : "Inactive"}
-											</Badge>
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center text-sm text-muted-foreground">

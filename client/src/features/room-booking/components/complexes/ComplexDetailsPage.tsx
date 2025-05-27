@@ -13,10 +13,8 @@ import { RoomsList } from "@room-booking/components/rooms/RoomsList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
-// @ts-ignore
 import {
 	Accessibility,
-	Activity,
 	ArrowLeft,
 	BarChart3,
 	Building,
@@ -24,8 +22,9 @@ import {
 	Car,
 	Edit,
 	MapPin,
-	Plus,
+	TreePine,
 	Users,
+	Warehouse,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -88,56 +87,41 @@ export function ComplexDetailsPage({
 		setSelectedRoom(null);
 	};
 
+	// Calculer les statistiques des salles
 	const totalRooms = initialRooms.length;
-	const activeRooms = initialRooms.filter((room) => room.isActive).length;
-	const totalCapacity = initialRooms.reduce(
-		(sum, room) => sum + (room.capacity || 0),
-		0,
-	);
-	const roomsByType = initialRooms.reduce(
+	const indoorRooms = initialRooms.filter((room) => room.isIndoor).length;
+	const outdoorRooms = totalRooms - indoorRooms;
+	const accreditedRooms = initialRooms.filter(
+		(room) => room.accreditation && room.accreditation.trim() !== "",
+	).length;
+	const roomsBySport = initialRooms.reduce(
 		(acc, room) => {
-			const type = room.type || "other";
-			acc[type] = (acc[type] || 0) + 1;
+			acc[room.sportType] = (acc[room.sportType] || 0) + 1;
 			return acc;
 		},
 		{} as Record<string, number>,
 	);
 
-	const getRoomTypeLabel = (type: string) => {
-		const labels: Record<string, string> = {
-			gym: "Gymnase",
-			pool: "Piscine",
-			court: "Court",
-			field: "Terrain",
-			studio: "Studio",
-			meeting: "Salle de réunion",
-			other: "Autre",
-		};
-		return labels[type] || type;
-	};
-
 	if (currentView === "create-room") {
 		return (
 			<div className="space-y-6">
 				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-4">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCurrentView("rooms")}
-						>
-							<ArrowLeft className="w-4 h-4 mr-2" />
-							Retour aux salles
-						</Button>
-						<div>
-							<h1 className="text-3xl font-bold tracking-tight">
-								Nouvelle salle
-							</h1>
-							<p className="text-muted-foreground">
-								Ajouter une nouvelle salle au complexe {complex.name}
-							</p>
-						</div>
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">
+							Nouvelle salle
+						</h1>
+						<p className="text-muted-foreground">
+							Ajouter une nouvelle salle au complexe {complex.name}
+						</p>
 					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setCurrentView("rooms")}
+					>
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour aux salles
+					</Button>
 				</div>
 				<RoomForm
 					complexId={complex.id}
@@ -152,24 +136,22 @@ export function ComplexDetailsPage({
 		return (
 			<div className="space-y-6">
 				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-4">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCurrentView("rooms")}
-						>
-							<ArrowLeft className="w-4 h-4 mr-2" />
-							Retour aux salles
-						</Button>
-						<div>
-							<h1 className="text-3xl font-bold tracking-tight">
-								Modifier la salle
-							</h1>
-							<p className="text-muted-foreground">
-								Modifier les informations de {selectedRoom.name}
-							</p>
-						</div>
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">
+							Modifier la salle
+						</h1>
+						<p className="text-muted-foreground">
+							Modifier les informations de {selectedRoom.name}
+						</p>
 					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setCurrentView("rooms")}
+					>
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour aux salles
+					</Button>
 				</div>
 				<RoomForm
 					complexId={complex.id}
@@ -213,7 +195,7 @@ export function ComplexDetailsPage({
 					<CardContent>
 						<div className="text-2xl font-bold">{totalRooms}</div>
 						<p className="text-xs text-muted-foreground">
-							{activeRooms} actives
+							{indoorRooms} intérieures • {outdoorRooms} extérieures
 						</p>
 					</CardContent>
 				</Card>
@@ -221,13 +203,13 @@ export function ComplexDetailsPage({
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
 						<CardTitle className="text-sm font-medium">
-							Capacité totale
+							Accréditations
 						</CardTitle>
 						<Users className="w-4 h-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{totalCapacity}</div>
-						<p className="text-xs text-muted-foreground">Personnes maximum</p>
+						<div className="text-2xl font-bold">{accreditedRooms}</div>
+						<p className="text-xs text-muted-foreground">Salles certifiées</p>
 					</CardContent>
 				</Card>
 
@@ -278,7 +260,6 @@ export function ComplexDetailsPage({
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
-									<Building className="w-5 h-5" />
 									Informations du complexe
 								</CardTitle>
 							</CardHeader>
@@ -338,26 +319,26 @@ export function ComplexDetailsPage({
 							</CardContent>
 						</Card>
 
-						{/* Répartition des salles par type */}
+						{/* Répartition des salles par sport */}
 						<Card>
 							<CardHeader>
 								<CardTitle>Répartition des salles</CardTitle>
-								<CardDescription>Types de salles disponibles</CardDescription>
+								<CardDescription>
+									Sports pratiqués dans ce complexe
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
-									{Object.entries(roomsByType).map(([type, count]) => (
+									{Object.entries(roomsBySport).map(([sport, count]) => (
 										<div
-											key={type}
+											key={sport}
 											className="flex items-center justify-between"
 										>
-											<span className="text-sm font-medium">
-												{getRoomTypeLabel(type)}
-											</span>
+											<span className="text-sm font-medium">{sport}</span>
 											<Badge variant="outline">{count}</Badge>
 										</div>
 									))}
-									{Object.keys(roomsByType).length === 0 && (
+									{Object.keys(roomsBySport).length === 0 && (
 										<p className="text-sm text-muted-foreground text-center py-4">
 											Aucune salle configurée
 										</p>
@@ -367,11 +348,38 @@ export function ComplexDetailsPage({
 						</Card>
 					</div>
 
+					{/* Types de salles */}
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								Types de salles
+							</CardTitle>
+							<CardDescription>Répartition intérieur/extérieur</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="grid gap-4 md:grid-cols-2">
+								<div className="flex items-center gap-3 p-4 border rounded-lg">
+									<Warehouse className="w-8 h-8 text-blue-600" />
+									<div>
+										<p className="font-medium">Salles intérieures</p>
+										<p className="text-2xl font-bold">{indoorRooms}</p>
+									</div>
+								</div>
+								<div className="flex items-center gap-3 p-4 border rounded-lg">
+									<TreePine className="w-8 h-8 text-green-600" />
+									<div>
+										<p className="font-medium">Terrains extérieurs</p>
+										<p className="text-2xl font-bold">{outdoorRooms}</p>
+									</div>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
 					{/* Activité récente */}
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<Activity className="w-5 h-5" />
 								Activité récente
 							</CardTitle>
 							<CardDescription>
@@ -398,6 +406,20 @@ export function ComplexDetailsPage({
 											</p>
 											<p className="text-xs text-muted-foreground">
 												{formatDate(complex.updatedAt)}
+											</p>
+										</div>
+									</div>
+								)}
+								{totalRooms > 0 && (
+									<div className="flex items-center gap-3">
+										<div className="w-2 h-2 rounded-full bg-purple-500" />
+										<div className="flex-1">
+											<p className="text-sm font-medium">
+												{totalRooms} salle{totalRooms > 1 ? "s" : ""} configurée
+												{totalRooms > 1 ? "s" : ""}
+											</p>
+											<p className="text-xs text-muted-foreground">
+												Prêt pour les réservations
 											</p>
 										</div>
 									</div>

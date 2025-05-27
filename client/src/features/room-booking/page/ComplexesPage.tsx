@@ -194,7 +194,7 @@ export function ComplexesPage({
 							Ajoutez un nouveau complexe sportif à l'association
 						</p>
 					</div>
-					<Button variant="outline" onClick={() => setCurrentView("overview")}>
+					<Button variant="outline" onClick={() => setCurrentView("list")}>
 						Retour
 					</Button>
 				</div>
@@ -218,7 +218,7 @@ export function ComplexesPage({
 							Modifiez les informations du complexe sportif
 						</p>
 					</div>
-					<Button variant="outline" onClick={() => setCurrentView("overview")}>
+					<Button variant="outline" onClick={() => setCurrentView("list")}>
 						Retour
 					</Button>
 				</div>

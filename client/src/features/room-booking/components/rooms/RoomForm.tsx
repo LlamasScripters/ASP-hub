@@ -38,18 +38,31 @@ import type {
 	UpdateRoomData,
 } from "@room-booking/hooks/useRooms";
 // @ts-ignore
-import { Building, Info, Loader2, Settings, Users } from "lucide-react";
+import { Building, Info, Loader2, Settings, Warehouse } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-const roomTypes = [
-	{ value: "gym", label: "Gymnase" },
-	{ value: "pool", label: "Piscine" },
-	{ value: "court", label: "Court" },
-	{ value: "field", label: "Terrain" },
-	{ value: "studio", label: "Studio" },
-	{ value: "meeting", label: "Salle de réunion" },
-	{ value: "other", label: "Autre" },
+const sportTypes = [
+	"Football",
+	"Basketball",
+	"Tennis",
+	"Volleyball",
+	"Handball",
+	"Badminton",
+	"Natation",
+	"Gymnastique",
+	"Judo",
+	"Karaté",
+	"Danse",
+	"Fitness",
+	"Musculation",
+	"Escalade",
+	"Ping-pong",
+	"Squash",
+	"Boxe",
+	"Yoga",
+	"Pilates",
+	"Autre",
 ];
 
 interface RoomFormProps {
@@ -75,10 +88,9 @@ export function RoomForm({
 		defaultValues: {
 			name: room?.name || "",
 			complexId: complexId,
-			capacity: room?.capacity || undefined,
-			type: room?.type || undefined,
-			equipment: room?.equipment || "",
-			isActive: room?.isActive ?? true,
+			sportType: room?.sportType || "",
+			isIndoor: room?.isIndoor ?? true,
+			accreditation: room?.accreditation || "",
 		},
 	});
 
@@ -111,14 +123,8 @@ export function RoomForm({
 		<Card className="w-full max-w-2xl mx-auto">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<Building className="w-5 h-5" />
-					{isEditing ? "Modifier la salle" : "Nouvelle salle"}
+					Formulaire d'édition
 				</CardTitle>
-				<CardDescription>
-					{isEditing
-						? "Modifiez les informations de la salle"
-						: "Ajoutez une nouvelle salle au complexe"}
-				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -150,106 +156,48 @@ export function RoomForm({
 								)}
 							/>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<FormField
-									control={form.control}
-									name="type"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Type de salle</FormLabel>
-											<Select
-												onValueChange={field.onChange}
-												defaultValue={field.value}
-											>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Sélectionnez un type" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{roomTypes.map((type) => (
-														<SelectItem key={type.value} value={type.value}>
-															{type.label}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											<FormDescription>
-												Type d'espace ou d'activité
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="capacity"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Capacité</FormLabel>
-											<FormControl>
-												<div className="relative">
-													<Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-													<Input
-														type="number"
-														placeholder="Ex: 50"
-														className="pl-10"
-														min="1"
-														max="1000"
-														{...field}
-														onChange={(e) =>
-															field.onChange(
-																e.target.value
-																	? Number(e.target.value)
-																	: undefined,
-															)
-														}
-													/>
-												</div>
-											</FormControl>
-											<FormDescription>
-												Nombre maximum de personnes
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</div>
-
-						{/* Équipements */}
-						<div className="space-y-4">
-							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-								<Settings className="w-4 h-4" />
-								Équipements et configuration
-							</div>
-
 							<FormField
 								control={form.control}
-								name="equipment"
+								name="sportType"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Équipements disponibles</FormLabel>
-										<FormControl>
-											<Textarea
-												placeholder="Ex: Matériel de sport, système audio, éclairage LED..."
-												className="min-h-[80px]"
-												{...field}
-											/>
-										</FormControl>
+										<FormLabel>Type de sport *</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Sélectionnez un sport" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{sportTypes.map((sport) => (
+													<SelectItem key={sport} value={sport}>
+														{sport}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 										<FormDescription>
-											Listez les équipements et matériels disponibles dans cette
-											salle
+											Sport principal pratiqué dans cette salle
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
+						</div>
+
+						{/* Configuration */}
+						<div className="space-y-4">
+							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+								<Settings className="w-4 h-4" />
+								Configuration
+							</div>
 
 							<FormField
 								control={form.control}
-								name="isActive"
+								name="isIndoor"
 								render={({ field }) => (
 									<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
 										<FormControl>
@@ -259,12 +207,37 @@ export function RoomForm({
 											/>
 										</FormControl>
 										<div className="space-y-1 leading-none">
-											<FormLabel>Salle active</FormLabel>
+											<FormLabel className="flex items-center gap-2">
+												<Warehouse className="w-4 h-4" />
+												Salle intérieure
+											</FormLabel>
 											<FormDescription>
-												Décochez cette case pour désactiver temporairement cette
-												salle (maintenance, rénovation, etc.)
+												Cochez cette case si la salle est couverte/intérieure.
+												Décochez pour un terrain extérieur.
 											</FormDescription>
 										</div>
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="accreditation"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Accréditation</FormLabel>
+										<FormControl>
+											<Textarea
+												placeholder="Ex: Homologuée FFT, Norme FIFA, Certification FFA..."
+												className="min-h-[80px]"
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											Certifications, homologations ou accréditations
+											officielles de cette salle
+										</FormDescription>
+										<FormMessage />
 									</FormItem>
 								)}
 							/>

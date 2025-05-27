@@ -1,10 +1,12 @@
 import {
 	type CreateRoomData,
 	type Room,
+	type RoomFilters,
+	type RoomsPaginatedResponse,
 	type UpdateRoomData,
 	roomSchema,
+	roomsPaginatedResponseSchema,
 } from "@room-booking/hooks/useRooms";
-import { z } from "zod";
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -19,12 +21,50 @@ export class RoomsApiClient {
 		this.baseUrl = baseUrl;
 	}
 
+	async getRooms(
+		filters?: Partial<RoomFilters>,
+		page = 1,
+		limit = 20,
+		options?: ApiOptions,
+	): Promise<RoomsPaginatedResponse> {
+		const queryParams = new URLSearchParams({
+			page: page.toString(),
+			limit: limit.toString(),
+		});
+
+		if (filters) {
+			for (const [key, value] of Object.entries(filters)) {
+				if (value !== undefined && value !== null && value !== "") {
+					queryParams.append(key, String(value));
+				}
+			}
+		}
+
+		const response = await fetch(`${this.baseUrl}/rooms?${queryParams}`, {
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const rawData = await response.json();
+		return roomsPaginatedResponseSchema.parse(rawData);
+	}
+
 	async getRoomsByComplexId(
 		complexId: string,
+		page = 1,
+		limit = 20,
 		options?: ApiOptions,
-	): Promise<Room[]> {
+	): Promise<RoomsPaginatedResponse> {
+		const queryParams = new URLSearchParams({
+			page: page.toString(),
+			limit: limit.toString(),
+		});
+
 		const response = await fetch(
-			`${this.baseUrl}/complexes/${complexId}/rooms`,
+			`${this.baseUrl}/complexes/${complexId}/rooms?${queryParams}`,
 			{
 				signal: options?.signal,
 			},
@@ -35,7 +75,7 @@ export class RoomsApiClient {
 		}
 
 		const rawData = await response.json();
-		return z.array(roomSchema).parse(rawData);
+		return roomsPaginatedResponseSchema.parse(rawData);
 	}
 
 	async getRoomById(roomId: string, options?: ApiOptions): Promise<Room> {

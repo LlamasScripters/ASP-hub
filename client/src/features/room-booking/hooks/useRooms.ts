@@ -3,22 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-export const roomFiltersSchema = z.object({
-	search: z.string().optional(),
-	type: z.string().optional(),
-	isActive: z.boolean().optional(),
-});
-
 export const roomSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, "Le nom est requis"),
 	complexId: z.string().uuid(),
-	capacity: z.number().int().positive().optional(),
-	type: z
-		.enum(["gym", "pool", "court", "field", "studio", "meeting", "other"])
-		.optional(),
-	equipment: z.string().optional(),
-	isActive: z.boolean().default(true),
+	sportType: z.string().min(1, "Le type de sport est requis"),
+	isIndoor: z.boolean(),
+	accreditation: z.string().optional(),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
 });
@@ -27,33 +18,54 @@ export const createRoomSchema = z.object({
 	name: z
 		.string()
 		.min(1, "Le nom est requis")
-		.max(100, "Le nom ne peut pas dépasser 100 caractères"),
+		.max(255, "Le nom ne peut pas dépasser 255 caractères"),
 	complexId: z.string().uuid("ID de complexe invalide"),
-	capacity: z
-		.number()
-		.int("La capacité doit être un nombre entier")
-		.positive("La capacité doit être positive")
-		.max(1000, "La capacité ne peut pas dépasser 1000")
-		.optional(),
-	type: z
-		.enum(["gym", "pool", "court", "field", "studio", "meeting", "other"], {
-			errorMap: () => ({ message: "Type de salle invalide" }),
-		})
-		.optional(),
-	equipment: z
+	sportType: z
 		.string()
-		.max(500, "L'équipement ne peut pas dépasser 500 caractères")
+		.min(1, "Le type de sport est requis")
+		.max(100, "Le type de sport ne peut pas dépasser 100 caractères"),
+	isIndoor: z.boolean().default(true),
+	accreditation: z
+		.string()
+		.max(255, "L'accréditation ne peut pas dépasser 255 caractères")
 		.optional(),
-	isActive: z.boolean().default(true),
 });
 
 export const updateRoomSchema = createRoomSchema
 	.partial()
 	.omit({ complexId: true });
 
+export const roomFiltersSchema = z.object({
+	search: z.string().optional(),
+	sportType: z.string().optional(),
+	isIndoor: z.boolean().optional(),
+});
+
+export const roomsPaginatedResponseSchema = z.object({
+	data: z.array(roomSchema),
+	total: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	page: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	limit: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+});
+
 export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
+export type RoomsPaginatedResponse = z.infer<
+	typeof roomsPaginatedResponseSchema
+>;
 
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
 
@@ -67,9 +79,20 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [filters, setFilters] = useState<RoomFilters>({});
+	const [pagination, setPagination] = useState<{
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+	} | null>(null);
 
 	const fetchRooms = useCallback(async () => {
-		if (!filters.search && initialData.length > 0) {
+		if (
+			!filters.search &&
+			!filters.sportType &&
+			filters.isIndoor === undefined &&
+			initialData.length > 0
+		) {
 			return;
 		}
 
@@ -77,29 +100,39 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		setError(null);
 
 		try {
-			const fetchedRooms = await roomsApi.getRoomsByComplexId(complexId);
+			const response: RoomsPaginatedResponse =
+				await roomsApi.getRoomsByComplexId(complexId, 1, 50);
 
-			let filteredRooms = fetchedRooms;
+			let filteredRooms = response.data;
 
 			if (filters.search) {
-				filteredRooms = filteredRooms.filter((room) =>
-					room.name.toLowerCase().includes(filters.search?.toLowerCase() ?? ""),
+				const searchTerm = filters.search.toLowerCase();
+				filteredRooms = filteredRooms.filter(
+					(room) =>
+						room.name.toLowerCase().includes(searchTerm) ||
+						room.sportType.toLowerCase().includes(searchTerm),
 				);
 			}
 
-			if (filters.type) {
+			if (filters.sportType) {
 				filteredRooms = filteredRooms.filter(
-					(room) => room.type === filters.type,
+					(room) => room.sportType === filters.sportType,
 				);
 			}
 
-			if (filters.isActive !== undefined) {
+			if (filters.isIndoor !== undefined) {
 				filteredRooms = filteredRooms.filter(
-					(room) => room.isActive === filters.isActive,
+					(room) => room.isIndoor === filters.isIndoor,
 				);
 			}
 
 			setRooms(filteredRooms);
+			setPagination({
+				total: response.total,
+				page: response.page,
+				limit: response.limit,
+				totalPages: Math.ceil(response.total / response.limit),
+			});
 		} catch (err) {
 			let errorMessage = "Une erreur inattendue s'est produite";
 
@@ -259,7 +292,7 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 	);
 
 	useEffect(() => {
-		if (filters.search || filters.type || filters.isActive !== undefined) {
+		if (filters.search || filters.sportType || filters.isIndoor !== undefined) {
 			fetchRooms();
 		}
 	}, [fetchRooms, filters]);
@@ -268,6 +301,7 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		// Data
 		rooms,
 		filters,
+		pagination,
 
 		// State
 		loading,

@@ -1,10 +1,12 @@
 import {
+	type Complex,
 	type ComplexFilters,
+	type ComplexesPaginatedResponse,
 	type CreateComplexData,
 	type UpdateComplexData,
 	complexSchema,
+	complexesPaginatedResponseSchema,
 } from "@room-booking/hooks/useComplexes";
-import { z } from "zod";
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -19,7 +21,10 @@ export class ComplexesApiClient {
 		this.baseUrl = baseUrl;
 	}
 
-	async getComplexes(filters?: Partial<ComplexFilters>, options?: ApiOptions) {
+	async getComplexes(
+		filters?: Partial<ComplexFilters>,
+		options?: ApiOptions,
+	): Promise<ComplexesPaginatedResponse> {
 		const queryParams = new URLSearchParams();
 
 		if (filters) {
@@ -30,7 +35,14 @@ export class ComplexesApiClient {
 			}
 		}
 
-		const url = `${this.baseUrl}/complexes${queryParams.toString() ? `?${queryParams}` : ""}`;
+		if (!queryParams.has("page")) {
+			queryParams.append("page", "1");
+		}
+		if (!queryParams.has("limit")) {
+			queryParams.append("limit", "20");
+		}
+
+		const url = `${this.baseUrl}/complexes?${queryParams}`;
 
 		const response = await fetch(url, {
 			signal: options?.signal,
@@ -41,10 +53,10 @@ export class ComplexesApiClient {
 		}
 
 		const rawData = await response.json();
-		return z.array(complexSchema).parse(rawData);
+		return complexesPaginatedResponseSchema.parse(rawData);
 	}
 
-	async getComplexById(id: string, options?: ApiOptions) {
+	async getComplexById(id: string, options?: ApiOptions): Promise<Complex> {
 		const response = await fetch(`${this.baseUrl}/complexes/${id}`, {
 			signal: options?.signal,
 		});
@@ -57,7 +69,10 @@ export class ComplexesApiClient {
 		return complexSchema.parse(rawData);
 	}
 
-	async createComplex(data: CreateComplexData, options?: ApiOptions) {
+	async createComplex(
+		data: CreateComplexData,
+		options?: ApiOptions,
+	): Promise<Complex> {
 		const response = await fetch(`${this.baseUrl}/complexes`, {
 			method: "POST",
 			headers: {
@@ -79,7 +94,7 @@ export class ComplexesApiClient {
 		id: string,
 		data: UpdateComplexData,
 		options?: ApiOptions,
-	) {
+	): Promise<Complex> {
 		const response = await fetch(`${this.baseUrl}/complexes/${id}`, {
 			method: "PUT",
 			headers: {

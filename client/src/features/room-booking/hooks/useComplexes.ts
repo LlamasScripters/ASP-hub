@@ -22,32 +22,29 @@ export const createComplexSchema = z.object({
 	name: z
 		.string()
 		.min(1, "Le nom est requis")
-		.max(100, "Le nom ne peut pas dépasser 100 caractères"),
+		.max(255, "Le nom ne peut pas dépasser 255 caractères"),
 	street: z
 		.string()
 		.min(1, "La rue est requise")
-		.max(200, "La rue ne peut pas dépasser 200 caractères"),
+		.max(255, "La rue ne peut pas dépasser 255 caractères"),
 	city: z
 		.string()
 		.min(1, "La ville est requise")
-		.max(50, "La ville ne peut pas dépasser 50 caractères"),
+		.max(100, "La ville ne peut pas dépasser 100 caractères"),
 	postalCode: z
 		.string()
 		.min(5, "Le code postal doit contenir au moins 5 caractères")
-		.max(10, "Le code postal ne peut pas dépasser 10 caractères")
-		.regex(/^\d{5}$/, "Le code postal doit contenir exactement 5 chiffres"),
+		.max(20, "Le code postal ne peut pas dépasser 20 caractères"),
 	numberOfElevators: z
 		.number()
 		.int("Le nombre d'ascenseurs doit être un nombre entier")
 		.nonnegative("Le nombre d'ascenseurs doit être positif ou nul")
-		.max(20, "Le nombre d'ascenseurs ne peut pas dépasser 20")
 		.default(0),
 	accessibleForReducedMobility: z.boolean().default(false),
 	parkingCapacity: z
 		.number()
 		.int("La capacité de parking doit être un nombre entier")
 		.nonnegative("La capacité de parking doit être positive ou nulle")
-		.max(1000, "La capacité de parking ne peut pas dépasser 1000")
 		.default(0),
 });
 
@@ -55,18 +52,38 @@ export const updateComplexSchema = createComplexSchema.partial();
 
 export const complexFiltersSchema = z.object({
 	page: z.number().int().positive().default(1),
-	limit: z.number().int().positive().max(100).default(10),
+	limit: z.number().int().positive().max(100).default(20),
 	search: z.string().optional(),
-	type: z.string().optional(),
 	city: z.string().optional(),
-	isActive: z.boolean().optional(),
 });
+
+export const complexesPaginatedResponseSchema = z.object({
+	data: z.array(complexSchema),
+	total: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	page: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	limit: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+});
+
+export type ComplexesPaginatedResponse = z.infer<
+	typeof complexesPaginatedResponseSchema
+>;
 
 export const complexStatsSchema = z.object({
 	totalComplexes: z.number().int().nonnegative(),
 	activeComplexes: z.number().int().nonnegative(),
 	inactiveComplexes: z.number().int().nonnegative(),
-	typeStats: z.record(z.string(), z.number().int().nonnegative()),
 	cityStats: z.record(z.string(), z.number().int().nonnegative()),
 });
 
@@ -107,20 +124,23 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 	const [error, setError] = useState<string | null>(null);
 	const [pagination, setPagination] = useState<PaginationInfo | null>(null);
 
+	// Valider et définir les filtres initiaux
 	const [filters, setFilters] = useState<ComplexFilters>(() => {
 		try {
 			return complexFiltersSchema.parse({
 				page: 1,
-				limit: 10,
+				limit: 20,
 				...initialFilters,
 			});
 		} catch (error) {
 			console.warn("Invalid initial filters, using defaults:", error);
-			return complexFiltersSchema.parse({ page: 1, limit: 10 });
+			return complexFiltersSchema.parse({ page: 1, limit: 20 });
 		}
 	});
 
+	// Fetch complexes with current filters
 	const fetchComplexes = useCallback(async () => {
+		// Si pas de recherche et qu'on a des données initiales, ne pas faire de requête
 		if (!filters.search && initialData.length > 0) {
 			return;
 		}
@@ -130,20 +150,21 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 
 		try {
 			const validatedFilters = complexFiltersSchema.parse(filters);
-			const fetchedComplexes =
+			const response: ComplexesPaginatedResponse =
 				await complexesApi.getComplexes(validatedFilters);
 
-			setComplexes(fetchedComplexes);
+			setComplexes(response.data);
 
-			const mockPagination = {
-				page: filters.page,
-				limit: filters.limit,
-				totalCount: fetchedComplexes.length,
-				totalPages: Math.ceil(fetchedComplexes.length / filters.limit),
-				hasNext: false,
-				hasPrev: false,
+			// Calculer la pagination à partir de la réponse
+			const calculatedPagination: PaginationInfo = {
+				page: response.page,
+				limit: response.limit,
+				totalCount: response.total,
+				totalPages: Math.ceil(response.total / response.limit),
+				hasNext: response.page < Math.ceil(response.total / response.limit),
+				hasPrev: response.page > 1,
 			};
-			setPagination(mockPagination);
+			setPagination(calculatedPagination);
 		} catch (err) {
 			let errorMessage = "Une erreur inattendue s'est produite";
 
@@ -162,13 +183,14 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		}
 	}, [filters, initialData]);
 
+	// Update filters and trigger fetch
 	const updateFilters = useCallback(
 		(newFilters: Partial<ComplexFilters>) => {
 			try {
 				const updatedFilters = complexFiltersSchema.parse({
 					...filters,
 					...newFilters,
-
+					// Reset to page 1 when filters change (except when changing page)
 					page: newFilters.page !== undefined ? newFilters.page : 1,
 				});
 				setFilters(updatedFilters);
@@ -183,6 +205,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[filters],
 	);
 
+	// Create new complex
 	const createComplex = useCallback(
 		async (data: CreateComplexData): Promise<Complex | null> => {
 			setLoading(true);
@@ -197,6 +220,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 						description: "Complexe créé avec succès",
 					});
 
+					// Add to current list
 					setComplexes((prev) => [result, ...prev]);
 					return result;
 				}
@@ -222,6 +246,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
+	// Update complex
 	const updateComplex = useCallback(
 		async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
 			setLoading(true);
@@ -237,6 +262,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 						description: "Complexe mis à jour avec succès",
 					});
 
+					// Update the complex in the current list
 					setComplexes((prev) =>
 						prev.map((complex) => (complex.id === id ? result : complex)),
 					);
@@ -264,6 +290,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
+	// Delete complex
 	const deleteComplex = useCallback(async (id: string): Promise<boolean> => {
 		setLoading(true);
 		setError(null);
@@ -277,6 +304,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 					description: "Complexe supprimé avec succès",
 				});
 
+				// Remove the complex from the current list
 				setComplexes((prev) => prev.filter((complex) => complex.id !== id));
 				return true;
 			}
@@ -300,6 +328,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		}
 	}, []);
 
+	// Get complex by ID
 	const getComplexById = useCallback(
 		async (id: string): Promise<Complex | null> => {
 			setLoading(true);
@@ -334,12 +363,14 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
+	// Fetch complexes when filters change (only if search is active)
 	useEffect(() => {
 		if (filters.search) {
 			fetchComplexes();
 		}
 	}, [fetchComplexes, filters.search]);
 
+	// Pagination helpers
 	const goToPage = useCallback(
 		(page: number) => {
 			try {
@@ -394,6 +425,7 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 	};
 }
 
+// Hook for complex statistics
 export function useComplexStats() {
 	const [stats, setStats] = useState<ComplexStats | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -404,11 +436,11 @@ export function useComplexStats() {
 		setError(null);
 
 		try {
+			// Mock stats for now - replace with real API call
 			const mockStats: ComplexStats = {
 				totalComplexes: 0,
 				activeComplexes: 0,
 				inactiveComplexes: 0,
-				typeStats: {},
 				cityStats: {},
 			};
 			setStats(mockStats);
@@ -440,6 +472,7 @@ export function useComplexStats() {
 	};
 }
 
+// Hook pour valider les données de formulaire en temps réel
 export function useComplexValidation() {
 	const validateCreateData = useCallback((data: unknown) => {
 		try {

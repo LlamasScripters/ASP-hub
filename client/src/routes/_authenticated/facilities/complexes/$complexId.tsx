@@ -18,16 +18,16 @@ export const Route = createFileRoute(
 		abortController,
 	}): Promise<ComplexDetailsLoaderData> => {
 		try {
-			const [complex, rooms] = await Promise.all([
+			const [complex, roomsResponse] = await Promise.all([
 				complexesApi.getComplexById(params.complexId, {
 					signal: abortController.signal,
 				}),
-				roomsApi.getRoomsByComplexId(params.complexId, {
+				roomsApi.getRoomsByComplexId(params.complexId, 1, 50, {
 					signal: abortController.signal,
 				}),
 			]);
 
-			return { complex, rooms };
+			return { complex, rooms: roomsResponse.data };
 		} catch (error) {
 			console.error("Error loading complex details:", error);
 			throw error;
