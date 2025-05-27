@@ -259,9 +259,6 @@ export function ComplexList({
 														>
 															Modifier
 														</DropdownMenuItem>
-														<DropdownMenuItem>
-															Voir le planning
-														</DropdownMenuItem>
 														<DropdownMenuSeparator />
 														<DropdownMenuItem
 															className="text-red-600"

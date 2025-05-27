@@ -184,25 +184,23 @@ export function ComplexDetailsPage({
 	return (
 		<div className="space-y-6">
 			{/* En-tête */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
+			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+				<div>
+					<h1 className="text-3xl font-bold tracking-tight">{complex.name}</h1>
+					<p className="text-muted-foreground">
+						Détails et gestion du complexe sportif
+					</p>
+				</div>
+				<div className="flex items-center gap-2">
 					<Button variant="outline" size="sm" onClick={handleBack}>
 						<ArrowLeft className="w-4 h-4 mr-2" />
 						Retour à la liste
 					</Button>
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							{complex.name}
-						</h1>
-						<p className="text-muted-foreground">
-							Détails et gestion du complexe sportif
-						</p>
-					</div>
+					<Button onClick={handleEdit}>
+						<Edit className="w-4 h-4 mr-2" />
+						Modifier
+					</Button>
 				</div>
-				<Button onClick={handleEdit}>
-					<Edit className="w-4 h-4 mr-2" />
-					Modifier
-				</Button>
 			</div>
 
 			{/* Informations principales */}
@@ -410,18 +408,6 @@ export function ComplexDetailsPage({
 				</TabsContent>
 
 				<TabsContent value="rooms" className="space-y-4">
-					<div className="flex items-center justify-between">
-						<div>
-							<h3 className="text-lg font-medium">Salles du complexe</h3>
-							<p className="text-sm text-muted-foreground">
-								Gérez les salles et espaces de ce complexe
-							</p>
-						</div>
-						<Button onClick={handleCreateRoom}>
-							<Plus className="w-4 h-4 mr-2" />
-							Nouvelle salle
-						</Button>
-					</div>
 					<RoomsList
 						complexId={complex.id}
 						initialRooms={initialRooms}
