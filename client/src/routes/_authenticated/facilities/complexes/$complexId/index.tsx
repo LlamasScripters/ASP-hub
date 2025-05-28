@@ -10,7 +10,7 @@ interface ComplexDetailsLoaderData {
 }
 
 export const Route = createFileRoute(
-	"/_authenticated/facilities/complexes/$complexId",
+	"/_authenticated/facilities/complexes/$complexId/",
 )({
 	component: ComplexDetailsRoute,
 	loader: async ({
@@ -74,7 +74,7 @@ export const Route = createFileRoute(
 
 function ComplexDetailsRoute() {
 	const { complex, rooms } = useLoaderData({
-		from: "/_authenticated/facilities/complexes/$complexId",
+		from: "/_authenticated/facilities/complexes/$complexId/",
 	});
 
 	return <ComplexDetailsPage complex={complex} initialRooms={rooms} />;

@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
 import { ComplexList } from "@room-booking/components/complexes/ComplexList";
 import {
 	useComplexStats,
 	useComplexes,
 } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
+import { useNavigate } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-type ViewMode = "overview" | "list" | "create" | "edit" | "stats";
+type ViewMode = "overview" | "list" | "create" | "edit" | "stats" | "planning";
 
 interface ComplexesPageProps {
 	initialView?: ViewMode;
@@ -43,6 +43,7 @@ export function ComplexesPage({
 	initialView = "overview",
 	initialComplexes = [],
 }: ComplexesPageProps) {
+	const navigate = useNavigate();
 	const [currentView, setCurrentView] = useState<ViewMode>(initialView);
 	const [selectedComplex, setSelectedComplex] = useState<Complex | null>(null);
 
@@ -116,15 +117,13 @@ export function ComplexesPage({
 	};
 
 	const handleCreateClick = () => {
-		setSelectedComplex(null);
-		setCurrentView("create");
+		navigate({ to: "/facilities/complexes/create" });
 	};
 
 	const handleEditClick = (complexId: string) => {
 		const complex = initialComplexes.find((c) => c.id === complexId);
 		if (complex) {
-			setSelectedComplex(complex);
-			setCurrentView("edit");
+			navigate({ to: `/facilities/complexes/${complexId}/edit` });
 		} else {
 			console.error(`Complex with id ${complexId} not found`);
 		}
@@ -182,80 +181,6 @@ export function ComplexesPage({
 		}
 	};
 
-	if (currentView === "create") {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							Nouveau complexe
-						</h1>
-						<p className="text-muted-foreground">
-							Ajoutez un nouveau complexe sportif à l'association
-						</p>
-					</div>
-					<Button variant="outline" onClick={() => setCurrentView("list")}>
-						Retour
-					</Button>
-				</div>
-				<ComplexForm
-					onSuccess={handleFormSuccess}
-					onCancel={handleFormCancel}
-				/>
-			</div>
-		);
-	}
-
-	if (currentView === "edit") {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							Modifier le complexe
-						</h1>
-						<p className="text-muted-foreground">
-							Modifiez les informations du complexe sportif
-						</p>
-					</div>
-					<Button variant="outline" onClick={() => setCurrentView("list")}>
-						Retour
-					</Button>
-				</div>
-				<ComplexForm
-					complex={selectedComplex || undefined}
-					onSuccess={handleFormSuccess}
-					onCancel={handleFormCancel}
-				/>
-			</div>
-		);
-	}
-
-	if (currentView === "list") {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							Installations sportives
-						</h1>
-						<p className="text-muted-foreground">
-							Gérez tous les complexes sportifs de l'association
-						</p>
-					</div>
-					<Button variant="outline" onClick={() => setCurrentView("overview")}>
-						Retour au tableau de bord
-					</Button>
-				</div>
-				<ComplexList
-					initialComplexes={initialComplexes}
-					onCreateClick={handleCreateClick}
-					onEditClick={handleEditClick}
-				/>
-			</div>
-		);
-	}
-
 	// Calculer les stats à partir des données initiales
 	const totalComplexes = initialComplexes.length;
 	const accessibleComplexes = initialComplexes.filter(
@@ -290,10 +215,6 @@ export function ComplexesPage({
 					>
 						<RefreshCw className="w-4 h-4 mr-2" />
 						Actualiser
-					</Button>
-					<Button size="sm" className="h-9" onClick={handleCreateClick}>
-						<Plus className="w-4 h-4 mr-2" />
-						Nouveau complexe
 					</Button>
 				</div>
 			</div>
@@ -382,9 +303,7 @@ export function ComplexesPage({
 			<Tabs defaultValue="overview" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-					<TabsTrigger value="complexes" onClick={() => setCurrentView("list")}>
-						Tous les complexes
-					</TabsTrigger>
+					<TabsTrigger value="complexes">Tous les complexes</TabsTrigger>
 					<TabsTrigger value="statistics">Statistiques</TabsTrigger>
 					<TabsTrigger value="planning">Planning</TabsTrigger>
 				</TabsList>
@@ -566,6 +485,14 @@ export function ComplexesPage({
 							</CardContent>
 						</Card>
 					</div>
+				</TabsContent>
+
+				<TabsContent value="complexes" className="space-y-4">
+					<ComplexList
+						initialComplexes={initialComplexes}
+						onCreateClick={handleCreateClick}
+						onEditClick={handleEditClick}
+					/>
 				</TabsContent>
 
 				<TabsContent value="statistics" className="space-y-4">

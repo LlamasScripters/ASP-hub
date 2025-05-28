@@ -34,6 +34,9 @@ import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_ve
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
 import { Route as AuthenticatedUserUserProfileImport } from "./routes/_authenticated/user/_user.profile"
+import { Route as AuthenticatedFacilitiesComplexesCreateImport } from "./routes/_authenticated/facilities/complexes/create"
+import { Route as AuthenticatedFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/facilities/complexes/$complexId/index"
+import { Route as AuthenticatedFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/facilities/complexes/$complexId.edit"
 
 // Create Virtual Routes
 
@@ -190,6 +193,27 @@ const AuthenticatedUserUserProfileRoute =
     getParentRoute: () => AuthenticatedUserUserRoute,
   } as any)
 
+const AuthenticatedFacilitiesComplexesCreateRoute =
+  AuthenticatedFacilitiesComplexesCreateImport.update({
+    id: "/facilities/complexes/create",
+    path: "/facilities/complexes/create",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedFacilitiesComplexesComplexIdIndexRoute =
+  AuthenticatedFacilitiesComplexesComplexIdIndexImport.update({
+    id: "/facilities/complexes/$complexId/",
+    path: "/facilities/complexes/$complexId/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedFacilitiesComplexesComplexIdEditRoute =
+  AuthenticatedFacilitiesComplexesComplexIdEditImport.update({
+    id: "/facilities/complexes/$complexId/edit",
+    path: "/facilities/complexes/$complexId/edit",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
@@ -327,6 +351,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthVerifyIndexImport
       parentRoute: typeof AuthVerifyImport
     }
+    "/_authenticated/facilities/complexes/create": {
+      id: "/_authenticated/facilities/complexes/create"
+      path: "/facilities/complexes/create"
+      fullPath: "/facilities/complexes/create"
+      preLoaderRoute: typeof AuthenticatedFacilitiesComplexesCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/user/_user/profile": {
       id: "/_authenticated/user/_user/profile"
       path: "/profile"
@@ -360,6 +391,20 @@ declare module "@tanstack/react-router" {
       path: "/facilities/complexes"
       fullPath: "/facilities/complexes"
       preLoaderRoute: typeof AuthenticatedFacilitiesComplexesIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/facilities/complexes/$complexId/edit": {
+      id: "/_authenticated/facilities/complexes/$complexId/edit"
+      path: "/facilities/complexes/$complexId/edit"
+      fullPath: "/facilities/complexes/$complexId/edit"
+      preLoaderRoute: typeof AuthenticatedFacilitiesComplexesComplexIdEditImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/facilities/complexes/$complexId/": {
+      id: "/_authenticated/facilities/complexes/$complexId/"
+      path: "/facilities/complexes/$complexId"
+      fullPath: "/facilities/complexes/$complexId"
+      preLoaderRoute: typeof AuthenticatedFacilitiesComplexesComplexIdIndexImport
       parentRoute: typeof AuthenticatedImport
     }
   }
@@ -399,7 +444,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardSocialRoute: typeof AuthenticatedDashboardSocialRoute
   AuthenticatedUserRoute: typeof AuthenticatedUserRouteWithChildren
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedFacilitiesComplexesCreateRoute: typeof AuthenticatedFacilitiesComplexesCreateRoute
   AuthenticatedFacilitiesComplexesIndexRoute: typeof AuthenticatedFacilitiesComplexesIndexRoute
+  AuthenticatedFacilitiesComplexesComplexIdEditRoute: typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  AuthenticatedFacilitiesComplexesComplexIdIndexRoute: typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -408,8 +456,14 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardSocialRoute: AuthenticatedDashboardSocialRoute,
   AuthenticatedUserRoute: AuthenticatedUserRouteWithChildren,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedFacilitiesComplexesCreateRoute:
+    AuthenticatedFacilitiesComplexesCreateRoute,
   AuthenticatedFacilitiesComplexesIndexRoute:
     AuthenticatedFacilitiesComplexesIndexRoute,
+  AuthenticatedFacilitiesComplexesComplexIdEditRoute:
+    AuthenticatedFacilitiesComplexesComplexIdEditRoute,
+  AuthenticatedFacilitiesComplexesComplexIdIndexRoute:
+    AuthenticatedFacilitiesComplexesComplexIdIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -484,11 +538,14 @@ export interface FileRoutesByFullPath {
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -507,11 +564,14 @@ export interface FileRoutesByTo {
   "/user": typeof AuthenticatedUserUserRouteWithChildren
   "/auth/verify": typeof AuthVerifyIndexRoute
   "/dashboard": typeof AuthenticatedDashboardIndexRoute
+  "/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/user/profile": typeof AuthenticatedUserUserProfileRoute
   "/user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
 }
 
 export interface FileRoutesById {
@@ -535,11 +595,14 @@ export interface FileRoutesById {
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute
   "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/_authenticated/facilities/complexes/create": typeof AuthenticatedFacilitiesComplexesCreateRoute
   "/_authenticated/user/_user/profile": typeof AuthenticatedUserUserProfileRoute
   "/_authenticated/user/_user/settings": typeof AuthenticatedUserUserSettingsRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
   "/_authenticated/facilities/complexes/": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/_authenticated/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/_authenticated/facilities/complexes/$complexId/": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -561,11 +624,14 @@ export interface FileRouteTypes {
     | "/auth/verify"
     | "/dashboard"
     | "/auth/verify/"
+    | "/facilities/complexes/create"
     | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
     | "/facilities/complexes"
+    | "/facilities/complexes/$complexId/edit"
+    | "/facilities/complexes/$complexId"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -583,11 +649,14 @@ export interface FileRouteTypes {
     | "/user"
     | "/auth/verify"
     | "/dashboard"
+    | "/facilities/complexes/create"
     | "/user/profile"
     | "/user/settings"
     | "/auth/verify/error"
     | "/auth/verify/success"
     | "/facilities/complexes"
+    | "/facilities/complexes/$complexId/edit"
+    | "/facilities/complexes/$complexId"
   id:
     | "__root__"
     | "/"
@@ -609,11 +678,14 @@ export interface FileRouteTypes {
     | "/auth/verify/_verify"
     | "/_authenticated/dashboard/"
     | "/auth/verify/"
+    | "/_authenticated/facilities/complexes/create"
     | "/_authenticated/user/_user/profile"
     | "/_authenticated/user/_user/settings"
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
     | "/_authenticated/facilities/complexes/"
+    | "/_authenticated/facilities/complexes/$complexId/edit"
+    | "/_authenticated/facilities/complexes/$complexId/"
   fileRoutesById: FileRoutesById
 }
 
@@ -655,7 +727,10 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/social",
         "/_authenticated/user",
         "/_authenticated/dashboard/",
-        "/_authenticated/facilities/complexes/"
+        "/_authenticated/facilities/complexes/create",
+        "/_authenticated/facilities/complexes/",
+        "/_authenticated/facilities/complexes/$complexId/edit",
+        "/_authenticated/facilities/complexes/$complexId/"
       ]
     },
     "/auth": {
@@ -750,6 +825,10 @@ export const routeTree = rootRoute
       "filePath": "auth/verify/index.tsx",
       "parent": "/auth/verify"
     },
+    "/_authenticated/facilities/complexes/create": {
+      "filePath": "_authenticated/facilities/complexes/create.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/user/_user/profile": {
       "filePath": "_authenticated/user/_user.profile.tsx",
       "parent": "/_authenticated/user/_user"
@@ -768,6 +847,14 @@ export const routeTree = rootRoute
     },
     "/_authenticated/facilities/complexes/": {
       "filePath": "_authenticated/facilities/complexes/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/facilities/complexes/$complexId/edit": {
+      "filePath": "_authenticated/facilities/complexes/$complexId.edit.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/facilities/complexes/$complexId/": {
+      "filePath": "_authenticated/facilities/complexes/$complexId/index.tsx",
       "parent": "/_authenticated"
     }
   }
