@@ -10,14 +10,12 @@ import {
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
-// @ts-ignore
 import {
 	AlertCircle,
 	ArrowLeft,
 	Building,
 	CheckCircle,
-	Save,
-	X,
+	// @ts-ignore
 } from "lucide-react";
 import { useState } from "react";
 

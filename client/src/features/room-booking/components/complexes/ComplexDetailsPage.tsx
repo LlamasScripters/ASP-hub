@@ -8,7 +8,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import { RoomsList } from "@room-booking/components/rooms/RoomsList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
@@ -69,23 +68,11 @@ export function ComplexDetailsPage({
 	};
 
 	const handleCreateRoom = () => {
-		setSelectedRoom(null);
-		setCurrentView("create-room");
+		navigate({ to: `/facilities/complexes/${complex.id}/create-room` });
 	};
 
 	const handleEditRoom = (room: Room) => {
-		setSelectedRoom(room);
-		setCurrentView("edit-room");
-	};
-
-	const handleRoomFormSuccess = () => {
-		setCurrentView("rooms");
-		setSelectedRoom(null);
-	};
-
-	const handleRoomFormCancel = () => {
-		setCurrentView("rooms");
-		setSelectedRoom(null);
+		navigate({ to: `/facilities/rooms/${room.id}/edit` });
 	};
 
 	const totalRooms = initialRooms.length;
@@ -101,67 +88,6 @@ export function ComplexDetailsPage({
 		},
 		{} as Record<string, number>,
 	);
-
-	if (currentView === "create-room") {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							Nouvelle salle
-						</h1>
-						<p className="text-muted-foreground">
-							Ajouter une nouvelle salle au complexe {complex.name}
-						</p>
-					</div>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setCurrentView("rooms")}
-					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour aux salles
-					</Button>
-				</div>
-				<RoomForm
-					complexId={complex.id}
-					onSuccess={handleRoomFormSuccess}
-					onCancel={handleRoomFormCancel}
-				/>
-			</div>
-		);
-	}
-
-	if (currentView === "edit-room" && selectedRoom) {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							Modifier la salle
-						</h1>
-						<p className="text-muted-foreground">
-							Modifier les informations de {selectedRoom.name}
-						</p>
-					</div>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setCurrentView("rooms")}
-					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour aux salles
-					</Button>
-				</div>
-				<RoomForm
-					complexId={complex.id}
-					room={selectedRoom}
-					onSuccess={handleRoomFormSuccess}
-					onCancel={handleRoomFormCancel}
-				/>
-			</div>
-		);
-	}
 
 	return (
 		<div className="space-y-6">

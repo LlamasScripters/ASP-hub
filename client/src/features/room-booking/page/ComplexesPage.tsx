@@ -129,16 +129,6 @@ export function ComplexesPage({
 		}
 	};
 
-	const handleFormSuccess = (complex: Complex) => {
-		setCurrentView("list");
-		setSelectedComplex(null);
-	};
-
-	const handleFormCancel = () => {
-		setCurrentView("overview");
-		setSelectedComplex(null);
-	};
-
 	const getActionIcon = (type: string) => {
 		switch (type) {
 			case "create":

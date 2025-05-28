@@ -29,14 +29,18 @@ import { Route as AuthenticatedUserUserImport } from "./routes/_authenticated/us
 import { Route as AuthenticatedDashboardSocialImport } from "./routes/_authenticated/dashboard/social"
 import { Route as AuthenticatedDashboardMembersImport } from "./routes/_authenticated/dashboard/members"
 import { Route as AuthenticatedDashboardActivitiesImport } from "./routes/_authenticated/dashboard/activities"
+import { Route as AuthenticatedFacilitiesRoomsIndexImport } from "./routes/_authenticated/facilities/rooms/index"
 import { Route as AuthenticatedFacilitiesComplexesIndexImport } from "./routes/_authenticated/facilities/complexes/index"
 import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedUserUserSettingsImport } from "./routes/_authenticated/user/_user.settings"
 import { Route as AuthenticatedUserUserProfileImport } from "./routes/_authenticated/user/_user.profile"
 import { Route as AuthenticatedFacilitiesComplexesCreateImport } from "./routes/_authenticated/facilities/complexes/create"
+import { Route as AuthenticatedFacilitiesRoomsRoomIdIndexImport } from "./routes/_authenticated/facilities/rooms/$roomId/index"
 import { Route as AuthenticatedFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/facilities/complexes/$complexId/index"
+import { Route as AuthenticatedFacilitiesRoomsRoomIdEditImport } from "./routes/_authenticated/facilities/rooms/$roomId.edit"
 import { Route as AuthenticatedFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/facilities/complexes/$complexId.edit"
+import { Route as AuthenticatedFacilitiesComplexesComplexIdCreateRoomImport } from "./routes/_authenticated/facilities/complexes/$complexId.create-room"
 
 // Create Virtual Routes
 
@@ -160,6 +164,13 @@ const AuthenticatedDashboardActivitiesRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
+const AuthenticatedFacilitiesRoomsIndexRoute =
+  AuthenticatedFacilitiesRoomsIndexImport.update({
+    id: "/facilities/rooms/",
+    path: "/facilities/rooms/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 const AuthenticatedFacilitiesComplexesIndexRoute =
   AuthenticatedFacilitiesComplexesIndexImport.update({
     id: "/facilities/complexes/",
@@ -200,6 +211,13 @@ const AuthenticatedFacilitiesComplexesCreateRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
+const AuthenticatedFacilitiesRoomsRoomIdIndexRoute =
+  AuthenticatedFacilitiesRoomsRoomIdIndexImport.update({
+    id: "/facilities/rooms/$roomId/",
+    path: "/facilities/rooms/$roomId/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 const AuthenticatedFacilitiesComplexesComplexIdIndexRoute =
   AuthenticatedFacilitiesComplexesComplexIdIndexImport.update({
     id: "/facilities/complexes/$complexId/",
@@ -207,10 +225,24 @@ const AuthenticatedFacilitiesComplexesComplexIdIndexRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
+const AuthenticatedFacilitiesRoomsRoomIdEditRoute =
+  AuthenticatedFacilitiesRoomsRoomIdEditImport.update({
+    id: "/facilities/rooms/$roomId/edit",
+    path: "/facilities/rooms/$roomId/edit",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
 const AuthenticatedFacilitiesComplexesComplexIdEditRoute =
   AuthenticatedFacilitiesComplexesComplexIdEditImport.update({
     id: "/facilities/complexes/$complexId/edit",
     path: "/facilities/complexes/$complexId/edit",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute =
+  AuthenticatedFacilitiesComplexesComplexIdCreateRoomImport.update({
+    id: "/facilities/complexes/$complexId/create-room",
+    path: "/facilities/complexes/$complexId/create-room",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -393,6 +425,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFacilitiesComplexesIndexImport
       parentRoute: typeof AuthenticatedImport
     }
+    "/_authenticated/facilities/rooms/": {
+      id: "/_authenticated/facilities/rooms/"
+      path: "/facilities/rooms"
+      fullPath: "/facilities/rooms"
+      preLoaderRoute: typeof AuthenticatedFacilitiesRoomsIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/facilities/complexes/$complexId/create-room": {
+      id: "/_authenticated/facilities/complexes/$complexId/create-room"
+      path: "/facilities/complexes/$complexId/create-room"
+      fullPath: "/facilities/complexes/$complexId/create-room"
+      preLoaderRoute: typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/facilities/complexes/$complexId/edit": {
       id: "/_authenticated/facilities/complexes/$complexId/edit"
       path: "/facilities/complexes/$complexId/edit"
@@ -400,11 +446,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFacilitiesComplexesComplexIdEditImport
       parentRoute: typeof AuthenticatedImport
     }
+    "/_authenticated/facilities/rooms/$roomId/edit": {
+      id: "/_authenticated/facilities/rooms/$roomId/edit"
+      path: "/facilities/rooms/$roomId/edit"
+      fullPath: "/facilities/rooms/$roomId/edit"
+      preLoaderRoute: typeof AuthenticatedFacilitiesRoomsRoomIdEditImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_authenticated/facilities/complexes/$complexId/": {
       id: "/_authenticated/facilities/complexes/$complexId/"
       path: "/facilities/complexes/$complexId"
       fullPath: "/facilities/complexes/$complexId"
       preLoaderRoute: typeof AuthenticatedFacilitiesComplexesComplexIdIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/facilities/rooms/$roomId/": {
+      id: "/_authenticated/facilities/rooms/$roomId/"
+      path: "/facilities/rooms/$roomId"
+      fullPath: "/facilities/rooms/$roomId"
+      preLoaderRoute: typeof AuthenticatedFacilitiesRoomsRoomIdIndexImport
       parentRoute: typeof AuthenticatedImport
     }
   }
@@ -446,8 +506,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedFacilitiesComplexesCreateRoute: typeof AuthenticatedFacilitiesComplexesCreateRoute
   AuthenticatedFacilitiesComplexesIndexRoute: typeof AuthenticatedFacilitiesComplexesIndexRoute
+  AuthenticatedFacilitiesRoomsIndexRoute: typeof AuthenticatedFacilitiesRoomsIndexRoute
+  AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute: typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   AuthenticatedFacilitiesComplexesComplexIdEditRoute: typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  AuthenticatedFacilitiesRoomsRoomIdEditRoute: typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
   AuthenticatedFacilitiesComplexesComplexIdIndexRoute: typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
+  AuthenticatedFacilitiesRoomsRoomIdIndexRoute: typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -460,10 +524,18 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedFacilitiesComplexesCreateRoute,
   AuthenticatedFacilitiesComplexesIndexRoute:
     AuthenticatedFacilitiesComplexesIndexRoute,
+  AuthenticatedFacilitiesRoomsIndexRoute:
+    AuthenticatedFacilitiesRoomsIndexRoute,
+  AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute:
+    AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute,
   AuthenticatedFacilitiesComplexesComplexIdEditRoute:
     AuthenticatedFacilitiesComplexesComplexIdEditRoute,
+  AuthenticatedFacilitiesRoomsRoomIdEditRoute:
+    AuthenticatedFacilitiesRoomsRoomIdEditRoute,
   AuthenticatedFacilitiesComplexesComplexIdIndexRoute:
     AuthenticatedFacilitiesComplexesComplexIdIndexRoute,
+  AuthenticatedFacilitiesRoomsRoomIdIndexRoute:
+    AuthenticatedFacilitiesRoomsRoomIdIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -544,8 +616,12 @@ export interface FileRoutesByFullPath {
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/facilities/rooms": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
   "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
+  "/facilities/rooms/$roomId": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -570,8 +646,12 @@ export interface FileRoutesByTo {
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/facilities/complexes": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/facilities/rooms": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
   "/facilities/complexes/$complexId": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
+  "/facilities/rooms/$roomId": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
 }
 
 export interface FileRoutesById {
@@ -601,8 +681,12 @@ export interface FileRoutesById {
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
   "/_authenticated/facilities/complexes/": typeof AuthenticatedFacilitiesComplexesIndexRoute
+  "/_authenticated/facilities/rooms/": typeof AuthenticatedFacilitiesRoomsIndexRoute
+  "/_authenticated/facilities/complexes/$complexId/create-room": typeof AuthenticatedFacilitiesComplexesComplexIdCreateRoomRoute
   "/_authenticated/facilities/complexes/$complexId/edit": typeof AuthenticatedFacilitiesComplexesComplexIdEditRoute
+  "/_authenticated/facilities/rooms/$roomId/edit": typeof AuthenticatedFacilitiesRoomsRoomIdEditRoute
   "/_authenticated/facilities/complexes/$complexId/": typeof AuthenticatedFacilitiesComplexesComplexIdIndexRoute
+  "/_authenticated/facilities/rooms/$roomId/": typeof AuthenticatedFacilitiesRoomsRoomIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -630,8 +714,12 @@ export interface FileRouteTypes {
     | "/auth/verify/error"
     | "/auth/verify/success"
     | "/facilities/complexes"
+    | "/facilities/rooms"
+    | "/facilities/complexes/$complexId/create-room"
     | "/facilities/complexes/$complexId/edit"
+    | "/facilities/rooms/$roomId/edit"
     | "/facilities/complexes/$complexId"
+    | "/facilities/rooms/$roomId"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -655,8 +743,12 @@ export interface FileRouteTypes {
     | "/auth/verify/error"
     | "/auth/verify/success"
     | "/facilities/complexes"
+    | "/facilities/rooms"
+    | "/facilities/complexes/$complexId/create-room"
     | "/facilities/complexes/$complexId/edit"
+    | "/facilities/rooms/$roomId/edit"
     | "/facilities/complexes/$complexId"
+    | "/facilities/rooms/$roomId"
   id:
     | "__root__"
     | "/"
@@ -684,8 +776,12 @@ export interface FileRouteTypes {
     | "/auth/verify/_verify/error"
     | "/auth/verify/_verify/success"
     | "/_authenticated/facilities/complexes/"
+    | "/_authenticated/facilities/rooms/"
+    | "/_authenticated/facilities/complexes/$complexId/create-room"
     | "/_authenticated/facilities/complexes/$complexId/edit"
+    | "/_authenticated/facilities/rooms/$roomId/edit"
     | "/_authenticated/facilities/complexes/$complexId/"
+    | "/_authenticated/facilities/rooms/$roomId/"
   fileRoutesById: FileRoutesById
 }
 
@@ -729,8 +825,12 @@ export const routeTree = rootRoute
         "/_authenticated/dashboard/",
         "/_authenticated/facilities/complexes/create",
         "/_authenticated/facilities/complexes/",
+        "/_authenticated/facilities/rooms/",
+        "/_authenticated/facilities/complexes/$complexId/create-room",
         "/_authenticated/facilities/complexes/$complexId/edit",
-        "/_authenticated/facilities/complexes/$complexId/"
+        "/_authenticated/facilities/rooms/$roomId/edit",
+        "/_authenticated/facilities/complexes/$complexId/",
+        "/_authenticated/facilities/rooms/$roomId/"
       ]
     },
     "/auth": {
@@ -849,12 +949,28 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/facilities/complexes/index.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/facilities/rooms/": {
+      "filePath": "_authenticated/facilities/rooms/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/facilities/complexes/$complexId/create-room": {
+      "filePath": "_authenticated/facilities/complexes/$complexId.create-room.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/facilities/complexes/$complexId/edit": {
       "filePath": "_authenticated/facilities/complexes/$complexId.edit.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/facilities/rooms/$roomId/edit": {
+      "filePath": "_authenticated/facilities/rooms/$roomId.edit.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/facilities/complexes/$complexId/": {
       "filePath": "_authenticated/facilities/complexes/$complexId/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/facilities/rooms/$roomId/": {
+      "filePath": "_authenticated/facilities/rooms/$roomId/index.tsx",
       "parent": "/_authenticated"
     }
   }

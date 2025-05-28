@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { useRooms } from "@room-booking/hooks/useRooms";
 import type { Room } from "@room-booking/hooks/useRooms";
+import { useNavigate } from "@tanstack/react-router";
 import {
 	Calendar,
 	CircleOff,
@@ -58,14 +59,13 @@ export function RoomsList({
 		complexId,
 		initialData: initialRooms,
 	});
+	const navigate = useNavigate();
 
-	// Handle search
 	const handleSearch = (value: string) => {
 		setSearchTerm(value);
 		updateFilters({ search: value || undefined });
 	};
 
-	// Handle delete
 	const handleDelete = async (room: Room) => {
 		if (
 			window.confirm(
@@ -76,7 +76,10 @@ export function RoomsList({
 		}
 	};
 
-	// Format date
+	const handleSeeDetails = (roomId: string) => {
+		navigate({ to: `/facilities/rooms/${roomId}` });
+	};
+
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
 			day: "2-digit",
@@ -223,7 +226,11 @@ export function RoomsList({
 												<DropdownMenuContent align="end">
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuSeparator />
-													<DropdownMenuItem>Voir les détails</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={() => handleSeeDetails(room.id)}
+													>
+														Voir les détails
+													</DropdownMenuItem>
 													<DropdownMenuItem onClick={() => onEditClick?.(room)}>
 														Modifier
 													</DropdownMenuItem>

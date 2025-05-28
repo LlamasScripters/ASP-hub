@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/facilities/complexes/")({
 	loader: async ({ abortController }): Promise<ComplexesLoaderData> => {
 		try {
 			const response = await complexesApi.getComplexes(
-				{ page: 1, limit: 50 }, // Charger plus d'éléments initialement
+				{ page: 1, limit: 50 },
 				{ signal: abortController.signal },
 			);
 
