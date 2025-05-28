@@ -253,12 +253,6 @@ export function RoomsList({
 													? "Aucune salle ne correspond à votre recherche."
 													: "Commencez par créer votre première salle."}
 											</p>
-											{!searchTerm && (
-												<Button onClick={onCreateClick}>
-													<Plus className="w-4 h-4 mr-2" />
-													Créer une salle
-												</Button>
-											)}
 										</div>
 									</TableCell>
 								</TableRow>

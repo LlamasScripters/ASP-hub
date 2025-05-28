@@ -287,12 +287,6 @@ export function ComplexList({
 														? "Aucun complexe ne correspond à votre recherche."
 														: "Commencez par créer votre premier complexe sportif."}
 												</p>
-												{!searchTerm && (
-													<Button onClick={onCreateClick}>
-														<Plus className="w-4 h-4 mr-2" />
-														Créer un complexe
-													</Button>
-												)}
 											</div>
 										</TableCell>
 									</TableRow>
