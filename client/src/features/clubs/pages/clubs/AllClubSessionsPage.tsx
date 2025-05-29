@@ -40,7 +40,7 @@ interface EnrichedSession extends Omit<SessionSport, 'categoryId'> {
 }
 
 export function AllClubSessionsPage() {
-  const { clubId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sessions/" });
+  const { clubId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/" });
   const [sessions, setSessions] = useState<EnrichedSession[]>([]);
   const [, setSections] = useState<Section[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -306,7 +306,7 @@ export function AllClubSessionsPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <Link 
-                to="/dashboard/clubs/$clubId" 
+                to="/admin/dashboard/clubs/$clubId" 
                 params={{ clubId }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -395,7 +395,7 @@ export function AllClubSessionsPage() {
               <p className="text-muted-foreground mb-6 max-w-md">
                 Les sessions apparaîtront ici une fois qu'elles seront créées dans les catégories.
               </p>
-              <Link to="/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+              <Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
                 <Button size="lg">
                   <Users className="mr-2 h-5 w-5" />
                   Voir les sections
@@ -609,7 +609,7 @@ export function AllClubSessionsPage() {
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Link 
-                                to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" 
+                                to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" 
                                 params={{ clubId, sectionId: s.sectionId!, categoryId: s.categoryId!, sessionId: s.id }}
                               >
                                 <Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary">

@@ -21,14 +21,14 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: `/facilities/complexes/${complex.id}`,
+				to: `/admin/facilities/complexes/${complex.id}`,
 			});
 		}, 1500);
 	};
 
 	const handleCancel = () => {
 		navigate({
-			to: `/facilities/complexes/${complex.id}`,
+			to: `/admin/facilities/complexes/${complex.id}`,
 		});
 	};
 

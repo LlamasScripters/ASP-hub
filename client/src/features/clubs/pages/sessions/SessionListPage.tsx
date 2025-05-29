@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { SessionSport } from "../../types";
 
 export function SessionsListPage() {
-  const { clubId, sectionId, categoryId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/" });
+  const { clubId, sectionId, categoryId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/" });
   const [sessions, setSessions] = useState<SessionSport[]>([]);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function SessionsListPage() {
     <div className="p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Sessions</h1>
-        <Link to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create" params={{ clubId, sectionId, categoryId }}>
+        <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create" params={{ clubId, sectionId, categoryId }}>
           <Button>Créer une session</Button>
         </Link>
       </div>
@@ -41,7 +41,7 @@ export function SessionsListPage() {
               <TableCell>{s.status}</TableCell>
               <TableCell>{new Date(s.startDate).toLocaleDateString()} → {new Date(s.endDate).toLocaleDateString()}</TableCell>
               <TableCell>
-                <Link to="/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" params={{ clubId, sectionId, categoryId, sessionId: s.id }}>
+                <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit" params={{ clubId, sectionId, categoryId, sessionId: s.id }}>
                   <Button variant="outline">Modifier</Button>
                 </Link>
               </TableCell>

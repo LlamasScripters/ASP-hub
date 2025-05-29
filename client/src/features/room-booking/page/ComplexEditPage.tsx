@@ -30,12 +30,12 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 
 	const handleBack = () => {
 		setIsNavigating(true);
-		navigate({ to: `/facilities/complexes/${initialComplex.id}` });
+		navigate({ to: `/admin/facilities/complexes/${initialComplex.id}` });
 	};
 
 	const handleSeeComplexesList = () => {
 		setIsNavigating(true);
-		navigate({ to: "/facilities/complexes" });
+		navigate({ to: "/admin/facilities/complexes" });
 	};
 
 	const handleSuccess = (updatedComplex: Complex) => {
@@ -47,7 +47,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 
 		setTimeout(() => {
 			setIsNavigating(true);
-			navigate({ to: `/facilities/complexes/${updatedComplex.id}` });
+			navigate({ to: `/admin/facilities/complexes/${updatedComplex.id}` });
 		}, 1500);
 	};
 

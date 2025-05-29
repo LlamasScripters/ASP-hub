@@ -60,19 +60,19 @@ export function ComplexDetailsPage({
 	};
 
 	const handleBack = () => {
-		navigate({ to: "/facilities/complexes" });
+		navigate({ to: "/admin/facilities/complexes" });
 	};
 
 	const handleEdit = () => {
-		navigate({ to: `/facilities/complexes/${complex.id}/edit` });
+		navigate({ to: `/admin/facilities/complexes/${complex.id}/edit` });
 	};
 
 	const handleCreateRoom = () => {
-		navigate({ to: `/facilities/complexes/${complex.id}/create-room` });
+		navigate({ to: `/admin/facilities/complexes/${complex.id}/create-room` });
 	};
 
 	const handleEditRoom = (room: Room) => {
-		navigate({ to: `/facilities/rooms/${room.id}/edit` });
+		navigate({ to: `/admin/facilities/rooms/${room.id}/edit` });
 	};
 
 	const totalRooms = initialRooms.length;

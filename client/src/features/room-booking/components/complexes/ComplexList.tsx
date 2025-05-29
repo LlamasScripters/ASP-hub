@@ -90,7 +90,7 @@ export function ComplexList({
 	};
 
 	const handleViewDetails = (complexId: string) => {
-		navigate({ to: `/facilities/complexes/${complexId}` });
+		navigate({ to: `/admin/facilities/complexes/${complexId}` });
 	};
 
 	const formatDate = (dateString: string) => {

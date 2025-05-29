@@ -21,7 +21,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 	const navigate = useNavigate();
 
 	const handleBack = () => {
-		navigate({ to: `/facilities/complexes/${complex.id}` });
+		navigate({ to: `/admin/facilities/complexes/${complex.id}` });
 	};
 
 	return (

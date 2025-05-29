@@ -81,7 +81,7 @@ export function ClubsListPage() {
             </p>
           </div>
           {!mainClub && (
-            <Link to="/dashboard/clubs/create">
+            <Link to="/admin/dashboard/clubs/create">
               <Button size="lg" className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
                 Créer l'association
@@ -104,7 +104,7 @@ export function ClubsListPage() {
               <p className="text-muted-foreground mb-8 max-w-md text-lg">
                 Commencez par créer votre association sportive pour accéder à tous les outils de gestion.
               </p>
-              <Link to="/dashboard/clubs/create">
+              <Link to="/admin/dashboard/clubs/create">
                 <Button size="lg" className="text-lg px-8 py-3">
                   <Plus className="mr-3 h-6 w-6" />
                   Créer mon association
@@ -128,7 +128,7 @@ export function ClubsListPage() {
                     </Badge>
                   </div>
                   <Link 
-                    to="/dashboard/clubs/$clubId/edit" 
+                    to="/admin/dashboard/clubs/$clubId/edit" 
                     params={{ clubId: mainClub.id }}
                   >
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
@@ -222,7 +222,7 @@ export function ClubsListPage() {
                 {/* Bouton principal d'accès */}
                 <div className="pt-4 border-t border-primary/20">
                   <Link 
-                    to="/dashboard/clubs/$clubId" 
+                    to="/admin/dashboard/clubs/$clubId" 
                     params={{ clubId: mainClub.id }}
                     className="block"
                   >
@@ -253,7 +253,7 @@ export function ClubsListPage() {
 
               <div className="space-y-4">
                 <Link 
-                  to="/dashboard/clubs/$clubId/sections" 
+                  to="/admin/dashboard/clubs/$clubId/sections" 
                   params={{ clubId: mainClub.id }}
                 >
                   <Card className="group hover:shadow-md transition-all duration-200 hover:border-primary/20 cursor-pointer">
@@ -277,7 +277,7 @@ export function ClubsListPage() {
                 </Link>
 
                 <Link 
-                  to="/dashboard/clubs/$clubId/categories" 
+                  to="/admin/dashboard/clubs/$clubId/categories" 
                   params={{ clubId: mainClub.id }}
                 >
                   <Card className="group hover:shadow-md transition-all duration-200 hover:border-primary/20 cursor-pointer">
@@ -301,7 +301,7 @@ export function ClubsListPage() {
                 </Link>
 
                 <Link 
-                  to="/dashboard/clubs/$clubId/sessions" 
+                  to="/admin/dashboard/clubs/$clubId/sessions" 
                   params={{ clubId: mainClub.id }}
                 >
                   <Card className="group hover:shadow-md transition-all duration-200 hover:border-primary/20 cursor-pointer">

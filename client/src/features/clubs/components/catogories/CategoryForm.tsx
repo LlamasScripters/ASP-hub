@@ -82,7 +82,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
       }
 
       toast.success(mode === "create" ? "Catégorie créée avec succès !" : "Catégorie modifiée avec succès !");
-      navigate({ to: "/dashboard/clubs/$clubId/sections/$sectionId/categories", params: { clubId, sectionId } });
+      navigate({ to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories", params: { clubId, sectionId } });
     } catch (error) {
       console.error('Erreur:', error);
       toast.error("Erreur lors de la sauvegarde de la catégorie");
@@ -93,7 +93,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
   };
 
   const handleBack = () => {
-    navigate({ to: "/dashboard/clubs/$clubId/sections/$sectionId/categories", params: { clubId, sectionId } });
+    navigate({ to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories", params: { clubId, sectionId } });
   };
 
   return (

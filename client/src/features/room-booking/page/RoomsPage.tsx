@@ -53,11 +53,11 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 	}, [search, filterType, initialRooms]);
 
 	const handleView = (roomId: string, complexId: string) => {
-		navigate({ to: `/facilities/complexes/${complexId}/rooms/${roomId}` });
+		navigate({ to: `/admin/facilities/complexes/${complexId}/rooms/${roomId}` });
 	};
 
 	const handleCreate = () => {
-		navigate({ to: "/facilities/complexes" });
+		navigate({ to: "/admin/facilities/complexes" });
 	};
 
 	const totalRooms = initialRooms.length;

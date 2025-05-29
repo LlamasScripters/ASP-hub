@@ -3,7 +3,7 @@ import * as schema from "@/db/schema.js";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { twoFactor } from "better-auth/plugins";
+import { admin, twoFactor } from "better-auth/plugins";
 import { sendConfirmationEmail, sendResetPasswordEmail } from "./email.js";
 import { checkPasswordStrength } from "./password.js";
 
@@ -113,5 +113,6 @@ export const auth = betterAuth({
 		twoFactor({
 			issuer: "ASP Hub",
 		}),
+		admin(),
 	],
 });

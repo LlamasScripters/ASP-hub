@@ -1,4 +1,5 @@
 import {
+	adminClient,
 	inferAdditionalFields,
 	twoFactorClient,
 } from "better-auth/client/plugins";
@@ -73,6 +74,7 @@ export function getAuthErrorMessage(code: string) {
 export const authClient = createAuthClient({
 	plugins: [
 		twoFactorClient(),
+		adminClient(),
 		inferAdditionalFields({
 			user: {
 				acceptTerms: {

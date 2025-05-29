@@ -134,7 +134,7 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
 
       toast.success(mode === "create" ? "Session créée avec succès !" : "Session modifiée avec succès !");
       navigate({
-        to: "/dashboard/clubs/$clubId/sections/$sectionId/sessions",
+        to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
         params: { clubId, sectionId },
       });
     } catch (error) {
@@ -148,7 +148,7 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
 
   const handleBack = () => {
     navigate({
-      to: "/dashboard/clubs/$clubId/sections/$sectionId/sessions",
+      to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
       params: { clubId, sectionId },
     });
   };

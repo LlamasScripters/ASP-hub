@@ -18,7 +18,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			disableTransitionOnChange
 		>
 			<Outlet />
-			<TanStackRouterDevtools />
+			<TanStackRouterDevtools position="bottom-right" />
 			<Toaster visibleToasts={1} />
 		</ThemeProvider>
 	),

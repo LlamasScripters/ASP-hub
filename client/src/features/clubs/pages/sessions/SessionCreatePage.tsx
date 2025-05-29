@@ -6,7 +6,7 @@ import type { Section } from "../../types";
 
 
 export function SessionCreatePage() {
-  const { clubId, sectionId, categoryId } = useParams({ from: "/_authenticated/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create" });
+  const { clubId, sectionId, categoryId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create" });
   const [section, setSection] = useState<Section | null>(null);
 
 useEffect(() => {
