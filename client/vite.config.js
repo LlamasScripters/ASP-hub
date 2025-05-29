@@ -27,6 +27,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "./src"),
+			"@room-booking": resolve(__dirname, "./src/features/room-booking"),
 		},
 	},
 });

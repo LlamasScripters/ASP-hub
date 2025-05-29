@@ -25,6 +25,7 @@ import {
 import {
 	BarChart3,
 	Bell,
+	Building2,
 	Calendar,
 	CreditCard,
 	FileText,
@@ -122,6 +123,11 @@ const navigationItems = [
 		href: "/dashboard/messages",
 		label: "Messages",
 		icon: <MessageSquare className="w-5 h-5" />,
+	},
+	{
+		href: "/facilities/complexes",
+		label: "Complexes",
+		icon: <Building2 className="w-5 h-5" />,
 	},
 	{
 		href: "/user/settings",

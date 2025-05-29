@@ -3,6 +3,9 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import complexesRouter from "./features/room-booking/complexes.controller.js";
+import reservationsRouter from "./features/room-booking/reservations.controller.js";
+import roomsRouter from "./features/room-booking/rooms.controller.js";
 import usersRouter from "./features/users/users.controller.js";
 
 const server = express();
@@ -26,6 +29,9 @@ server.get("/api/me", async (req, res) => {
 
 server.use(express.json());
 server.use("/api/users", usersRouter);
+server.use("/api/complexes", complexesRouter);
+server.use("/api/rooms", roomsRouter);
+server.use("/api/reservations", reservationsRouter);
 
 server.get("/api", (req, res) => {
 	res.json({ message: "ASP API is running!" });
