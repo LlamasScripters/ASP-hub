@@ -19,7 +19,11 @@ const clubSchema = z.object({
   description: z.string().optional(),
   address: z.string().optional(),
   email: z.string().email("Adresse email invalide").optional().or(z.literal("")),
-  phone: z.string().optional(),
+  phone: z.string()
+    .optional()
+    .refine((val) => !val || /^0[0-9]{9}$/.test(val), {
+      message: "Veuillez mettre un numéro de téléphone valide (10 chiffres commençant par 0)"
+    }),
   website: z.string().url("L'URL du site web est invalide").optional().or(z.literal("")),
 });
 
@@ -281,13 +285,25 @@ export function ClubForm({ mode, clubId }: { mode: "create" | "edit"; clubId?: s
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="01 23 45 67 89"
+                            placeholder="0123456789"
                             className="h-11"
+                            maxLength={10}
                             {...field}
+                            onPaste={(e) => {
+                              e.preventDefault();
+                              const pastedText = e.clipboardData.getData('text');
+                              const cleanedPhone = pastedText.replace(/\D/g, '');
+                              const limitedPhone = cleanedPhone.slice(0, 10);
+                              field.onChange(limitedPhone);
+                            }}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormDescription>
-                          Numéro de téléphone de contact.
+                          Numéro de téléphone à 10 chiffres (sans espaces ni tirets).
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
