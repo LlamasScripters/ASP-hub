@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Save, ArrowLeft, Users, AlertCircle, Calendar } from "lucide-react";
+import { Save, ArrowLeft, Users, AlertCircle, Calendar, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { Category } from "../../types";
@@ -44,10 +44,43 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
     }
   }, [mode, categoryId, clubId, sectionId]);
 
+  // Validation en temps réel des âges
+  const validateAgeRange = (ageMin?: number, ageMax?: number) => {
+    if (ageMin !== undefined && ageMax !== undefined) {
+      if (ageMin > ageMax) {
+        return "L'âge minimum ne peut pas être supérieur à l'âge maximum";
+      }
+      if (ageMin === ageMax) {
+        return "L'âge minimum et maximum ne peuvent pas être identiques";
+      }
+    }
+    return null;
+  };
+
+  const ageRangeError = validateAgeRange(form.ageMin, form.ageMax);
+  const isValidAgeRange = form.ageMin !== undefined && form.ageMax !== undefined && !ageRangeError;
+
+  const handleAgeMinChange = (value: string) => {
+    const ageMin = value ? Number(value) : undefined;
+    setForm(prev => ({ ...prev, ageMin }));
+  };
+
+  const handleAgeMaxChange = (value: string) => {
+    const ageMax = value ? Number(value) : undefined;
+    setForm(prev => ({ ...prev, ageMax }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+
+    // Validation côté client
+    if (ageRangeError) {
+      setErrors({ ageRange: ageRangeError });
+      setIsLoading(false);
+      return;
+    }
 
     const parsed = schema.safeParse({
       ...form,
@@ -198,8 +231,8 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                       min="0"
                       max="100"
                       value={form.ageMin ?? ""}
-                      onChange={(e) => setForm({ ...form, ageMin: e.target.value ? Number(e.target.value) : undefined })}
-                      className={errors.ageMin ? "border-destructive" : ""}
+                      onChange={(e) => handleAgeMinChange(e.target.value)}
+                      className={errors.ageMin || ageRangeError ? "border-destructive" : ""}
                     />
                     {errors.ageMin && (
                       <p className="text-sm text-destructive">{errors.ageMin}</p>
@@ -217,8 +250,8 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                       min="0"
                       max="100"
                       value={form.ageMax ?? ""}
-                      onChange={(e) => setForm({ ...form, ageMax: e.target.value ? Number(e.target.value) : undefined })}
-                      className={errors.ageMax ? "border-destructive" : ""}
+                      onChange={(e) => handleAgeMaxChange(e.target.value)}
+                      className={errors.ageMax || ageRangeError ? "border-destructive" : ""}
                     />
                     {errors.ageMax && (
                       <p className="text-sm text-destructive">{errors.ageMax}</p>
@@ -226,13 +259,36 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                   </div>
                 </div>
 
-                {form.ageMin !== undefined && form.ageMax !== undefined && (
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">
+                {/* Erreur de tranche d'âge */}
+                {ageRangeError && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>{ageRangeError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Aperçu de la tranche d'âge valide */}
+                {isValidAgeRange && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700">
                       Cette catégorie acceptera les participants âgés de{" "}
-                      <span className="font-medium text-foreground">
+                      <span className="font-semibold">
                         {form.ageMin} à {form.ageMax} ans
                       </span>
+                      {form.ageMin !== undefined && form.ageMax !== undefined && (
+                        <>
+                          {" "}({form.ageMax - form.ageMin + 1} années couvertes)
+                        </>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {/* Aide pour les tranches d'âge */}
+                {!form.ageMin && !form.ageMax && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700">
+                      💡 <strong>Conseil :</strong> Laissez vide pour une catégorie sans restriction d'âge, ou définissez une tranche pour cibler un groupe spécifique.
                     </p>
                   </div>
                 )}
@@ -250,7 +306,11 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                 >
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || !!ageRangeError} 
+                  className="min-w-[120px]"
+                >
                   {isLoading ? (
                     "Enregistrement..."
                   ) : (

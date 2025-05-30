@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit, Users, ChevronUp, ChevronDown, Search, Trash2 } from "lucide-react";
+import { Edit, Users, ChevronUp, ChevronDown, Search, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import type { Category, Section } from "../../types";
 
@@ -159,19 +159,28 @@ export function CategoriesListPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Catégories de la section {sectionName}</h1>
-          <p className="text-muted-foreground">
-            Gérez les catégories de la section <span className="font-medium">{sectionName}</span>
-          </p>
-        </div>
-        <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create" params={{ clubId, sectionId }}>
-          <Button className="w-full md:w-auto">
-            <Users className="mr-2 h-4 w-4" />
-            Créer une catégorie
+      <div className="flex flex-col gap-4">
+        <Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+          <Button variant="ghost" className="w-fit">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour aux sections
           </Button>
         </Link>
+        
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">Catégories de la section {sectionName}</h1>
+            <p className="text-muted-foreground">
+              Gérez les catégories de la section <span className="font-medium">{sectionName}</span>
+            </p>
+          </div>
+          <Link to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create" params={{ clubId, sectionId }}>
+            <Button className="w-full md:w-auto">
+              <Users className="mr-2 h-4 w-4" />
+              Créer une catégorie
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
