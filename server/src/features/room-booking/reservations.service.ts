@@ -69,6 +69,15 @@ export const reservationsService = {
 		return res;
 	},
 
+	getByRoomId: async (
+		roomId: string,
+	): Promise<SelectReservation[]> => {
+		return await db
+			.select()
+			.from(reservations)
+			.where(eq(reservations.roomId, roomId));
+	},
+
 	update: async (
 		id: string,
 		data: Partial<InsertReservation>,

@@ -2,6 +2,7 @@ import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { complexesService } from "./complexes.service.js";
 import { roomsService } from "./rooms.service.js";
+import { reservationsService } from "./reservations.service.js";
 
 const roomsRouter = Router();
 
@@ -46,6 +47,15 @@ roomsRouter.get("/:id", async (req: Request, res: Response) => {
 	const room = await roomsService.getById(req.params.id);
 	if (!room) return res.status(404).json({ error: "Room not found" });
 	return res.json(room);
+});
+
+//@ts-ignore
+roomsRouter.get("/:id/reservations", async (req: Request, res: Response) => {
+	const reservations = await reservationsService.getByRoomId(req.params.id);
+	if (!reservations || reservations.length === 0) {
+		return res.status(404).json({ error: "No reservations found for this complex" });
+	}
+	res.json(reservations);
 });
 
 //@ts-ignore
