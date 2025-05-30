@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Calendar, Plus, ChevronUp, ChevronDown, Search, Filter, Edit, Trash2 } from "lucide-react";
+import { Calendar, Plus, ChevronUp, ChevronDown, Search, Filter, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import type { Category, SessionSport, Section } from "../../types";
 
@@ -38,6 +38,7 @@ interface EnrichedSession extends Omit<SessionSport, 'categoryId'> {
 export function SectionSessionsListPage() {
   const { clubId, sectionId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/" });
   const [sessions, setSessions] = useState<EnrichedSession[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [sectionName, setSectionName] = useState("");
   const [sortField, setSortField] = useState<SortField>('startDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -52,10 +53,12 @@ export function SectionSessionsListPage() {
 
   useEffect(() => {
     const fetchSectionSessions = async () => {
-      const categories: Category[] = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`).then(res => res.json());
+      const categoriesData: Category[] = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`).then(res => res.json());
+      setCategories(categoriesData);
+      
       const result: EnrichedSession[] = [];
 
-      for (const cat of categories) {
+      for (const cat of categoriesData) {
         const catSessions: SessionSport[] = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`).then(res => res.json());
         result.push(...catSessions.map((s) => ({ ...s, categoryName: cat.name, categoryId: cat.id })));
       }
@@ -228,22 +231,50 @@ export function SectionSessionsListPage() {
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/admin/dashboard/clubs/$clubId/sections"
+              params={{ clubId }}
+            >
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Retour aux sections
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-3xl font-bold tracking-tight">Sessions de {sectionName}</h1>
           <p className="text-muted-foreground">
             Gérez les sessions de la section <span className="font-medium">{sectionName}</span>
           </p>
         </div>
-        {sessions.length > 0 && sessions[0].categoryId && (
-          <Link
-            to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
-            params={{ clubId, sectionId, categoryId: sessions[0].categoryId }}
-          >
-            <Button className="w-full md:w-auto">
-              <Plus className="mr-2 h-4 w-4" />
-              Créer une session
-            </Button>
-          </Link>
-        )}
+        <div className="flex flex-col gap-2 w-full md:w-auto">
+          {categories.length > 0 ? (
+            <Link
+              to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+              params={{ clubId, sectionId, categoryId: categories[0].id }}
+            >
+              <Button className="w-full md:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Créer une session
+              </Button>
+            </Link>
+          ) : (
+            <div className="text-center md:text-right">
+              <p className="text-sm text-muted-foreground mb-2">
+                Aucune catégorie trouvée. Créez d'abord une catégorie pour pouvoir ajouter des sessions.
+              </p>
+              <Link
+                to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+                params={{ clubId, sectionId }}
+              >
+                <Button variant="outline" className="w-full md:w-auto">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Créer une catégorie
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
       <Card>
