@@ -15,14 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { Section } from "../../types";
 
-const sectionSchema = z.object({
-  name: z.string().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
-  description: z.string().optional(),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "La couleur doit être au format hexadécimal (#000000)").optional(),
-});
-
-type SectionFormData = z.infer<typeof sectionSchema>;
-
 export function SectionForm({ 
   mode, 
   clubId, 
@@ -34,6 +26,34 @@ export function SectionForm({
 }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [existingSections, setExistingSections] = useState<Section[]>([]);
+  const [isLoadingExistingSections, setIsLoadingExistingSections] = useState(true);
+
+  // schéma de validation dynamique qui prend en compte les sections existantes
+  const createSectionSchema = (existingSections: Section[], currentSectionId?: string) => {
+    return z.object({
+      name: z.string()
+        .min(1, "Le nom est requis")
+        .max(100, "Le nom ne peut pas dépasser 100 caractères")
+        .refine((name) => {
+          // normalisation du nom pour la comparaison
+          const normalizedName = name.trim().toLowerCase();
+          
+          // vérifie si une section avec ce nom existe déjà
+          const duplicateSection = existingSections.find(section => 
+            section.name.trim().toLowerCase() === normalizedName && 
+            section.id !== currentSectionId // exclusion la section actuelle en mode édition
+          );
+          
+          return !duplicateSection;
+        }, "Une section avec ce nom existe déjà"),
+      description: z.string().optional(),
+      color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "La couleur doit être au format hexadécimal (#000000)").optional(),
+    });
+  };
+
+  const sectionSchema = createSectionSchema(existingSections, sectionId);
+  type SectionFormData = z.infer<typeof sectionSchema>;
   
   const form = useForm<SectionFormData>({
     resolver: zodResolver(sectionSchema),
@@ -44,8 +64,65 @@ export function SectionForm({
     },
   });
 
+  // récupération des sections existantes au chargement
   useEffect(() => {
-    if (mode === "edit" && sectionId) {
+    const fetchExistingSections = async () => {
+      try {
+        setIsLoadingExistingSections(true);
+        const response = await fetch(`/api/clubs/${clubId}/sections`);
+        if (!response.ok) throw new Error('Erreur lors du chargement des sections');
+        const sections: Section[] = await response.json();
+        setExistingSections(sections);
+      } catch (error) {
+        console.error('Erreur lors du chargement des sections:', error);
+        toast.error("Erreur lors du chargement des sections existantes");
+      } finally {
+        setIsLoadingExistingSections(false);
+      }
+    };
+
+    fetchExistingSections();
+  }, [clubId]);
+
+  // mise à jour du resolver du formulaire quand les sections existantes changent
+  useEffect(() => {
+    if (!isLoadingExistingSections) {
+      // récréation du formulaire avec les valeurs actuelles
+      const currentValues = form.getValues();
+      form.reset(currentValues);
+    }
+  }, [existingSections, isLoadingExistingSections, sectionId]);
+
+  // validation en temps réel pour les noms dupliqués
+  useEffect(() => {
+    const subscription = form.watch((value, { name: fieldName }) => {
+      if (fieldName === "name" && value.name && !isLoadingExistingSections) {
+        const normalizedName = value.name.trim().toLowerCase();
+        const duplicateSection = existingSections.find(section => 
+          section.name.trim().toLowerCase() === normalizedName && 
+          section.id !== sectionId
+        );
+        
+        if (duplicateSection) {
+          form.setError("name", {
+            type: "manual",
+            message: "Une section avec ce nom existe déjà"
+          });
+        } else {
+          // clean l'erreur si le nom n'est plus dupliqué
+          const currentError = form.formState.errors.name;
+          if (currentError && currentError.message === "Une section avec ce nom existe déjà") {
+            form.clearErrors("name");
+          }
+        }
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, existingSections, sectionId, isLoadingExistingSections]);
+
+  useEffect(() => {
+    if (mode === "edit" && sectionId && !isLoadingExistingSections) {
       setIsLoading(true);
       fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
         .then((res) => {
@@ -65,9 +142,24 @@ export function SectionForm({
         })
         .finally(() => setIsLoading(false));
     }
-  }, [mode, sectionId, clubId, form]);
+  }, [mode, sectionId, clubId, form, isLoadingExistingSections]);
 
   const onSubmit = async (data: SectionFormData) => {
+    // Validation manuelle supplémentaire pour les noms dupliqués
+    const normalizedName = data.name.trim().toLowerCase();
+    const duplicateSection = existingSections.find(section => 
+      section.name.trim().toLowerCase() === normalizedName && 
+      section.id !== sectionId
+    );
+    
+    if (duplicateSection) {
+      form.setError("name", {
+        type: "manual",
+        message: "Une section avec ce nom existe déjà"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const url = mode === "create" 
@@ -83,7 +175,15 @@ export function SectionForm({
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la sauvegarde');
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 409 || errorData.message?.includes('existe déjà')) {
+          form.setError("name", {
+            type: "manual",
+            message: "Une section avec ce nom existe déjà"
+          });
+          return;
+        }
+        throw new Error(errorData.message || 'Erreur lors de la sauvegarde');
       }
 
       toast.success(mode === "create" ? "Section créée avec succès !" : "Section modifiée avec succès !");
@@ -108,6 +208,21 @@ export function SectionForm({
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-6 w-6 animate-spin" />
               <span>Chargement de la section...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoadingExistingSections) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Chargement des données...</span>
             </div>
           </CardContent>
         </Card>
