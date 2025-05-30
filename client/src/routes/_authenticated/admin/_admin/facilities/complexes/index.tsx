@@ -7,7 +7,9 @@ interface ComplexesLoaderData {
 	complexes: Complex[];
 }
 
-export const Route = createFileRoute("/_authenticated/admin/_admin/facilities/complexes/")({
+export const Route = createFileRoute(
+	"/_authenticated/admin/_admin/facilities/complexes/",
+)({
 	component: ComplexesRoute,
 	loader: async ({ abortController }): Promise<ComplexesLoaderData> => {
 		try {

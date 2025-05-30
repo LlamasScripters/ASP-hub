@@ -31,7 +31,6 @@ import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_ve
 import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
 import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
 import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
-import { Route as AuthenticatedAdminAdminUsersCreateImport } from "./routes/_authenticated/admin/_admin.users.create"
 import { Route as AuthenticatednonadminNonadminUserUserImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user"
 import { Route as AuthenticatednonadminNonadminDashboardSocialImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
 import { Route as AuthenticatednonadminNonadminDashboardMembersImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
@@ -213,13 +212,6 @@ const AuthenticatednonadminNonadminDashboardIndexRoute =
     id: "/dashboard/",
     path: "/dashboard/",
     getParentRoute: () => AuthenticatednonadminNonadminRoute,
-  } as any)
-
-const AuthenticatedAdminAdminUsersCreateRoute =
-  AuthenticatedAdminAdminUsersCreateImport.update({
-    id: "/create",
-    path: "/create",
-    getParentRoute: () => AuthenticatedAdminAdminUsersRoute,
   } as any)
 
 const AuthenticatednonadminNonadminUserUserRoute =
@@ -642,13 +634,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatednonadminNonadminUserUserImport
       parentRoute: typeof AuthenticatednonadminNonadminUserRoute
     }
-    "/_authenticated/admin/_admin/users/create": {
-      id: "/_authenticated/admin/_admin/users/create"
-      path: "/create"
-      fullPath: "/admin/users/create"
-      preLoaderRoute: typeof AuthenticatedAdminAdminUsersCreateImport
-      parentRoute: typeof AuthenticatedAdminAdminUsersImport
-    }
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
       id: "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
       path: "/dashboard"
@@ -924,23 +909,8 @@ const AuthenticatednonadminRouteWithChildren =
     AuthenticatednonadminRouteChildren,
   )
 
-interface AuthenticatedAdminAdminUsersRouteChildren {
-  AuthenticatedAdminAdminUsersCreateRoute: typeof AuthenticatedAdminAdminUsersCreateRoute
-}
-
-const AuthenticatedAdminAdminUsersRouteChildren: AuthenticatedAdminAdminUsersRouteChildren =
-  {
-    AuthenticatedAdminAdminUsersCreateRoute:
-      AuthenticatedAdminAdminUsersCreateRoute,
-  }
-
-const AuthenticatedAdminAdminUsersRouteWithChildren =
-  AuthenticatedAdminAdminUsersRoute._addFileChildren(
-    AuthenticatedAdminAdminUsersRouteChildren,
-  )
-
 interface AuthenticatedAdminAdminRouteChildren {
-  AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRouteWithChildren
+  AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminDashboardClubsCreateRoute: typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   AuthenticatedAdminAdminFacilitiesComplexesCreateRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
@@ -971,8 +941,7 @@ interface AuthenticatedAdminAdminRouteChildren {
 
 const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren =
   {
-    AuthenticatedAdminAdminUsersRoute:
-      AuthenticatedAdminAdminUsersRouteWithChildren,
+    AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
     AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
     AuthenticatedAdminAdminDashboardClubsCreateRoute:
       AuthenticatedAdminAdminDashboardClubsCreateRoute,
@@ -1120,7 +1089,7 @@ export interface FileRoutesByFullPath {
   "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
   "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
   "/auth/verify/": typeof AuthVerifyIndexRoute
-  "/admin/users": typeof AuthenticatedAdminAdminUsersRouteWithChildren
+  "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1128,7 +1097,6 @@ export interface FileRoutesByFullPath {
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
-  "/admin/users/create": typeof AuthenticatedAdminAdminUsersCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
@@ -1170,14 +1138,13 @@ export interface FileRoutesByTo {
   "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
   "/auth/verify": typeof AuthVerifyIndexRoute
-  "/admin/users": typeof AuthenticatedAdminAdminUsersRouteWithChildren
+  "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
   "/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
-  "/admin/users/create": typeof AuthenticatedAdminAdminUsersCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
@@ -1227,7 +1194,7 @@ export interface FileRoutesById {
   "/auth/verify": typeof AuthVerifyRouteWithChildren
   "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
   "/auth/verify/": typeof AuthVerifyIndexRoute
-  "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRouteWithChildren
+  "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
   "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
   "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1236,7 +1203,6 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/_authenticated/(nonadmin)/_nonadmin/user": typeof AuthenticatednonadminNonadminUserRouteWithChildren
   "/_authenticated/(nonadmin)/_nonadmin/user/_user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
-  "/_authenticated/admin/_admin/users/create": typeof AuthenticatedAdminAdminUsersCreateRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/": typeof AuthenticatednonadminNonadminDashboardIndexRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
@@ -1290,7 +1256,6 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
-    | "/admin/users/create"
     | "/dashboard"
     | "/user/profile"
     | "/user/settings"
@@ -1338,7 +1303,6 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
-    | "/admin/users/create"
     | "/dashboard"
     | "/user/profile"
     | "/user/settings"
@@ -1395,7 +1359,6 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
     | "/_authenticated/(nonadmin)/_nonadmin/user"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user"
-    | "/_authenticated/admin/_admin/users/create"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
@@ -1585,10 +1548,7 @@ export const routeTree = rootRoute
     },
     "/_authenticated/admin/_admin/users": {
       "filePath": "_authenticated/admin/_admin.users.tsx",
-      "parent": "/_authenticated/admin/_admin",
-      "children": [
-        "/_authenticated/admin/_admin/users/create"
-      ]
+      "parent": "/_authenticated/admin/_admin"
     },
     "/auth/verify/_verify/error": {
       "filePath": "auth/verify/_verify.error.tsx",
@@ -1628,10 +1588,6 @@ export const routeTree = rootRoute
         "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile",
         "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
       ]
-    },
-    "/_authenticated/admin/_admin/users/create": {
-      "filePath": "_authenticated/admin/_admin.users.create.tsx",
-      "parent": "/_authenticated/admin/_admin/users"
     },
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
       "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/index.tsx",

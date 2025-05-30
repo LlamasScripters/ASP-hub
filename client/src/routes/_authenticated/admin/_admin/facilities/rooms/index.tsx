@@ -7,7 +7,9 @@ interface RoomsLoaderData {
 	rooms: Room[];
 }
 
-export const Route = createFileRoute("/_authenticated/admin/_admin/facilities/rooms/")({
+export const Route = createFileRoute(
+	"/_authenticated/admin/_admin/facilities/rooms/",
+)({
 	component: RoomsComponent,
 	loader: async ({ abortController }): Promise<RoomsLoaderData> => {
 		try {

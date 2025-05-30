@@ -1,4 +1,5 @@
 import GoogleIcon from "@/components/icons/GoogleIcon";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -27,7 +28,7 @@ import {
 import { queryClient } from "@/lib/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Mail, Shield, Trash2, UserIcon } from "lucide-react";
+import { AlertCircleIcon, Mail, Shield, Trash2, UserIcon } from "lucide-react";
 import { useId } from "react";
 import { toast } from "sonner";
 import { listAccountsQueryOptions } from "../users.config";
@@ -46,7 +47,7 @@ const socialProviders: Record<string, SocialProvider> = {
 	},
 };
 
-function UserAccountLoading() {
+function UserAccountsLoading() {
 	const id = useId();
 
 	return (
@@ -62,7 +63,6 @@ function UserAccountLoading() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-					{/* Loading Credential Account */}
 					<div className="flex items-center justify-between p-4 border rounded-lg">
 						<div className="flex items-center gap-3">
 							<Skeleton className="h-10 w-10 rounded-full" />
@@ -113,7 +113,7 @@ function UserAccountError() {
 	);
 }
 
-export default function UserAccountsCard({
+export default function UserAccounts({
 	user,
 }: {
 	user: UserLoggedIn;
@@ -124,7 +124,7 @@ export default function UserAccountsCard({
 		isError,
 	} = useQuery(listAccountsQueryOptions(user.id));
 
-	if (isPending) return <UserAccountLoading />;
+	if (isPending) return <UserAccountsLoading />;
 	if (isError || !accounts) return <UserAccountError />;
 
 	const hasCredentialAccount = accounts.some(
@@ -167,7 +167,18 @@ export default function UserAccountsCard({
 					Gérez les comptes sociaux liés à votre profil
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="space-y-4">
+				{!hasCredentialAccount && socialAccounts.length > 0 && (
+					<Alert variant="default">
+						<AlertCircleIcon className="size-4" />
+						<AlertTitle>Attention</AlertTitle>
+						<AlertDescription>
+							Vous ne pouvez pas déconnecter vos comptes sociaux car vous n'avez
+							pas de compte email configuré. Pour plus de sécurité, configurez
+							d'abord un mot de passe depuis la page des paramètres.
+						</AlertDescription>
+					</Alert>
+				)}
 				<div className="space-y-4">
 					{hasCredentialAccount && (
 						<div className="flex items-center justify-between p-4 border rounded-lg">
@@ -181,9 +192,6 @@ export default function UserAccountsCard({
 										Connexion avec email et mot de passe
 									</p>
 								</div>
-							</div>
-							<div className="text-sm text-muted-foreground">
-								Compte principal
 							</div>
 						</div>
 					)}
@@ -248,33 +256,10 @@ export default function UserAccountsCard({
 										</AlertDialogContent>
 									</AlertDialog>
 								)}
-								{!hasCredentialAccount && (
-									<div className="text-sm text-muted-foreground">
-										Compte principal
-									</div>
-								)}
 							</div>
 						);
 					})}
-
-					{socialAccounts.length === 0 && !hasCredentialAccount && (
-						<div className="text-center py-8 text-muted-foreground">
-							<UserIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-							<p>Aucun compte connecté</p>
-						</div>
-					)}
 				</div>
-
-				{!hasCredentialAccount && socialAccounts.length > 0 && (
-					<div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-						<p className="text-sm text-amber-800">
-							<Shield className="h-4 w-4 inline mr-1" />
-							Vous ne pouvez pas déconnecter vos comptes sociaux car vous n'avez
-							pas de compte email configuré. Pour plus de sécurité, configurez
-							d'abord un mot de passe depuis la page des paramètres.
-						</p>
-					</div>
-				)}
 			</CardContent>
 		</Card>
 	);

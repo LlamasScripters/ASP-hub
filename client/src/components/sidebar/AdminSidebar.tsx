@@ -10,7 +10,13 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
-import { Building2, HomeIcon, type LucideIcon, Shield, UsersIcon } from "lucide-react";
+import {
+	Building2,
+	HomeIcon,
+	type LucideIcon,
+	Shield,
+	UsersIcon,
+} from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "./NavUser";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
@@ -40,8 +46,8 @@ const navigationItems: NavAdminContentItem[] = [
 	{
 		url: "/admin/dashboard/clubs",
 		title: "Clubs",
-		icon: Shield
-	}
+		icon: Shield,
+	},
 ];
 
 export function AdminSidebar({

@@ -12,7 +12,13 @@
 		"lint:fix": "biome check  --write .",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio --config drizzle-dev.config.ts"
+		"db:studio": "drizzle-kit studio --config drizzle-dev.config.ts",
+		"db:generate:dev": "drizzle-kit generate --config drizzle-dev.config.ts",
+		"db:generate:prod": "drizzle-kit generate",
+		"db:migrate:dev": "drizzle-kit migrate --config drizzle-dev.config.ts",
+		"db:migrate:prod": "drizzle-kit migrate",
+		"db:studio:dev": "drizzle-kit studio --config drizzle-dev.config.ts",
+		"db:studio:prod": "drizzle-kit studio"
 	},
 	"keywords": [],
 	"author": "",
