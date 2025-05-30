@@ -63,9 +63,7 @@ export const roomsPaginatedResponseSchema = z.object({
 export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
-export type RoomsPaginatedResponse = z.infer<
-	typeof roomsPaginatedResponseSchema
->;
+export type RoomsPaginatedResponse = z.infer<typeof roomsPaginatedResponseSchema>;
 
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
 

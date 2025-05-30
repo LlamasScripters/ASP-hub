@@ -24,6 +24,16 @@ const roomQuerySchema = z
 		limit: Number.parseInt(data.limit || "20", 10),
 	}));
 
+const reservationQuerySchema = z
+	.object({
+		startDate: z.string().optional(),
+		endDate: z.string().optional(),
+	})
+	.transform((data) => ({
+		startDate: data.startDate ? new Date(data.startDate) : new Date(new Date().setDate(1)), // First day of current month
+		endDate: data.endDate ? new Date(data.endDate) : new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
+	}));
+
 //@ts-ignore
 roomsRouter.get("/", async (req: Request, res: Response) => {
 	const query = roomQuerySchema.safeParse(req.query);
@@ -51,11 +61,25 @@ roomsRouter.get("/:id", async (req: Request, res: Response) => {
 
 //@ts-ignore
 roomsRouter.get("/:id/reservations", async (req: Request, res: Response) => {
-	const reservations = await reservationsService.getByRoomId(req.params.id);
-	if (!reservations || reservations.length === 0) {
-		return res.status(404).json({ error: "No reservations found for this complex" });
+	const query = reservationQuerySchema.safeParse(req.query);
+	if (!query.success) {
+		return res.status(400).json({ error: query.error.flatten() });
 	}
-	res.json(reservations);
+
+	const { startDate, endDate } = query.data;
+	if (startDate >= endDate) {
+		return res.status(400).json({ error: "Start date must be before end date" });
+	}
+
+	const room = await roomsService.getById(req.params.id);
+	if (!room) return res.status(404).json({ error: "Room not found" });
+
+	const reservations = await reservationsService.getPaginatedByRoomAndDateRange(
+		req.params.id,
+		startDate,
+		endDate,
+	);
+	return res.json(reservations);
 });
 
 //@ts-ignore
