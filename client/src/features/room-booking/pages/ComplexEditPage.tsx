@@ -174,7 +174,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 				<ComplexForm
 					complex={initialComplex}
 					onSuccess={handleSuccess}
-					onCancelLink={`/admin/facilities/complexes/${initialComplex.id}`}
+					onCancelLink={`/admin/facilities/complexes/${initialComplex.id}?view=rooms`}
 				/>
 			</div>
 		</div>
