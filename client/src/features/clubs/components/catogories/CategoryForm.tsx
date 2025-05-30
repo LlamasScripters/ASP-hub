@@ -19,12 +19,38 @@ const schema = z.object({
   ageMin: z.number().int().nonnegative().optional(),
   ageMax: z.number().int().nonnegative().optional(),
 }).refine((data) => {
+  // si on un âge est défini, l'autre doit l'être aussi
+  if ((data.ageMin !== undefined) !== (data.ageMax !== undefined)) {
+    return false;
+  }
+  // si les deux sont définis, âge min doit être inférieur à ou égal à âge max
+  if (data.ageMin !== undefined && data.ageMax !== undefined) {
+    if (data.ageMin > data.ageMax) {
+      return false;
+    }
+    if (data.ageMin === data.ageMax) {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum",
+  path: ["ageRange"]
+}).refine((data) => {
   if (data.ageMin !== undefined && data.ageMax !== undefined) {
     return data.ageMin <= data.ageMax;
   }
   return true;
 }, {
-  message: "L'âge minimum doit être inférieur ou égal à l'âge maximum",
+  message: "L'âge minimum doit être inférieur à l'âge maximum",
+  path: ["ageMax"]
+}).refine((data) => {
+  if (data.ageMin !== undefined && data.ageMax !== undefined) {
+    return data.ageMin !== data.ageMax;
+  }
+  return true;
+}, {
+  message: "L'âge minimum et maximum ne peuvent pas être identiques",
   path: ["ageMax"]
 });
 
@@ -44,8 +70,14 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
     }
   }, [mode, categoryId, clubId, sectionId]);
 
-  // Validation en temps réel des âges
+  // validation en temps réel des âges
   const validateAgeRange = (ageMin?: number, ageMax?: number) => {
+    // si un âge est défini, l'autre doit l'être aussi
+    if ((ageMin !== undefined) !== (ageMax !== undefined)) {
+      return "Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum";
+    }
+    
+    // si les deux sont définis, validation de cohérence
     if (ageMin !== undefined && ageMax !== undefined) {
       if (ageMin > ageMax) {
         return "L'âge minimum ne peut pas être supérieur à l'âge maximum";
@@ -54,11 +86,13 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
         return "L'âge minimum et maximum ne peuvent pas être identiques";
       }
     }
+    
     return null;
   };
 
   const ageRangeError = validateAgeRange(form.ageMin, form.ageMax);
   const isValidAgeRange = form.ageMin !== undefined && form.ageMax !== undefined && !ageRangeError;
+  const hasPartialAge = (form.ageMin !== undefined) !== (form.ageMax !== undefined);
 
   const handleAgeMinChange = (value: string) => {
     const ageMin = value ? Number(value) : undefined;
@@ -75,7 +109,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
     setErrors({});
     setIsLoading(true);
 
-    // Validation côté client
+    // validation côté client
     if (ageRangeError) {
       setErrors({ ageRange: ageRangeError });
       setIsLoading(false);
@@ -271,7 +305,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                 {isValidAgeRange && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-700">
-                      Cette catégorie acceptera les participants âgés de{" "}
+                      ✅ Cette catégorie acceptera les participants âgés de{" "}
                       <span className="font-semibold">
                         {form.ageMin} à {form.ageMax} ans
                       </span>
@@ -284,11 +318,22 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                   </div>
                 )}
 
+                {/* Avertissement pour âge partiel */}
+                {hasPartialAge && (
+                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-sm text-orange-700">
+                      ⚠️ <strong>Attention :</strong> Vous devez remplir à la fois l'âge minimum et maximum pour définir une limite d'âge, ou laisser les deux champs vides pour une catégorie sans restriction.
+                    </p>
+                  </div>
+                )}
+
                 {/* Aide pour les tranches d'âge */}
                 {!form.ageMin && !form.ageMax && (
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-700">
-                      💡 <strong>Conseil :</strong> Laissez vide pour une catégorie sans restriction d'âge, ou définissez une tranche pour cibler un groupe spécifique.
+                      💡 <strong>Options disponibles :</strong>
+                      <br />• Laissez vide pour une catégorie <strong>sans restriction d'âge</strong>
+                      <br />• Ou remplissez <strong>les deux champs</strong> pour définir une tranche d'âge spécifique
                     </p>
                   </div>
                 )}

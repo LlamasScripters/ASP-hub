@@ -45,6 +45,11 @@ export function CategoriesListPage() {
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // fonction pour vérifier si un âge est valide
+  const isValidAge = (age: number | undefined | null): age is number => {
+    return age !== undefined && age !== null && age >= 0;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       // Fetch categories
@@ -84,11 +89,21 @@ export function CategoriesListPage() {
   const filteredAndSortedCategories = useMemo(() => {
     let filtered = categories.filter(category => {
       const nameMatch = category.name.toLowerCase().includes(filters.name.toLowerCase());
-      const ageMinMatch = filters.ageMin === '' || (category.ageMin !== undefined && category.ageMin.toString().includes(filters.ageMin));
-      const ageMaxMatch = filters.ageMax === '' || (category.ageMax !== undefined && category.ageMax.toString().includes(filters.ageMax));
+      
+      // amélioration du filtrage pour les âges undefined
+      const ageMinMatch = filters.ageMin === '' || 
+        (isValidAge(category.ageMin) && category.ageMin.toString().includes(filters.ageMin)) ||
+        (!isValidAge(category.ageMin) && filters.ageMin.toLowerCase().includes('non'));
+        
+      const ageMaxMatch = filters.ageMax === '' || 
+        (isValidAge(category.ageMax) && category.ageMax.toString().includes(filters.ageMax)) ||
+        (!isValidAge(category.ageMax) && filters.ageMax.toLowerCase().includes('non'));
+        
       const ageRangeMatch = filters.ageRange === '' || 
-        (category.ageMin !== undefined && category.ageMax !== undefined && 
-         `${category.ageMin} → ${category.ageMax}`.includes(filters.ageRange));
+        (isValidAge(category.ageMin) && isValidAge(category.ageMax) && 
+         `${category.ageMin} - ${category.ageMax}`.includes(filters.ageRange)) ||
+        (!isValidAge(category.ageMin) || !isValidAge(category.ageMax)) && 
+         filters.ageRange.toLowerCase().includes('non');
 
       return nameMatch && ageMinMatch && ageMaxMatch && ageRangeMatch;
     });
@@ -104,12 +119,12 @@ export function CategoriesListPage() {
           bValue = b.name.toLowerCase();
           break;
         case 'ageMin':
-          aValue = a.ageMin ?? 0;
-          bValue = b.ageMin ?? 0;
+          aValue = isValidAge(a.ageMin) ? a.ageMin : -1; // -1 pour que les undefined soient en premier
+          bValue = isValidAge(b.ageMin) ? b.ageMin : -1;
           break;
         case 'ageMax':
-          aValue = a.ageMax ?? 0;
-          bValue = b.ageMax ?? 0;
+          aValue = isValidAge(a.ageMax) ? a.ageMax : -1; // -1 pour que les undefined soient en premier
+          bValue = isValidAge(b.ageMax) ? b.ageMax : -1;
           break;
         default:
           return 0;
@@ -236,7 +251,7 @@ export function CategoriesListPage() {
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">Tranche d'âge</label>
                 <Input
-                  placeholder="Ex: 12 → 18"
+                  placeholder="Ex: 12 - 18"
                   value={filters.ageRange}
                   onChange={(e) => handleFilterChange('ageRange', e.target.value)}
                   className="h-8"
@@ -295,30 +310,34 @@ export function CategoriesListPage() {
                     <TableRow key={c.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-medium text-foreground">{c.name}</TableCell>
                       <TableCell>
-                        {c.ageMin !== undefined ? (
+                        {isValidAge(c.ageMin) ? (
                           <Badge variant="secondary" className="font-mono">
                             {c.ageMin} ans
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Non défini</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {c.ageMax !== undefined ? (
+                        {isValidAge(c.ageMax) ? (
                           <Badge variant="secondary" className="font-mono">
                             {c.ageMax} ans
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Non défini</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {c.ageMin !== undefined && c.ageMax !== undefined ? (
+                        {isValidAge(c.ageMin) && isValidAge(c.ageMax) ? (
                           <Badge variant="outline" className="font-mono">
-                            {c.ageMin} → {c.ageMax} ans
+                            {c.ageMin} - {c.ageMax} ans
+                          </Badge>
+                        ) : isValidAge(c.ageMin) || isValidAge(c.ageMax) ? (
+                          <Badge variant="outline" className="font-mono text-muted-foreground">
+                            {isValidAge(c.ageMin) ? c.ageMin : '-'} - {isValidAge(c.ageMax) ? c.ageMax : '-'} ans
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Non défini</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
