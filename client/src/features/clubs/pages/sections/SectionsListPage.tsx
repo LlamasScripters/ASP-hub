@@ -1,6 +1,6 @@
 // client/src/features/clubs/pages/sections/SectionsListPage.tsx
 import { useEffect, useState } from "react";
-import { useParams, Link } from "@tanstack/react-router";
+import { useParams, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,12 +25,17 @@ interface EnrichedSection extends Section {
 
 export function SectionsListPage() {
   const { clubId } = useParams({ from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/" });
+  const navigate = useNavigate();
   const [sections, setSections] = useState<EnrichedSection[]>([]);
   const [allCategories, setAllCategories] = useState<any[]>([]);
   const [categoriesCountBySection, setCategoriesCountBySection] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [deleteSection, setDeleteSection] = useState<EnrichedSection | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleGoBack = () => {
+    navigate({ to: "..", });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -152,13 +157,12 @@ export function SectionsListPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <Link 
-                to="/admin/dashboard/clubs/$clubId" 
-                params={{ clubId }}
+              <button 
+                onClick={handleGoBack}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="h-6 w-6" />
-              </Link>
+              </button>
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
                 <FolderOpen className="h-8 w-8 text-primary" />
                 Sections du club
