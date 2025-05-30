@@ -98,7 +98,9 @@ export function ClubForm({ mode, clubId }: { mode: "create" | "edit"; clubId?: s
       }
 
       toast.success(mode === "create" ? "Club créé avec succès !" : "Club modifié avec succès !");
-      navigate({ to: "/admin/dashboard/clubs" });
+      
+      // Redirection vers la page précédente
+      navigate({ to: "..", replace: true });
     } catch (error) {
       console.error('Erreur:', error);
       toast.error("Une erreur est survenue lors de la sauvegarde");
@@ -108,7 +110,8 @@ export function ClubForm({ mode, clubId }: { mode: "create" | "edit"; clubId?: s
   };
 
   const handleCancel = () => {
-    navigate({ to: "/admin/dashboard/clubs" });
+    // Redirection vers la page précédente
+    navigate({ to: "..", replace: true });
   };
 
   if (isLoading && mode === "edit") {
