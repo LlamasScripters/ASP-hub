@@ -2,7 +2,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -33,13 +33,9 @@ export function RoomCreatePage({ complex }: RoomCreatePageProps) {
 						Nouvelle salle pour le complexe {complex.name}
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					asChild
-				>
-					<Link 
-						to="/admin/facilities/complexes/$complexId" 
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						to="/admin/facilities/complexes/$complexId"
 						params={{ complexId: complex.id }}
 					>
 						<ArrowLeft className="w-4 h-4 mr-2" />

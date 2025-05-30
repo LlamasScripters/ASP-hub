@@ -1,13 +1,15 @@
+import { ComplexesPage } from "@/features/room-booking/pages/ComplexesPage";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import { complexesApi } from "@room-booking/lib/api/complexes";
-import { ComplexesPage } from "@/features/room-booking/pages/ComplexesPage";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 interface ComplexesLoaderData {
 	complexes: Complex[];
 }
 
-export const Route = createFileRoute("/_authenticated/admin/_admin/facilities/complexes/")({
+export const Route = createFileRoute(
+	"/_authenticated/admin/_admin/facilities/complexes/",
+)({
 	component: ComplexesRoute,
 	loader: async ({ abortController }): Promise<ComplexesLoaderData> => {
 		try {

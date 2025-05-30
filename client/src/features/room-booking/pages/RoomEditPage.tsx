@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -38,13 +38,9 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 						{complex.name}
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					asChild
-				>
-					<Link 
-						to="/admin/facilities/complexes/$complexId" 
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						to="/admin/facilities/complexes/$complexId"
 						params={{ complexId: complex.id }}
 					>
 						<ArrowLeft className="w-4 h-4 mr-2" />

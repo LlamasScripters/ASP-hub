@@ -10,6 +10,7 @@ import {
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	ArrowLeft,
@@ -18,7 +19,6 @@ import {
 	// @ts-ignore
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
 interface ComplexEditPageProps {
 	initialComplex: Complex;
@@ -65,11 +65,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						asChild
-					>
+					<Button variant="outline" size="sm" asChild>
 						<Link to="/admin/facilities/complexes">
 							<ArrowLeft className="w-4 h-4 mr-2" />
 							Retour à la liste

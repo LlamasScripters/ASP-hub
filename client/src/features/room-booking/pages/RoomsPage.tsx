@@ -150,10 +150,11 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 				)}
 
 				{filteredRooms.map((room) => (
-					<Link to='/admin/facilities/rooms/$roomId' 
-						params={{ roomId: room.id }} key={room.id}
+					<Link
+						to="/admin/facilities/rooms/$roomId"
+						params={{ roomId: room.id }}
+						key={room.id}
 					>
-					
 						<Card
 							key={room.id}
 							className="cursor-pointer hover:shadow-lg transition-shadow"

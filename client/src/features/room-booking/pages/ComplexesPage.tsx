@@ -463,9 +463,7 @@ export function ComplexesPage({
 				</TabsContent>
 
 				<TabsContent value="complexes" className="space-y-4">
-					<ComplexList
-						initialComplexes={initialComplexes}
-					/>
+					<ComplexList initialComplexes={initialComplexes} />
 				</TabsContent>
 
 				<TabsContent value="statistics" className="space-y-4">

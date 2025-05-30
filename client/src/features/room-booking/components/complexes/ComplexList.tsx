@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { useComplexes } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
+import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Building,
@@ -42,15 +43,12 @@ import {
 	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
 interface ComplexListProps {
 	initialComplexes?: Complex[];
 }
 
-export function ComplexList({
-	initialComplexes = [],
-}: ComplexListProps) {
+export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const {
@@ -246,7 +244,7 @@ export function ComplexList({
 														<DropdownMenuItem asChild>
 															<Link
 																to={"/admin/facilities/complexes/$complexId"}
-																params={{complexId: complex.id}}
+																params={{ complexId: complex.id }}
 																className="w-full cursor-pointer"
 															>
 																Voir les détails
@@ -254,8 +252,10 @@ export function ComplexList({
 														</DropdownMenuItem>
 														<DropdownMenuItem asChild>
 															<Link
-																to={"/admin/facilities/complexes/$complexId/edit"}
-																params={{complexId: complex.id}}
+																to={
+																	"/admin/facilities/complexes/$complexId/edit"
+																}
+																params={{ complexId: complex.id }}
 																className="w-full cursor-pointer"
 															>
 																Modifier

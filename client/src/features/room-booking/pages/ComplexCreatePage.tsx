@@ -1,7 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, Building, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -30,11 +30,7 @@ export function ComplexCreatePage() {
 						Remplissez les informations pour ajouter un nouveau complexe
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					asChild
-				>
+				<Button variant="outline" size="sm" asChild>
 					<Link to="/admin/facilities/complexes">
 						<ArrowLeft className="w-4 h-4 mr-2" />
 						Retour à la liste
@@ -60,7 +56,10 @@ export function ComplexCreatePage() {
 				</AlertDescription>
 			</Alert>
 
-			<ComplexForm onSuccess={handleSuccess} onCancelLink="/admin/facilities/complexes" />
+			<ComplexForm
+				onSuccess={handleSuccess}
+				onCancelLink="/admin/facilities/complexes"
+			/>
 		</div>
 	);
 }

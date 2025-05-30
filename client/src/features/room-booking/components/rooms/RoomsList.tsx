@@ -45,10 +45,7 @@ interface RoomsListProps {
 	initialRooms: Room[];
 }
 
-export function RoomsList({
-	complexId,
-	initialRooms,
-}: RoomsListProps) {
+export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const { rooms, loading, error, updateFilters, deleteRoom } = useRooms({

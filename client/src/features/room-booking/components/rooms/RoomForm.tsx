@@ -37,6 +37,7 @@ import type {
 	Room,
 	UpdateRoomData,
 } from "@room-booking/hooks/useRooms";
+import { Link } from "@tanstack/react-router";
 import {
 	Info,
 	Loader2,
@@ -46,7 +47,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "@tanstack/react-router";
 
 const sportTypes = [
 	"Football",
@@ -260,14 +260,8 @@ export function RoomForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							<Button
-								variant="outline"
-								size="sm"
-								asChild
-							>
-								<Link to={onCancelLink} >
-									Annuler
-								</Link>
+							<Button variant="outline" size="sm" asChild>
+								<Link to={onCancelLink}>Annuler</Link>
 							</Button>
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? (

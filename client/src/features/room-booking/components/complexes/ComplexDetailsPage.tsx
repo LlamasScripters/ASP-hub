@@ -346,10 +346,7 @@ export function ComplexDetailsPage({
 				</TabsContent>
 
 				<TabsContent value="rooms" className="space-y-4">
-					<RoomsList
-						complexId={complex.id}
-						initialRooms={initialRooms}
-					/>
+					<RoomsList complexId={complex.id} initialRooms={initialRooms} />
 				</TabsContent>
 
 				<TabsContent value="planning" className="space-y-4">

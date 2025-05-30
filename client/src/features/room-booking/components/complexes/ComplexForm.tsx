@@ -23,6 +23,7 @@ import type {
 	CreateComplexData,
 	UpdateComplexData,
 } from "@room-booking/hooks/useComplexes.js";
+import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Car,
@@ -34,7 +35,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "@tanstack/react-router";
 
 interface ComplexFormProps {
 	complex?: Complex;
@@ -302,14 +302,8 @@ export function ComplexForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							<Button
-								variant="outline"
-								size="sm"
-								asChild
-							>
-								<Link to={onCancelLink} >
-									Annuler
-								</Link>
+							<Button variant="outline" size="sm" asChild>
+								<Link to={onCancelLink}>Annuler</Link>
 							</Button>
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? (

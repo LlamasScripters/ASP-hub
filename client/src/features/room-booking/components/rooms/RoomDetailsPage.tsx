@@ -18,7 +18,6 @@ interface RoomDetailsPageProps {
 }
 
 export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
-
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -29,7 +28,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 					</p>
 				</div>
 				<Button asChild variant="outline" size="sm">
-					<Link 
+					<Link
 						to="/admin/facilities/complexes/$complexId"
 						params={{ complexId: complex.id }}
 					>
