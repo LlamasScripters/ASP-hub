@@ -1,7 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, Building, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -19,11 +19,6 @@ export function ComplexCreatePage() {
 		}, 1500);
 	};
 
-	const handleCancel = () => {
-		setIsNavigating(true);
-		navigate({ to: "/admin/facilities/complexes" });
-	};
-
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -38,11 +33,12 @@ export function ComplexCreatePage() {
 				<Button
 					variant="outline"
 					size="sm"
-					onClick={handleCancel}
-					disabled={isNavigating}
+					asChild
 				>
-					<ArrowLeft className="w-4 h-4 mr-2" />
-					Retour à la liste
+					<Link to="/admin/facilities/complexes">
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour à la liste
+					</Link>
 				</Button>
 			</div>
 
@@ -64,7 +60,7 @@ export function ComplexCreatePage() {
 				</AlertDescription>
 			</Alert>
 
-			<ComplexForm onSuccess={handleSuccess} onCancel={handleCancel} />
+			<ComplexForm onSuccess={handleSuccess} onCancelLink="/admin/facilities/complexes" />
 		</div>
 	);
 }

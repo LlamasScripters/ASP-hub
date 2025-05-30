@@ -15,7 +15,6 @@ import {
 	useComplexes,
 } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -43,7 +42,6 @@ export function ComplexesPage({
 	initialView = "overview",
 	initialComplexes = [],
 }: ComplexesPageProps) {
-	const navigate = useNavigate();
 	const [currentView, setCurrentView] = useState<ViewMode>(initialView);
 	const [selectedComplex, setSelectedComplex] = useState<Complex | null>(null);
 
@@ -114,19 +112,6 @@ export function ComplexesPage({
 
 	const handleRefresh = async () => {
 		await Promise.all([refreshComplexes(), refreshStats()]);
-	};
-
-	const handleCreateClick = () => {
-		navigate({ to: "/admin/facilities/complexes/create" });
-	};
-
-	const handleEditClick = (complexId: string) => {
-		const complex = initialComplexes.find((c) => c.id === complexId);
-		if (complex) {
-			navigate({ to: `/admin/facilities/complexes/${complexId}/edit` });
-		} else {
-			console.error(`Complex with id ${complexId} not found`);
-		}
 	};
 
 	const getActionIcon = (type: string) => {
@@ -480,8 +465,6 @@ export function ComplexesPage({
 				<TabsContent value="complexes" className="space-y-4">
 					<ComplexList
 						initialComplexes={initialComplexes}
-						onCreateClick={handleCreateClick}
-						onEditClick={handleEditClick}
 					/>
 				</TabsContent>
 

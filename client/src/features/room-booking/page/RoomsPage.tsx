@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	CalendarDays,
 	Filter,
@@ -35,7 +35,6 @@ interface RoomsPageProps {
 }
 
 export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
-	const navigate = useNavigate();
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState<string>("all");
 
@@ -52,14 +51,6 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 		});
 	}, [search, filterType, initialRooms]);
 
-	const handleView = (roomId: string, complexId: string) => {
-		navigate({ to: `/admin/facilities/complexes/${complexId}/rooms/${roomId}` });
-	};
-
-	const handleCreate = () => {
-		navigate({ to: "/admin/facilities/complexes" });
-	};
-
 	const totalRooms = initialRooms.length;
 	const totalIndoor = initialRooms.filter((r) => r.isIndoor).length;
 	const totalOutdoor = totalRooms - totalIndoor;
@@ -75,8 +66,10 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 						Liste de toutes les salles enregistrées dans les complexes
 					</p>
 				</div>
-				<Button onClick={handleCreate} className="w-full md:w-auto">
-					<Plus className="w-4 h-4 mr-2" /> Nouvelle salle
+				<Button asChild>
+					<Link to="/admin/facilities/complexes">
+						<Plus className="w-4 h-4 mr-2" /> Nouvelle salle
+					</Link>
 				</Button>
 			</div>
 
@@ -157,28 +150,32 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 				)}
 
 				{filteredRooms.map((room) => (
-					<Card
-						key={room.id}
-						className="cursor-pointer hover:shadow-lg transition-shadow"
-						onClick={() => handleView(room.id, room.complexId)}
+					<Link to='/admin/facilities/rooms/$roomId' 
+						params={{ roomId: room.id }} key={room.id}
 					>
-						<CardHeader>
-							<CardTitle className="flex items-center justify-between">
-								{room.name}
-								<Badge variant="outline">
-									{room.isIndoor ? "Intérieur" : "Extérieur"}
-								</Badge>
-							</CardTitle>
-							<CardDescription className="text-xs text-muted-foreground">
-								{room.sportType || "Sport non précisé"}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<p className="text-sm text-muted-foreground">
-								{"Aucune description fournie."}
-							</p>
-						</CardContent>
-					</Card>
+					
+						<Card
+							key={room.id}
+							className="cursor-pointer hover:shadow-lg transition-shadow"
+						>
+							<CardHeader>
+								<CardTitle className="flex items-center justify-between">
+									{room.name}
+									<Badge variant="outline">
+										{room.isIndoor ? "Intérieur" : "Extérieur"}
+									</Badge>
+								</CardTitle>
+								<CardDescription className="text-xs text-muted-foreground">
+									{room.sportType || "Sport non précisé"}
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<p className="text-sm text-muted-foreground">
+									{"Aucune description fournie."}
+								</p>
+							</CardContent>
+						</Card>
+					</Link>
 				))}
 			</div>
 		</div>

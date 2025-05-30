@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 // @ts-ignore
 import { ArrowLeft, Building, Calendar, Info } from "lucide-react";
 
@@ -18,11 +18,6 @@ interface RoomDetailsPageProps {
 }
 
 export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
-	const navigate = useNavigate();
-
-	const handleBack = () => {
-		navigate({ to: `/admin/facilities/complexes/${complex.id}` });
-	};
 
 	return (
 		<div className="space-y-6">
@@ -33,9 +28,14 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 						Salle du complexe {complex.name}
 					</p>
 				</div>
-				<Button variant="outline" size="sm" onClick={handleBack}>
-					<ArrowLeft className="w-4 h-4 mr-2" />
-					Retour au complexe
+				<Button asChild variant="outline" size="sm">
+					<Link 
+						to="/admin/facilities/complexes/$complexId"
+						params={{ complexId: complex.id }}
+					>
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour au complexe
+					</Link>
 				</Button>
 			</div>
 

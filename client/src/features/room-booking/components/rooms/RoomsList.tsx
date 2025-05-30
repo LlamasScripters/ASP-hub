@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { useRooms } from "@room-booking/hooks/useRooms";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	Calendar,
 	CircleOff,
@@ -43,15 +43,11 @@ import { useState } from "react";
 interface RoomsListProps {
 	complexId: string;
 	initialRooms: Room[];
-	onCreateClick?: () => void;
-	onEditClick?: (room: Room) => void;
 }
 
 export function RoomsList({
 	complexId,
 	initialRooms,
-	onCreateClick,
-	onEditClick,
 }: RoomsListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 
@@ -59,7 +55,6 @@ export function RoomsList({
 		complexId,
 		initialData: initialRooms,
 	});
-	const navigate = useNavigate();
 
 	const handleSearch = (value: string) => {
 		setSearchTerm(value);
@@ -74,10 +69,6 @@ export function RoomsList({
 		) {
 			await deleteRoom(room.id);
 		}
-	};
-
-	const handleSeeDetails = (roomId: string) => {
-		navigate({ to: `/admin/facilities/rooms/${roomId}` });
 	};
 
 	const formatDate = (dateString: string) => {
@@ -128,9 +119,14 @@ export function RoomsList({
 							onChange={(e) => handleSearch(e.target.value)}
 						/>
 					</div>
-					<Button onClick={onCreateClick}>
-						<Plus className="w-4 h-4 mr-2" />
-						Nouvelle salle
+					<Button asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId/create-room"
+							params={{ complexId }}
+						>
+							<Plus className="w-4 h-4 mr-2" />
+							Nouvelle salle
+						</Link>
 					</Button>
 				</div>
 
@@ -226,13 +222,23 @@ export function RoomsList({
 												<DropdownMenuContent align="end">
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuSeparator />
-													<DropdownMenuItem
-														onClick={() => handleSeeDetails(room.id)}
-													>
-														Voir les détails
+													<DropdownMenuItem asChild>
+														<Link
+															to="/admin/facilities/rooms/$roomId"
+															params={{ roomId: room.id }}
+															className="w-full cursor-pointer"
+														>
+															Voir les détails
+														</Link>
 													</DropdownMenuItem>
-													<DropdownMenuItem onClick={() => onEditClick?.(room)}>
-														Modifier
+													<DropdownMenuItem asChild>
+														<Link
+															to="/admin/facilities/rooms/$roomId/edit"
+															params={{ roomId: room.id }}
+															className="w-full cursor-pointer"
+														>
+															Modifier
+														</Link>
 													</DropdownMenuItem>
 													<DropdownMenuItem>Voir le planning</DropdownMenuItem>
 													<DropdownMenuSeparator />

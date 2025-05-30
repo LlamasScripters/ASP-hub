@@ -18,6 +18,7 @@ import {
 	// @ts-ignore
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 interface ComplexEditPageProps {
 	initialComplex: Complex;
@@ -27,16 +28,6 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 	const navigate = useNavigate();
 	const [isNavigating, setIsNavigating] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
-	const handleBack = () => {
-		setIsNavigating(true);
-		navigate({ to: `/admin/facilities/complexes/${initialComplex.id}` });
-	};
-
-	const handleSeeComplexesList = () => {
-		setIsNavigating(true);
-		navigate({ to: "/admin/facilities/complexes" });
-	};
 
 	const handleSuccess = (updatedComplex: Complex) => {
 		setShowSuccessAlert(true);
@@ -49,10 +40,6 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 			setIsNavigating(true);
 			navigate({ to: `/admin/facilities/complexes/${updatedComplex.id}` });
 		}, 1500);
-	};
-
-	const handleCancel = () => {
-		handleBack();
 	};
 
 	const formatDate = (dateString: string) => {
@@ -81,19 +68,20 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 					<Button
 						variant="outline"
 						size="sm"
-						onClick={handleSeeComplexesList}
-						disabled={isNavigating}
+						asChild
 					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retourner à la liste
+						<Link to="/admin/facilities/complexes">
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Retour à la liste
+						</Link>
 					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleBack}
-						disabled={isNavigating}
-					>
-						Voir les détails
+					<Button asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId"
+							params={{ complexId: initialComplex.id }}
+						>
+							Voir les détails
+						</Link>
 					</Button>
 				</div>
 			</div>
@@ -190,7 +178,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 				<ComplexForm
 					complex={initialComplex}
 					onSuccess={handleSuccess}
-					onCancel={handleCancel}
+					onCancelLink={`/admin/facilities/complexes/${initialComplex.id}`}
 				/>
 			</div>
 		</div>

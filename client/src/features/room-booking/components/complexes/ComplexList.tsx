@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/table";
 import { useComplexes } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Building,
@@ -43,19 +42,15 @@ import {
 	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 interface ComplexListProps {
-	onCreateClick?: () => void;
-	onEditClick?: (complexId: string) => void;
 	initialComplexes?: Complex[];
 }
 
 export function ComplexList({
-	onCreateClick,
-	onEditClick,
 	initialComplexes = [],
 }: ComplexListProps) {
-	const navigate = useNavigate();
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const {
@@ -89,10 +84,6 @@ export function ComplexList({
 		}
 	};
 
-	const handleViewDetails = (complexId: string) => {
-		navigate({ to: `/admin/facilities/complexes/${complexId}` });
-	};
-
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
 			day: "2-digit",
@@ -116,9 +107,11 @@ export function ComplexList({
 								{displayComplexes.length > 1 ? "s" : ""}
 							</CardDescription>
 						</div>
-						<Button onClick={onCreateClick}>
-							<Plus className="w-4 h-4 mr-2" />
-							Nouveau complexe
+						<Button asChild>
+							<Link to="/admin/facilities/complexes/create">
+								<Plus className="w-4 h-4 mr-2" />
+								Nouveau complexe
+							</Link>
 						</Button>
 					</div>
 				</CardHeader>
@@ -250,15 +243,23 @@ export function ComplexList({
 													<DropdownMenuContent align="end">
 														<DropdownMenuLabel>Actions</DropdownMenuLabel>
 														<DropdownMenuSeparator />
-														<DropdownMenuItem
-															onClick={() => handleViewDetails(complex.id)}
-														>
-															Voir les détails
+														<DropdownMenuItem asChild>
+															<Link
+																to={"/admin/facilities/complexes/$complexId"}
+																params={{complexId: complex.id}}
+																className="w-full cursor-pointer"
+															>
+																Voir les détails
+															</Link>
 														</DropdownMenuItem>
-														<DropdownMenuItem
-															onClick={() => onEditClick?.(complex.id)}
-														>
-															Modifier
+														<DropdownMenuItem asChild>
+															<Link
+																to={"/admin/facilities/complexes/$complexId/edit"}
+																params={{complexId: complex.id}}
+																className="w-full cursor-pointer"
+															>
+																Modifier
+															</Link>
 														</DropdownMenuItem>
 														<DropdownMenuSeparator />
 														<DropdownMenuItem
