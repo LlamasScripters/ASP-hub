@@ -2,7 +2,7 @@ import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { complexesApi } from "@room-booking/lib/api/complexes";
 import { roomsApi } from "@room-booking/lib/api/rooms";
-import { RoomEditPage } from "@room-booking/page/RoomEditPage";
+import { RoomEditPage } from "@/features/room-booking/pages/RoomEditPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 interface LoaderData {

@@ -1,5 +1,5 @@
 import { complexesApi } from "@room-booking/lib/api/complexes";
-import { RoomCreatePage } from "@room-booking/page/RoomCreatePage";
+import { RoomCreatePage } from "@/features/room-booking/pages/RoomCreatePage";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
