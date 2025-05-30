@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoomsList } from "@room-booking/components/rooms/RoomsList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	ArrowLeft,
@@ -26,13 +25,12 @@ import {
 	Warehouse,
 	//@ts-ignore
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearch, Link } from "@tanstack/react-router";
 
 type ViewMode =
 	| "overview"
 	| "rooms"
-	| "create-room"
-	| "edit-room"
 	| "planning"
 	| "stats";
 
@@ -45,7 +43,16 @@ export function ComplexDetailsPage({
 	complex,
 	initialRooms,
 }: ComplexDetailsPageProps) {
-	const [currentView, setCurrentView] = useState<ViewMode>("overview");
+	const search = useSearch({ strict: false });
+	const navigate = useNavigate();
+	// @ts-ignore
+	const initialViewFromUrl = (search.view as ViewMode) ?? "overview";
+
+	const [currentView, setCurrentView] = useState<ViewMode>(initialViewFromUrl);
+
+	useEffect(() => {
+	setCurrentView(initialViewFromUrl);
+	}, [initialViewFromUrl]);
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -83,7 +90,7 @@ export function ComplexDetailsPage({
 				</div>
 				<div className="flex items-center gap-2">
 					<Button asChild variant="outline" size="sm">
-						<Link to="/admin/facilities/complexes">
+						<Link to="/admin/facilities/complexes" search={{ view: 'complexes' }}>
 							<ArrowLeft className="w-4 h-4 mr-2" />
 							Retour à la liste
 						</Link>
@@ -160,7 +167,11 @@ export function ComplexDetailsPage({
 			{/* Onglets */}
 			<Tabs
 				value={currentView}
-				onValueChange={(value) => setCurrentView(value as ViewMode)}
+				onValueChange={(value) => {
+				setCurrentView(value as ViewMode);
+				// @ts-ignore
+				navigate({ search: (prev) => ({ ...prev, view: value }) });
+				}}
 				className="space-y-4"
 			>
 				<TabsList>

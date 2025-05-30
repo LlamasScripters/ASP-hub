@@ -31,7 +31,7 @@ export function ComplexCreatePage() {
 					</p>
 				</div>
 				<Button variant="outline" size="sm" asChild>
-					<Link to="/admin/facilities/complexes">
+					<Link to="/admin/facilities/complexes" search={{ view: 'complexes' }}>
 						<ArrowLeft className="w-4 h-4 mr-2" />
 						Retour à la liste
 					</Link>
@@ -58,7 +58,7 @@ export function ComplexCreatePage() {
 
 			<ComplexForm
 				onSuccess={handleSuccess}
-				onCancelLink="/admin/facilities/complexes"
+				onCancelLink="/admin/facilities/complexes?view=complexes"
 			/>
 		</div>
 	);

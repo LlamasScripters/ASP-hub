@@ -67,7 +67,10 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
 					</p>
 				</div>
 				<Button asChild>
-					<Link to="/admin/facilities/complexes">
+					<Link 
+						to="/admin/facilities/complexes"
+						search={{ view: "rooms" }}
+					>
 						<Plus className="w-4 h-4 mr-2" /> Nouvelle salle
 					</Link>
 				</Button>

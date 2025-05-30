@@ -15,6 +15,7 @@ import {
 	useComplexes,
 } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -29,25 +30,34 @@ import {
 	Users,
 	//@ts-ignore
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type ViewMode = "overview" | "list" | "create" | "edit" | "stats" | "planning";
+type ViewMode = 
+	| "overview" 
+	| "complexes" 
+	| "statistics" 
+	| "planning";
 
 interface ComplexesPageProps {
-	initialView?: ViewMode;
 	initialComplexes?: Complex[];
 }
 
-export function ComplexesPage({
-	initialView = "overview",
-	initialComplexes = [],
-}: ComplexesPageProps) {
-	const [currentView, setCurrentView] = useState<ViewMode>(initialView);
-	const [selectedComplex, setSelectedComplex] = useState<Complex | null>(null);
+export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
+	const search = useSearch({ strict: false });
+	const navigate = useNavigate();
+	// @ts-ignore
+	const initialViewFromUrl = (search.view as ViewMode) ?? "overview";
+
+	const [currentView, setCurrentView] = useState<ViewMode>(initialViewFromUrl);
+
+	useEffect(() => {
+		setCurrentView(initialViewFromUrl);
+	}, [initialViewFromUrl]);
 
 	const { refresh: refreshComplexes } = useComplexes({
 		initialData: initialComplexes,
 	});
+
 	const {
 		stats,
 		loading: statsLoading,
@@ -275,7 +285,15 @@ export function ComplexesPage({
 			</div>
 
 			{/* Onglets principaux */}
-			<Tabs defaultValue="overview" className="space-y-4">
+			<Tabs
+				value={currentView}
+				onValueChange={(value) => {
+					setCurrentView(value as ViewMode);
+					// @ts-ignore
+					navigate({ search: (prev) => ({ ...prev, view: value }) });
+				}}
+				className="space-y-4"
+			>
 				<TabsList>
 					<TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
 					<TabsTrigger value="complexes">Tous les complexes</TabsTrigger>

@@ -21,7 +21,7 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: `/admin/facilities/complexes/${complex.id}`,
+				to: `/admin/facilities/complexes/${complex.id}?view=rooms`,
 			});
 		}, 1500);
 	};
@@ -41,6 +41,7 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 				<Button variant="outline" size="sm" asChild>
 					<Link
 						to="/admin/facilities/complexes/$complexId"
+						search={{ view: 'rooms' }}
 						params={{ complexId: complex.id }}
 					>
 						<ArrowLeft className="w-4 h-4 mr-2" />
@@ -72,7 +73,7 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 				complexId={complex.id}
 				room={room}
 				onSuccess={handleSuccess}
-				onCancelLink={`/admin/facilities/complexes/${complex.id}`}
+				onCancelLink={`/admin/facilities/complexes/${complex.id}?view=rooms`}
 			/>
 		</div>
 	);
