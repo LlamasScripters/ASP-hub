@@ -486,6 +486,7 @@ clubsRouter.post("/:clubId/sections/:sectionId/categories/:categoryId/sessions",
       type,
       status,
       maxParticipants,
+      notes,
     } = req.body;
 
     const categoryId = req.params.categoryId;
@@ -500,6 +501,7 @@ clubsRouter.post("/:clubId/sections/:sectionId/categories/:categoryId/sessions",
       type,
       status,
       maxParticipants: maxParticipants ? Number(maxParticipants) : null,
+      notes,
     });
 
     res.status(201).json(created);

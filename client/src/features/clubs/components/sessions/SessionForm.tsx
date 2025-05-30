@@ -34,12 +34,38 @@ const sessionSchema = z.object({
   path: ["endDate"]
 });
 
-// Fonction pour formater une date ISO en format datetime-local
+// fonction pour convertir du datetime-local en ISO
+const formatDateForAPI = (localDateTime: string): string => {
+  if (!localDateTime) return "";
+  try {
+    const date = new Date(localDateTime);
+    return date.toISOString();
+  } catch (error) {
+    console.error("Error converting date to ISO:", error);
+    return localDateTime; // fallback à la valeur originale
+  }
+};
+
+// fonction pour formater une date ISO en datetime-local
 const formatDateForInput = (isoDate: string): string => {
   if (!isoDate) return "";
-  const date = new Date(isoDate);
-  // Format YYYY-MM-DDTHH:MM (sans secondes ni millisecondes)
-  return date.toISOString().slice(0, 16);
+  try {
+    const date = new Date(isoDate);
+    // vérifier si la date est valide
+    if (isNaN(date.getTime())) return "";
+    
+    // format YYYY-MM-DDTHH:MM
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "";
+  }
 };
 
 export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: {
@@ -54,6 +80,11 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [sectionName, setSectionName] = useState("");
+  const [dateValidation, setDateValidation] = useState<{
+    isValid: boolean;
+    message: string;
+    type: "error" | "warning" | "info" | null;
+  }>({ isValid: true, message: "", type: null });
 
   const [form, setForm] = useState<Partial<SessionSport>>({
     type: "entrainement",
@@ -79,7 +110,16 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
         if (mode === "edit" && sessionId) {
           const sessionRes = await fetch(`/api/clubs/sessions/${sessionId}`);
           const sessionData = await sessionRes.json();
-          setForm(sessionData);
+
+          // Ensure proper date formatting for datetime-local inputs
+          const formattedSessionData = {
+            ...sessionData,
+            startDate: sessionData.startDate ? formatDateForInput(sessionData.startDate) : "",
+            endDate: sessionData.endDate ? formatDateForInput(sessionData.endDate) : "",
+            notes: sessionData.notes || "",
+          };
+          
+          setForm(formattedSessionData);
         }
       } catch (error) {
         setErrors({ general: "Erreur lors du chargement des données" });
@@ -91,15 +131,102 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
     fetchData();
   }, [mode, sessionId, clubId, sectionId, categoryId]);
 
+  // Fonction pour valider les dates en temps réel
+  const validateDates = (startDate: string, endDate: string) => {
+    if (!startDate && !endDate) {
+      setDateValidation({ isValid: true, message: "", type: null });
+      return;
+    }
+
+    if (!startDate && endDate) {
+      setDateValidation({
+        isValid: false,
+        message: "Veuillez renseigner la date de début",
+        type: "warning"
+      });
+      return;
+    }
+
+    if (startDate && !endDate) {
+      setDateValidation({
+        isValid: false,
+        message: "Veuillez renseigner la date de fin",
+        type: "warning"
+      });
+      return;
+    }
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (start > end) {
+        setDateValidation({
+          isValid: false,
+          message: "⚠️ La date de début ne peut pas être postérieure à la date de fin !",
+          type: "error"
+        });
+        return;
+      }
+
+      if (start.getTime() === end.getTime()) {
+        setDateValidation({
+          isValid: false,
+          message: "⚠️ Les dates de début et fin ne peuvent pas être identiques ! Une session doit avoir une durée minimale.",
+          type: "error"
+        });
+        return;
+      }
+
+      // calcul des durées
+      const durationMs = end.getTime() - start.getTime();
+      const durationMinutes = Math.floor(durationMs / (1000 * 60));
+      const hours = Math.floor(durationMinutes / 60);
+      const minutes = durationMinutes % 60;
+
+      let durationText = "";
+      if (hours > 0) {
+        durationText += `${hours}h`;
+        if (minutes > 0) durationText += ` ${minutes}min`;
+      } else {
+        durationText = `${minutes}min`;
+      }
+
+      setDateValidation({
+        isValid: true,
+        message: `Durée de la session : ${durationText}`,
+        type: "info"
+      });
+    }
+  };
+
+  // effect pour valider les dates quand elles changent
+  useEffect(() => {
+    validateDates(form.startDate || "", form.endDate || "");
+  }, [form.startDate, form.endDate]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
 
-    const parsed = sessionSchema.safeParse({
+    console.log("Form submission started:", { mode, form }); // Debug log
+
+    // vérifie la validation des dates en premier
+    if (!dateValidation.isValid) {
+      setErrors({ general: "Veuillez corriger les erreurs de dates avant de continuer" });
+      setIsLoading(false);
+      return;
+    }
+
+    const formData = {
       ...form,
+      startDate: form.startDate ? formatDateForAPI(form.startDate) : undefined,
+      endDate: form.endDate ? formatDateForAPI(form.endDate) : undefined,
       maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : undefined,
-    });
+    };
+    
+    const parsed = sessionSchema.safeParse(formData);
 
     if (!parsed.success) {
       const formattedErrors: Record<string, string> = {};
@@ -122,23 +249,26 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...parsed.data,
-          categoryId,
-        }),
+        body: JSON.stringify(parsed.data),
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la sauvegarde");
+        // const errorText = await response.text();
+        // console.error("API error response:", errorText);
+        throw new Error(`Erreur lors de la sauvegarde: ${response.status}`);
       }
 
       toast.success(mode === "create" ? "Session créée avec succès !" : "Session modifiée avec succès !");
-      navigate({
-        to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
-        params: { clubId, sectionId },
-      });
+      
+      // délai pour s'assurer que le toast s'affiche avant la navigation
+      setTimeout(() => {
+        navigate({
+          to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
+          params: { clubId, sectionId },
+        });
+      }, 500);
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur complète:', error);
       toast.error("Erreur lors de la sauvegarde de la session");
       setErrors({ general: "Erreur lors de la sauvegarde de la session" });
     } finally {
@@ -276,7 +406,7 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                     <Input
                       id="startDate"
                       type="datetime-local"
-                      value={formatDateForInput(form.startDate ?? "")}
+                      value={form.startDate ?? ""}
                       onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                       className={errors.startDate ? "border-destructive" : ""}
                     />
@@ -292,7 +422,7 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                     <Input
                       id="endDate"
                       type="datetime-local"
-                      value={formatDateForInput(form.endDate ?? "")}
+                      value={form.endDate ?? ""}
                       onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                       className={errors.endDate ? "border-destructive" : ""}
                     />
@@ -301,6 +431,25 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                     )}
                   </div>
                 </div>
+
+                {/* Validation des dates en temps réel */}
+                {dateValidation.message && (
+                  <Alert 
+                    variant={dateValidation.type === "error" ? "destructive" : "default"}
+                    className={
+                      dateValidation.type === "error" 
+                        ? "border-destructive bg-destructive/10" 
+                        : dateValidation.type === "warning"
+                        ? "border-orange-500 bg-orange-50 text-orange-800"
+                        : "border-blue-500 bg-blue-50 text-blue-800"
+                    }
+                  >
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="font-medium">
+                      {dateValidation.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -371,8 +520,22 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                       type="number"
                       placeholder="Ex: 20"
                       min="1"
+                      max="9999"
                       value={form.maxParticipants ?? ""}
-                      onChange={(e) => setForm({ ...form, maxParticipants: e.target.value ? Number(e.target.value) : undefined })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || /^\d+$/.test(value)) {
+                          setForm({ ...form, maxParticipants: value ? Number(value) : undefined });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (
+                          !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key) &&
+                          !/^\d$/.test(e.key)
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -385,7 +548,9 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                     id="notes"
                     placeholder="Notes, consignes particulières, matériel requis..."
                     value={form.notes ?? ""}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    onChange={(e) => {
+                      setForm({ ...form, notes: e.target.value });
+                    }}
                     rows={3}
                     className="resize-none"
                   />
@@ -404,7 +569,11 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                 >
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || !dateValidation.isValid} 
+                  className="min-w-[120px]"
+                >
                   {isLoading ? (
                     "Enregistrement..."
                   ) : (
