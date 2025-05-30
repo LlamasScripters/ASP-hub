@@ -1,8 +1,6 @@
-import { ImageUploadButton } from "@/components/ImageUploadButton";
 import PasswordInput from "@/components/PasswordInput";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
 	Form,
 	FormControl,
@@ -12,11 +10,6 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -30,27 +23,15 @@ import {
 	getAuthErrorMessage,
 } from "@/lib/auth/auth-client";
 import { authConfig } from "@/lib/auth/auth-config";
-import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import type { UserWithRole } from "better-auth/plugins/admin";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
 import { type FieldErrors, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 import { generateRandomPassword } from "../utils/generate-random-password";
 
-const formSchema = z.object({
-	firstName: z
-		.string()
-		.min(2, "Le prénom doit contenir au moins 2 caractères")
-		.optional(),
-	lastName: z
-		.string()
-		.min(2, "Le nom doit contenir au moins 2 caractères")
-		.optional(),
+const userCreateFormSchema = z.object({
+	firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+	lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
 	email: z.string().email("L'email est invalide"),
 	password: z
 		.string()
@@ -61,7 +42,7 @@ const formSchema = z.object({
 	role: z.enum(["user", "admin"]),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof userCreateFormSchema>;
 
 export default function UserCreateForm({
 	onSuccess = () => {},
@@ -71,7 +52,7 @@ export default function UserCreateForm({
 	onError?: (err: Error) => void;
 }) {
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(userCreateFormSchema),
 		defaultValues: {
 			role: "user",
 			password: "",

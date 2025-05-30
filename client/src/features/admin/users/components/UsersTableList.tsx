@@ -18,6 +18,12 @@ import {
 import { RoleBadge } from "@/features/admin/users/components/RoleBadge";
 import type { UserLoggedIn } from "@/lib/auth/auth-client";
 import type { AppRole } from "@/lib/auth/auth-config";
+import {
+	PencilIcon,
+	ShieldUserIcon,
+	TrashIcon,
+	UserPenIcon,
+} from "lucide-react";
 
 const UserTableHeader = () => {
 	return (
@@ -35,14 +41,27 @@ const UserTableHeader = () => {
 
 export default function UsersTableList({
 	users,
-	onEditRole = () => {},
+	onUserRoleEdit = () => {},
+	onUserEdit = () => {},
+	onUserDelete = () => {},
 }: {
 	users: UserLoggedIn[];
-	onEditRole: (user: UserLoggedIn) => void;
+	onUserRoleEdit: (user: UserLoggedIn) => void;
+	onUserEdit: (user: UserLoggedIn) => void;
+	onUserDelete: (user: UserLoggedIn) => void;
 }) {
-	const handleEditRole = (user: UserLoggedIn) => {
-		onEditRole(user);
+	const handleUserRoleEdit = (user: UserLoggedIn) => {
+		onUserRoleEdit(user);
 	};
+
+	const handleUserEdit = (user: UserLoggedIn) => {
+		onUserEdit(user);
+	};
+
+	const handleUserDelete = (user: UserLoggedIn) => {
+		onUserDelete(user);
+	};
+
 	return (
 		<Table>
 			<UserTableHeader />
@@ -65,11 +84,25 @@ export default function UsersTableList({
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
-										<DropdownMenuLabel>Actions</DropdownMenuLabel>
-										<DropdownMenuItem onClick={() => handleEditRole(user)}>
+										<DropdownMenuLabel className="select-none">
+											Actions
+										</DropdownMenuLabel>
+										<DropdownMenuItem onClick={() => handleUserEdit(user)}>
+											<UserPenIcon className="size-4" />
+											Modifier l'utilisateur
+										</DropdownMenuItem>
+										<DropdownMenuItem onClick={() => handleUserRoleEdit(user)}>
+											<ShieldUserIcon className="size-4" />
 											Modifier le rôle
 										</DropdownMenuItem>
 										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											variant="destructive"
+											onClick={() => handleUserDelete(user)}
+										>
+											<TrashIcon className="size-4" />
+											Supprimer l'utilisateur
+										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</TableCell>

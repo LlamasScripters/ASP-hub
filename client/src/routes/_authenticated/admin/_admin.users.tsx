@@ -23,10 +23,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import UserCreateForm from "@/features/admin/users/components/UserCreateForm";
+import UserResetPasswordForm from "@/features/admin/users/components/UserResetPasswordForm";
 import UsersListSkeleton from "@/features/admin/users/components/UsersListSkeleton";
 import UsersTableList from "@/features/admin/users/components/UsersTableList";
-import UserCreateForm from "@/features/users/components/UserCreateForm";
 
 import {
 	type UserLoggedIn,
@@ -38,10 +38,9 @@ import { queryClient } from "@/lib/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { DialogProps } from "@radix-ui/react-dialog";
 import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -77,14 +76,14 @@ const searchParamsSchema = z.object({
 	search: z.string().optional(),
 	limit: z.number().optional(),
 	offset: z.number().optional(),
-	showCreate: z.boolean().optional(),
+	action: z.enum(["create", "role", "edit", "delete"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/users")({
 	component: UsersListPage,
 	validateSearch: zodValidator(searchParamsSchema),
-	// avoid reloading the page when the showCreate search param changes
-	loaderDeps: ({ search: { showCreate, ...search } }) => ({ search }),
+	// avoid reloading the page when the action search param changes
+	loaderDeps: ({ search: { action, ...search } }) => ({ search }),
 	loader: ({ deps: { search } }) => {
 		queryClient.prefetchQuery(listUsersQueryOptions(search));
 	},
@@ -97,7 +96,7 @@ const updateRoleFormSchema = z.object({
 
 type UpdateRoleFormValues = z.infer<typeof updateRoleFormSchema>;
 
-function RoleEditDialog({
+function UserRoleEditDialog({
 	user,
 	...dialogProps
 }: { user: UserLoggedIn } & DialogProps) {
@@ -256,14 +255,51 @@ function UserCreateDialog(props: DialogProps) {
 	);
 }
 
+function UserResetPasswordDialog({
+	user,
+	...dialogProps
+}: { user: UserLoggedIn } & DialogProps) {
+	return (
+		<Dialog {...dialogProps}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+					<DialogDescription>
+						Réinitialiser le mot de passe de l'utilisateur{" "}
+						<span className="font-bold">{user.name}</span>
+					</DialogDescription>
+				</DialogHeader>
+				<UserResetPasswordForm
+					user={user}
+					onSuccess={() => {
+						toast.success("Mot de passe réinitialisé avec succès", {
+							description: `Le mot de passe de l'utilisateur ${user.name} a été réinitialisé avec succès`,
+						});
+					}}
+					onError={(err) => {
+						toast.error("Erreur lors de la réinitialisation du mot de passe", {
+							description: err.message,
+						});
+					}}
+				/>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 function UsersListPage() {
 	const searchParams = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
-	const { showCreate } = searchParams;
+	const location = useLocation();
+
+	const selectedUser =
+		"selectedUser" in location.state
+			? (location.state.selectedUser as UserLoggedIn | null)
+			: null;
 
 	const { data, isPending } = useQuery(listUsersQueryOptions(searchParams));
 
-	const [selectedUser, setSelectedUser] = useState<UserLoggedIn | null>(null);
+	const action = searchParams.action;
 
 	if (isPending) {
 		return <UsersListSkeleton />;
@@ -275,6 +311,58 @@ function UsersListPage() {
 
 	const { total, users } = data;
 
+	const handleUserRoleEdit = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "role",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleUserEdit = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "edit",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleUserDelete = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "delete",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleDialogClose = () => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: undefined,
+			}),
+			state: undefined,
+		});
+	};
+
 	return (
 		<div className="space-y-4">
 			<div className="flex justify-between items-center">
@@ -284,7 +372,7 @@ function UsersListPage() {
 				<Button asChild>
 					<Link
 						to="."
-						search={(prev) => ({ ...prev, showCreate: true })}
+						search={(prev) => ({ ...prev, action: "create" })}
 						mask={{ to: "." }}
 					>
 						Créer un utilisateur
@@ -294,33 +382,29 @@ function UsersListPage() {
 
 			<UsersTableList
 				users={users}
-				onEditRole={(user) => setSelectedUser(user)}
+				onUserRoleEdit={handleUserRoleEdit}
+				onUserEdit={handleUserEdit}
+				onUserDelete={handleUserDelete}
 			/>
 
 			{selectedUser && (
-				<RoleEditDialog
-					open={!!selectedUser}
-					onOpenChange={(open) => {
-						if (!open) {
-							setSelectedUser(null);
-						}
-					}}
-					user={selectedUser}
-					key={selectedUser?.id} // if key changes, the dialog state is reset
-				/>
+				<>
+					<UserRoleEditDialog
+						open={action === "role"}
+						onOpenChange={handleDialogClose}
+						user={selectedUser}
+					/>
+					<UserResetPasswordDialog
+						open={action === "edit"}
+						onOpenChange={handleDialogClose}
+						user={selectedUser}
+					/>
+				</>
 			)}
 
 			<UserCreateDialog
-				open={showCreate}
-				onOpenChange={() => {
-					navigate({
-						search: (prev) => ({
-							...prev,
-							showCreate: false,
-						}),
-						mask: { to: "." },
-					});
-				}}
+				open={action === "create"}
+				onOpenChange={handleDialogClose}
 			/>
 		</div>
 	);
