@@ -108,9 +108,7 @@ export function ClubForm({ mode, clubId }: { mode: "create" | "edit"; clubId?: s
   };
 
   const handleCancel = () => {
-    if (mode === "edit" && clubId) {
-      navigate({ to: "/admin/dashboard/clubs/$clubId", params: { clubId } });
-    } 
+    navigate({ to: "/admin/dashboard/clubs" });
   };
 
   if (isLoading && mode === "edit") {

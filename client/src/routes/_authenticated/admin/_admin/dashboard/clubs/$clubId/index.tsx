@@ -3,10 +3,11 @@ import { Outlet, Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { Club } from "@/features/clubs/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Phone, Users, Calendar, Settings, FolderOpen, Building2, MapPin, Globe, FileText } from "lucide-react";
+import { Mail, Phone, Users, Calendar, Settings, FolderOpen, Building2, MapPin, Globe, FileText, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/dashboard/clubs/$clubId/")({
   component: ClubOverviewPage,
@@ -113,6 +114,15 @@ function ClubOverviewPage() {
               Tableau de bord de gestion du club
             </p>
           </div>
+          <Link to="/admin/dashboard/clubs">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Retour à l'association
+            </Button>
+          </Link>
         </div>
 
         {/* Informations du club */}
