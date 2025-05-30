@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Save, ArrowLeft, Users, AlertCircle, Calendar, AlertTriangle } from "lucide-react";
+import { Save, ArrowLeft, Users, AlertCircle, Calendar, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { Category } from "../../types";
@@ -59,16 +59,51 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
   const [form, setForm] = useState<Partial<Category>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [existingCategories, setExistingCategories] = useState<Category[]>([]);
+  const [isLoadingExistingCategories, setIsLoadingExistingCategories] = useState(true);
+
+  // récupération des catégories existantes au chargement
+  useEffect(() => {
+    const fetchExistingCategories = async () => {
+      try {
+        setIsLoadingExistingCategories(true);
+        const response = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`);
+        if (!response.ok) throw new Error('Erreur lors du chargement des catégories');
+        const categories: Category[] = await response.json();
+        setExistingCategories(categories);
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories:', error);
+        toast.error("Erreur lors du chargement des catégories existantes");
+      } finally {
+        setIsLoadingExistingCategories(false);
+      }
+    };
+
+    fetchExistingCategories();
+  }, [clubId, sectionId]);
 
   useEffect(() => {
-    if (mode === "edit" && categoryId) {
+    if (mode === "edit" && categoryId && !isLoadingExistingCategories) {
       setIsLoading(true);
       fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`)
         .then((res) => res.json())
         .then(setForm)
         .finally(() => setIsLoading(false));
     }
-  }, [mode, categoryId, clubId, sectionId]);
+  }, [mode, categoryId, clubId, sectionId, isLoadingExistingCategories]);
+
+  // validation pour les noms dupliqués
+  const validateDuplicateName = (name: string) => {
+    if (!name.trim()) return null;
+    
+    const normalizedName = name.trim().toLowerCase();
+    const duplicateCategory = existingCategories.find(category => 
+      category.name.trim().toLowerCase() === normalizedName && 
+      category.id !== categoryId // exclusion la catégorie actuelle en mode édition
+    );
+    
+    return duplicateCategory ? "Une catégorie avec ce nom existe déjà dans cette section" : null;
+  };
 
   // validation en temps réel des âges
   const validateAgeRange = (ageMin?: number, ageMax?: number) => {
@@ -91,6 +126,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
   };
 
   const ageRangeError = validateAgeRange(form.ageMin, form.ageMax);
+  const duplicateNameError = validateDuplicateName(form.name || "");
   const isValidAgeRange = form.ageMin !== undefined && form.ageMax !== undefined && !ageRangeError;
   const hasPartialAge = (form.ageMin !== undefined) !== (form.ageMax !== undefined);
 
@@ -104,10 +140,31 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
     setForm(prev => ({ ...prev, ageMax }));
   };
 
+  const handleNameChange = (value: string) => {
+    setForm(prev => ({ ...prev, name: value }));
+    
+    // nettoyer l'erreur de nom dupliqué si elle existe
+    if (errors.name === "Une catégorie avec ce nom existe déjà dans cette section") {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.name;
+        return newErrors;
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+
+    // validation des noms dupliqués
+    const nameError = validateDuplicateName(form.name || "");
+    if (nameError) {
+      setErrors({ name: nameError });
+      setIsLoading(false);
+      return;
+    }
 
     // validation côté client
     if (ageRangeError) {
@@ -134,18 +191,29 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
     }
 
     try {
+      let response;
       if (mode === "create") {
-        await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`, {
+        response = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(parsed.data),
         });
       } else {
-        await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`, {
+        response = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(parsed.data),
         });
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 409 || errorData.message?.includes('existe déjà')) {
+          setErrors({ name: "Une catégorie avec ce nom existe déjà dans cette section" });
+          setIsLoading(false);
+          return;
+        }
+        throw new Error(errorData.message || 'Erreur lors de la sauvegarde');
       }
 
       toast.success(mode === "create" ? "Catégorie créée avec succès !" : "Catégorie modifiée avec succès !");
@@ -162,6 +230,21 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
   const handleBack = () => {
     navigate({ to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories", params: { clubId, sectionId } });
   };
+
+  if (isLoadingExistingCategories) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Chargement des données...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-2xl">
@@ -215,11 +298,11 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                     id="name"
                     placeholder="Ex: U15, Seniors, Débutants..."
                     value={form.name ?? ""}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className={errors.name ? "border-destructive" : ""}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    className={errors.name || duplicateNameError ? "border-destructive" : ""}
                   />
-                  {errors.name && (
-                    <p className="text-sm text-destructive">{errors.name}</p>
+                  {(errors.name || duplicateNameError) && (
+                    <p className="text-sm text-destructive">{errors.name || duplicateNameError}</p>
                   )}
                 </div>
 
@@ -353,7 +436,7 @@ export function CategoryForm({ mode, clubId, sectionId, categoryId }: { mode: "c
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isLoading || !!ageRangeError} 
+                  disabled={isLoading || !!ageRangeError || !!duplicateNameError} 
                   className="min-w-[120px]"
                 >
                   {isLoading ? (
