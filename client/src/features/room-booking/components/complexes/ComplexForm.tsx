@@ -23,6 +23,7 @@ import type {
 	CreateComplexData,
 	UpdateComplexData,
 } from "@room-booking/hooks/useComplexes.js";
+import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Car,
@@ -38,13 +39,13 @@ import { useForm } from "react-hook-form";
 interface ComplexFormProps {
 	complex?: Complex;
 	onSuccess?: (complex: Complex) => void;
-	onCancel?: () => void;
+	onCancelLink?: string;
 }
 
 export function ComplexForm({
 	complex,
 	onSuccess,
-	onCancel,
+	onCancelLink,
 }: ComplexFormProps) {
 	const { createComplex, updateComplex } = useComplexes();
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -301,16 +302,9 @@ export function ComplexForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							{onCancel && (
-								<Button
-									type="button"
-									variant="outline"
-									onClick={onCancel}
-									disabled={isSubmitting}
-								>
-									Annuler
-								</Button>
-							)}
+							<Button variant="outline" size="sm" asChild>
+								<Link to={onCancelLink}>Annuler</Link>
+							</Button>
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? (
 									<>

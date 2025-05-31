@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoomsList } from "@room-booking/components/rooms/RoomsList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	Accessibility,
 	ArrowLeft,
@@ -26,13 +25,12 @@ import {
 	Warehouse,
 	//@ts-ignore
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearch, Link } from "@tanstack/react-router";
 
 type ViewMode =
 	| "overview"
 	| "rooms"
-	| "create-room"
-	| "edit-room"
 	| "planning"
 	| "stats";
 
@@ -45,9 +43,16 @@ export function ComplexDetailsPage({
 	complex,
 	initialRooms,
 }: ComplexDetailsPageProps) {
+	const search = useSearch({ strict: false });
 	const navigate = useNavigate();
-	const [currentView, setCurrentView] = useState<ViewMode>("overview");
-	const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+	// @ts-ignore
+	const initialViewFromUrl = (search.view as ViewMode) ?? "overview";
+
+	const [currentView, setCurrentView] = useState<ViewMode>(initialViewFromUrl);
+
+	useEffect(() => {
+	setCurrentView(initialViewFromUrl);
+	}, [initialViewFromUrl]);
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -57,22 +62,6 @@ export function ComplexDetailsPage({
 			hour: "2-digit",
 			minute: "2-digit",
 		});
-	};
-
-	const handleBack = () => {
-		navigate({ to: "/admin/facilities/complexes" });
-	};
-
-	const handleEdit = () => {
-		navigate({ to: `/admin/facilities/complexes/${complex.id}/edit` });
-	};
-
-	const handleCreateRoom = () => {
-		navigate({ to: `/admin/facilities/complexes/${complex.id}/create-room` });
-	};
-
-	const handleEditRoom = (room: Room) => {
-		navigate({ to: `/admin/facilities/rooms/${room.id}/edit` });
 	};
 
 	const totalRooms = initialRooms.length;
@@ -100,13 +89,21 @@ export function ComplexDetailsPage({
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" size="sm" onClick={handleBack}>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour à la liste
+					<Button asChild variant="outline" size="sm">
+						<Link to="/admin/facilities/complexes" search={{ view: 'complexes' }}>
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Retour à la liste
+						</Link>
 					</Button>
-					<Button onClick={handleEdit}>
-						<Edit className="w-4 h-4 mr-2" />
-						Modifier
+
+					<Button asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId/edit"
+							params={{ complexId: complex.id }}
+						>
+							<Edit className="w-4 h-4 mr-2" />
+							Modifier
+						</Link>
 					</Button>
 				</div>
 			</div>
@@ -170,7 +167,11 @@ export function ComplexDetailsPage({
 			{/* Onglets */}
 			<Tabs
 				value={currentView}
-				onValueChange={(value) => setCurrentView(value as ViewMode)}
+				onValueChange={(value) => {
+				setCurrentView(value as ViewMode);
+				// @ts-ignore
+				navigate({ search: (prev) => ({ ...prev, view: value }) });
+				}}
 				className="space-y-4"
 			>
 				<TabsList>
@@ -356,12 +357,7 @@ export function ComplexDetailsPage({
 				</TabsContent>
 
 				<TabsContent value="rooms" className="space-y-4">
-					<RoomsList
-						complexId={complex.id}
-						initialRooms={initialRooms}
-						onCreateClick={handleCreateRoom}
-						onEditClick={handleEditRoom}
-					/>
+					<RoomsList complexId={complex.id} initialRooms={initialRooms} />
 				</TabsContent>
 
 				<TabsContent value="planning" className="space-y-4">

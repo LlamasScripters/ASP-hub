@@ -37,8 +37,8 @@ import type {
 	Room,
 	UpdateRoomData,
 } from "@room-booking/hooks/useRooms";
+import { Link } from "@tanstack/react-router";
 import {
-	Building,
 	Info,
 	Loader2,
 	Settings,
@@ -75,14 +75,14 @@ interface RoomFormProps {
 	complexId: string;
 	room?: Room;
 	onSuccess?: (room: Room) => void;
-	onCancel?: () => void;
+	onCancelLink?: string;
 }
 
 export function RoomForm({
 	complexId,
 	room,
 	onSuccess,
-	onCancel,
+	onCancelLink,
 }: RoomFormProps) {
 	const { createRoom, updateRoom } = useRooms({ complexId });
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -260,16 +260,9 @@ export function RoomForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							{onCancel && (
-								<Button
-									type="button"
-									variant="outline"
-									onClick={onCancel}
-									disabled={isSubmitting}
-								>
-									Annuler
-								</Button>
-							)}
+							<Button variant="outline" size="sm" asChild>
+								<Link to={onCancelLink}>Annuler</Link>
+							</Button>
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? (
 									<>
