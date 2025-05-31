@@ -245,13 +245,16 @@ export function useReservation({
   }, [fetchReservations]);
 
   return {
+    // Data
     reservations,
     totalCount,
     filters,
 
+    // State
     loading,
     error,
 
+    // Actions
     fetchReservations,
     updateFilters,
     createReservation,
@@ -259,6 +262,7 @@ export function useReservation({
     deleteReservation,
     getReservationById,
 
+    // Refresh function
     refresh: fetchReservations,
   };
 }
