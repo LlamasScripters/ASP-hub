@@ -1,3 +1,5 @@
+import { useSearch } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -6,11 +8,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { Link } from "@tanstack/react-router";
 // @ts-ignore
-import { ArrowLeft, Building, Calendar, Info } from "lucide-react";
+import { ArrowLeft, Info, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { ReservationList } from "@room-booking/components/reservations/ReservationList";
 
 interface RoomDetailsPageProps {
 	room: Room;
@@ -18,30 +21,50 @@ interface RoomDetailsPageProps {
 }
 
 export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
+	const search = useSearch({ strict: false });
+	const navigate = useNavigate();
+
 	return (
 		<div className="space-y-6">
+			{/* En-tête de la page */}
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">{room.name}</h1>
 					<p className="text-muted-foreground">
-						Salle du complexe {complex.name}
+						Salle du complexe :{" "}
+						<span className="font-medium">{complex.name}</span>
 					</p>
 				</div>
-				<Button asChild variant="outline" size="sm">
-					<Link
-						to="/admin/facilities/complexes/$complexId"
-						params={{ complexId: complex.id }}
-					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour au complexe
-					</Link>
-				</Button>
+				<div className="flex items-center gap-2">
+					{/* Bouton retour au complexe */}
+					<Button asChild variant="outline" size="sm">
+						<Link
+							to="/admin/facilities/complexes/$complexId"
+							params={{ complexId: complex.id }}
+						>
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Retour au complexe
+						</Link>
+					</Button>
+
+					{/* Bouton création de réservation */}
+					<Button asChild variant="default" size="sm">
+						<Link
+							to="/admin/facilities/rooms/$roomId/create-reservation"
+							params={{ roomId: room.id }}
+						>
+							<Plus className="w-4 h-4 mr-2" />
+							Nouvelle réservation
+						</Link>
+					</Button>
+				</div>
 			</div>
 
+			{/* Carte d'information de la salle */}
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<Info className="w-5 h-5" />
+						<Info className="w-5 h-5 text-muted-foreground" />
 						Détails de la salle
 					</CardTitle>
 					<CardDescription>Informations principales</CardDescription>
@@ -49,34 +72,27 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 				<CardContent>
 					<ul className="space-y-2 text-sm text-muted-foreground">
 						<li>
-							<strong>Sport :</strong> {room.sportType}
+							<strong>Sport :</strong>{" "}
+							<span className="font-medium">{room.sportType}</span>
 						</li>
 						<li>
-							<strong>Intérieur :</strong> {room.isIndoor ? "Oui" : "Non"}
+							<strong>Intérieure :</strong>{" "}
+							<span className="font-medium">
+								{room.isIndoor ? "Oui" : "Non"}
+							</span>
 						</li>
 						<li>
-							<strong>Accréditation :</strong> {room.accreditation || "Aucune"}
+							<strong>Accréditation :</strong>{" "}
+							<span className="font-medium">
+								{room.accreditation || "Aucune"}
+							</span>
 						</li>
 					</ul>
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Calendar className="w-5 h-5" />
-						Planning des réservations
-					</CardTitle>
-					<CardDescription>Calendrier des événements à venir</CardDescription>
-				</CardHeader>
-				<CardContent>
-					{/* 👉 Ici tu pourras intégrer ton calendrier (FullCalendar, React Big Calendar, etc.) */}
-					<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-						<Calendar className="w-12 h-12 text-gray-400" />
-						<span className="ml-2 text-gray-500">Calendrier à implémenter</span>
-					</div>
-				</CardContent>
-			</Card>
+			{/* Planification des réservations */}
+			<ReservationList roomId={room.id} initialReservations={[]} />
 		</div>
 	);
 }

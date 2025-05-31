@@ -13,7 +13,7 @@ const API_BASE_URL = "http://localhost:8080/api";
  * Get the start and end dates of the current week (Monday to Sunday).
  * If today is Sunday, it considers the week starting from the previous Monday.
  */
-function getWeekBounds(): { startDate: Date; endDate: Date } {
+export function getWeekBounds(): { start: Date; end: Date } {
   const now = new Date();
   const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   const diffToMonday = day === 0 ? -6 : 1 - day; // If today is Sunday, go back 6 days to get the previous Monday
@@ -25,7 +25,20 @@ function getWeekBounds(): { startDate: Date; endDate: Date } {
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
 
-  return { startDate: monday, endDate: sunday };
+  return { start: monday, end: sunday };
+}
+
+/**
+ * Get the start and end dates of the current month.
+ * The start date is the first day of the month at 00:00:00,
+ * and the end date is the last day of the month at 23:59:59.
+ */
+export function getMonthBounds(date: Date): { start: Date; end: Date } {
+  const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  firstOfMonth.setHours(0, 0, 0, 0);
+  const lastOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  lastOfMonth.setHours(23, 59, 59, 999);
+  return { start: firstOfMonth, end: lastOfMonth };
 }
 
 export interface ApiOptions {
@@ -47,7 +60,7 @@ export class ReservationsApiClient {
       this.defaultStartDate = startDate;
       this.defaultEndDate = endDate;
     } else {
-      const { startDate: s, endDate: e } = getWeekBounds();
+      const { start: s, end: e } = getWeekBounds();
       this.defaultStartDate = s;
       this.defaultEndDate = e;
     }

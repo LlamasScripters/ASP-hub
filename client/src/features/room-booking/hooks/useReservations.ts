@@ -63,15 +63,15 @@ export type ReservationsPaginatedResponse = z.infer<
   typeof reservationsPaginatedResponseSchema
 >;
 
-interface UseReservationOptions {
+interface UseReservationsOptions {
   roomId: string;
   initialData?: Reservation[];
 }
 
-export function useReservation({
+export function useReservations({
   roomId,
   initialData = [],
-}: UseReservationOptions) {
+}: UseReservationsOptions) {
   const [reservations, setReservations] = useState<Reservation[]>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
