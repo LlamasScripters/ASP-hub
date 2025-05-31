@@ -1,168 +1,246 @@
 import {
-    type Reservation,
-    type CreateReservation,
-    type UpdateReservation,
-    type ReservationFilters,
-    type ReservationsPaginatedResponse,
-    reservationSchema,
-    reservationsPaginatedResponseSchema,
-} from "@room-booking/hooks/useReservation";
+  type Reservation,
+  type CreateReservationData,
+  type UpdateReservationData,
+  type ReservationsPaginatedResponse,
+  reservationSchema,
+  reservationsPaginatedResponseSchema,
+} from "@/features/room-booking/hooks/useReservations";
 
 const API_BASE_URL = "http://localhost:8080/api";
 
-const thisWeekStartDate = new Date();
-thisWeekStartDate.setDate(thisWeekStartDate.getDate() - thisWeekStartDate.getDay() + 1); // Set to Monday
-const thisWeekEndDate = new Date();
-thisWeekEndDate.setDate(thisWeekStartDate.getDate() + 6); // Set to Sunday
+/**
+ * Get the start and end dates of the current week (Monday to Sunday).
+ * If today is Sunday, it considers the week starting from the previous Monday.
+ */
+function getWeekBounds(): { startDate: Date; endDate: Date } {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const diffToMonday = day === 0 ? -6 : 1 - day; // If today is Sunday, go back 6 days to get the previous Monday
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+
+  return { startDate: monday, endDate: sunday };
+}
 
 export interface ApiOptions {
-	signal?: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export class ReservationsApiClient {
-    private baseUrl: string;
-    private startDate: Date;
-    private endDate: Date;
+  private baseUrl: string;
+  private defaultStartDate: Date;
+  private defaultEndDate: Date;
 
-    constructor(
-        baseUrl: string = API_BASE_URL, 
-        startDate: Date = thisWeekStartDate, 
-        endDate: Date = thisWeekEndDate
-    ) {
-        this.baseUrl = baseUrl;
-        this.startDate = startDate;
-        this.endDate = endDate;
+  constructor(
+    baseUrl: string = API_BASE_URL,
+    startDate?: Date,
+    endDate?: Date
+  ) {
+    this.baseUrl = baseUrl;
+    if (startDate && endDate) {
+      this.defaultStartDate = startDate;
+      this.defaultEndDate = endDate;
+    } else {
+      const { startDate: s, endDate: e } = getWeekBounds();
+      this.defaultStartDate = s;
+      this.defaultEndDate = e;
+    }
+  }
+
+  /**
+   * Get all reservations (generic).
+   * @param filters : { status?, startDate?, endDate? }
+   * @param startDate, endDate : if provided, they override defaultStartDate/defaultEndDate
+   */
+  async getReservations(
+    filters?: Partial<{ status: string; startDate: Date; endDate: Date }>,
+    startDate?: Date,
+    endDate?: Date,
+    options?: ApiOptions
+  ): Promise<ReservationsPaginatedResponse> {
+    const sd = startDate ?? this.defaultStartDate;
+    const ed = endDate ?? this.defaultEndDate;
+
+    const queryParams = new URLSearchParams({
+      startDate: sd.toISOString(),
+      endDate: ed.toISOString(),
+    });
+
+    if (filters?.status) {
+      queryParams.append("status", filters.status);
     }
 
-    async getReservations(
-        filters?: Partial<ReservationFilters>,
-        startDate?: Date,
-        endDate?: Date,
-        options?: ApiOptions,
-    ): Promise<ReservationsPaginatedResponse> {
-        const queryParams = new URLSearchParams({
-            startDate: startDate ? startDate.toISOString() : this.startDate.toISOString(),
-            endDate: endDate ? endDate.toISOString() : this.endDate.toISOString(),
-        });
+    const response = await fetch(
+      `${this.baseUrl}/reservations?${queryParams.toString()}`,
+      {
+        signal: options?.signal,
+      }
+    );
 
-        if (filters) {
-            for (const [key, value] of Object.entries(filters)) {
-                if (value !== undefined && value !== null && value !== "") {
-                    queryParams.append(key, String(value));
-                }
-            }
-        }
-
-        const response = await fetch(`${this.baseUrl}/reservations?${queryParams}`, {
-            signal: options?.signal,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const rawData = await response.json();
-        return reservationsPaginatedResponseSchema.parse(rawData);
-    }   
-
-    async getReservationsByRoomId(
-        roomId: string,
-        startDate?: Date,
-        endDate?: Date,
-        options?: ApiOptions,
-    ): Promise<ReservationsPaginatedResponse> {
-        const queryParams = new URLSearchParams({
-            startDate: startDate ? startDate.toISOString() : this.startDate.toISOString(),
-            endDate: endDate ? endDate.toISOString() : this.endDate.toISOString(),
-        });
-
-        const response = await fetch(`${this.baseUrl}/rooms/${roomId}/reservations?${queryParams}`, {
-            signal: options?.signal,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const rawData = await response.json();
-        return reservationsPaginatedResponseSchema.parse(rawData);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    async getReservationById(
-        reservationId: string,
-        options?: ApiOptions,
-    ): Promise<Reservation> {
-        const response = await fetch(`${this.baseUrl}/reservations/${reservationId}`, {
-            signal: options?.signal,
-        });
+    const raw = await response.json();
+    return reservationsPaginatedResponseSchema.parse(raw);
+  }
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  /**
+   * Get reservations for a given room within a [startDate, endDate] interval.
+   * @param roomId : Room ID
+   * @param startDate, endDate : desired interval (otherwise, current week by default)
+   */
+  async getReservationsByRoomId(
+    roomId: string,
+    startDate?: Date,
+    endDate?: Date,
+    options?: ApiOptions
+  ): Promise<ReservationsPaginatedResponse> {
+    const sd = startDate ?? this.defaultStartDate;
+    const ed = endDate ?? this.defaultEndDate;
 
-        const rawData = await response.json();
-        return reservationSchema.parse(rawData);
+    const queryParams = new URLSearchParams({
+      startDate: sd.toISOString(),
+      endDate: ed.toISOString(),
+    });
+
+    const response = await fetch(
+      `${this.baseUrl}/rooms/${roomId}/reservations?${queryParams.toString()}`,
+      {
+        signal: options?.signal,
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { data: [], total: 0 };
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    async createReservation(
-        data: CreateReservation,
-        options?: ApiOptions,
-    ): Promise<Reservation | null> {
-        const response = await fetch(`${this.baseUrl}/reservations`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-            signal: options?.signal,
-        });
+    const raw = await response.json();
+    return reservationsPaginatedResponseSchema.parse(raw);
+  }
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  /**
+   * Get a single reservation by its ID.
+   */
+  async getReservationById(
+    reservationId: string,
+    options?: ApiOptions
+  ): Promise<Reservation> {
+    const response = await fetch(
+      `${this.baseUrl}/reservations/${reservationId}`,
+      {
+        signal: options?.signal,
+      }
+    );
 
-        const rawData = await response.json();
-        return reservationSchema.parse(rawData);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Réservation non trouvée (404).");
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    async updateReservation(
-        reservationId: string,
-        data: UpdateReservation,
-        options?: ApiOptions,
-    ): Promise<Reservation | null> {
-        const response = await fetch(`${this.baseUrl}/reservations/${reservationId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-            signal: options?.signal,
-        });
+    const raw = await response.json();
+    return reservationSchema.parse(raw);
+  }
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  /**
+   * Creates a new reservation.
+   * Returns the complete Reservation object if successful, otherwise throws an error.
+   */
+  async createReservation(
+    data: CreateReservationData,
+    options?: ApiOptions
+  ): Promise<Reservation> {
+    const response = await fetch(`${this.baseUrl}/reservations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      signal: options?.signal,
+    });
 
-        const rawData = await response.json();
-        return reservationSchema.parse(rawData);
+    if (!response.ok) {
+      if (response.status === 409) {
+        throw new Error(
+          "Ce créneau est déjà réservé pour cette salle (409 Conflict)."
+        );
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    async deleteReservation(
-        reservationId: string,
-        options?: ApiOptions,
-    ): Promise<boolean> {
-        const response = await fetch(`${this.baseUrl}/reservations/${reservationId}`, {
-            method: "DELETE",
-            signal: options?.signal,
-        });
+    const raw = await response.json();
+    return reservationSchema.parse(raw);
+  }
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  /**
+   * Updates an existing reservation (PUT /reservations/:id).
+   * Returns the updated Reservation object if successful, otherwise throws an error.
+   */
+  async updateReservation(
+    reservationId: string,
+    data: UpdateReservationData,
+    options?: ApiOptions
+  ): Promise<Reservation> {
+    const response = await fetch(
+      `${this.baseUrl}/reservations/${reservationId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        signal: options?.signal,
+      }
+    );
 
-        return true;
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Réservation non trouvée (404).");
+      }
+      if (response.status === 409) {
+        throw new Error(
+          "Le créneau mis à jour entre en conflit avec une autre réservation (409)."
+        );
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    const raw = await response.json();
+    return reservationSchema.parse(raw);
+  }
+
+  /**
+   * Deletes a reservation by its ID.
+   * Returns `true` if successful, otherwise throws an error.
+   */
+  async deleteReservation(
+    reservationId: string,
+    options?: ApiOptions
+  ): Promise<boolean> {
+    const response = await fetch(
+      `${this.baseUrl}/reservations/${reservationId}`,
+      {
+        method: "DELETE",
+        signal: options?.signal,
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Réservation non trouvée (404).");
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  }
 }
 
 export const reservationsApi = new ReservationsApiClient();
