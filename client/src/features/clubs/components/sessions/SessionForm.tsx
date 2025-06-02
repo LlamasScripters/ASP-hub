@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Save, ArrowLeft, Calendar, MapPin, FileText, AlertCircle, Clock } from "lucide-react";
+import { Save, ArrowLeft, Calendar, MapPin, FileText, AlertCircle, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { SessionSport, Category } from "../../types";
@@ -77,6 +77,8 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
 }) {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [existingSessions, setExistingSessions] = useState<SessionSport[]>([]);
+  const [isLoadingExistingSessions, setIsLoadingExistingSessions] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [sectionName, setSectionName] = useState("");
@@ -92,8 +94,48 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
     categoryId: categoryId,
   });
 
+  // récupération des sessions existantes au chargement
+  useEffect(() => {
+    const fetchExistingSessions = async () => {
+      try {
+        setIsLoadingExistingSessions(true);
+        const categoriesRes = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`);
+        const categoriesData: Category[] = await categoriesRes.json();
+        
+        const allSessions: SessionSport[] = [];
+        for (const cat of categoriesData) {
+          try {
+            const sessionsRes = await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`);
+            if (sessionsRes.ok) {
+              const sessionsData: SessionSport[] = await sessionsRes.json();
+              console.log(`Sessions from API for category ${cat.name}:`, JSON.stringify(sessionsData, null, 2));
+              const sessionsWithCategoryId = sessionsData.map(session => ({
+                ...session,
+                categoryId: cat.id
+              }));
+              allSessions.push(...sessionsWithCategoryId);
+            }
+          } catch (error) {
+            console.error(`Erreur lors du chargement des sessions pour la catégorie ${cat.id}:`, error);
+          }
+        }
+        
+        setExistingSessions(allSessions);
+      } catch (error) {
+        console.error('Erreur lors du chargement des sessions:', error);
+        toast.error("Erreur lors du chargement des sessions existantes");
+      } finally {
+        setIsLoadingExistingSessions(false);
+      }
+    };
+
+    fetchExistingSessions();
+  }, [clubId, sectionId]);
+
   useEffect(() => {
     const fetchData = async () => {
+      if (isLoadingExistingSessions) return;
+      
       setIsLoading(true);
       try {
         // Fetch categories
@@ -129,7 +171,40 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
     };
 
     fetchData();
-  }, [mode, sessionId, clubId, sectionId, categoryId]);
+  }, [mode, sessionId, clubId, sectionId, categoryId, isLoadingExistingSessions]);
+
+  // validation pour les titres dupliqués
+  const validateDuplicateTitle = (title: string, selectedCategoryId: string) => {
+    if (!title.trim() || !selectedCategoryId) return null;
+    
+    console.log("Validation - Title:", title, "CategoryId:", selectedCategoryId);
+    console.log("Existing sessions:", existingSessions);
+    
+    const normalizedTitle = title.trim().toLowerCase();
+    console.log("Normalized title:", normalizedTitle);
+    
+    // Log each session for debugging
+    existingSessions.forEach((session, index) => {
+      console.log(`Session ${index}:`, {
+        title: session.title,
+        normalizedTitle: session.title.trim().toLowerCase(),
+        categoryId: session.categoryId,
+        id: session.id,
+        titleMatch: session.title.trim().toLowerCase() === normalizedTitle,
+        categoryMatch: session.categoryId === selectedCategoryId
+      });
+    });
+    
+    const duplicateSession = existingSessions.find(session => 
+      session.title.trim().toLowerCase() === normalizedTitle && 
+      session.categoryId === selectedCategoryId &&
+      session.id !== sessionId // exclusion la session actuelle en mode édition
+    );
+    
+    console.log("Duplicate found:", duplicateSession);
+    
+    return duplicateSession ? "Une session avec ce titre existe déjà pour cette catégorie" : null;
+  };
 
   // Fonction pour valider les dates en temps réel
   const validateDates = (startDate: string, endDate: string) => {
@@ -200,6 +275,22 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
     }
   };
 
+  // validation en temps réel pour les titres et catégories
+  const duplicateTitleError = validateDuplicateTitle(form.title || "", form.categoryId || "");
+
+  const handleTitleChange = (value: string) => {
+    setForm(prev => ({ ...prev, title: value }));
+    
+    // nettoye l'erreur de titre dupliqué si elle existe
+    if (errors.title === "Une session avec ce titre existe déjà pour cette catégorie") {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.title;
+        return newErrors;
+      });
+    }
+  };
+
   // effect pour valider les dates quand elles changent
   useEffect(() => {
     validateDates(form.startDate || "", form.endDate || "");
@@ -211,6 +302,14 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
     setIsLoading(true);
 
     console.log("Form submission started:", { mode, form }); // Debug log
+
+    // validation des titres dupliqués
+    const titleError = validateDuplicateTitle(form.title || "", form.categoryId || "");
+    if (titleError) {
+      setErrors({ title: titleError });
+      setIsLoading(false);
+      return;
+    }
 
     // vérifie la validation des dates en premier
     if (!dateValidation.isValid) {
@@ -253,8 +352,12 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
       });
 
       if (!response.ok) {
-        // const errorText = await response.text();
-        // console.error("API error response:", errorText);
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 409 || errorData.message?.includes('existe déjà')) {
+          setErrors({ title: "Une session avec ce titre existe déjà pour cette catégorie" });
+          setIsLoading(false);
+          return;
+        }
         throw new Error(`Erreur lors de la sauvegarde: ${response.status}`);
       }
 
@@ -282,6 +385,21 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
       params: { clubId, sectionId },
     });
   };
+
+  if (isLoadingExistingSessions) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Chargement des données...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -337,18 +455,30 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                     <Label htmlFor="categoryId" className="text-sm font-medium">
                       Catégorie <span className="text-destructive">*</span>
                     </Label>
-                    <Select value={form.categoryId || ""} onValueChange={(value) => setForm({ ...form, categoryId: value })}>
-                      <SelectTrigger className={errors.categoryId ? "border-destructive" : ""}>
-                        <SelectValue placeholder="Choisir une catégorie" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {categories.length > 0 ? (
+                      <Select 
+                        value={form.categoryId || ""} 
+                        onValueChange={(value) => {
+                          setForm(prev => ({ ...prev, categoryId: value }));
+                        }}
+                      >
+                        <SelectTrigger className={errors.categoryId ? "border-destructive" : ""}>
+                          <SelectValue placeholder="Choisir une catégorie" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm text-muted-foreground">Chargement des catégories...</span>
+                      </div>
+                    )}
                     {errors.categoryId && (
                       <p className="text-sm text-destructive">{errors.categoryId}</p>
                     )}
@@ -362,11 +492,11 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                       id="title"
                       placeholder="Ex: Entraînement technique, Match amical..."
                       value={form.title ?? ""}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className={errors.title ? "border-destructive" : ""}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      className={errors.title || duplicateTitleError ? "border-destructive" : ""}
                     />
-                    {errors.title && (
-                      <p className="text-sm text-destructive">{errors.title}</p>
+                    {(errors.title || duplicateTitleError) && (
+                      <p className="text-sm text-destructive">{errors.title || duplicateTitleError}</p>
                     )}
                   </div>
                 </div>
@@ -571,7 +701,7 @@ export function SessionForm({ mode, clubId, sectionId, categoryId, sessionId }: 
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isLoading || !dateValidation.isValid} 
+                  disabled={isLoading || !dateValidation.isValid || !!duplicateTitleError} 
                   className="min-w-[120px]"
                 >
                   {isLoading ? (

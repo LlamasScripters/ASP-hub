@@ -249,6 +249,7 @@ export const clubsService = {
 				location: sessionsSport.location,
 				maxParticipants: sessionsSport.maxParticipants,
 				currentParticipants: sessionsSport.currentParticipants,
+				categoryId: sessionsSport.categoryId,
 				coachId: users.id,
 				coachFirstName: users.firstName,
 				coachLastName: users.lastName,

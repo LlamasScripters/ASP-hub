@@ -461,6 +461,7 @@ clubsRouter.get("/:clubId/sections/:sectionId/categories/:categoryId/sessions", 
       location: s.location,
       maxParticipants: s.maxParticipants,
       currentParticipants: s.currentParticipants,
+      categoryId: s.categoryId,
       coach: s.coachId ? {
         id: s.coachId,
         firstName: s.coachFirstName,
@@ -487,12 +488,13 @@ clubsRouter.post("/:clubId/sections/:sectionId/categories/:categoryId/sessions",
       status,
       maxParticipants,
       notes,
+      categoryId,
     } = req.body;
 
-    const categoryId = req.params.categoryId;
+    const finalCategoryId = categoryId || req.params.categoryId;
 
     const created = await clubsService.createSession({
-      categoryId,
+      categoryId: finalCategoryId,
       title,
       description,
       startDate: new Date(startDate),
