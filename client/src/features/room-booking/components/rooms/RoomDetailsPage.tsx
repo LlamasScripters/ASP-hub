@@ -27,7 +27,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 	return (
 		<div className="space-y-6">
 			{/* En-tête de la page */}
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">{room.name}</h1>
 					<p className="text-muted-foreground">

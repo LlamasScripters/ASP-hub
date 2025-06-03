@@ -6,7 +6,7 @@ import { ReservationForm } from "@room-booking/components/reservations/Reservati
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import type { Reservation } from "@room-booking/hooks/useReservations";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 
@@ -21,8 +21,11 @@ export function ReservationEditPage({
   room,
   reservation,
 }: ReservationEditPageProps) {
-  const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
+  const router = useRouter();
+
+	const previousPageHref = router.__store.prevState?.resolvedLocation?.href || undefined;
 
   const handleSuccess = () => {
     setShowSuccess(true);
@@ -84,7 +87,7 @@ export function ReservationEditPage({
         roomId={room.id}
         reservation={reservation}
         onSuccess={handleSuccess}
-        onCancelLink={`/admin/facilities/complexes/${complex.id}?view=rooms`}
+        onCancelLink={previousPageHref}
       />
     </div>
   );

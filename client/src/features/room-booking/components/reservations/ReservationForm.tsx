@@ -260,11 +260,13 @@ export function ReservationForm({
 
             {/* ACTIONS */}
             <div className="flex items-center justify-end pt-4 border-t space-x-4">
-              <Button variant="outline" size="sm" asChild>
-                <Link to={onCancelLink ?? `/admin/facilities/rooms/${roomId}`}>
-                  Annuler
-                </Link>
-              </Button>
+              {onCancelLink && (
+                <Button variant="outline" size='sm' asChild>
+                  <Link to={onCancelLink}>
+                    <span>Annuler</span>
+                  </Link>
+                </Button>
+              )}
               <Button disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
