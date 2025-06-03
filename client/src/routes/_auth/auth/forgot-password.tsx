@@ -11,7 +11,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-export const Route = createFileRoute("/auth/forgot-password")({
+export const Route = createFileRoute("/_auth/auth/forgot-password")({
 	component: RouteComponent,
 });
 

@@ -14,27 +14,27 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { Route as rootRoute } from "./routes/__root"
 import { Route as AuthenticatedImport } from "./routes/_authenticated"
+import { Route as AuthImport } from "./routes/_auth"
 import { Route as IndexImport } from "./routes/index"
-import { Route as AuthSendVerificationEmailImport } from "./routes/auth/send-verification-email"
-import { Route as AuthResetPasswordImport } from "./routes/auth/reset-password"
-import { Route as AuthRegisterImport } from "./routes/auth/register"
-import { Route as AuthLoginImport } from "./routes/auth/login"
-import { Route as AuthForgotPasswordImport } from "./routes/auth/forgot-password"
-import { Route as AuthAccountCreatedImport } from "./routes/auth/account-created"
-import { Route as AuthLayoutImport } from "./routes/auth/_layout"
-import { Route as AuthVerifyIndexImport } from "./routes/auth/verify/index"
-import { Route as AuthVerifyVerifyImport } from "./routes/auth/verify/_verify"
 import { Route as AuthenticatedAdminAdminImport } from "./routes/_authenticated/admin/_admin"
 import { Route as AuthenticatednonadminNonadminImport } from "./routes/_authenticated/(nonadmin)/_nonadmin"
+import { Route as AuthAuthSendVerificationEmailImport } from "./routes/_auth/auth/send-verification-email"
+import { Route as AuthAuthResetPasswordImport } from "./routes/_auth/auth/reset-password"
+import { Route as AuthAuthRegisterImport } from "./routes/_auth/auth/register"
+import { Route as AuthAuthLoginImport } from "./routes/_auth/auth/login"
+import { Route as AuthAuthForgotPasswordImport } from "./routes/_auth/auth/forgot-password"
+import { Route as AuthAuthAccountCreatedImport } from "./routes/_auth/auth/account-created"
 import { Route as AuthenticatedAdminAdminIndexImport } from "./routes/_authenticated/admin/_admin.index"
-import { Route as AuthVerifyVerifySuccessImport } from "./routes/auth/verify/_verify.success"
-import { Route as AuthVerifyVerifyErrorImport } from "./routes/auth/verify/_verify.error"
+import { Route as AuthAuthVerifyIndexImport } from "./routes/_auth/auth/verify/index"
 import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
+import { Route as AuthAuthVerifyVerifyImport } from "./routes/_auth/auth/verify/_verify"
 import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
 import { Route as AuthenticatednonadminNonadminUserUserImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user"
 import { Route as AuthenticatednonadminNonadminDashboardSocialImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
 import { Route as AuthenticatednonadminNonadminDashboardMembersImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
 import { Route as AuthenticatednonadminNonadminDashboardActivitiesImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/activities"
+import { Route as AuthAuthVerifyVerifySuccessImport } from "./routes/_auth/auth/verify/_verify.success"
+import { Route as AuthAuthVerifyVerifyErrorImport } from "./routes/_auth/auth/verify/_verify.error"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/index"
@@ -65,26 +65,24 @@ import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCa
 
 // Create Virtual Routes
 
-const AuthImport = createFileRoute("/auth")()
-const AuthVerifyImport = createFileRoute("/auth/verify")()
 const AuthenticatedAdminImport = createFileRoute("/_authenticated/admin")()
 const AuthenticatednonadminImport = createFileRoute(
   "/_authenticated/(nonadmin)",
 )()
+const AuthAuthVerifyImport = createFileRoute("/_auth/auth/verify")()
 const AuthenticatednonadminNonadminUserImport = createFileRoute(
   "/_authenticated/(nonadmin)/_nonadmin/user",
 )()
 
 // Create/Update Routes
 
-const AuthRoute = AuthImport.update({
-  id: "/auth",
-  path: "/auth",
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: "/_authenticated",
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthenticatedRoute = AuthenticatedImport.update({
-  id: "/_authenticated",
+const AuthRoute = AuthImport.update({
+  id: "/_auth",
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -92,12 +90,6 @@ const IndexRoute = IndexImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRoute,
-} as any)
-
-const AuthVerifyRoute = AuthVerifyImport.update({
-  id: "/verify",
-  path: "/verify",
-  getParentRoute: () => AuthRoute,
 } as any)
 
 const AuthenticatedAdminRoute = AuthenticatedAdminImport.update({
@@ -111,56 +103,10 @@ const AuthenticatednonadminRoute = AuthenticatednonadminImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const AuthSendVerificationEmailRoute = AuthSendVerificationEmailImport.update({
-  id: "/send-verification-email",
-  path: "/send-verification-email",
+const AuthAuthVerifyRoute = AuthAuthVerifyImport.update({
+  id: "/auth/verify",
+  path: "/auth/verify",
   getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthResetPasswordRoute = AuthResetPasswordImport.update({
-  id: "/reset-password",
-  path: "/reset-password",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthRegisterRoute = AuthRegisterImport.update({
-  id: "/register",
-  path: "/register",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthLoginRoute = AuthLoginImport.update({
-  id: "/login",
-  path: "/login",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthForgotPasswordRoute = AuthForgotPasswordImport.update({
-  id: "/forgot-password",
-  path: "/forgot-password",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthAccountCreatedRoute = AuthAccountCreatedImport.update({
-  id: "/account-created",
-  path: "/account-created",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthLayoutRoute = AuthLayoutImport.update({
-  id: "/_layout",
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthVerifyIndexRoute = AuthVerifyIndexImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => AuthVerifyRoute,
-} as any)
-
-const AuthVerifyVerifyRoute = AuthVerifyVerifyImport.update({
-  id: "/_verify",
-  getParentRoute: () => AuthVerifyRoute,
 } as any)
 
 const AuthenticatedAdminAdminRoute = AuthenticatedAdminAdminImport.update({
@@ -173,6 +119,43 @@ const AuthenticatednonadminNonadminRoute =
     id: "/_nonadmin",
     getParentRoute: () => AuthenticatednonadminRoute,
   } as any)
+
+const AuthAuthSendVerificationEmailRoute =
+  AuthAuthSendVerificationEmailImport.update({
+    id: "/auth/send-verification-email",
+    path: "/auth/send-verification-email",
+    getParentRoute: () => AuthRoute,
+  } as any)
+
+const AuthAuthResetPasswordRoute = AuthAuthResetPasswordImport.update({
+  id: "/auth/reset-password",
+  path: "/auth/reset-password",
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthRegisterRoute = AuthAuthRegisterImport.update({
+  id: "/auth/register",
+  path: "/auth/register",
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthLoginRoute = AuthAuthLoginImport.update({
+  id: "/auth/login",
+  path: "/auth/login",
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthForgotPasswordRoute = AuthAuthForgotPasswordImport.update({
+  id: "/auth/forgot-password",
+  path: "/auth/forgot-password",
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthAccountCreatedRoute = AuthAuthAccountCreatedImport.update({
+  id: "/auth/account-created",
+  path: "/auth/account-created",
+  getParentRoute: () => AuthRoute,
+} as any)
 
 const AuthenticatednonadminNonadminUserRoute =
   AuthenticatednonadminNonadminUserImport.update({
@@ -188,16 +171,10 @@ const AuthenticatedAdminAdminIndexRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
-const AuthVerifyVerifySuccessRoute = AuthVerifyVerifySuccessImport.update({
-  id: "/success",
-  path: "/success",
-  getParentRoute: () => AuthVerifyVerifyRoute,
-} as any)
-
-const AuthVerifyVerifyErrorRoute = AuthVerifyVerifyErrorImport.update({
-  id: "/error",
-  path: "/error",
-  getParentRoute: () => AuthVerifyVerifyRoute,
+const AuthAuthVerifyIndexRoute = AuthAuthVerifyIndexImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => AuthAuthVerifyRoute,
 } as any)
 
 const AuthenticatedAdminAdminUsersRoute =
@@ -206,6 +183,11 @@ const AuthenticatedAdminAdminUsersRoute =
     path: "/users",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
+
+const AuthAuthVerifyVerifyRoute = AuthAuthVerifyVerifyImport.update({
+  id: "/_verify",
+  getParentRoute: () => AuthAuthVerifyRoute,
+} as any)
 
 const AuthenticatednonadminNonadminDashboardIndexRoute =
   AuthenticatednonadminNonadminDashboardIndexImport.update({
@@ -240,6 +222,19 @@ const AuthenticatednonadminNonadminDashboardActivitiesRoute =
     path: "/dashboard/activities",
     getParentRoute: () => AuthenticatednonadminNonadminRoute,
   } as any)
+
+const AuthAuthVerifyVerifySuccessRoute =
+  AuthAuthVerifyVerifySuccessImport.update({
+    id: "/success",
+    path: "/success",
+    getParentRoute: () => AuthAuthVerifyVerifyRoute,
+  } as any)
+
+const AuthAuthVerifyVerifyErrorRoute = AuthAuthVerifyVerifyErrorImport.update({
+  id: "/error",
+  path: "/error",
+  getParentRoute: () => AuthAuthVerifyVerifyRoute,
+} as any)
 
 const AuthenticatedAdminAdminFacilitiesRoomsIndexRoute =
   AuthenticatedAdminAdminFacilitiesRoomsIndexImport.update({
@@ -459,6 +454,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    "/_auth": {
+      id: "/_auth"
+      path: ""
+      fullPath: ""
+      preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
     "/_authenticated": {
       id: "/_authenticated"
       path: ""
@@ -466,60 +468,46 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
-    "/auth": {
-      id: "/auth"
-      path: "/auth"
-      fullPath: "/auth"
-      preLoaderRoute: typeof AuthImport
-      parentRoute: typeof rootRoute
-    }
-    "/auth/_layout": {
-      id: "/auth/_layout"
-      path: "/auth"
-      fullPath: "/auth"
-      preLoaderRoute: typeof AuthLayoutImport
-      parentRoute: typeof AuthRoute
-    }
-    "/auth/account-created": {
-      id: "/auth/account-created"
-      path: "/account-created"
+    "/_auth/auth/account-created": {
+      id: "/_auth/auth/account-created"
+      path: "/auth/account-created"
       fullPath: "/auth/account-created"
-      preLoaderRoute: typeof AuthAccountCreatedImport
+      preLoaderRoute: typeof AuthAuthAccountCreatedImport
       parentRoute: typeof AuthImport
     }
-    "/auth/forgot-password": {
-      id: "/auth/forgot-password"
-      path: "/forgot-password"
+    "/_auth/auth/forgot-password": {
+      id: "/_auth/auth/forgot-password"
+      path: "/auth/forgot-password"
       fullPath: "/auth/forgot-password"
-      preLoaderRoute: typeof AuthForgotPasswordImport
+      preLoaderRoute: typeof AuthAuthForgotPasswordImport
       parentRoute: typeof AuthImport
     }
-    "/auth/login": {
-      id: "/auth/login"
-      path: "/login"
+    "/_auth/auth/login": {
+      id: "/_auth/auth/login"
+      path: "/auth/login"
       fullPath: "/auth/login"
-      preLoaderRoute: typeof AuthLoginImport
+      preLoaderRoute: typeof AuthAuthLoginImport
       parentRoute: typeof AuthImport
     }
-    "/auth/register": {
-      id: "/auth/register"
-      path: "/register"
+    "/_auth/auth/register": {
+      id: "/_auth/auth/register"
+      path: "/auth/register"
       fullPath: "/auth/register"
-      preLoaderRoute: typeof AuthRegisterImport
+      preLoaderRoute: typeof AuthAuthRegisterImport
       parentRoute: typeof AuthImport
     }
-    "/auth/reset-password": {
-      id: "/auth/reset-password"
-      path: "/reset-password"
+    "/_auth/auth/reset-password": {
+      id: "/_auth/auth/reset-password"
+      path: "/auth/reset-password"
       fullPath: "/auth/reset-password"
-      preLoaderRoute: typeof AuthResetPasswordImport
+      preLoaderRoute: typeof AuthAuthResetPasswordImport
       parentRoute: typeof AuthImport
     }
-    "/auth/send-verification-email": {
-      id: "/auth/send-verification-email"
-      path: "/send-verification-email"
+    "/_auth/auth/send-verification-email": {
+      id: "/_auth/auth/send-verification-email"
+      path: "/auth/send-verification-email"
       fullPath: "/auth/send-verification-email"
-      preLoaderRoute: typeof AuthSendVerificationEmailImport
+      preLoaderRoute: typeof AuthAuthSendVerificationEmailImport
       parentRoute: typeof AuthImport
     }
     "/_authenticated/(nonadmin)": {
@@ -550,26 +538,19 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    "/auth/verify": {
-      id: "/auth/verify"
-      path: "/verify"
+    "/_auth/auth/verify": {
+      id: "/_auth/auth/verify"
+      path: "/auth/verify"
       fullPath: "/auth/verify"
-      preLoaderRoute: typeof AuthVerifyImport
+      preLoaderRoute: typeof AuthAuthVerifyImport
       parentRoute: typeof AuthImport
     }
-    "/auth/verify/_verify": {
-      id: "/auth/verify/_verify"
-      path: "/verify"
+    "/_auth/auth/verify/_verify": {
+      id: "/_auth/auth/verify/_verify"
+      path: "/auth/verify"
       fullPath: "/auth/verify"
-      preLoaderRoute: typeof AuthVerifyVerifyImport
-      parentRoute: typeof AuthVerifyRoute
-    }
-    "/auth/verify/": {
-      id: "/auth/verify/"
-      path: "/"
-      fullPath: "/auth/verify/"
-      preLoaderRoute: typeof AuthVerifyIndexImport
-      parentRoute: typeof AuthVerifyImport
+      preLoaderRoute: typeof AuthAuthVerifyVerifyImport
+      parentRoute: typeof AuthAuthVerifyRoute
     }
     "/_authenticated/admin/_admin/users": {
       id: "/_authenticated/admin/_admin/users"
@@ -578,19 +559,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminUsersImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
-    "/auth/verify/_verify/error": {
-      id: "/auth/verify/_verify/error"
-      path: "/error"
-      fullPath: "/auth/verify/error"
-      preLoaderRoute: typeof AuthVerifyVerifyErrorImport
-      parentRoute: typeof AuthVerifyVerifyImport
-    }
-    "/auth/verify/_verify/success": {
-      id: "/auth/verify/_verify/success"
-      path: "/success"
-      fullPath: "/auth/verify/success"
-      preLoaderRoute: typeof AuthVerifyVerifySuccessImport
-      parentRoute: typeof AuthVerifyVerifyImport
+    "/_auth/auth/verify/": {
+      id: "/_auth/auth/verify/"
+      path: "/"
+      fullPath: "/auth/verify/"
+      preLoaderRoute: typeof AuthAuthVerifyIndexImport
+      parentRoute: typeof AuthAuthVerifyImport
     }
     "/_authenticated/admin/_admin/": {
       id: "/_authenticated/admin/_admin/"
@@ -598,6 +572,20 @@ declare module "@tanstack/react-router" {
       fullPath: "/admin/"
       preLoaderRoute: typeof AuthenticatedAdminAdminIndexImport
       parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_auth/auth/verify/_verify/error": {
+      id: "/_auth/auth/verify/_verify/error"
+      path: "/error"
+      fullPath: "/auth/verify/error"
+      preLoaderRoute: typeof AuthAuthVerifyVerifyErrorImport
+      parentRoute: typeof AuthAuthVerifyVerifyImport
+    }
+    "/_auth/auth/verify/_verify/success": {
+      id: "/_auth/auth/verify/_verify/success"
+      path: "/success"
+      fullPath: "/auth/verify/success"
+      preLoaderRoute: typeof AuthAuthVerifyVerifySuccessImport
+      parentRoute: typeof AuthAuthVerifyVerifyImport
     }
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities": {
       id: "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities"
@@ -835,6 +823,55 @@ declare module "@tanstack/react-router" {
 
 // Create and export the route tree
 
+interface AuthAuthVerifyVerifyRouteChildren {
+  AuthAuthVerifyVerifyErrorRoute: typeof AuthAuthVerifyVerifyErrorRoute
+  AuthAuthVerifyVerifySuccessRoute: typeof AuthAuthVerifyVerifySuccessRoute
+}
+
+const AuthAuthVerifyVerifyRouteChildren: AuthAuthVerifyVerifyRouteChildren = {
+  AuthAuthVerifyVerifyErrorRoute: AuthAuthVerifyVerifyErrorRoute,
+  AuthAuthVerifyVerifySuccessRoute: AuthAuthVerifyVerifySuccessRoute,
+}
+
+const AuthAuthVerifyVerifyRouteWithChildren =
+  AuthAuthVerifyVerifyRoute._addFileChildren(AuthAuthVerifyVerifyRouteChildren)
+
+interface AuthAuthVerifyRouteChildren {
+  AuthAuthVerifyVerifyRoute: typeof AuthAuthVerifyVerifyRouteWithChildren
+  AuthAuthVerifyIndexRoute: typeof AuthAuthVerifyIndexRoute
+}
+
+const AuthAuthVerifyRouteChildren: AuthAuthVerifyRouteChildren = {
+  AuthAuthVerifyVerifyRoute: AuthAuthVerifyVerifyRouteWithChildren,
+  AuthAuthVerifyIndexRoute: AuthAuthVerifyIndexRoute,
+}
+
+const AuthAuthVerifyRouteWithChildren = AuthAuthVerifyRoute._addFileChildren(
+  AuthAuthVerifyRouteChildren,
+)
+
+interface AuthRouteChildren {
+  AuthAuthAccountCreatedRoute: typeof AuthAuthAccountCreatedRoute
+  AuthAuthForgotPasswordRoute: typeof AuthAuthForgotPasswordRoute
+  AuthAuthLoginRoute: typeof AuthAuthLoginRoute
+  AuthAuthRegisterRoute: typeof AuthAuthRegisterRoute
+  AuthAuthResetPasswordRoute: typeof AuthAuthResetPasswordRoute
+  AuthAuthSendVerificationEmailRoute: typeof AuthAuthSendVerificationEmailRoute
+  AuthAuthVerifyRoute: typeof AuthAuthVerifyRouteWithChildren
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthAuthAccountCreatedRoute: AuthAuthAccountCreatedRoute,
+  AuthAuthForgotPasswordRoute: AuthAuthForgotPasswordRoute,
+  AuthAuthLoginRoute: AuthAuthLoginRoute,
+  AuthAuthRegisterRoute: AuthAuthRegisterRoute,
+  AuthAuthResetPasswordRoute: AuthAuthResetPasswordRoute,
+  AuthAuthSendVerificationEmailRoute: AuthAuthSendVerificationEmailRoute,
+  AuthAuthVerifyRoute: AuthAuthVerifyRouteWithChildren,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface AuthenticatednonadminNonadminUserUserRouteChildren {
   AuthenticatednonadminNonadminUserUserProfileRoute: typeof AuthenticatednonadminNonadminUserUserProfileRoute
   AuthenticatednonadminNonadminUserUserSettingsRoute: typeof AuthenticatednonadminNonadminUserUserSettingsRoute
@@ -1025,74 +1062,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface AuthVerifyVerifyRouteChildren {
-  AuthVerifyVerifyErrorRoute: typeof AuthVerifyVerifyErrorRoute
-  AuthVerifyVerifySuccessRoute: typeof AuthVerifyVerifySuccessRoute
-}
-
-const AuthVerifyVerifyRouteChildren: AuthVerifyVerifyRouteChildren = {
-  AuthVerifyVerifyErrorRoute: AuthVerifyVerifyErrorRoute,
-  AuthVerifyVerifySuccessRoute: AuthVerifyVerifySuccessRoute,
-}
-
-const AuthVerifyVerifyRouteWithChildren =
-  AuthVerifyVerifyRoute._addFileChildren(AuthVerifyVerifyRouteChildren)
-
-interface AuthVerifyRouteChildren {
-  AuthVerifyVerifyRoute: typeof AuthVerifyVerifyRouteWithChildren
-  AuthVerifyIndexRoute: typeof AuthVerifyIndexRoute
-}
-
-const AuthVerifyRouteChildren: AuthVerifyRouteChildren = {
-  AuthVerifyVerifyRoute: AuthVerifyVerifyRouteWithChildren,
-  AuthVerifyIndexRoute: AuthVerifyIndexRoute,
-}
-
-const AuthVerifyRouteWithChildren = AuthVerifyRoute._addFileChildren(
-  AuthVerifyRouteChildren,
-)
-
-interface AuthRouteChildren {
-  AuthLayoutRoute: typeof AuthLayoutRoute
-  AuthAccountCreatedRoute: typeof AuthAccountCreatedRoute
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-  AuthSendVerificationEmailRoute: typeof AuthSendVerificationEmailRoute
-  AuthVerifyRoute: typeof AuthVerifyRouteWithChildren
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthLayoutRoute: AuthLayoutRoute,
-  AuthAccountCreatedRoute: AuthAccountCreatedRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
-  AuthSendVerificationEmailRoute: AuthSendVerificationEmailRoute,
-  AuthVerifyRoute: AuthVerifyRouteWithChildren,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 export interface FileRoutesByFullPath {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
   "": typeof AuthenticatedRouteWithChildren
-  "/auth": typeof AuthLayoutRoute
-  "/auth/account-created": typeof AuthAccountCreatedRoute
-  "/auth/forgot-password": typeof AuthForgotPasswordRoute
-  "/auth/login": typeof AuthLoginRoute
-  "/auth/register": typeof AuthRegisterRoute
-  "/auth/reset-password": typeof AuthResetPasswordRoute
-  "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
+  "/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/auth/login": typeof AuthAuthLoginRoute
+  "/auth/register": typeof AuthAuthRegisterRoute
+  "/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
-  "/auth/verify": typeof AuthVerifyVerifyRouteWithChildren
-  "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/auth/verify": typeof AuthAuthVerifyVerifyRouteWithChildren
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
-  "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
-  "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/admin/": typeof AuthenticatedAdminAdminIndexRoute
+  "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
   "/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
@@ -1129,18 +1114,18 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
-  "/auth": typeof AuthLayoutRoute
-  "/auth/account-created": typeof AuthAccountCreatedRoute
-  "/auth/forgot-password": typeof AuthForgotPasswordRoute
-  "/auth/login": typeof AuthLoginRoute
-  "/auth/register": typeof AuthRegisterRoute
-  "/auth/reset-password": typeof AuthResetPasswordRoute
-  "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
+  "": typeof AuthRouteWithChildren
+  "/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/auth/login": typeof AuthAuthLoginRoute
+  "/auth/register": typeof AuthAuthRegisterRoute
+  "/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
-  "/auth/verify": typeof AuthVerifyIndexRoute
+  "/auth/verify": typeof AuthAuthVerifyIndexRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
-  "/auth/verify/error": typeof AuthVerifyVerifyErrorRoute
-  "/auth/verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
   "/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
@@ -1178,26 +1163,25 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   "/": typeof IndexRoute
+  "/_auth": typeof AuthRouteWithChildren
   "/_authenticated": typeof AuthenticatedRouteWithChildren
-  "/auth": typeof AuthRouteWithChildren
-  "/auth/_layout": typeof AuthLayoutRoute
-  "/auth/account-created": typeof AuthAccountCreatedRoute
-  "/auth/forgot-password": typeof AuthForgotPasswordRoute
-  "/auth/login": typeof AuthLoginRoute
-  "/auth/register": typeof AuthRegisterRoute
-  "/auth/reset-password": typeof AuthResetPasswordRoute
-  "/auth/send-verification-email": typeof AuthSendVerificationEmailRoute
+  "/_auth/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/_auth/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/_auth/auth/login": typeof AuthAuthLoginRoute
+  "/_auth/auth/register": typeof AuthAuthRegisterRoute
+  "/_auth/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/_auth/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/_authenticated/(nonadmin)": typeof AuthenticatednonadminRouteWithChildren
   "/_authenticated/(nonadmin)/_nonadmin": typeof AuthenticatednonadminNonadminRouteWithChildren
   "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren
   "/_authenticated/admin/_admin": typeof AuthenticatedAdminAdminRouteWithChildren
-  "/auth/verify": typeof AuthVerifyRouteWithChildren
-  "/auth/verify/_verify": typeof AuthVerifyVerifyRouteWithChildren
-  "/auth/verify/": typeof AuthVerifyIndexRoute
+  "/_auth/auth/verify": typeof AuthAuthVerifyRouteWithChildren
+  "/_auth/auth/verify/_verify": typeof AuthAuthVerifyVerifyRouteWithChildren
   "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
-  "/auth/verify/_verify/error": typeof AuthVerifyVerifyErrorRoute
-  "/auth/verify/_verify/success": typeof AuthVerifyVerifySuccessRoute
+  "/_auth/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
+  "/_auth/auth/verify/_verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/_auth/auth/verify/_verify/success": typeof AuthAuthVerifyVerifySuccessRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
@@ -1238,7 +1222,6 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | ""
-    | "/auth"
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -1247,11 +1230,11 @@ export interface FileRouteTypes {
     | "/auth/send-verification-email"
     | "/admin"
     | "/auth/verify"
-    | "/auth/verify/"
     | "/admin/users"
+    | "/auth/verify/"
+    | "/admin/"
     | "/auth/verify/error"
     | "/auth/verify/success"
-    | "/admin/"
     | "/dashboard/activities"
     | "/dashboard/members"
     | "/dashboard/social"
@@ -1287,7 +1270,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
-    | "/auth"
+    | ""
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -1334,26 +1317,25 @@ export interface FileRouteTypes {
   id:
     | "__root__"
     | "/"
+    | "/_auth"
     | "/_authenticated"
-    | "/auth"
-    | "/auth/_layout"
-    | "/auth/account-created"
-    | "/auth/forgot-password"
-    | "/auth/login"
-    | "/auth/register"
-    | "/auth/reset-password"
-    | "/auth/send-verification-email"
+    | "/_auth/auth/account-created"
+    | "/_auth/auth/forgot-password"
+    | "/_auth/auth/login"
+    | "/_auth/auth/register"
+    | "/_auth/auth/reset-password"
+    | "/_auth/auth/send-verification-email"
     | "/_authenticated/(nonadmin)"
     | "/_authenticated/(nonadmin)/_nonadmin"
     | "/_authenticated/admin"
     | "/_authenticated/admin/_admin"
-    | "/auth/verify"
-    | "/auth/verify/_verify"
-    | "/auth/verify/"
+    | "/_auth/auth/verify"
+    | "/_auth/auth/verify/_verify"
     | "/_authenticated/admin/_admin/users"
-    | "/auth/verify/_verify/error"
-    | "/auth/verify/_verify/success"
+    | "/_auth/auth/verify/"
     | "/_authenticated/admin/_admin/"
+    | "/_auth/auth/verify/_verify/error"
+    | "/_auth/auth/verify/_verify/success"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
@@ -1392,14 +1374,14 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -1413,12 +1395,24 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_authenticated",
-        "/auth"
+        "/_auth",
+        "/_authenticated"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/auth/account-created",
+        "/_auth/auth/forgot-password",
+        "/_auth/auth/login",
+        "/_auth/auth/register",
+        "/_auth/auth/reset-password",
+        "/_auth/auth/send-verification-email",
+        "/_auth/auth/verify"
+      ]
     },
     "/_authenticated": {
       "filePath": "_authenticated.tsx",
@@ -1427,46 +1421,29 @@ export const routeTree = rootRoute
         "/_authenticated/admin"
       ]
     },
-    "/auth": {
-      "filePath": "auth",
-      "children": [
-        "/auth/_layout",
-        "/auth/account-created",
-        "/auth/forgot-password",
-        "/auth/login",
-        "/auth/register",
-        "/auth/reset-password",
-        "/auth/send-verification-email",
-        "/auth/verify"
-      ]
+    "/_auth/auth/account-created": {
+      "filePath": "_auth/auth/account-created.tsx",
+      "parent": "/_auth"
     },
-    "/auth/_layout": {
-      "filePath": "auth/_layout.tsx",
-      "parent": "/auth"
+    "/_auth/auth/forgot-password": {
+      "filePath": "_auth/auth/forgot-password.tsx",
+      "parent": "/_auth"
     },
-    "/auth/account-created": {
-      "filePath": "auth/account-created.tsx",
-      "parent": "/auth"
+    "/_auth/auth/login": {
+      "filePath": "_auth/auth/login.tsx",
+      "parent": "/_auth"
     },
-    "/auth/forgot-password": {
-      "filePath": "auth/forgot-password.tsx",
-      "parent": "/auth"
+    "/_auth/auth/register": {
+      "filePath": "_auth/auth/register.tsx",
+      "parent": "/_auth"
     },
-    "/auth/login": {
-      "filePath": "auth/login.tsx",
-      "parent": "/auth"
+    "/_auth/auth/reset-password": {
+      "filePath": "_auth/auth/reset-password.tsx",
+      "parent": "/_auth"
     },
-    "/auth/register": {
-      "filePath": "auth/register.tsx",
-      "parent": "/auth"
-    },
-    "/auth/reset-password": {
-      "filePath": "auth/reset-password.tsx",
-      "parent": "/auth"
-    },
-    "/auth/send-verification-email": {
-      "filePath": "auth/send-verification-email.tsx",
-      "parent": "/auth"
+    "/_auth/auth/send-verification-email": {
+      "filePath": "_auth/auth/send-verification-email.tsx",
+      "parent": "/_auth"
     },
     "/_authenticated/(nonadmin)": {
       "filePath": "_authenticated/(nonadmin)",
@@ -1526,41 +1503,41 @@ export const routeTree = rootRoute
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
       ]
     },
-    "/auth/verify": {
-      "filePath": "auth/verify",
-      "parent": "/auth",
+    "/_auth/auth/verify": {
+      "filePath": "_auth/auth/verify",
+      "parent": "/_auth",
       "children": [
-        "/auth/verify/_verify",
-        "/auth/verify/"
+        "/_auth/auth/verify/_verify",
+        "/_auth/auth/verify/"
       ]
     },
-    "/auth/verify/_verify": {
-      "filePath": "auth/verify/_verify.tsx",
-      "parent": "/auth/verify",
+    "/_auth/auth/verify/_verify": {
+      "filePath": "_auth/auth/verify/_verify.tsx",
+      "parent": "/_auth/auth/verify",
       "children": [
-        "/auth/verify/_verify/error",
-        "/auth/verify/_verify/success"
+        "/_auth/auth/verify/_verify/error",
+        "/_auth/auth/verify/_verify/success"
       ]
-    },
-    "/auth/verify/": {
-      "filePath": "auth/verify/index.tsx",
-      "parent": "/auth/verify"
     },
     "/_authenticated/admin/_admin/users": {
       "filePath": "_authenticated/admin/_admin.users.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
-    "/auth/verify/_verify/error": {
-      "filePath": "auth/verify/_verify.error.tsx",
-      "parent": "/auth/verify/_verify"
-    },
-    "/auth/verify/_verify/success": {
-      "filePath": "auth/verify/_verify.success.tsx",
-      "parent": "/auth/verify/_verify"
+    "/_auth/auth/verify/": {
+      "filePath": "_auth/auth/verify/index.tsx",
+      "parent": "/_auth/auth/verify"
     },
     "/_authenticated/admin/_admin/": {
       "filePath": "_authenticated/admin/_admin.index.tsx",
       "parent": "/_authenticated/admin/_admin"
+    },
+    "/_auth/auth/verify/_verify/error": {
+      "filePath": "_auth/auth/verify/_verify.error.tsx",
+      "parent": "/_auth/auth/verify/_verify"
+    },
+    "/_auth/auth/verify/_verify/success": {
+      "filePath": "_auth/auth/verify/_verify.success.tsx",
+      "parent": "/_auth/auth/verify/_verify"
     },
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities": {
       "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/activities.tsx",

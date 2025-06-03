@@ -2,7 +2,9 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
+	SidebarGroup,
 	SidebarHeader,
+	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarRail,
@@ -11,67 +13,64 @@ import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
 import {
 	Calendar,
 	Home,
-	type LucideIcon,
+	type LucideIconComponent,
 	Settings,
 	Shield,
 	Users,
 } from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
+import type { NavItemProps } from "./NavItem";
+import NavItem from "./NavItem";
+import NavItems from "./NavItems";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
 
-type NavMainItem = {
-	title: string;
-	url: LinkProps["to"];
-	icon: LucideIcon;
-};
-
-const navigationItems: NavMainItem[] = [
+const navigationItems: NavItemProps[] = [
 	{
 		url: "/dashboard",
 		title: "Tableau de bord",
-		icon: Home,
+		IconComponent: Home,
 	},
 	{
 		url: "/dashboard/members",
 		title: "Adhérents",
-		icon: Users,
+		IconComponent: Users,
 	},
 	{
 		url: "/dashboard/activities",
 		title: "Activités",
-		icon: Calendar,
+		IconComponent: Calendar,
 	},
 	{
 		url: "/dashboard/social",
 		title: "Projets sociaux",
-		icon: Shield,
+		IconComponent: Shield,
 	},
 	// {
 	// 	url: "/dashboard/finances",
 	// 	title: "Finances",
-	// 	icon: CreditCard,
+	// 	IconComponent: CreditCard,
 	// },
 	// {
 	// 	url: "/dashboard/reports",
 	// 	title: "Rapports",
-	// 	icon: FileText,
+	// 	IconComponent: FileText,
 	// },
 	// {
 	// 	url: "/dashboard/statistics",
 	// 	title: "Statistiques",
-	// 	icon: BarChart3,
+	// 	IconComponent: BarChart3,
 	// },
 	// {
 	// 	url: "/dashboard/",
 	// 	title: "Messages",
-	// 	icon: MessageSquare,
+	// 	IconComponent: MessageSquare,
 	// },
 
 	{
 		url: "/user/settings",
 		title: "Paramètres",
-		icon: Settings,
+		IconComponent: Settings,
 	},
 ];
 
@@ -81,21 +80,16 @@ export function UserSidebar({
 	const location = useLocation().pathname;
 
 	return (
-		<Sidebar collapsible="icon" {...props}>
+		<Sidebar collapsible="IconComponent" {...props}>
 			<SidebarHeader>
 				<SidebarHeaderContent siteName="ASP Hub" />
 			</SidebarHeader>
 			<SidebarContent>
-				{navigationItems.map((item) => (
-					<SidebarMenuItem key={item.title}>
-						<SidebarMenuButton asChild isActive={location === item.url}>
-							<Link to={item.url}>
-								<item.icon />
-								<span>{item.title}</span>
-							</Link>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				))}
+				<SidebarGroup>
+					<SidebarMenu>
+						<NavItems items={navigationItems} />
+					</SidebarMenu>
+				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser />

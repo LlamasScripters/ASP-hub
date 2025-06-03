@@ -1,8 +1,8 @@
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
-	component: AuthenticatedLayout,
 	loader: async ({ context: { queryClient }, abortController }) => {
 		const queryOptions = getLoggedInUserQueryOptions({
 			signal: abortController.signal,
@@ -11,13 +11,23 @@ export const Route = createFileRoute("/_authenticated")({
 		const userLoggedIn = await queryClient.ensureQueryData(queryOptions);
 
 		if (!userLoggedIn) {
-			throw redirect({ to: "/auth/login" });
+			throw redirect({
+				to: "/auth/login",
+				search: {
+					redirect: location.href,
+				},
+			});
 		}
 
 		return { user: userLoggedIn };
 	},
+	component: AuthenticatedLayout,
 });
 
 function AuthenticatedLayout() {
-	return <Outlet />;
+	return (
+		<SidebarProvider className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+			<Outlet />
+		</SidebarProvider>
+	);
 }

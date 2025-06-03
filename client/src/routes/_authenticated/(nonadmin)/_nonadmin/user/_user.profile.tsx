@@ -1,5 +1,5 @@
 import UserProfilePage from "@/features/users/pages/UserProfilePage";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
 	"/_authenticated/(nonadmin)/_nonadmin/user/_user/profile",

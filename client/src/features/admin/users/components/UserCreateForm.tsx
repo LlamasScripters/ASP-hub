@@ -18,6 +18,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
 	type UserLoggedIn,
 	authClient,
 	getAuthErrorMessage,
@@ -25,6 +31,8 @@ import {
 import { authConfig } from "@/lib/auth/auth-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
+import { useState } from "react";
 import { type FieldErrors, useForm } from "react-hook-form";
 import z from "zod";
 import { generateRandomPassword } from "../utils/generate-random-password";
@@ -51,6 +59,8 @@ export default function UserCreateForm({
 	onSuccess?: (user: UserLoggedIn) => void;
 	onError?: (err: Error) => void;
 }) {
+	const [isPasswordCopied, setIsPasswordCopied] = useState(false);
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(userCreateFormSchema),
 		defaultValues: {
@@ -158,27 +168,68 @@ export default function UserCreateForm({
 						<FormItem>
 							<FormLabel>Mot de passe</FormLabel>
 							<FormControl>
-								<div className="space-y-2">
-									<PasswordInput {...field} />
-									<PasswordStrengthIndicator password={field.value} />
-									<Button
-										variant="outline"
-										type="button"
-										size="sm"
-										onClick={() => {
-											const newPassword = generateRandomPassword();
-											field.onChange(newPassword);
-										}}
-									>
-										Générer un mot de passe
-									</Button>
+								<div className="grid grid-cols-10 gap-2">
+									<div className="col-span-9">
+										<PasswordInput
+											InputProps={field}
+											ContainerProps={{ className: "w-full" }}
+										/>
+									</div>
+									<div className="col-span-1 flex justify-end">
+										<TooltipProvider>
+											<Tooltip open={isPasswordCopied}>
+												<TooltipTrigger asChild>
+													<Button
+														type="button"
+														variant="ghost"
+														onClick={() => {
+															window.navigator.clipboard.writeText(field.value);
+															setIsPasswordCopied(true);
+															setTimeout(
+																() => setIsPasswordCopied(false),
+																2000,
+															);
+														}}
+														disabled={isPasswordCopied}
+													>
+														{isPasswordCopied ? (
+															<CheckIcon className="size-4 text-green-500" />
+														) : (
+															<CopyIcon className="size-4" />
+														)}
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Copié !</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</div>
+									<div className="col-span-9">
+										{typeof field.value === "string" && (
+											<PasswordStrengthIndicator password={field.value} />
+										)}
+									</div>
+									<div className="col-span-10">
+										<Button
+											variant="outline"
+											type="button"
+											size="sm"
+											onClick={() => {
+												const newPassword = generateRandomPassword();
+												field.onChange(newPassword);
+											}}
+										>
+											<RefreshCcwIcon className="size-4" />
+											Générer un mot de passe
+										</Button>
+									</div>
 								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
-
 				<FormField
 					control={form.control}
 					name="role"

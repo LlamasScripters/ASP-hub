@@ -10,7 +10,7 @@ import {
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { CheckCircle, Mail } from "lucide-react";
 
-export const Route = createFileRoute("/auth/account-created")({
+export const Route = createFileRoute("/_auth/auth/account-created")({
 	component: RouteComponent,
 });
 

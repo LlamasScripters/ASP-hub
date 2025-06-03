@@ -100,7 +100,7 @@ function UserRoleEditDialog({
 	user,
 	...dialogProps
 }: { user: UserLoggedIn } & DialogProps) {
-	const searchParams = Route.useSearch();
+	const { action, ...searchParams } = Route.useSearch();
 	const { onOpenChange } = dialogProps;
 	const form = useForm({
 		resolver: zodResolver(updateRoleFormSchema),
@@ -218,7 +218,7 @@ function UserRoleEditDialog({
 }
 
 function UserCreateDialog(props: DialogProps) {
-	const searchParams = Route.useSearch();
+	const { action, ...searchParams } = Route.useSearch();
 	return (
 		<Dialog {...props}>
 			<DialogContent>

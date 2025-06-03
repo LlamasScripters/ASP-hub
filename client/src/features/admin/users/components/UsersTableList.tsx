@@ -18,12 +18,7 @@ import {
 import { RoleBadge } from "@/features/admin/users/components/RoleBadge";
 import type { UserLoggedIn } from "@/lib/auth/auth-client";
 import type { AppRole } from "@/lib/auth/auth-config";
-import {
-	PencilIcon,
-	ShieldUserIcon,
-	TrashIcon,
-	UserPenIcon,
-} from "lucide-react";
+import { LockIcon, ShieldUserIcon, TrashIcon } from "lucide-react";
 
 const UserTableHeader = () => {
 	return (
@@ -88,8 +83,8 @@ export default function UsersTableList({
 											Actions
 										</DropdownMenuLabel>
 										<DropdownMenuItem onClick={() => handleUserEdit(user)}>
-											<UserPenIcon className="size-4" />
-											Modifier l'utilisateur
+											<LockIcon className="size-4" />
+											Modifier le mot de passe
 										</DropdownMenuItem>
 										<DropdownMenuItem onClick={() => handleUserRoleEdit(user)}>
 											<ShieldUserIcon className="size-4" />

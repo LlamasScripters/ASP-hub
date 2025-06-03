@@ -24,7 +24,12 @@ import {
 import { authConfig } from "@/lib/auth/auth-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AlertCircleIcon, CheckIcon, CopyIcon } from "lucide-react";
+import {
+	AlertCircleIcon,
+	CheckIcon,
+	CopyIcon,
+	RefreshCcwIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { type FieldErrors, useForm } from "react-hook-form";
 import z from "zod";
@@ -115,9 +120,14 @@ export default function UserResetPasswordForm({
 						<FormItem>
 							<FormLabel>Mot de passe</FormLabel>
 							<FormControl>
-								<div className="space-y-2">
-									<div className="flex items-center justify-between w-full gap-2">
-										<PasswordInput {...field} />
+								<div className="grid grid-cols-10 gap-2">
+									<div className="col-span-9">
+										<PasswordInput
+											InputProps={field}
+											ContainerProps={{ className: "w-full" }}
+										/>
+									</div>
+									<div className="col-span-1 flex justify-end">
 										<TooltipProvider>
 											<Tooltip open={isPasswordCopied}>
 												<TooltipTrigger asChild>
@@ -147,20 +157,25 @@ export default function UserResetPasswordForm({
 											</Tooltip>
 										</TooltipProvider>
 									</div>
-									{typeof field.value === "string" && (
-										<PasswordStrengthIndicator password={field.value} />
-									)}
-									<Button
-										variant="outline"
-										type="button"
-										size="sm"
-										onClick={() => {
-											const newPassword = generateRandomPassword();
-											field.onChange(newPassword);
-										}}
-									>
-										Générer un mot de passe
-									</Button>
+									<div className="col-span-9">
+										{typeof field.value === "string" && (
+											<PasswordStrengthIndicator password={field.value} />
+										)}
+									</div>
+									<div className="col-span-10">
+										<Button
+											variant="outline"
+											type="button"
+											size="sm"
+											onClick={() => {
+												const newPassword = generateRandomPassword();
+												field.onChange(newPassword);
+											}}
+										>
+											<RefreshCcwIcon className="size-4" />
+											Générer un mot de passe
+										</Button>
+									</div>
 								</div>
 							</FormControl>
 							<FormMessage />
