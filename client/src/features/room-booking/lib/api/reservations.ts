@@ -41,6 +41,38 @@ export function getMonthBounds(date: Date): { start: Date; end: Date } {
   return { start: firstOfMonth, end: lastOfMonth };
 }
 
+/**
+ * Formats a date string to "DD/MM/YYYY HH:mm" in French locale.
+ */
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** 
+ * Formats a date to a short string "ddd DD/MM" (e.g., "lun. 01/01").
+*/
+export function formatDateShort(date: Date): string {
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
+/**
+ * Formats a date to a string "DD/MM/YYYY" (e.g., "01/01/2023").
+ */
+export function formatDateForInput(date: Date): string {
+  return date.toISOString().slice(0, 16);
+}
+
 export interface ApiOptions {
   signal?: AbortSignal;
 }

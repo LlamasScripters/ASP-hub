@@ -7,34 +7,16 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useReservations, type Reservation } from "@room-booking/hooks/useReservations";
 // @ts-ignore
-import { Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { getWeekBounds, getMonthBounds } from "@room-booking/lib/api/reservations";
+import { getWeekBounds, getMonthBounds, formatDateShort, formatDateTime } from "@room-booking/lib/api/reservations";
 
-// Parse ISO date string to format "06/04/2025 14:30"
-function formatDateTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
-// Simple date formatter (displays e.g. "Sun 04/06/2025" or "04/06")
-function formatDateShort(date: Date): string {
-  return date.toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  });
-}
 
 type ViewMode = "week" | "month";
 
@@ -73,8 +55,8 @@ export function ReservationList({
   useEffect(() => {
 
     updateFilters({
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: startDate,
+      endDate: endDate,
     });
   }, [startDate, endDate, updateFilters]);
 
@@ -140,7 +122,7 @@ export function ReservationList({
       <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-muted-foreground" />
+            <CalendarIcon className="w-5 h-5 text-muted-foreground" />
             Planning des réservations
           </CardTitle>
           <CardDescription>

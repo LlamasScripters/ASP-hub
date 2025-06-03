@@ -69,13 +69,13 @@ export function ReservationForm({
     () => ({
       title: reservation?.title ?? "",
       startAt: reservation
-        ? reservation.startAt.substring(0, 16)
-        : new Date().toISOString().substring(0, 16), // "YYYY-MM-DDTHH:mm"
+        ? reservation.startAt
+        : new Date(), // "YYYY-MM-DDTHH:mm"
       endAt: reservation
-        ? reservation.endAt.substring(0, 16)
+        ? reservation.endAt
         : new Date(
             Date.now() + 60 * 60 * 1000
-          ).toISOString().substring(0, 16), // default +1h 
+          ), // default +1h 
       status: reservation?.status ?? "pending",
     }),
     [reservation]
@@ -104,8 +104,8 @@ export function ReservationForm({
       if (isEditing && reservation) {
         const payload: UpdateReservationData = {
           title: data.title ?? '',
-          startAt: data.startAt ?? '',
-          endAt: data.endAt ?? '',
+          startAt: data.startAt ?? new Date(),
+          endAt: data.endAt ?? new Date(),
           status: data.status ?? 'pending',
         };
         result = await updateReservation(reservation.id, payload);
@@ -115,8 +115,8 @@ export function ReservationForm({
         }
         const payload: CreateReservationData = {
           title: data.title ?? '',
-          startAt: data.startAt ?? '',
-          endAt: data.endAt ?? '',
+          startAt: data.startAt ?? new Date(),
+          endAt: data.endAt ?? new Date( Date.now() + 60 * 60 * 1000), // default +1h
           roomId,
           bookerId: user.id,
           status: data.status ?? 'pending',
@@ -184,8 +184,13 @@ export function ReservationForm({
                     <FormControl>
                       <Input
                         type="datetime-local"
-                        {...field}
-                        min={new Date().toISOString().substring(0, 16)}
+                        value={field.value ? field.value.toISOString().slice(0, 16) : ""}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value);
+                          field.onChange(date);
+                        }}
+                        placeholder="YYYY-MM-DDTHH:mm"
+                        min={new Date().toISOString().slice(0, 16)}
                       />
                     </FormControl>
                     <FormDescription>
@@ -204,8 +209,13 @@ export function ReservationForm({
                     <FormControl>
                       <Input
                         type="datetime-local"
-                        {...field}
-                        min={form.getValues("startAt") || undefined}
+                        value={field.value ? field.value.toISOString().slice(0, 16) : ""}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value);
+                          field.onChange(date);
+                        }}
+                        placeholder="YYYY-MM-DDTHH:mm"
+                        min={new Date().toISOString().slice(0, 16)}
                       />
                     </FormControl>
                     <FormDescription>
@@ -244,7 +254,7 @@ export function ReservationForm({
                     </Select>
                   </FormControl>
                   <FormDescription>
-                    État de la réservation (en général « pending » à la création)
+                    Sélectionnez le statut de la réservation
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

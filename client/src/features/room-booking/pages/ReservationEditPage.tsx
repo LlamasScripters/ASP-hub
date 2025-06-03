@@ -58,7 +58,7 @@ export function ReservationEditPage({
             params={{ complexId: complex.id }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
+            Retour au complexe
           </Link>
         </Button>
       </div>

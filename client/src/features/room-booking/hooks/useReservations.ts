@@ -15,13 +15,13 @@ export const reservationStatusEnum = z.enum([
 export const reservationSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1, "Le titre est requis"),
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime(),
+  startAt: z.coerce.date(),
+  endAt: z.coerce.date(),
   roomId: z.string().uuid(),
   bookerId: z.string().uuid(),
   status: reservationStatusEnum,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 });
 
 export const createReservationSchema = z.object({
@@ -29,21 +29,36 @@ export const createReservationSchema = z.object({
     .string()
     .min(1, "Le titre est requis")
     .max(255, "Le titre ne peut pas dépasser 255 caractères"),
-  startAt: z.string().datetime("La date de début doit être un ISO valide"),
-  endAt: z.string().datetime("La date de fin doit être un ISO valide"),
+  startAt: z
+    .coerce
+    .date()
+    .min(
+      new Date(),
+      "La date de début doit être dans le futur"
+    ),
+  endAt: z
+    .coerce
+    .date(),
   roomId: z.string().uuid("L'ID de la salle doit être un UUID valide"),
   bookerId: z.string().uuid("L'ID du réservateur doit être un UUID valide"),
   status: reservationStatusEnum.default("pending"),
-});
+}).refine(
+  (data) => data.endAt > data.startAt,
+  {
+    message: "La date de fin doit être postérieure à la date de début",
+    path: ["endAt"]
+  }
+);
 
 export const updateReservationSchema = createReservationSchema
+  .innerType()
   .partial()
   .omit({ bookerId: true, roomId: true });
 
 export const reservationFiltersSchema = z.object({
   status: reservationStatusEnum.optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
 });
 
 export const reservationsPaginatedResponseSchema = z.object({
@@ -76,7 +91,11 @@ export function useReservations({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [filters, setFilters] = useState<ReservationFilters>({});
+  const [filters, setFilters] = useState<ReservationFilters>({
+    status: undefined,
+    startDate: new Date(new Date().setDate(1)), // First day of current month
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
+  });
 
   const [totalCount, setTotalCount] = useState<number>(0);
 
