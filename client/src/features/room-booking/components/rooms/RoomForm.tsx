@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -260,9 +259,13 @@ export function RoomForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							<Button variant="outline" size="sm" asChild>
-								<Link to={onCancelLink}>Annuler</Link>
-							</Button>
+							{onCancelLink && (
+								<Button variant="outline" asChild>
+									<Link to={onCancelLink}>
+										Annuler
+									</Link>
+								</Button>
+							)}
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? (
 									<>

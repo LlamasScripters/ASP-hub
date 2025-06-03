@@ -1,5 +1,5 @@
-import { useSearch } from "@tanstack/react-router";
-import { useNavigate } from "@tanstack/react-router";
+// import { useSearch } from "@tanstack/react-router";
+// import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -12,7 +12,7 @@ import { Link } from "@tanstack/react-router";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 // @ts-ignore
-import { ArrowLeft, Info, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { ArrowLeft, Info, Calendar as CalendarIcon, Plus, Edit } from "lucide-react";
 import { ReservationList } from "@room-booking/components/reservations/ReservationList";
 
 interface RoomDetailsPageProps {
@@ -21,8 +21,8 @@ interface RoomDetailsPageProps {
 }
 
 export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
-	const search = useSearch({ strict: false });
-	const navigate = useNavigate();
+	// const search = useSearch({ strict: false });
+	// const navigate = useNavigate();
 
 	return (
 		<div className="space-y-6">
@@ -36,7 +36,6 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					{/* Bouton retour au complexe */}
 					<Button asChild variant="outline" size="sm">
 						<Link
 							to="/admin/facilities/complexes/$complexId"
@@ -46,15 +45,24 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 							Retour au complexe
 						</Link>
 					</Button>
-
-					{/* Bouton création de réservation */}
+					
 					<Button asChild variant="default" size="sm">
 						<Link
 							to="/admin/facilities/rooms/$roomId/create-reservation"
 							params={{ roomId: room.id }}
 						>
 							<Plus className="w-4 h-4 mr-2" />
-							Nouvelle réservation
+							Réserver la salle
+						</Link>
+					</Button>
+
+					<Button asChild variant="default" size="sm">
+						<Link
+							to="/admin/facilities/rooms/$roomId/edit"
+							params={{ roomId: room.id }}
+						>
+							<Edit className="w-4 h-4 mr-2" />
+							Modifier
 						</Link>
 					</Button>
 				</div>

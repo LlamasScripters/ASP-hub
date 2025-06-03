@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -16,6 +16,8 @@ interface RoomEditPageProps {
 export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 	const navigate = useNavigate();
 	const [showSuccess, setShowSuccess] = useState(false);
+	const router = useRouter();
+	const previousPageHref = router.__store.prevState?.resolvedLocation?.href || undefined;
 
 	const handleSuccess = () => {
 		setShowSuccess(true);
@@ -38,16 +40,26 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 						{complex.name}
 					</p>
 				</div>
-				<Button variant="outline" size="sm" asChild>
-					<Link
+				<div className="flex items-center gap-2">
+					<Button variant="outline" size="sm" asChild>
+						<Link
 						to="/admin/facilities/complexes/$complexId"
 						search={{ view: 'rooms' }}
 						params={{ complexId: complex.id }}
-					>
+						>
 						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour
+						Retour au complexe
 					</Link>
-				</Button>
+					</Button>
+					<Button asChild>
+						<Link
+							to="/admin/facilities/rooms/$roomId"
+							params={{ roomId: room.id }}
+						>
+							Voir les détails
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			{showSuccess && (
@@ -73,7 +85,7 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 				complexId={complex.id}
 				room={room}
 				onSuccess={handleSuccess}
-				onCancelLink={`/admin/facilities/complexes/${complex.id}?view=rooms`}
+				onCancelLink={previousPageHref}
 			/>
 		</div>
 	);
