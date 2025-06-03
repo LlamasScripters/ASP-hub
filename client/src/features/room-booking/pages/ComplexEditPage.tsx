@@ -26,7 +26,6 @@ interface ComplexEditPageProps {
 
 export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 	const navigate = useNavigate();
-	const [isNavigating, setIsNavigating] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
 	const handleSuccess = (updatedComplex: Complex) => {
@@ -37,7 +36,6 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 		}, 3000);
 
 		setTimeout(() => {
-			setIsNavigating(true);
 			navigate({ to: `/admin/facilities/complexes/${updatedComplex.id}` });
 		}, 1500);
 	};

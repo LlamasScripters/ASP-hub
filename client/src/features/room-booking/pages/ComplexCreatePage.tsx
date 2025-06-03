@@ -8,13 +8,11 @@ import { useState } from "react";
 
 export function ComplexCreatePage() {
 	const navigate = useNavigate();
-	const [isNavigating, setIsNavigating] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
 	const handleSuccess = (newComplex: { id: string }) => {
 		setShowSuccessAlert(true);
 		setTimeout(() => {
-			setIsNavigating(true);
 			navigate({ to: `/admin/facilities/complexes/${newComplex.id}` });
 		}, 1500);
 	};
