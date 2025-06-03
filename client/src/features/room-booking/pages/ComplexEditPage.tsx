@@ -10,7 +10,7 @@ import {
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	ArrowLeft,
@@ -25,9 +25,12 @@ interface ComplexEditPageProps {
 }
 
 export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
-	const navigate = useNavigate();
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const navigate = useNavigate();
+	const router = useRouter();
 
+	const previousPageHref = router.__store.prevState?.resolvedLocation?.href || undefined;
+	
 	const handleSuccess = (updatedComplex: Complex) => {
 		setShowSuccessAlert(true);
 
@@ -172,7 +175,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 				<ComplexForm
 					complex={initialComplex}
 					onSuccess={handleSuccess}
-					onCancelLink={`/admin/facilities/complexes/${initialComplex.id}`}
+					onCancelLink={previousPageHref}
 				/>
 			</div>
 		</div>
