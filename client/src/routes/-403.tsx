@@ -11,7 +11,7 @@ import { Shield } from "lucide-react";
 
 export default function ForbiddenPage() {
 	return (
-		<div className="flex flex-col min-h-screen bg-background text-foreground">
+		<div className="flex flex-col w-full min-h-screen bg-background text-foreground">
 			<div className="container flex flex-col items-center justify-center flex-1 px-4 py-12 mx-auto sm:px-6">
 				<Card className="w-full max-w-md shadow-lg">
 					<CardHeader className="space-y-1 text-center">

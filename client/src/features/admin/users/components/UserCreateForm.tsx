@@ -83,6 +83,7 @@ export default function UserCreateForm({
 					firstName: values.firstName,
 					lastName: values.lastName,
 					acceptTerms: true,
+					emailVerified: true,
 				},
 			});
 

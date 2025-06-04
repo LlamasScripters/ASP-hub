@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
+import type { AppRole } from "@/lib/auth/auth-config";
 import { cn } from "@/lib/utils";
 
-const roleMap = {
+const roleMap: Record<AppRole, { label: string; className: string }> = {
 	admin: {
 		label: "Administrateur",
 		className:

@@ -16,6 +16,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { api } from "@/lib/api";
 import {
 	type UserLoggedIn,
 	authClient,
@@ -67,27 +68,30 @@ export default function UserResetPasswordForm({
 
 	const resetUserPasswordMutation = useMutation({
 		mutationFn: async (values: FormValues) => {
-			const { data, error } = await authClient.admin.setUserPassword({
-				userId: values.userId,
-				newPassword: values.password,
-			});
-
-			if (error?.code) {
-				form.setError("root", {
-					message: getAuthErrorMessage(error.code),
-				});
-				throw new Error(getAuthErrorMessage(error.code), { cause: error });
-			}
+			const data = await api
+				.post(`users/${values.userId}/set-password`, {
+					json: {
+						newPassword: values.password,
+					},
+				})
+				.json<{ status: boolean }>();
 
 			if (!data?.status) {
-				throw new Error("Une erreur est survenue, veuillez réessayer.");
+				throw new Error("Erreur lors de la modification du mot de passe");
 			}
+
+			return true;
+		},
+		onSuccess: () => {
+			onSuccess();
+		},
+		onError: (error) => {
+			onError(error);
 		},
 	});
 
-	const onSubmit = (values: FormValues) => {
+	const onSubmit = async (values: FormValues) => {
 		resetUserPasswordMutation.mutate(values);
-		onSuccess();
 	};
 
 	const onInvalidSubmit = (errors: FieldErrors<FormValues>) => {

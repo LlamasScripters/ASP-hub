@@ -8,6 +8,7 @@ export function LoginWithGoogleButton() {
 		mutationFn: async () => {
 			const { data, error } = await authClient.signIn.social({
 				provider: "google",
+				callbackURL: "/dashboard",
 			});
 
 			if (error?.code) {

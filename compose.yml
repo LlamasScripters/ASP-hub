@@ -12,22 +12,26 @@ services:
   client:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host"
+    command: sh -c "npm run dev -- --host"
     expose:
       - 5173
     volumes:
       - ./client:/app
+      - ./client/node_modules:/app/node_modules:ro
+      - ./client/node_modules/.vite:/app/node_modules/.vite
+      - ./client/node_modules/.vite-temp:/app/node_modules/.vite-temp
     environment:
       - NODE_ENV=development
     
   server:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm run dev"
     expose:
       - 3000
     volumes:
       - ./server:/app
+      - ./server/node_modules:/app/node_modules:ro
     env_file:
       - ./server/.env
     depends_on:

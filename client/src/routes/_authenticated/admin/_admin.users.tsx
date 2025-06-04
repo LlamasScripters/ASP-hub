@@ -76,7 +76,7 @@ const searchParamsSchema = z.object({
 	search: z.string().optional(),
 	limit: z.number().optional(),
 	offset: z.number().optional(),
-	action: z.enum(["create", "role", "edit", "delete"]).optional(),
+	action: z.enum(["create", "role", "reset-password", "delete"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/users")({
@@ -287,6 +287,40 @@ function UserResetPasswordDialog({
 	);
 }
 
+function UserDeleteDialog({
+	user,
+	onConfirm,
+	onCancel,
+	...dialogProps
+}: {
+	user: UserLoggedIn;
+	onConfirm: () => void;
+	onCancel: () => void;
+} & DialogProps) {
+	return (
+		<Dialog {...dialogProps}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer l'utilisateur</DialogTitle>
+				</DialogHeader>
+				<DialogDescription>
+					Supprimer l'utilisateur {user.name} ({user.email})
+				</DialogDescription>
+				<DialogFooter>
+					<div className="flex gap-2">
+						<Button variant="outline" onClick={onCancel}>
+							Annuler
+						</Button>
+						<Button variant="destructive" onClick={onConfirm}>
+							Supprimer
+						</Button>
+					</div>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 function UsersListPage() {
 	const searchParams = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
@@ -298,6 +332,53 @@ function UsersListPage() {
 			: null;
 
 	const { data, isPending } = useQuery(listUsersQueryOptions(searchParams));
+	const deleteUserMutation = useMutation({
+		mutationFn: async (user: UserLoggedIn) => {
+			const { data, error } = await authClient.admin.removeUser({
+				userId: user.id,
+			});
+
+			if (error?.code) {
+				throw new Error(getAuthErrorMessage(error.code));
+			}
+
+			if (!data?.success) {
+				throw new Error("Erreur lors de la suppression de l'utilisateur");
+			}
+
+			return true;
+		},
+		onSuccess: () => {
+			toast.success("Utilisateur supprimé avec succès", {
+				description: `L'utilisateur ${selectedUser?.name} a été supprimé avec succès`,
+			});
+			queryClient.setQueryData(
+				listUsersQueryOptions(searchParams).queryKey,
+				(old) => {
+					if (!old) return old;
+					const newUsers = old.users.filter(
+						(user) => user.id !== selectedUser?.id,
+					);
+					const newTotal = newUsers.length;
+					return {
+						total: newTotal,
+						users: newUsers,
+					};
+				},
+			);
+			navigate({
+				search: (prev) => ({
+					...prev,
+					action: undefined,
+				}),
+			});
+		},
+		onError: (err) => {
+			toast.error("Erreur lors de la suppression de l'utilisateur", {
+				description: err.message,
+			});
+		},
+	});
 
 	const action = searchParams.action;
 
@@ -325,11 +406,11 @@ function UsersListPage() {
 		});
 	};
 
-	const handleUserEdit = (user: UserLoggedIn) => {
+	const handleUserResetPassword = (user: UserLoggedIn) => {
 		navigate({
 			search: (prev) => ({
 				...prev,
-				action: "edit",
+				action: "reset-password",
 			}),
 			state: {
 				//@ts-ignore Unsafe but we know the type of the state
@@ -383,7 +464,7 @@ function UsersListPage() {
 			<UsersTableList
 				users={users}
 				onUserRoleEdit={handleUserRoleEdit}
-				onUserEdit={handleUserEdit}
+				onUserResetPassword={handleUserResetPassword}
 				onUserDelete={handleUserDelete}
 			/>
 
@@ -395,7 +476,7 @@ function UsersListPage() {
 						user={selectedUser}
 					/>
 					<UserResetPasswordDialog
-						open={action === "edit"}
+						open={action === "reset-password"}
 						onOpenChange={handleDialogClose}
 						user={selectedUser}
 					/>
@@ -406,6 +487,19 @@ function UsersListPage() {
 				open={action === "create"}
 				onOpenChange={handleDialogClose}
 			/>
+
+			{selectedUser && (
+				<UserDeleteDialog
+					open={action === "delete"}
+					onOpenChange={handleDialogClose}
+					user={selectedUser}
+					onConfirm={() => {
+						deleteUserMutation.mutate(selectedUser);
+						handleDialogClose();
+					}}
+					onCancel={handleDialogClose}
+				/>
+			)}
 		</div>
 	);
 }
