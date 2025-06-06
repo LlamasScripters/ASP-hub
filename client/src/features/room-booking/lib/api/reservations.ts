@@ -67,6 +67,32 @@ export function formatDateShort(date: Date): string {
 }
 
 /**
+ * Converts a `Date` object to a string in "YYYY-MM-DDTHH:mm" format
+ * in **local time**.
+ */
+export function toLocalInputDateTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+/**
+ * Takes a "YYYY-MM-DDTHH:mm" string (value returned by <input type="datetime-local">)
+ * and returns a **local** Date object (in the current timezone).
+ * Ex. "2025-06-04T18:24" → new Date(2025, 5, 4, 18, 24).
+ */
+export function parseLocalInputDateTime(val: string): Date {
+  const [datePart, timePart] = val.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  return new Date(year, month - 1, day, hour, minute);
+}
+
+/**
  * Formats a date to a string "DD/MM/YYYY" (e.g., "01/01/2023").
  */
 export function formatDateForInput(date: Date): string {

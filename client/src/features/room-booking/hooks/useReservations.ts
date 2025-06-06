@@ -143,18 +143,20 @@ export function useReservations({
         createReservationSchema.parse(data);
 
         const result = await reservationsApi.createReservation(data);
-        toast.success("Reservation created successfully");
+        toast.success("Réservation créée avec succès");
 
         setReservations((prev) => [result, ...prev]);
         setTotalCount((prev) => prev + 1);
         return result;
       } catch (err) {
         let message = "Unexpected error";
+
         if (err instanceof z.ZodError) {
           message = err.errors.map((e) => e.message).join(", ");
         } else if (err instanceof Error) {
           message = err.message;
         }
+        
         setError(message);
         toast.error("Error", { description: message });
         return null;
@@ -180,7 +182,7 @@ export function useReservations({
         updateReservationSchema.parse(data);
 
         const result = await reservationsApi.updateReservation(id, data);
-        toast.success("Reservation updated successfully");
+        toast.success("Réservation mise à jour avec succès");
         setReservations((prev) => prev.map((r) => (r.id === id ? result : r)));
         return result;
       } catch (err) {
@@ -211,7 +213,7 @@ export function useReservations({
       try {
         const success = await reservationsApi.deleteReservation(id);
         if (success) {
-          toast.success("Reservation deleted");
+          toast.success("Réservation supprimée avec succès");
           setReservations((prev) => prev.filter((r) => r.id !== id));
           setTotalCount((prev) => (prev > 0 ? prev - 1 : 0));
           return true;
