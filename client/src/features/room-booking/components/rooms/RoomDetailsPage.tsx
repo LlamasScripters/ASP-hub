@@ -1,5 +1,3 @@
-// import { useSearch } from "@tanstack/react-router";
-// import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -12,7 +10,14 @@ import { Link } from "@tanstack/react-router";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 // @ts-ignore
-import { ArrowLeft, Info, Calendar as CalendarIcon, Plus, Edit } from "lucide-react";
+import {
+	ArrowLeft,
+	Info,
+	Calendar as CalendarIcon,
+	Plus,
+	Edit,
+	// @ts-ignore
+} from "lucide-react";
 import { ReservationList } from "@room-booking/components/reservations/ReservationList";
 
 interface RoomDetailsPageProps {
@@ -21,9 +26,6 @@ interface RoomDetailsPageProps {
 }
 
 export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
-	// const search = useSearch({ strict: false });
-	// const navigate = useNavigate();
-
 	return (
 		<div className="space-y-6">
 			{/* En-tête de la page */}
@@ -45,7 +47,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 							Retour au complexe
 						</Link>
 					</Button>
-					
+
 					<Button asChild variant="default" size="sm">
 						<Link
 							to="/admin/facilities/rooms/$roomId/create-reservation"

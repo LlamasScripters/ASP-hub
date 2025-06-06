@@ -34,6 +34,7 @@ import {
 	type Reservation,
 	type CreateReservationData,
 	type UpdateReservationData,
+	reservationStatusEnumTranslated,
 } from "@room-booking/hooks/useReservations";
 import {
 	toLocalInputDateTime,
@@ -50,15 +51,6 @@ interface ReservationFormProps {
 	onSuccess?: (r: Reservation) => void;
 	onCancelLink?: string;
 }
-
-const reservationStatusEnumTranslated = {
-	pending: "En attente",
-	confirmed: "Confirmée",
-	cancelled: "Annulée",
-	completed: "Terminée",
-	no_show: "Non présentée",
-	rescheduled: "Reportée",
-};
 
 export function ReservationForm({
 	roomId,
@@ -102,7 +94,9 @@ export function ReservationForm({
 		}
 	}, [isEditing, formMode, form, defaultValues]);
 
-	const onSubmit = async ( data: CreateReservationData | UpdateReservationData,) => {
+	const onSubmit = async (
+		data: CreateReservationData | UpdateReservationData,
+	) => {
 		setIsSubmitting(true);
 		setGlobalError(null);
 
@@ -167,56 +161,61 @@ export function ReservationForm({
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
-					<form onSubmit={async (e) => {
-            e.preventDefault();
-            setIsSubmitting(true);
-            setGlobalError(null);
+					<form
+						onSubmit={async (e) => {
+							e.preventDefault();
+							setIsSubmitting(true);
+							setGlobalError(null);
 
-            try {
-              let result: Reservation | null = null;
+							try {
+								let result: Reservation | null = null;
 
-              if (isEditing && reservation) {
-                    const payload: UpdateReservationData = {
-                      title: form.getValues("title") ?? "",
-                      startAt: form.getValues("startAt") ?? new Date(),
-                      endAt: form.getValues("endAt") ?? new Date(),
-                      status: form.getValues("status") ?? "pending",
-                    };
+								if (isEditing && reservation) {
+									const payload: UpdateReservationData = {
+										title: form.getValues("title") ?? "",
+										startAt: form.getValues("startAt") ?? new Date(),
+										endAt: form.getValues("endAt") ?? new Date(),
+										status: form.getValues("status") ?? "pending",
+									};
 
-                    result = await updateReservation(reservation.id, payload);
-                    } else {
-                    if (!user?.id) {
-                      throw new Error("Utilisateur non authentifié");
-                    }
+									result = await updateReservation(reservation.id, payload);
+								} else {
+									if (!user?.id) {
+										throw new Error("Utilisateur non authentifié");
+									}
 
-                    const payload: CreateReservationData = {
-                      title: form.getValues("title") ?? "",
-                      startAt: form.getValues("startAt") ?? new Date(),
-                      endAt: form.getValues("endAt") ?? new Date(Date.now() + 60 * 60 * 1000), // default +1h
-                      roomId,
-                      bookerId: user.id,
-                      status: form.getValues("status") ?? "pending",
-                    };
+									const payload: CreateReservationData = {
+										title: form.getValues("title") ?? "",
+										startAt: form.getValues("startAt") ?? new Date(),
+										endAt:
+											form.getValues("endAt") ??
+											new Date(Date.now() + 60 * 60 * 1000), // default +1h
+										roomId,
+										bookerId: user.id,
+										status: form.getValues("status") ?? "pending",
+									};
 
-                    result = await createReservation(payload);
-                    }
+									result = await createReservation(payload);
+								}
 
-                    if (result) {
-                    onSuccess?.(result);
-                    if (!isEditing) {
-                      form.reset(defaultValues);
-                    }
-                    }
-                  } catch (err) {
-                    let message = "Erreur inattendue";
-                    if (err instanceof Error) {
-                    message = err.message;
-                    }
-                    setGlobalError(message);
-                  } finally {
-                    setIsSubmitting(false);
-                  }}
-            } className="space-y-6">
+								if (result) {
+									onSuccess?.(result);
+									if (!isEditing) {
+										form.reset(defaultValues);
+									}
+								}
+							} catch (err) {
+								let message = "Erreur inattendue";
+								if (err instanceof Error) {
+									message = err.message;
+								}
+								setGlobalError(message);
+							} finally {
+								setIsSubmitting(false);
+							}
+						}}
+						className="space-y-6"
+					>
 						{/* TITRE */}
 						<FormField
 							control={form.control}

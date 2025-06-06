@@ -3,6 +3,15 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { reservationsApi } from "@room-booking/lib/api/reservations";
 
+export const reservationStatusEnumTranslated = {
+  pending: "En attente",
+  confirmed: "Confirmée",
+  cancelled: "Annulée",
+  completed: "Terminée",
+  no_show: "Non présentée",
+  rescheduled: "Reportée",
+};
+
 export const reservationStatusEnum = z.enum([
   "pending",
   "confirmed",
@@ -24,31 +33,24 @@ export const reservationSchema = z.object({
   updatedAt: z.coerce.date(),
 });
 
-export const createReservationSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Le titre est requis")
-    .max(255, "Le titre ne peut pas dépasser 255 caractères"),
-  startAt: z
-    .coerce
-    .date()
-    .min(
-      new Date(),
-      "La date de début doit être dans le futur"
-    ),
-  endAt: z
-    .coerce
-    .date(),
-  roomId: z.string().uuid("L'ID de la salle doit être un UUID valide"),
-  bookerId: z.string().uuid("L'ID du réservateur doit être un UUID valide"),
-  status: reservationStatusEnum.default("pending"),
-}).refine(
-  (data) => data.endAt > data.startAt,
-  {
+export const createReservationSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, "Le titre est requis")
+      .max(255, "Le titre ne peut pas dépasser 255 caractères"),
+    startAt: z.coerce
+      .date()
+      .min(new Date(), "La date de début doit être dans le futur"),
+    endAt: z.coerce.date(),
+    roomId: z.string().uuid("L'ID de la salle doit être un UUID valide"),
+    bookerId: z.string().uuid("L'ID du réservateur doit être un UUID valide"),
+    status: reservationStatusEnum.default("pending"),
+  })
+  .refine((data) => data.endAt > data.startAt, {
     message: "La date de fin doit être postérieure à la date de début",
-    path: ["endAt"]
-  }
-);
+    path: ["endAt"],
+  });
 
 export const updateReservationSchema = createReservationSchema
   .innerType()
@@ -156,7 +158,7 @@ export function useReservations({
         } else if (err instanceof Error) {
           message = err.message;
         }
-        
+
         setError(message);
         toast.error("Error", { description: message });
         return null;
