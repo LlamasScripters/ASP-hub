@@ -10,13 +10,16 @@ import {
 const API_BASE_URL = "http://localhost:8080/api";
 
 /**
- * Get the start and end dates of the current week (Monday to Sunday).
- * If today is Sunday, it considers the week starting from the previous Monday.
+ * Get the start and end dates of the week containing `refDate` (lundi → dimanche).
+ * Si `refDate` est un dimanche, la semaine calculée commencera quand même au lundi précédent.
+ * @param refDate Date de référence (type Date). Par défaut : today (si on appelle sans argument).
  */
-export function getWeekBounds(): { start: Date; end: Date } {
-  const now = new Date();
-  const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  const diffToMonday = day === 0 ? -6 : 1 - day; // If today is Sunday, go back 6 days to get the previous Monday
+export function getWeekBounds(refDate?: Date): { start: Date; end: Date } {
+  const now = refDate ? new Date(refDate) : new Date();
+  const day = now.getDay();
+
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
   const monday = new Date(now);
   monday.setDate(now.getDate() + diffToMonday);
   monday.setHours(0, 0, 0, 0);
@@ -27,6 +30,7 @@ export function getWeekBounds(): { start: Date; end: Date } {
 
   return { start: monday, end: sunday };
 }
+
 
 /**
  * Get the start and end dates of the current month.
