@@ -7,11 +7,18 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 } from "@/components/ui/sidebar";
+import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
+import {
+	Calendar,
+	Home,
+	type LucideIcon,
+	Settings,
+	Shield,
+	Users,
+} from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
-import { Home, Users, Calendar, Shield, Settings, type LucideIcon } from "lucide-react";
-import { Link, useLocation, type LinkProps } from "@tanstack/react-router";
 
 type NavMainItem = {
 	title: string;
@@ -79,16 +86,16 @@ export function UserSidebar({
 				<SidebarHeaderContent siteName="ASP Hub" />
 			</SidebarHeader>
 			<SidebarContent>
-			{navigationItems.map((item) => (
-							<SidebarMenuItem key={item.title}>
-								<SidebarMenuButton asChild isActive={location === item.url}>
-									<Link to={item.url}>
-										<item.icon />
-										<span>{item.title}</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						))}
+				{navigationItems.map((item) => (
+					<SidebarMenuItem key={item.title}>
+						<SidebarMenuButton asChild isActive={location === item.url}>
+							<Link to={item.url}>
+								<item.icon />
+								<span>{item.title}</span>
+							</Link>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				))}
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser />
