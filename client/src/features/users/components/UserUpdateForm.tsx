@@ -36,18 +36,18 @@ const formSchema = z.object({
 		.min(2, "Le nom doit contenir au moins 2 caractères")
 		.optional(),
 	dateOfBirth: z.coerce.date().optional(),
-	image: z.string().url("L'URL de l'image est invalide").optional(),
+	image: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface UserSettingsUpdateFormProps {
+interface UserUpdateFormProps {
 	user: UserLoggedIn;
 }
 
-export default function UserSettingsUpdateForm({
-	user,
-}: UserSettingsUpdateFormProps) {
+export default function UserUpdateForm({ user }: UserUpdateFormProps) {
+	const session = authClient.useSession();
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -69,6 +69,10 @@ export default function UserSettingsUpdateForm({
 				image: values.image ?? undefined,
 			});
 		},
+
+		onSuccess: () => {
+			session.refetch();
+		},
 	});
 
 	const onSubmit = (values: FormValues) => {
@@ -76,6 +80,7 @@ export default function UserSettingsUpdateForm({
 	};
 
 	const onInvalidSubmit = (errors: FieldErrors<FormValues>) => {
+		console.error(errors);
 		const firstError = Object.values(errors)[0];
 		toast.error(
 			firstError?.message ?? "Une erreur est survenue, veuillez réessayer.",
@@ -164,6 +169,7 @@ export default function UserSettingsUpdateForm({
 								<ImageUploadButton
 									currentImage={field.value}
 									onImageUpload={field.onChange}
+									userId={user.id}
 								/>
 							</FormControl>
 							<FormMessage />

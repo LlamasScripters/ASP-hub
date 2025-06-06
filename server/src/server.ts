@@ -20,23 +20,18 @@ server.use(
 );
 
 server.all("/api/auth/*splat", toNodeHandler(auth));
-//@ts-ignore
-server.get("/api/me", async (req, res) => {
-	const session = await auth.api.getSession({
-		headers: fromNodeHeaders(req.headers),
-	});
-	return res.json(session);
-});
 
 server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
 server.use("/api/users", usersRouter);
 server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
 server.use("/api/reservations", reservationsRouter);
 server.use("/api/clubs", clubsRouter);
 
-server.get("/api", (req, res) => {
-	res.json({ message: "ASP API is running!" });
+server.get("/api/health", (_req, res) => {
+	res.sendStatus(200);
+	return;
 });
 
 export default server;

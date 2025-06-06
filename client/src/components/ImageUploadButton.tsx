@@ -1,48 +1,56 @@
+import { usersService } from "@/features/users/users.service.js";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface ImageUploadButtonProps {
 	onImageUpload: (url: string) => void;
 	currentImage?: string | null;
 	className?: string;
+	userId: string;
 }
 
 export function ImageUploadButton({
 	onImageUpload,
 	currentImage,
 	className,
+	userId,
 }: ImageUploadButtonProps) {
-	const [isUploading, setIsUploading] = useState(false);
+	const uploadMutation = useMutation({
+		mutationFn: (file: File) => usersService.uploadUserAvatar(userId, file),
+		onSuccess: (imageUrl) => {
+			onImageUpload(imageUrl);
+		},
+		onError: (error) => {
+			console.error("Error uploading image:", error);
+		},
+	});
 
 	const onDrop = useCallback(
 		async (acceptedFiles: File[]) => {
 			const file = acceptedFiles[0];
 			if (!file) return;
 
-			setIsUploading(true);
-			try {
-				// TODO: Implement actual file upload to your storage service
-				// For now, we'll create a local URL
-				const url = URL.createObjectURL(file);
-				onImageUpload(url);
-			} catch (error) {
-				console.error("Error uploading image:", error);
-			} finally {
-				setIsUploading(false);
-			}
+			uploadMutation.mutate(file);
 		},
-		[onImageUpload],
+		[uploadMutation],
 	);
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		onDrop,
+		onDropAccepted: (acceptedFiles) => {
+			console.log(acceptedFiles);
+		},
+		onDropRejected: (rejectedFiles) => {
+			console.log(rejectedFiles);
+		},
 		accept: {
-			"image/*": [".png", ".jpg", ".jpeg", ".gif"],
+			"image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
 		},
 		maxFiles: 1,
-		disabled: isUploading,
+		disabled: uploadMutation.isPending,
 	});
 
 	return (
@@ -68,7 +76,7 @@ export function ImageUploadButton({
 					<Upload className="w-8 h-8 mb-2 text-muted-foreground" />
 				)}
 				<p className="text-sm text-muted-foreground">
-					{isUploading
+					{uploadMutation.isPending
 						? "Téléchargement..."
 						: isDragActive
 							? "Déposez l'image ici..."
