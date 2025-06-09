@@ -86,6 +86,7 @@ export const reservationsService = {
 				.from(reservations)
 				.where(
 					and(
+						eq(reservations.roomId, roomId),
 						gt(reservations.startAt, startDate),
 						lt(reservations.endAt, endDate),
 					),
