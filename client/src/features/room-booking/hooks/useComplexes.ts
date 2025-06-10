@@ -6,6 +6,7 @@ import { z } from "zod";
 export const complexSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Le nom est requis"),
+  description: z.string().max(500).optional(),
   street: z.string().min(1, "La rue est requise"),
   city: z.string().min(1, "La ville est requise"),
   postalCode: z
@@ -23,6 +24,10 @@ export const createComplexSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(255, "Le nom ne peut pas dépasser 255 caractères"),
+  description: z
+    .string()
+    .max(500, "La description ne peut pas dépasser 500 caractères")
+    .optional(),
   street: z
     .string()
     .min(1, "La rue est requise")
@@ -96,12 +101,51 @@ export const paginationSchema = z.object({
   hasPrev: z.boolean(),
 });
 
+export const complexOpeningHoursSchema = z.object({
+  complexId: z.string().uuid(),
+  dayOfWeek: z.enum([
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ]),
+  openAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
+  closeAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
+  isClosed: z.boolean().default(false),
+});
+
+export const createComplexOpeningHoursSchema = complexOpeningHoursSchema
+  .omit({ complexId: true })
+  .refine(
+    (data) => data.openAt < data.closeAt,
+    {
+      message: "L'heure de fermeture doit être postérieure à l'heure d'ouverture",
+    }
+  );
+
+export const updateComplexOpeningHoursSchema = complexOpeningHoursSchema
+  .omit({ complexId: true })
+  .partial()
+  .refine(
+    (data) => !data.openAt || !data.closeAt || data.openAt < data.closeAt,
+    {
+      message: "L'heure de fermeture doit être postérieure à l'heure d'ouverture",
+    }
+  );
+
 export type Complex = z.infer<typeof complexSchema>;
 export type CreateComplexData = z.infer<typeof createComplexSchema>;
 export type UpdateComplexData = z.infer<typeof updateComplexSchema>;
 export type ComplexFilters = z.infer<typeof complexFiltersSchema>;
 export type ComplexStats = z.infer<typeof complexStatsSchema>;
 export type PaginationInfo = z.infer<typeof paginationSchema>;
+
+export type ComplexOpeningHours = z.infer<typeof complexOpeningHoursSchema>;
+export type CreateComplexOpeningHoursData = z.infer<typeof createComplexOpeningHoursSchema>;
+export type UpdateComplexOpeningHoursData = z.infer<typeof updateComplexOpeningHoursSchema>;
 
 function formatZodErrors(errors: z.ZodError): string {
   return errors.errors

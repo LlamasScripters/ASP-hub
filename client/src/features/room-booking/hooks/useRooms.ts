@@ -6,6 +6,7 @@ import { z } from "zod";
 export const roomSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Le nom est requis"),
+  description: z.string().max(500).optional(),
   complexId: z.string().uuid(),
   sportType: z.string().min(1, "Le type de sport est requis"),
   isIndoor: z.boolean(),
@@ -19,6 +20,10 @@ export const createRoomSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(255, "Le nom ne peut pas dépasser 255 caractères"),
+  description: z
+    .string()
+    .max(500, "La description ne peut pas dépasser 500 caractères")
+    .optional(),
   complexId: z.string().uuid("ID de complexe invalide"),
   sportType: z
     .string()
@@ -60,14 +65,51 @@ export const roomsPaginatedResponseSchema = z.object({
     ),
 });
 
+export const roomOpeningHoursSchema = z.object({
+  roomId: z.string().uuid(),
+  dayOfWeek: z.enum([
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ]),
+  openAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
+  closeAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
+  isClosed: z.boolean().default(false),
+});
+
+export const createRoomOpeningHoursSchema = roomOpeningHoursSchema
+  .omit({ roomId: true })
+  .partial()
+  .refine(
+    (data) => data.openAt && data.closeAt,
+    {
+      message: "Les horaires d'ouverture et de fermeture sont requis",  
+    }
+  );  
+
+export const updateRoomOpeningHoursSchema = roomOpeningHoursSchema
+  .omit({ roomId: true })
+  .partial()
+  .refine(
+    (data) => data.openAt || data.closeAt,
+    {
+      message: "Au moins un des horaires d'ouverture ou de fermeture doit être fourni",
+    }
+  );
+
 export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
-export type RoomsPaginatedResponse = z.infer<
-  typeof roomsPaginatedResponseSchema
->;
-
+export type RoomsPaginatedResponse = z.infer<typeof roomsPaginatedResponseSchema>;
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
+
+export type RoomOpeningHours = z.infer<typeof roomOpeningHoursSchema>;
+export type CreateRoomOpeningHoursData = z.infer<typeof createRoomOpeningHoursSchema>;
+export type UpdateRoomOpeningHoursData = z.infer<typeof updateRoomOpeningHoursSchema>;
 
 interface UseRoomsOptions {
   complexId: string;

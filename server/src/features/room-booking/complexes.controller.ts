@@ -30,7 +30,7 @@ const complexOpeningHoursSchema = z.object({
   ]),
   openAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
   closeAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
-  isClosed: z.boolean().optional(),
+  isClosed: z.boolean().default(false),
 });
 
 const complexQuerySchema = z

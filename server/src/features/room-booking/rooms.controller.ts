@@ -28,7 +28,7 @@ const roomOpeningHoursSchema = z.object({
 	]),
 	openAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
 	closeAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
-	isClosed: z.boolean().optional().default(false),
+	isClosed: z.boolean().default(false),
 });
 
 const roomQuerySchema = z
