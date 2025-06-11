@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoomsList } from "@room-booking/components/rooms/RoomsList";
-import type { Complex } from "@room-booking/hooks/useComplexes";
+import { frenchDays } from "@room-booking/hooks/useComplexes";
+import type { Complex, OpeningHours } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import {
 	Accessibility,
@@ -23,6 +24,7 @@ import {
 	TreePine,
 	Users,
 	Warehouse,
+	Timer
 	//@ts-ignore
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -35,7 +37,7 @@ type ViewMode =
 	| "stats";
 
 interface ComplexDetailsPageProps {
-	complex: Complex;
+	complex: Complex & { openingHours: OpeningHours };
 	initialRooms: Room[];
 }
 
@@ -163,6 +165,40 @@ export function ComplexDetailsPage({
 					</CardContent>
 				</Card>
 			</div>
+
+			{/* Horaires d'ouverture */}
+			<Card>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<Timer className="w-4 h-4" />
+						Horaires d'ouverture
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-7">
+						{['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((dayKey) => {
+							const dayData = complex.openingHours[dayKey as keyof typeof complex.openingHours];
+							return (
+								<div key={dayKey} className="flex flex-col items-center p-3 border rounded-lg">
+									<span className="text-sm font-medium mb-1">
+										{frenchDays[dayKey as keyof typeof frenchDays]}
+									</span>
+									<span className="text-sm text-muted-foreground text-center">
+										{dayData?.closed ? "Fermé" : `${dayData?.open} - ${dayData?.close}`}
+									</span>
+								</div>
+							);
+						})}
+					</div>
+					<p className="text-xs text-muted-foreground mt-4 text-center">
+						{Object.values(complex.openingHours).some(
+							(dayData) => dayData?.closed,
+						)
+							? "Le complexe est fermé certains jours"
+							: "Ouvert tous les jours"}
+					</p>
+				</CardContent>
+			</Card>
 
 			{/* Onglets */}
 			<Tabs

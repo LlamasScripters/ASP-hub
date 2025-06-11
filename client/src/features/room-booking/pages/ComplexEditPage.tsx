@@ -8,7 +8,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
-import type { Complex } from "@room-booking/hooks/useComplexes";
+import type { Complex, OpeningHours  } from "@room-booking/hooks/useComplexes";
+import { frenchDays  } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
@@ -21,14 +22,13 @@ import {
 import { useState } from "react";
 
 interface ComplexEditPageProps {
-	initialComplex: Complex;
+	initialComplex: Complex & { openingHours: OpeningHours };
 }
 
 export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const navigate = useNavigate();
 	const router = useRouter();
-
 	const previousPageHref = router.__store.prevState?.resolvedLocation?.href || undefined;
 	
 	const handleSuccess = (updatedComplex: Complex) => {
@@ -43,15 +43,12 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 		}, 1500);
 	};
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString("fr-FR", {
-			day: "2-digit",
-			month: "2-digit",
-			year: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
+	const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("fr-FR", {
+      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+
+  const { openingHours } = initialComplex;
 
 	return (
 		<div className="space-y-6">
@@ -153,8 +150,32 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 								Dernière modification :
 							</span>
 							<span className="ml-2 text-green-800">
-								{formatDate(initialComplex.updatedAt)}
+								{fmt(initialComplex.updatedAt)}
 							</span>
+						</div>
+					</div>
+					<div>
+						<h3 className="text-sm font-semibold mb-3 text-green-900">Horaires d'ouverture :</h3>
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+							{(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
+								const hours = openingHours[day];
+								return (
+									<div key={day} className="flex items-center justify-between p-2 rounded-md border border-green-100">
+										<span className="font-medium text-green-900 text-xs tracking-wide">
+											{frenchDays[day]}
+										</span>
+										<span className="text-green-800 text-sm font-medium">
+											{hours?.closed ? (
+												<span className="text-red-600 text-xs">Fermé</span>
+											) : hours ? (
+												<span className="text-green-700">{hours.open} – {hours.close}</span>
+											) : (
+												<span className="text-gray-500 text-xs">Non défini</span>
+											)}
+										</span>
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				</CardContent>

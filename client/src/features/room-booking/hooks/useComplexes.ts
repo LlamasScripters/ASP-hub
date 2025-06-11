@@ -3,14 +3,57 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+const days = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
+const openingHoursEntrySchema = z.object({
+  open:    z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  close:   z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  closed:  z.boolean(),
+});
+
+export const openingHoursSchema = z.record(
+  z.enum(days),
+  openingHoursEntrySchema
+);
+
+export const defaultOpenHours = {
+  monday: { open: "08:00", close: "20:00", closed: false },
+  tuesday: { open: "08:00", close: "20:00", closed: false },
+  wednesday: { open: "08:00", close: "20:00", closed: false },
+  thursday: { open: "08:00", close: "20:00", closed: false },
+  friday: { open: "08:00", close: "18:00", closed: false },
+  saturday: { open: "10:00", close: "16:00", closed: false },
+  sunday: { open: null, close: null, closed: true },
+};
+
+export const frenchDays: Record<keyof OpeningHours, string> = {
+  monday: "Lundi",
+  tuesday: "Mardi",
+  wednesday: "Mercredi",
+  thursday: "Jeudi",
+  friday: "Vendredi",
+  saturday: "Samedi",
+  sunday: "Dimanche",
+};
+
 export const complexSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Le nom est requis"),
+  description: z.string().max(500, "La description ne peut pas dépasser 500 caractères"),
   street: z.string().min(1, "La rue est requise"),
   city: z.string().min(1, "La ville est requise"),
   postalCode: z
     .string()
     .min(5, "Le code postal doit contenir au moins 5 caractères"),
+  openingHours: openingHoursSchema,
   numberOfElevators: z.number().int().nonnegative(),
   accessibleForReducedMobility: z.boolean(),
   parkingCapacity: z.number().int().nonnegative(),
@@ -23,6 +66,9 @@ export const createComplexSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(255, "Le nom ne peut pas dépasser 255 caractères"),
+  description: z
+    .string()
+    .max(500, "La description ne peut pas dépasser 500 caractères"),
   street: z
     .string()
     .min(1, "La rue est requise")
@@ -35,6 +81,7 @@ export const createComplexSchema = z.object({
     .string()
     .min(5, "Le code postal doit contenir au moins 5 caractères")
     .max(20, "Le code postal ne peut pas dépasser 20 caractères"),
+  openingHours: openingHoursSchema,
   numberOfElevators: z
     .number()
     .int("Le nombre d'ascenseurs doit être un nombre entier")
@@ -102,6 +149,7 @@ export type UpdateComplexData = z.infer<typeof updateComplexSchema>;
 export type ComplexFilters = z.infer<typeof complexFiltersSchema>;
 export type ComplexStats = z.infer<typeof complexStatsSchema>;
 export type PaginationInfo = z.infer<typeof paginationSchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 
 function formatZodErrors(errors: z.ZodError): string {
   return errors.errors

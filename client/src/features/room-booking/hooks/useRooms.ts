@@ -3,13 +3,37 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+const days = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
+const openingHoursEntrySchema = z.object({
+  open:    z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  close:   z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  closed:  z.boolean(),
+});
+
+export const openingHoursSchema = z.record(
+  z.enum(days),
+  openingHoursEntrySchema
+);
+
 export const roomSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Le nom est requis"),
+  description: z.string().max(500, "La description ne peut pas dépasser 500 caractères"),
   complexId: z.string().uuid(),
   sportType: z.string().min(1, "Le type de sport est requis"),
+  openingHours: openingHoursSchema,
   isIndoor: z.boolean(),
   accreditation: z.string().optional(),
+  capacity: z.number().int().nonnegative(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -19,16 +43,24 @@ export const createRoomSchema = z.object({
     .string()
     .min(1, "Le nom est requis")
     .max(255, "Le nom ne peut pas dépasser 255 caractères"),
+  description: z
+    .string()
+    .max(500, "La description ne peut pas dépasser 500 caractères"),
   complexId: z.string().uuid("ID de complexe invalide"),
   sportType: z
     .string()
     .min(1, "Le type de sport est requis")
     .max(100, "Le type de sport ne peut pas dépasser 100 caractères"),
+  openingHours: openingHoursSchema,
   isIndoor: z.boolean().default(true),
   accreditation: z
     .string()
     .max(255, "L'accréditation ne peut pas dépasser 255 caractères")
     .optional(),
+  capacity: z
+    .number()
+    .int()
+    .nonnegative("La capacité doit être un nombre entier positif")
 });
 
 export const updateRoomSchema = createRoomSchema
@@ -63,11 +95,9 @@ export const roomsPaginatedResponseSchema = z.object({
 export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
-export type RoomsPaginatedResponse = z.infer<
-  typeof roomsPaginatedResponseSchema
->;
-
+export type RoomsPaginatedResponse = z.infer<typeof roomsPaginatedResponseSchema>;
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 
 interface UseRoomsOptions {
   complexId: string;
