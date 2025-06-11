@@ -65,6 +65,7 @@ export function RoomCreatePage({ complex }: RoomCreatePageProps) {
 
 			<RoomForm
 				complexId={complex.id}
+				complexOpeningHours={complex.openingHours}
 				onSuccess={handleSuccess}
 				onCancelLink={`/admin/facilities/complexes/${complex.id}?view=rooms`}
 			/>

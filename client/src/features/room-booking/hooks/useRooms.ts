@@ -24,6 +24,16 @@ export const openingHoursSchema = z.record(
   openingHoursEntrySchema
 );
 
+export const frenchDays: Record<keyof OpeningHours, string> = {
+  monday: "Lundi",
+  tuesday: "Mardi",
+  wednesday: "Mercredi",
+  thursday: "Jeudi",
+  friday: "Vendredi",
+  saturday: "Samedi",
+  sunday: "Dimanche",
+};
+
 export const roomSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Le nom est requis"),

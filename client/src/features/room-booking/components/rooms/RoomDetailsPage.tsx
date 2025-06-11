@@ -9,13 +9,14 @@ import {
 import { Link } from "@tanstack/react-router";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
+import { frenchDays } from "@room-booking/hooks/useRooms";
 // @ts-ignore
 import {
 	ArrowLeft,
 	Info,
-	Calendar as CalendarIcon,
 	Plus,
 	Edit,
+	Timer
 	// @ts-ignore
 } from "lucide-react";
 import { ReservationList } from "@room-booking/components/reservations/ReservationList";
@@ -35,6 +36,9 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 					<p className="text-muted-foreground">
 						Salle du complexe :{" "}
 						<span className="font-medium">{complex.name}</span>
+					</p>
+					<p className="text-muted-foreground">
+						<span className="font-medium">{room.description}</span>
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
@@ -86,6 +90,10 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 							<span className="font-medium">{room.sportType}</span>
 						</li>
 						<li>
+							<strong>Capacité :</strong>{" "}
+							<span className="font-medium">{room.capacity} personnes</span>
+						</li>
+						<li>
 							<strong>Intérieure :</strong>{" "}
 							<span className="font-medium">
 								{room.isIndoor ? "Oui" : "Non"}
@@ -100,6 +108,40 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 					</ul>
 				</CardContent>
 			</Card>
+
+			{/* Horaires d'ouverture */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Timer className="w-4 h-4" />
+									Horaires d'ouverture
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-7">
+									{['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((dayKey) => {
+										const dayData = room.openingHours[dayKey as keyof typeof room.openingHours];
+										return (
+											<div key={dayKey} className="flex flex-col items-center p-3 border rounded-lg">
+												<span className="text-sm font-medium mb-1">
+													{frenchDays[dayKey as keyof typeof frenchDays]}
+												</span>
+												<span className="text-sm text-muted-foreground text-center">
+													{dayData?.closed ? "Fermé" : `${dayData?.open} - ${dayData?.close}`}
+												</span>
+											</div>
+										);
+									})}
+								</div>
+								<p className="text-xs text-muted-foreground mt-4 text-center">
+									{Object.values(room.openingHours).some(
+										(dayData) => dayData?.closed,
+									)
+										? "La salle est fermé certains jours"
+										: "Ouvert tous les jours"}
+								</p>
+							</CardContent>
+						</Card>
 
 			{/* Planification des réservations */}
 			<ReservationList roomId={room.id} initialReservations={[]} />

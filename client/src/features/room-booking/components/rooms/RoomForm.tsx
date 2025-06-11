@@ -30,7 +30,11 @@ import { useRooms } from "@room-booking/hooks/useRooms";
 import {
 	createRoomSchema,
 	updateRoomSchema,
+	frenchDays,
 } from "@room-booking/hooks/useRooms";
+import type {
+	OpeningHours as ComplexOpeningHours
+} from "@room-booking/hooks/useComplexes";
 import type {
 	CreateRoomData,
 	Room,
@@ -42,6 +46,7 @@ import {
 	Loader2,
 	Settings,
 	Warehouse,
+	Timer
 	//@ts-ignore
 } from "lucide-react";
 import { useState } from "react";
@@ -72,6 +77,7 @@ const sportTypes = [
 
 interface RoomFormProps {
 	complexId: string;
+	complexOpeningHours: ComplexOpeningHours; 
 	room?: Room;
 	onSuccess?: (room: Room) => void;
 	onCancelLink?: string;
@@ -79,6 +85,7 @@ interface RoomFormProps {
 
 export function RoomForm({
 	complexId,
+	complexOpeningHours,
 	room,
 	onSuccess,
 	onCancelLink,
@@ -93,11 +100,16 @@ export function RoomForm({
 		defaultValues: {
 			name: room?.name || "",
 			complexId: complexId,
+			description: room?.description || "",
 			sportType: room?.sportType || "",
+			openingHours: room?.openingHours || complexOpeningHours,
 			isIndoor: room?.isIndoor ?? true,
 			accreditation: room?.accreditation || "",
+			capacity: room?.capacity || 1,
 		},
 	});
+
+	const openingHours = form.watch("openingHours");
 
 	const onSubmit = async (data: CreateRoomData | UpdateRoomData) => {
 		setIsSubmitting(true);
@@ -163,6 +175,27 @@ export function RoomForm({
 
 							<FormField
 								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Textarea
+												placeholder="Ex: Salle équipée de machines de musculation, espace cardio..."
+												className="min-h-[80px]"
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											Description détaillée de la salle
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
 								name="sportType"
 								render={({ field }) => (
 									<FormItem>
@@ -191,6 +224,107 @@ export function RoomForm({
 									</FormItem>
 								)}
 							/>
+						</div>
+
+						{/* Horaires d'ouverture */}
+						<div className="space-y-4">
+							<div className="flex items-center gap-2 text-sm font-medium">
+								<Timer className="w-4 h-4" />
+								Horaires d'ouverture
+							</div>
+							{openingHours &&
+								Object.entries(frenchDays).map(([key, label]) => {
+									const dayValue =
+										openingHours[key as keyof typeof openingHours];
+									if (!dayValue) return null;
+									
+									const complexDay = complexOpeningHours[key as keyof typeof complexOpeningHours];
+									const isComplexOpen = complexDay && !complexDay.closed;
+									
+									// Si le complexe est fermé ce jour, fermer automatiquement la salle
+									if (!isComplexOpen) {
+										// Mettre à jour la valeur pour que la salle soit fermée
+										if (!dayValue.closed) {
+											//@ts-ignore
+											form.setValue(`openingHours.${key}.closed` as const, true);
+											//@ts-ignore
+											form.setValue(`openingHours.${key}.open` as const, null);
+											//@ts-ignore
+											form.setValue(`openingHours.${key}.close` as const, null);
+										}
+										
+										return (
+											<div
+												key={key}
+												className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+											>
+												<span className="w-20 font-medium text-gray-500">{label}</span>
+												<div className="flex items-center gap-2 flex-1 mx-4">
+													<span className="text-sm text-muted-foreground italic">
+														Le complexe est fermé ce jour
+													</span>
+												</div>
+											</div>
+										);
+									}
+									
+									const isOpen = !dayValue.closed;
+									return (
+										<div
+											key={key}
+											className="flex items-center justify-between p-3 border rounded-lg"
+										>
+											<span className="w-20 font-medium">{label}</span>
+											<div className="flex items-center gap-2 flex-1 mx-4">
+												<Input
+													type="time"
+													disabled={!isOpen}
+													min={complexDay.open || undefined}
+													max={complexDay.close || undefined}
+													value={dayValue.open || ""}
+													onChange={(e) =>
+														form.setValue(
+															//@ts-ignore
+															`openingHours.${key}.open`,
+															e.target.value,
+														)
+													}
+												/>
+												<span>à</span>
+												<Input
+													type="time"
+													disabled={!isOpen}
+													min={complexDay.open || undefined}
+													max={complexDay.close || undefined}
+													value={dayValue.close || ""}
+													onChange={(e) =>
+														form.setValue(
+															//@ts-ignore
+															`openingHours.${key}.close`,
+															e.target.value,
+														)
+													}
+												/>
+											</div>
+											<Checkbox
+												checked={isOpen}
+												onCheckedChange={(checked) => {
+													//@ts-ignore
+													form.setValue(`openingHours.${key}.closed`, !checked);
+													if (!checked) {
+														//@ts-ignore
+														form.setValue(`openingHours.${key}.open`, null);
+														//@ts-ignore
+														form.setValue(`openingHours.${key}.close`, null);
+													}
+												}}
+											/>
+										</div>
+									);
+								})}
+							<p className="text-xs text-muted-foreground">
+								Décochez un jour pour le marquer comme fermé.
+							</p>
 						</div>
 
 						{/* Configuration */}
@@ -241,6 +375,32 @@ export function RoomForm({
 										<FormDescription>
 											Certifications, homologations ou accréditations
 											officielles de cette salle
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="capacity"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Capacité *</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												placeholder="Ex: 30"
+												{...field}
+												onChange={(e) =>
+													field.onChange(
+														e.target.value ? Number(e.target.value) : 1,
+													)
+												}
+											/>
+										</FormControl>
+										<FormDescription>
+											Nombre maximum de personnes pouvant utiliser la salle
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

@@ -83,6 +83,7 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 
 			<RoomForm
 				complexId={complex.id}
+				complexOpeningHours={complex.openingHours}
 				room={room}
 				onSuccess={handleSuccess}
 				onCancelLink={previousPageHref}
