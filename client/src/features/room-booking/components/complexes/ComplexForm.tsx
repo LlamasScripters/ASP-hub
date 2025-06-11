@@ -136,6 +136,25 @@ export function ComplexForm({
 									</FormItem>
 								)}
 							/>
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Ex: Complexe polyvalent avec terrains de sport, salles de réunion, etc."
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											Description détaillée du complexe
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</div>
 
 						{/* Localisation */}

@@ -108,19 +108,9 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 							<span className="ml-2 text-green-800">{initialComplex.name}</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">Ville :</span>
-							<span className="ml-2 text-green-800">{initialComplex.city}</span>
-						</div>
-						<div>
-							<span className="font-medium text-green-900">Adresse :</span>
+							<span className="font-medium text-green-900">Adresse complète :</span>
 							<span className="ml-2 text-green-800">
-								{initialComplex.street}
-							</span>
-						</div>
-						<div>
-							<span className="font-medium text-green-900">Code postal :</span>
-							<span className="ml-2 text-green-800">
-								{initialComplex.postalCode}
+								{initialComplex.street}, {initialComplex.postalCode}, {initialComplex.city}
 							</span>
 						</div>
 						<div>
@@ -154,7 +144,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 							</span>
 						</div>
 					</div>
-					<div>
+					{/* <div>
 						<h3 className="text-sm font-semibold mb-3 text-green-900">Horaires d'ouverture :</h3>
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 							{(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
@@ -177,7 +167,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 								);
 							})}
 						</div>
-					</div>
+					</div> */}
 				</CardContent>
 			</Card>
 
