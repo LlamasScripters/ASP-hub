@@ -8,6 +8,7 @@ import {
 	timestamp,
 	uuid,
 	varchar,
+  jsonb
 } from "drizzle-orm/pg-core";
 
 // énumérations pour les types
@@ -109,38 +110,57 @@ export const reservationStatusEnum = pgEnum("reservation_status", [
 	"rescheduled",
 ]);
 
+export const defaultOpenHours = {
+  monday: { open: "08:00", close: "20:00", closed: false },
+  tuesday: { open: "08:00", close: "20:00", closed: false },
+  wednesday: { open: "08:00", close: "20:00", closed: false },
+  thursday: { open: "08:00", close: "20:00", closed: false },
+  friday: { open: "08:00", close: "18:00", closed: false },
+  saturday: { open: "10:00", close: "16:00", closed: false },
+  sunday: { open: null, close: null, closed: true },
+};
+
 export const complexes = pgTable("complexes", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	name: varchar("name", { length: 255 }).notNull(),
-	street: varchar("street", { length: 255 }).notNull(),
-	city: varchar("city", { length: 100 }).notNull(),
-	postalCode: varchar("postal_code", { length: 20 }).notNull(),
-	numberOfElevators: integer("number_of_elevators").notNull().default(0),
-	accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
-		.notNull()
-		.default(false),
-	parkingCapacity: integer("parking_capacity").notNull().default(0),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at")
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => new Date()),
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  street: varchar("street", { length: 255 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  postalCode: varchar("postal_code", { length: 20 }).notNull(),
+  openingHours: jsonb("opening_hours")
+    .notNull()
+    .default(JSON.stringify(defaultOpenHours)),
+  numberOfElevators: integer("number_of_elevators").notNull().default(0),
+  accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
+    .notNull()
+    .default(false),
+  parkingCapacity: integer("parking_capacity").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const rooms = pgTable("rooms", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	name: varchar("name", { length: 255 }).notNull(),
-	sportType: varchar("sport_type", { length: 100 }).notNull(),
-	isIndoor: boolean("is_indoor").notNull().default(true),
-	accreditation: varchar("accreditation", { length: 255 }),
-	complexId: uuid("complex_id")
-		.references(() => complexes.id, { onDelete: "cascade" })
-		.notNull(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at")
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => new Date()),
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  sportType: varchar("sport_type", { length: 100 }).notNull(),
+  openingHours: jsonb("opening_hours")
+    .notNull()
+    .default(JSON.stringify(defaultOpenHours)),
+  isIndoor: boolean("is_indoor").notNull().default(true),
+  capacity: integer("capacity").notNull().default(0),
+  accreditation: varchar("accreditation", { length: 255 }),
+  complexId: uuid("complex_id")
+    .references(() => complexes.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const reservations = pgTable("reservations", {

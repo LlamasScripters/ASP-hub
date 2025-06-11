@@ -7,11 +7,29 @@ import { reservationsService } from "./reservations.service.js";
 const roomsRouter = Router();
 
 const roomSchema = z.object({
-	name: z.string().min(1).max(255),
-	sportType: z.string().min(1).max(100),
-	isIndoor: z.boolean(),
-	accreditation: z.string().max(255).optional(),
-	complexId: z.string().uuid(),
+  name: z.string().min(1).max(255),
+  description: z.string().max(500),
+  sportType: z.string().min(1).max(100),
+  isIndoor: z.boolean(),
+  accreditation: z.string().max(255).optional(),
+  capacity: z.number().int().min(0),
+  complexId: z.string().uuid(),
+  openingHours: z.record(
+    z.enum([
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ]),
+    z.object({
+      open: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+      close: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+      closed: z.boolean(),
+    })
+  ),
 });
 
 const roomQuerySchema = z
