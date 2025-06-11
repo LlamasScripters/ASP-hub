@@ -8,6 +8,7 @@ import {
 	timestamp,
 	uuid,
 	varchar,
+  jsonb
 } from "drizzle-orm/pg-core";
 
 // énumérations pour les types
@@ -16,14 +17,14 @@ export const sessionTypeEnum = pgEnum("session_type", [
 	"match",
 	"stage",
 	"competition",
-	"autre"
+	"autre",
 ]);
 
 export const sessionStatusEnum = pgEnum("session_status", [
 	"planifie",
-	"en_cours", 
+	"en_cours",
 	"termine",
-	"annule"
+	"annule",
 ]);
 
 export const users = pgTable("users", {
@@ -109,38 +110,57 @@ export const reservationStatusEnum = pgEnum("reservation_status", [
 	"rescheduled",
 ]);
 
+export const defaultOpenHours = {
+  monday: { open: "08:00", close: "20:00", closed: false },
+  tuesday: { open: "08:00", close: "20:00", closed: false },
+  wednesday: { open: "08:00", close: "20:00", closed: false },
+  thursday: { open: "08:00", close: "20:00", closed: false },
+  friday: { open: "08:00", close: "18:00", closed: false },
+  saturday: { open: "10:00", close: "16:00", closed: false },
+  sunday: { open: null, close: null, closed: true },
+};
+
 export const complexes = pgTable("complexes", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	name: varchar("name", { length: 255 }).notNull(),
-	street: varchar("street", { length: 255 }).notNull(),
-	city: varchar("city", { length: 100 }).notNull(),
-	postalCode: varchar("postal_code", { length: 20 }).notNull(),
-	numberOfElevators: integer("number_of_elevators").notNull().default(0),
-	accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
-		.notNull()
-		.default(false),
-	parkingCapacity: integer("parking_capacity").notNull().default(0),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at")
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => new Date()),
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  street: varchar("street", { length: 255 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  postalCode: varchar("postal_code", { length: 20 }).notNull(),
+  openingHours: jsonb("opening_hours")
+    .notNull()
+    .default(JSON.stringify(defaultOpenHours)),
+  numberOfElevators: integer("number_of_elevators").notNull().default(0),
+  accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
+    .notNull()
+    .default(false),
+  parkingCapacity: integer("parking_capacity").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const rooms = pgTable("rooms", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	name: varchar("name", { length: 255 }).notNull(),
-	sportType: varchar("sport_type", { length: 100 }).notNull(),
-	isIndoor: boolean("is_indoor").notNull().default(true),
-	accreditation: varchar("accreditation", { length: 255 }),
-	complexId: uuid("complex_id")
-		.references(() => complexes.id, { onDelete: "cascade" })
-		.notNull(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at")
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => new Date()),
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  sportType: varchar("sport_type", { length: 100 }).notNull(),
+  openingHours: jsonb("opening_hours")
+    .notNull()
+    .default(JSON.stringify(defaultOpenHours)),
+  isIndoor: boolean("is_indoor").notNull().default(true),
+  capacity: integer("capacity").notNull().default(0),
+  accreditation: varchar("accreditation", { length: 255 }),
+  complexId: uuid("complex_id")
+    .references(() => complexes.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const reservations = pgTable("reservations", {
@@ -231,10 +251,12 @@ export const sessionsSport = pgTable("sessions_sport", {
 	maxParticipants: integer("max_participants"),
 	currentParticipants: integer("current_participants").default(0),
 	notes: text("notes"),
-	coachId: uuid("coach_id")
-		.references(() => users.id, { onDelete: "set null" }),
-	responsibleId: uuid("responsible_id")
-		.references(() => users.id, { onDelete: "set null" }),
+	coachId: uuid("coach_id").references(() => users.id, {
+		onDelete: "set null",
+	}),
+	responsibleId: uuid("responsible_id").references(() => users.id, {
+		onDelete: "set null",
+	}),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => new Date())
@@ -261,10 +283,12 @@ export const sectionResponsibilities = pgTable("section_responsibilities", {
 	userId: uuid("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
-	sectionId: uuid("section_id")
-		.references(() => sections.id, { onDelete: "cascade" }),
-	categoryId: uuid("category_id")
-		.references(() => categories.id, { onDelete: "cascade" }),
+	sectionId: uuid("section_id").references(() => sections.id, {
+		onDelete: "cascade",
+	}),
+	categoryId: uuid("category_id").references(() => categories.id, {
+		onDelete: "cascade",
+	}),
 	role: varchar("role", { length: 100 }).notNull(),
 	assignedAt: timestamp("assigned_at").defaultNow().notNull(),
 	isActive: boolean("is_active").notNull().default(true),
@@ -309,5 +333,7 @@ export type InsertSessionSport = typeof sessionsSport.$inferInsert;
 export type SelectSessionSport = typeof sessionsSport.$inferSelect;
 export type InsertSessionParticipant = typeof sessionParticipants.$inferInsert;
 export type SelectSessionParticipant = typeof sessionParticipants.$inferSelect;
-export type InsertSectionResponsibility = typeof sectionResponsibilities.$inferInsert;
-export type SelectSectionResponsibility = typeof sectionResponsibilities.$inferSelect;
+export type InsertSectionResponsibility =
+	typeof sectionResponsibilities.$inferInsert;
+export type SelectSectionResponsibility =
+	typeof sectionResponsibilities.$inferSelect;
