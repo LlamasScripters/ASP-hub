@@ -3,7 +3,6 @@ import { z } from "zod";
 import { complexesService } from "./complexes.service.js";
 import { roomsService } from "./rooms.service.js";
 import { reservationsService } from "./reservations.service.js";
-import { roomOpeningHoursService } from "./roomOpeningHours.service.js";
 
 const roomsRouter = Router();
 
@@ -13,22 +12,6 @@ const roomSchema = z.object({
 	isIndoor: z.boolean(),
 	accreditation: z.string().max(255).optional(),
 	complexId: z.string().uuid(),
-});
-
-const roomOpeningHoursSchema = z.object({
-	roomId: z.string().uuid(),
-	dayOfWeek: z.enum([
-	"monday",
-	"tuesday",
-	"wednesday",
-	"thursday",
-	"friday",
-	"saturday",
-	"sunday",
-	]),
-	openAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
-	closeAt: z.string().regex(/^\d{2}:\d{2}$/, "HH:mm"),
-	isClosed: z.boolean().default(false),
 });
 
 const roomQuerySchema = z
@@ -47,8 +30,8 @@ const reservationQuerySchema = z
 		endDate: z.string().optional(),
 	})
 	.transform((data) => ({
-		startDate: data.startDate ? new Date(data.startDate) : new Date(new Date().setDate(1)), 
-		endDate: data.endDate ? new Date(data.endDate) : new Date(new Date().setMonth(new Date().getMonth() + 1)),
+		startDate: data.startDate ? new Date(data.startDate) : new Date(new Date().setDate(1)), // First day of current month
+		endDate: data.endDate ? new Date(data.endDate) : new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
 	}));
 
 //@ts-ignore
@@ -100,18 +83,6 @@ roomsRouter.get("/:id/reservations", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-roomsRouter.get("/:id/opening-hours", async (req: Request, res: Response) => {
-	const room = await roomsService.getById(req.params.id);
-	if (!room) return res.status(404).json({ error: "Room not found" });
-
-	const openingHours = await roomOpeningHoursService.getByRoomId(req.params.id);
-	if (!openingHours) {
-		return res.status(404).json({ error: "Opening hours not found for this room" });
-	}
-	return res.json(openingHours);
-});
-
-//@ts-ignore
 roomsRouter.post("/", async (req: Request, res: Response) => {
 	const parse = roomSchema.safeParse(req.body);
 	if (!parse.success)
@@ -123,27 +94,6 @@ roomsRouter.post("/", async (req: Request, res: Response) => {
 	}
 
 	const created = await roomsService.create(parse.data);
-	return res.status(201).json(created);
-});
-
-//@ts-ignore
-roomsRouter.post("/:id/opening-hours", async (req: Request, res: Response) => {
-	const parse = z.array(roomOpeningHoursSchema).safeParse(req.body);
-	if (!parse.success)
-		return res.status(400).json({ error: parse.error.flatten() });
-
-	const room = await roomsService.getById(req.params.id);
-	if (!room) return res.status(404).json({ error: "Room not found" });
-
-	const existingOpeningHours = await roomOpeningHoursService.getByRoomId(req.params.id);
-	if (existingOpeningHours.length > 0) {
-		return res.status(400).json({ error: "Opening hours already exist for this room" });
-	}
-
-	const created = await roomOpeningHoursService.createMany(room.complexId, parse.data);
-	if (created.length === 0) {
-		return res.status(400).json({ error: "No opening hours created" });
-	}
 	return res.status(201).json(created);
 });
 
@@ -160,36 +110,12 @@ roomsRouter.put("/:id", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-roomsRouter.put("/:id/opening-hours", async (req: Request, res: Response) => {
-	const parse = z.array(roomOpeningHoursSchema).safeParse(req.body);
-	if (!parse.success)
-		return res.status(400).json({ error: parse.error.flatten() });
-	const room = await roomsService.getById(req.params.id);
-	if (!room) return res.status(404).json({ error: "Room not found" });
-	const updatedOpeningHours = await roomOpeningHoursService.updateMany(room.complexId, parse.data);
-	if (updatedOpeningHours.length === 0) {
-		return res.status(400).json({ error: "No opening hours updated" });
-	}
-	return res.json(updatedOpeningHours);
-});
-
-//@ts-ignore
 roomsRouter.delete("/:id", async (req: Request, res: Response) => {
 	const room = await roomsService.getById(req.params.id);
 	if (!room) return res.status(404).json({ error: "Room not found" });
 
 	await roomsService.delete(req.params.id);
 	return res.status(200).json({ message: "Room deleted successfully" });
-});
-
-//@ts-ignore
-roomsRouter.delete("/:id/opening-hours/:openingHourId", async (req: Request, res: Response) => {
-	const room = await roomsService.getById(req.params.id);
-	if (!room) return res.status(404).json({ error: "Room not found" });
-	const openingHour = await roomOpeningHoursService.getById(req.params.openingHourId);
-	if (!openingHour) return res.status(404).json({ error: "Opening hour not found" });
-	await roomOpeningHoursService.delete(req.params.openingHourId);
-	return res.status(200).json({ message: "Opening hour deleted successfully" });
 });
 
 export default roomsRouter;

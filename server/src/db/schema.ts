@@ -6,7 +6,6 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	time,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -113,7 +112,6 @@ export const reservationStatusEnum = pgEnum("reservation_status", [
 export const complexes = pgTable("complexes", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	name: varchar("name", { length: 255 }).notNull(),
-	description: text("description"),
 	street: varchar("street", { length: 255 }).notNull(),
 	city: varchar("city", { length: 100 }).notNull(),
 	postalCode: varchar("postal_code", { length: 20 }).notNull(),
@@ -132,7 +130,6 @@ export const complexes = pgTable("complexes", {
 export const rooms = pgTable("rooms", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	name: varchar("name", { length: 255 }).notNull(),
-	description: text("description"),
 	sportType: varchar("sport_type", { length: 100 }).notNull(),
 	isIndoor: boolean("is_indoor").notNull().default(true),
 	accreditation: varchar("accreditation", { length: 255 }),
@@ -163,48 +160,6 @@ export const reservations = pgTable("reservations", {
 		.notNull()
 		.defaultNow()
 		.$onUpdate(() => new Date()),
-});
-
-export const dayOfWeekEnum = pgEnum("day_of_week", [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-]);
-
-export const complexOpeningHours = pgTable("complex_opening_hours", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  complexId: uuid("complex_id")
-    .notNull()
-    .references(() => complexes.id, { onDelete: "cascade" }),
-  dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
-  openAt: time("open_at").notNull(),
-  closeAt: time("close_at").notNull(),
-  isClosed: boolean("is_closed").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
-
-export const roomOpeningHours = pgTable("room_opening_hours", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  roomId: uuid("room_id")
-    .notNull()
-    .references(() => rooms.id, { onDelete: "cascade" }),
-  dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
-  openAt: time("open_at").notNull(),
-  closeAt: time("close_at").notNull(),
-  isClosed: boolean("is_closed").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 });
 
 // table des clubs (ASP)
@@ -338,12 +293,6 @@ export type SelectRoom = typeof rooms.$inferSelect;
 // Reservations
 export type InsertReservation = typeof reservations.$inferInsert;
 export type SelectReservation = typeof reservations.$inferSelect;
-// Complex Opening Hours
-export type InsertComplexOpeningHour = typeof complexOpeningHours.$inferInsert;
-export type SelectComplexOpeningHour = typeof complexOpeningHours.$inferSelect;
-// Room Opening Hours
-export type InsertRoomOpeningHour = typeof roomOpeningHours.$inferInsert;
-export type SelectRoomOpeningHour = typeof roomOpeningHours.$inferSelect;
 
 export const reservationStatusEnumValues = [
 	"pending",
@@ -354,17 +303,6 @@ export const reservationStatusEnumValues = [
 	"rescheduled",
 ] as const;
 export type ReservationStatus = (typeof reservationStatusEnumValues)[number];
-export const dayOfWeekEnumValues = [
-	"monday",
-	"tuesday",
-	"wednesday",
-	"thursday",
-	"friday",
-	"saturday",
-	"sunday",
-] as const;
-export type DayOfWeek = (typeof dayOfWeekEnumValues)[number];
-
 export type InsertClub = typeof clubs.$inferInsert;
 export type SelectClub = typeof clubs.$inferSelect;
 export type InsertSection = typeof sections.$inferInsert;
