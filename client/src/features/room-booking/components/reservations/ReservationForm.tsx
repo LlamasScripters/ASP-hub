@@ -84,6 +84,8 @@ export function ReservationForm({
     const [globalError, setGlobalError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
+    onCancelLink = onCancelLink || `/admin/facilities/rooms/${roomId}`;
+
     const defaultValues = useMemo(
         () => ({
             title: reservation?.title ?? "",
