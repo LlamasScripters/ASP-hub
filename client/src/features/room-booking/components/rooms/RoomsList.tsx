@@ -126,7 +126,10 @@ export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filteredRooms.length]);
+    }, []);
+    // useEffect(() => {
+    //     setCurrentPage(1);
+    // }, [filteredRooms.length]);
 
     const handleSearch = (value: string) => {
         setSearchTerm(value);
