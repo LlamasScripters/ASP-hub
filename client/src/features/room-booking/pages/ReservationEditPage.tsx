@@ -71,6 +71,7 @@ export function ReservationEditPage({
       {/* Formulaire d’édition */}
       <ReservationForm
         roomId={room.id}
+        roomOpeningHours={room.openingHours}
         reservation={reservation}
         onSuccess={handleSuccess}
         onCancelLink={previousPageHref}

@@ -144,7 +144,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 						</Card>
 
 			{/* Planification des réservations */}
-			<ReservationList roomId={room.id} initialReservations={[]} />
+			<ReservationList roomId={room.id} roomOpeningHours={room.openingHours} initialReservations={[]} />
 		</div>
 	);
 }

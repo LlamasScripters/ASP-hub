@@ -68,6 +68,7 @@ export function ReservationCreatePage({
       {/* Formulaire de réservation */}
       <ReservationForm
         roomId={room.id}
+        roomOpeningHours={room.openingHours}
         onSuccess={handleSuccess}
         onCancelLink={previousPageHref}
       />

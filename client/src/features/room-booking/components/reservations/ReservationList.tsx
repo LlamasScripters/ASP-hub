@@ -16,13 +16,17 @@ import {
   type Reservation,
   reservationStatusEnumTranslated,
 } from "@room-booking/hooks/useReservations";
+import type {
+  OpeningHours as RoomOpeningHours
+} from "@room-booking/hooks/useRooms";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   Loader2,
   Edit2,
-  // @ts-ignore
+  Clock,
+  //@ts-ignore
 } from "lucide-react";
 import {
   getWeekBounds,
@@ -34,11 +38,65 @@ type ViewMode = "week" | "month";
 
 interface ReservationListProps {
   roomId: string;
+  roomOpeningHours: RoomOpeningHours;
   initialReservations?: Reservation[];
 }
 
+const getDayOfWeekKey = (date: Date): keyof RoomOpeningHours => {
+  const days: (keyof RoomOpeningHours)[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return days[date.getDay()];
+};
+
+const isRoomOpenOnDay = (date: Date, openingHours: RoomOpeningHours): boolean => {
+  const dayKey = getDayOfWeekKey(date);
+  const dayHours = openingHours[dayKey];
+  return dayHours ? !dayHours.closed : false;
+};
+
+const getRoomHoursForDay = (date: Date, openingHours: RoomOpeningHours) => {
+  const dayKey = getDayOfWeekKey(date);
+  const dayHours = openingHours[dayKey];
+  if (!dayHours || dayHours.closed) return null;
+  
+  return {
+    openTime: dayHours.open,
+    closeTime: dayHours.close
+  };
+};
+
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+const minutesToTime = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+};
+
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'confirmed':
+    case 'confirmé':
+      return 'bg-green-100 border-green-300 text-green-800';
+    case 'pending':
+    case 'en_attente':
+      return 'bg-yellow-100 border-yellow-300 text-yellow-800';
+    case 'cancelled':
+    case 'annulé':
+      return 'bg-red-100 border-red-300 text-red-800';
+    default:
+      return 'bg-blue-100 border-blue-300 text-blue-800';
+  }
+};
+
+const HOUR_HEIGHT = 60;
+const MIN_RESERVATION_HEIGHT = 20;
+
 export function ReservationList({
   roomId,
+  roomOpeningHours,
   initialReservations = [],
 }: ReservationListProps) {
   const { reservations, totalCount, loading, error, updateFilters } =
@@ -137,6 +195,373 @@ export function ReservationList({
     return grid;
   }, [viewMode, startDate, endDate, referenceDate]);
 
+  const timeSlots = useMemo(() => {
+    const slots = [];
+    for (let hour = 6; hour < 24; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    return slots;
+  }, []);
+
+  const organizeOverlappingReservations = (reservations: Reservation[]) => {
+    const sortedReservations = [...reservations].sort((a, b) => 
+      new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+    );
+
+    const columns: Reservation[][] = [];
+    
+    for (const reservation of sortedReservations) {
+      const startTime = new Date(reservation.startAt).getTime();
+      const endTime = new Date(reservation.endAt).getTime();
+      
+      let placed = false;
+      for (let i = 0; i < columns.length; i++) {
+        const column = columns[i];
+        const lastReservation = column[column.length - 1];
+        const lastEndTime = new Date(lastReservation.endAt).getTime();
+        
+        if (lastEndTime <= startTime) {
+          column.push(reservation);
+          placed = true;
+          break;
+        }
+      }
+      
+      if (!placed) {
+        columns.push([reservation]);
+      }
+    }
+    
+    return columns;
+  };
+
+  const renderWeekView = () => (
+    <div className="border rounded-lg bg-white overflow-hidden">
+      <ScrollArea className="h-[700px]">
+        <div className="min-w-[800px]">
+          {/* En-tête avec les jours */}
+          <div className="grid grid-cols-8 border-b bg-gray-50 sticky top-0 z-20">
+            <div className="p-3 border-r bg-gray-100">
+              <div className="text-xs font-semibold text-center text-gray-600">
+                Heures
+              </div>
+            </div>
+            {dateGrid.map((cell) => {
+              if (!cell.date) return null;
+              
+              const d = cell.date;
+              const key = d.toLocaleDateString("fr-FR");
+              const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
+              const roomHours = getRoomHoursForDay(d, roomOpeningHours);
+              const isToday = d.toDateString() === new Date().toDateString();
+
+              return (
+                <div 
+                  key={key} 
+                  className={`p-3 border-r ${isToday ? 'bg-blue-50' : 'bg-gray-50'} ${!isOpen ? 'bg-gray-200' : ''}`}
+                >
+                  <div className="text-center">
+                    <div className={`text-sm font-semibold ${isToday ? 'text-blue-600' : 'text-gray-900'} ${!isOpen ? 'text-gray-500' : ''}`}>
+                      {d.toLocaleDateString("fr-FR", { weekday: 'short' })}
+                    </div>
+                    <div className={`text-xs ${isToday ? 'text-blue-600' : 'text-gray-600'} ${!isOpen ? 'text-gray-500' : ''}`}>
+                      {d.getDate()}/{d.getMonth() + 1}
+                    </div>
+                    {!isOpen ? (
+                      <div className="flex items-center justify-center gap-1 text-red-500 mt-1">
+                        <Clock className="w-3 h-3" />
+                        <span className="text-[10px]">Fermé</span>
+                      </div>
+                    ) : roomHours && (
+                      <div className="text-[10px] text-gray-500 mt-1">
+                        {roomHours.openTime} - {roomHours.closeTime}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Grille horaire */}
+          <div className="grid grid-cols-8 relative">
+            {/* Colonne des heures */}
+            <div className="border-r bg-gray-50">
+              {timeSlots.map((time, idx) => (
+                <div 
+                  key={time} 
+                  className="border-b flex items-center justify-center text-xs text-gray-500 bg-gray-50"
+                  style={{ height: `${HOUR_HEIGHT}px` }}
+                >
+                  <div className="text-center">
+                    <div className="font-medium">{time}</div>
+                    {idx < timeSlots.length - 1 && (
+                      <div className="text-[10px] text-gray-400 mt-1">
+                        {timeSlots[idx + 1]?.substring(0, 2)}h
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Colonnes des jours */}
+            {dateGrid.map((cell) => {
+              if (!cell.date) return null;
+              
+              const d = cell.date;
+              const key = d.toLocaleDateString("fr-FR");
+              const dayReservations = reservationsByDay[key] || [];
+              const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
+              const roomHours = getRoomHoursForDay(d, roomOpeningHours);
+              const isToday = d.toDateString() === new Date().toDateString();
+
+              const reservationColumns = organizeOverlappingReservations(dayReservations);
+              const totalColumns = reservationColumns.length;
+
+              return (
+                <div key={key} className={`relative border-r ${isToday ? 'bg-blue-50/30' : 'bg-white'}`}>
+                  {/* Grille horaire de fond */}
+                  {timeSlots.map((time, idx) => {
+                    const timeMinutes = timeToMinutes(time);
+                    const isClosedTime = !isOpen || (roomHours?.openTime && roomHours?.closeTime && (
+                      timeMinutes < timeToMinutes(roomHours.openTime) ||
+                      timeMinutes >= timeToMinutes(roomHours.closeTime)
+                    ));
+
+                    return (
+                      <div
+                        key={time}
+                        className={`border-b relative ${
+                          isClosedTime 
+                            ? 'bg-gray-100 bg-opacity-80' 
+                            : idx % 2 === 0 
+                              ? 'bg-white' 
+                              : 'bg-gray-50/30'
+                        }`}
+                        style={{ height: `${HOUR_HEIGHT}px` }}
+                      >
+                        {/* Ligne médiane pour les demi-heures */}
+                        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200/50" />
+                        
+                        {/* Indicateur d'heure fermée */}
+                        {isClosedTime && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                         
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Réservations positionnées absolument */}
+                  {isOpen && reservationColumns.map((column, columnIndex) => (
+                    column.map((reservation) => {
+                      const startTime = new Date(reservation.startAt);
+                      const endTime = new Date(reservation.endAt);
+                      
+                      const startMinutes = startTime.getHours() * 60 + startTime.getMinutes();
+                      const endMinutes = endTime.getHours() * 60 + endTime.getMinutes();
+                      const duration = endMinutes - startMinutes;
+                      
+                      const topOffset = Math.max(0, (startMinutes - 360) / 60) * HOUR_HEIGHT;
+                      const height = Math.max((duration / 60) * HOUR_HEIGHT, MIN_RESERVATION_HEIGHT);
+
+                      if (startMinutes >= 1440 || endMinutes <= 360) return null;
+
+                      const width = totalColumns > 1 ? `${(1 / totalColumns) * 95}%` : '95%';
+                      const left = totalColumns > 1 ? `${(columnIndex / totalColumns) * 100 + 2.5}%` : '2.5%';
+
+                      const statusColors = getStatusColor(reservation.status);
+
+                      return (
+                        <div
+                          key={`${reservation.id}-${columnIndex}`}
+                          className={`absolute rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group border-l-4 ${statusColors} hover:scale-[1.02] z-10`}
+                          style={{
+                            top: `${topOffset}px`,
+                            height: `${height}px`,
+                            width,
+                            left,
+                          }}
+                        >
+                          <div className="h-full flex flex-col justify-between">
+                            <div className="min-h-0">
+                              <div className="text-xs font-semibold truncate mb-1 group-hover:text-wrap group-hover:whitespace-normal">
+                                {reservation.title}
+                              </div>
+                              <div className="text-[10px] opacity-80">
+                                {startTime.toLocaleTimeString("fr-FR", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })} - {endTime.toLocaleTimeString("fr-FR", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
+                            </div>
+                            
+                            <div className="flex justify-between items-end mt-1">
+                              <Badge variant="secondary" className="text-[8px] px-1 py-0 bg-white/50">
+                                {reservationStatusEnumTranslated[reservation.status] || reservation.status}
+                              </Badge>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                asChild
+                                title="Modifier"
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+                              >
+                                <Link
+                                  to="/admin/facilities/reservations/$reservationId/edit"
+                                  params={{ reservationId: reservation.id }}
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ))}
+
+                  {/* Ligne indicatrice de l'heure actuelle */}
+                  {isToday && (
+                    (() => {
+                      const now = new Date();
+                      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                      if (currentMinutes >= 360 && currentMinutes < 1440) {
+                        const currentOffset = ((currentMinutes - 360) / 60) * HOUR_HEIGHT;
+                        return (
+                          <div 
+                            className="absolute left-0 right-0 h-0.5 bg-red-500 z-30"
+                            style={{ top: `${currentOffset}px` }}
+                          >
+                            <div className="absolute -left-2 -top-1 w-3 h-3 bg-red-500 rounded-full" />
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+
+  const renderMonthView = () => (
+    <ScrollArea className="h-[500px] border rounded-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-y">
+        {dateGrid.map((cell, idx) => {
+          if (cell.isPlaceholder || !cell.date) {
+            return (
+              <div
+                key={`empty-${referenceDate.toISOString()}-${idx}`}
+                className="flex flex-col min-h-[100px] bg-gray-50 p-2"
+              />
+            );
+          }
+          
+          const d = cell.date;
+          const key = d.toLocaleDateString("fr-FR");
+          const dayReservations = reservationsByDay[key] || [];
+          const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
+          const roomHours = getRoomHoursForDay(d, roomOpeningHours);
+
+          return (
+            <div
+              key={key}
+              className={`flex flex-col min-h-[100px] p-2 ${
+                !isOpen ? 'bg-gray-100' : 'bg-white'
+              }`}
+            >
+              <div className="border-b pb-1 mb-1 text-xs font-semibold flex items-center justify-between">
+                <span className={isOpen ? 'text-muted-foreground' : 'text-red-500'}>
+                  {formatDateShort(d)}
+                </span>
+                {!isOpen && (
+                  <div className="flex items-center gap-1 text-red-500">
+                    <Clock className="w-3 h-3" />
+                    <span className="text-[10px]">Fermé</span>
+                  </div>
+                )}
+                {isOpen && roomHours && (
+                  <div className="text-[10px] text-muted-foreground">
+                    {roomHours.openTime} - {roomHours.closeTime}
+                  </div>
+                )}
+              </div>
+              
+              {dayReservations.length > 0 ? (
+                <div className="space-y-2 overflow-y-auto flex-1 pr-1">
+                  {dayReservations.map((r) => (
+                    <div
+                      key={r.id}
+                      className={`rounded-md p-2 transition-colors flex justify-between items-start ${
+                        isOpen ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-200 opacity-60'
+                      }`}
+                    >
+                      <div className="flex-1 pr-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-gray-800">
+                            {r.title}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[9px] px-1 py-[1px]"
+                          >
+                            {reservationStatusEnumTranslated[r.status] || r.status}
+                          </Badge>
+                        </div>
+                        <div className="mt-1 text-[10px] text-muted-foreground">
+                          {new Date(r.startAt).toLocaleTimeString("fr-FR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          –{" "}
+                          {new Date(r.endAt).toLocaleTimeString("fr-FR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        asChild
+                        title="Modifier"
+                        className="text-gray-400 hover:text-gray-600 mt-1"
+                        disabled={!isOpen}
+                      >
+                        <Link
+                          to="/admin/facilities/reservations/$reservationId/edit"
+                          params={{ reservationId: r.id }}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <span className="text-[11px] text-gray-300 text-center">
+                    {isOpen ? 'Aucune réservation' : '-'}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </ScrollArea>
+  );
+
   return (
     <Card className="space-y-4">
       <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
@@ -202,175 +627,7 @@ export function ReservationList({
           <div className="text-center text-destructive py-12">{error}</div>
         ) : (
           <>
-            {viewMode === "week" ? (
-              <ScrollArea className="h-[300px] border rounded-lg">
-                <div className="grid grid-cols-1 sm:grid-cols-7 divide-x">
-                  {dateGrid.map((cell) => {
-                    if (!cell.date) {
-                      return null;
-                    }
-                    const d = cell.date;
-                    const key = d.toLocaleDateString("fr-FR");
-                    const dayReservations = reservationsByDay[key] || [];
-                    return (
-                      <div
-                        key={key}
-                        className="flex flex-col min-h-[280px] p-2"
-                      >
-                        <div className="border-b pb-1 mb-1 text-center text-xs font-semibold text-muted-foreground">
-                          {formatDateShort(d)}
-                        </div>
-                        <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-                          {dayReservations.length > 0 ? (
-                            dayReservations.map((r) => (
-                              <div
-                                key={r.id}
-                                className="bg-white shadow-sm rounded-md p-2 hover:shadow-lg transition-shadow"
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-gray-800">
-                                    {r.title}
-                                  </span>
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] px-1 py-0"
-                                  >
-                                    {reservationStatusEnumTranslated[r.status] ||
-                                      r.status}
-                                  </Badge>
-                                </div>
-                                <div className="mt-1 text-[11px] text-muted-foreground">
-                                  {new Date(r.startAt).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}{" "}
-                                  –{" "}
-                                  {new Date(r.endAt).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </div>
-                                <div className="mt-1 text-right">
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    asChild
-                                    title="Modifier"
-                                    className="text-gray-400 hover:text-gray-600"
-                                  >
-                                    <Link
-                                      to="/admin/facilities/reservations/$reservationId/edit"
-                                      params={{ reservationId: r.id }}
-                                    >
-                                      <Edit2 className="w-4 h-4" />
-                                    </Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="text-[11px] text-center text-gray-300">
-                              —
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            ) : (
-              <ScrollArea className="h-[500px] border rounded-lg">
-                <div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-y">
-                  {dateGrid.map((cell, idx) => {
-                    if (cell.isPlaceholder || !cell.date) {
-                      return (
-                        <div
-                          key={`empty-${referenceDate.toISOString()}-${idx}`}
-                          className="flex flex-col min-h-[100px] bg-gray-50 p-2"
-                        />
-                      );
-                    }
-                    const d = cell.date;
-                    const key = d.toLocaleDateString("fr-FR");
-                    const dayReservations = reservationsByDay[key] || [];
-                    return (
-                      <div
-                        key={key}
-                        className="flex flex-col min-h-[100px] p-2 bg-white"
-                      >
-                        <div className="border-b pb-1 mb-1 text-xs font-semibold text-muted-foreground">
-                          {formatDateShort(d)}
-                        </div>
-                        {dayReservations.length > 0 ? (
-                          <div className="space-y-2 overflow-y-auto flex-1 pr-1">
-                            {dayReservations.map((r) => (
-                              <div
-                                key={r.id}
-                                className="bg-gray-50 rounded-md p-2 hover:bg-gray-100 transition-colors flex justify-between items-start"
-                              >
-                                <div className="flex-1 pr-2">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-xs font-medium text-gray-800">
-                                      {r.title}
-                                    </span>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-[9px] px-1 py-[1px]"
-                                    >
-                                      {reservationStatusEnumTranslated[
-                                        r.status
-                                      ] || r.status}
-                                    </Badge>
-                                  </div>
-                                  <div className="mt-1 text-[10px] text-muted-foreground">
-                                    {new Date(r.startAt).toLocaleTimeString(
-                                      "fr-FR",
-                                      {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      }
-                                    )}{" "}
-                                    –{" "}
-                                    {new Date(r.endAt).toLocaleTimeString(
-                                      "fr-FR",
-                                      {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      }
-                                    )}
-                                  </div>
-                                </div>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  asChild
-                                  title="Modifier"
-                                  className="text-gray-400 hover:text-gray-600 mt-1"
-                                >
-                                  <Link
-                                    to="/admin/facilities/reservations/$reservationId/edit"
-                                    params={{ reservationId: r.id }}
-                                  >
-                                    <Edit2 className="w-4 h-4" />
-                                  </Link>
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex items-center justify-center">
-                            <span className="text-[11px] text-gray-300 text-center">
-                              Aucune réservation
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            )}
+            {viewMode === "week" ? renderWeekView() : renderMonthView()}
           </>
         )}
       </CardContent>
