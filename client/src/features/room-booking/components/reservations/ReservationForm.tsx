@@ -94,57 +94,57 @@ export function ReservationForm({
 		}
 	}, [isEditing, formMode, form, defaultValues]);
 
-	const onSubmit = async (
-		data: CreateReservationData | UpdateReservationData,
-	) => {
-		setIsSubmitting(true);
-		setGlobalError(null);
+	// const onSubmit = async (
+	// 	data: CreateReservationData | UpdateReservationData,
+	// ) => {
+	// 	setIsSubmitting(true);
+	// 	setGlobalError(null);
 
-		try {
-			let result: Reservation | null = null;
+	// 	try {
+	// 		let result: Reservation | null = null;
 
-			if (isEditing && reservation) {
-				const payload: UpdateReservationData = {
-					title: data.title ?? "",
-					startAt: data.startAt ?? new Date(),
-					endAt: data.endAt ?? new Date(),
-					status: data.status ?? "pending",
-				};
+	// 		if (isEditing && reservation) {
+	// 			const payload: UpdateReservationData = {
+	// 				title: data.title ?? "",
+	// 				startAt: data.startAt ?? new Date(),
+	// 				endAt: data.endAt ?? new Date(),
+	// 				status: data.status ?? "pending",
+	// 			};
 
-				result = await updateReservation(reservation.id, payload);
-			} else {
-				if (!user?.id) {
-					throw new Error("Utilisateur non authentifié");
-				}
+	// 			result = await updateReservation(reservation.id, payload);
+	// 		} else {
+	// 			if (!user?.id) {
+	// 				throw new Error("Utilisateur non authentifié");
+	// 			}
 
-				const payload: CreateReservationData = {
-					title: data.title ?? "",
-					startAt: data.startAt ?? new Date(),
-					endAt: data.endAt ?? new Date(Date.now() + 60 * 60 * 1000), // default +1h
-					roomId,
-					bookerId: user.id,
-					status: data.status ?? "pending",
-				};
+	// 			const payload: CreateReservationData = {
+	// 				title: data.title ?? "",
+	// 				startAt: data.startAt ?? new Date(),
+	// 				endAt: data.endAt ?? new Date(Date.now() + 60 * 60 * 1000), // default +1h
+	// 				roomId,
+	// 				bookerId: user.id,
+	// 				status: data.status ?? "pending",
+	// 			};
 
-				result = await createReservation(payload);
-			}
+	// 			result = await createReservation(payload);
+	// 		}
 
-			if (result) {
-				onSuccess?.(result);
-				if (!isEditing) {
-					form.reset(defaultValues);
-				}
-			}
-		} catch (err) {
-			let message = "Erreur inattendue";
-			if (err instanceof Error) {
-				message = err.message;
-			}
-			setGlobalError(message);
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
+	// 		if (result) {
+	// 			onSuccess?.(result);
+	// 			if (!isEditing) {
+	// 				form.reset(defaultValues);
+	// 			}
+	// 		}
+	// 	} catch (err) {
+	// 		let message = "Erreur inattendue";
+	// 		if (err instanceof Error) {
+	// 			message = err.message;
+	// 		}
+	// 		setGlobalError(message);
+	// 	} finally {
+	// 		setIsSubmitting(false);
+	// 	}
+	// };
 
 	return (
 		<Card className="w-full max-w-2xl mx-auto">
@@ -337,9 +337,9 @@ export function ReservationForm({
 						{/* ACTIONS */}
 						<div className="flex items-center justify-end pt-4 border-t space-x-4">
 							{onCancelLink && (
-								<Button variant="outline" size="sm" asChild>
+								<Button variant="outline" asChild>
 									<Link to={onCancelLink}>
-										<span>Annuler</span>
+										Annuler
 									</Link>
 								</Button>
 							)}

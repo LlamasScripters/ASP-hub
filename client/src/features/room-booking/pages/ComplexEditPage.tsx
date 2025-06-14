@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
 import type { Complex, OpeningHours  } from "@room-booking/hooks/useComplexes";
-import { frenchDays  } from "@room-booking/hooks/useComplexes";
+// import { frenchDays  } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
@@ -48,7 +48,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
       day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
     });
 
-  const { openingHours } = initialComplex;
+	// const { openingHours } = initialComplex;
 
 	return (
 		<div className="space-y-6">
