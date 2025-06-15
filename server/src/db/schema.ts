@@ -149,7 +149,7 @@ export const rooms = pgTable("rooms", {
   sportType: varchar("sport_type", { length: 100 }).notNull(),
   openingHours: jsonb("opening_hours")
     .notNull()
-    .default(JSON.stringify(defaultOpenHours)),
+    .default(defaultOpenHours),
   isIndoor: boolean("is_indoor").notNull().default(true),
   capacity: integer("capacity").notNull().default(0),
   accreditation: varchar("accreditation", { length: 255 }),
