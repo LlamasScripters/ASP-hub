@@ -129,7 +129,7 @@ export const complexes = pgTable("complexes", {
   postalCode: varchar("postal_code", { length: 20 }).notNull(),
   openingHours: jsonb("opening_hours")
     .notNull()
-    .default(JSON.stringify(defaultOpenHours)),
+    .default(defaultOpenHours),
   numberOfElevators: integer("number_of_elevators").notNull().default(0),
   accessibleForReducedMobility: boolean("accessible_for_reduced_mobility")
     .notNull()
