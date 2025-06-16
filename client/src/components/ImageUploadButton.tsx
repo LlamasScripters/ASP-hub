@@ -1,82 +1,96 @@
-import { usersService } from "@/features/users/users.service.js";
 import { cn } from "@/lib/utils";
-import { useMutation } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
-import { useCallback } from "react";
+import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface ImageUploadButtonProps {
-	onImageUpload: (url: string) => void;
-	currentImage?: string | null;
+	currentImage?: string;
 	className?: string;
 	userId: string;
+	onUploadSuccess: (file: File) => void;
+	onUploadError?: (error?: Error) => void;
+	disabled?: boolean;
+	isUploading?: boolean;
+	imgPreviewClassName?: string;
+	isErrorUpload?: boolean;
 }
 
+const defaultRootClassName =
+	"relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors";
+
+const defaultImgPreviewClassName = "w-16 h-16 rounded-full object-cover";
+
 export function ImageUploadButton({
-	onImageUpload,
 	currentImage,
 	className,
-	userId,
+	onUploadSuccess,
+	onUploadError,
+	disabled = false,
+	isUploading = false,
+	isErrorUpload = false,
+	imgPreviewClassName,
 }: ImageUploadButtonProps) {
-	const uploadMutation = useMutation({
-		mutationFn: (file: File) => usersService.uploadUserAvatar(userId, file),
-		onSuccess: (imageUrl) => {
-			onImageUpload(imageUrl);
-		},
-		onError: (error) => {
-			console.error("Error uploading image:", error);
-		},
-	});
+	const [imagePreview, setImagePreview] = useState<string | undefined>();
 
-	const onDrop = useCallback(
-		async (acceptedFiles: File[]) => {
-			const file = acceptedFiles[0];
-			if (!file) return;
+	const rootRef = useRef<HTMLDivElement>(null);
 
-			uploadMutation.mutate(file);
-		},
-		[uploadMutation],
-	);
+	const isDisabled = disabled || isUploading;
 
-	const { getRootProps, getInputProps, isDragActive } = useDropzone({
-		onDrop,
-		onDropAccepted: (acceptedFiles) => {
-			console.log(acceptedFiles);
-		},
-		onDropRejected: (rejectedFiles) => {
-			console.log(rejectedFiles);
-		},
-		accept: {
-			"image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
-		},
-		maxFiles: 1,
-		disabled: uploadMutation.isPending,
-	});
+	const { getRootProps, getInputProps, isDragActive, isFileDialogActive } =
+		useDropzone({
+			onDropAccepted: (acceptedFiles) => {
+				const file = acceptedFiles.at(0);
+				if (!file) return;
+
+				setImagePreview(URL.createObjectURL(file));
+				onUploadSuccess(file);
+			},
+			onDropRejected: () => {
+				onUploadError?.(
+					new Error(
+						"Veuillez sélectionner une image valide (png, jpg, jpeg, gif, webp)",
+					),
+				);
+			},
+			accept: {
+				"image/png": [".png"],
+				"image/jpeg": [".jpg", ".jpeg"],
+				"image/gif": [".gif"],
+				"image/webp": [".webp"],
+			},
+			maxFiles: 1,
+			disabled: isDisabled,
+		});
+
+	const isUploadingImage = isUploading || isFileDialogActive || isDragActive;
 
 	return (
 		<div
-			{...getRootProps()}
-			className={cn(
-				"relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-				isDragActive
-					? "border-primary bg-primary/5"
-					: "border-muted-foreground/25 hover:border-primary/50",
-				className,
-			)}
+			ref={rootRef}
+			{...getRootProps({
+				className: cn(
+					defaultRootClassName,
+					isDragActive
+						? "border-primary bg-primary/5"
+						: "border-muted-foreground/25 hover:border-primary/50",
+					isErrorUpload && "border-destructive hover:border-destructive/50",
+					className,
+				),
+			})}
 		>
 			<input {...getInputProps()} />
 			<div className="flex flex-col items-center justify-center text-center">
-				{currentImage ? (
+				{imagePreview || currentImage ? (
 					<img
-						src={currentImage}
+						src={imagePreview ?? currentImage}
 						alt="Profile preview"
-						className="w-16 h-16 rounded-full object-cover"
+						className={cn(defaultImgPreviewClassName, imgPreviewClassName)}
 					/>
 				) : (
 					<Upload className="w-8 h-8 mb-2 text-muted-foreground" />
 				)}
 				<p className="text-sm text-muted-foreground">
-					{uploadMutation.isPending
+					{isUploadingImage
 						? "Téléchargement..."
 						: isDragActive
 							? "Déposez l'image ici..."

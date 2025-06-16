@@ -5,23 +5,12 @@ import {
 	SidebarGroup,
 	SidebarHeader,
 	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
-import {
-	Calendar,
-	Home,
-	type LucideIconComponent,
-	Settings,
-	Shield,
-	Users,
-} from "lucide-react";
+import { Calendar, Home, Settings, Shield, Users } from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
 import type { NavItemProps } from "./NavItem";
-import NavItem from "./NavItem";
 import NavItems from "./NavItems";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
 
@@ -77,10 +66,8 @@ const navigationItems: NavItemProps[] = [
 export function UserSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const location = useLocation().pathname;
-
 	return (
-		<Sidebar collapsible="IconComponent" {...props}>
+		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
 				<SidebarHeaderContent siteName="ASP Hub" />
 			</SidebarHeader>

@@ -8,6 +8,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
 import { z } from "zod/v4";
+import { usersConfig } from "./users.config.js";
 
 const usersRouter = Router();
 
@@ -73,8 +74,6 @@ usersRouter.get("/:userId/avatar", async (req, res) => {
 	);
 
 	const contentType = image.ContentType as string;
-	console.log(image.ContentType);
-	console.log(image.ContentLength);
 	const body = await image.Body?.transformToByteArray();
 
 	res.setHeader("Content-Type", contentType);
@@ -111,7 +110,12 @@ usersRouter.post(
 		next();
 		return;
 	},
-	upload.single("image"),
+	(req, res, next) => {
+		return upload({
+			key: `users/${req.params.userId}`,
+			validMimeTypes: usersConfig.userAvatarMimeTypes,
+		}).single("image")(req, res, next);
+	},
 	async (req, res) => {
 		const image = req.file as Express.MulterS3.File | undefined;
 
@@ -120,7 +124,11 @@ usersRouter.post(
 			return;
 		}
 
-		res.status(200).json({ image: `/api/users/${req.params.userId}/avatar` });
+		const now = Date.now();
+		// add a timestamp to the image url to avoid caching (aka cache busting)
+		const imageUrl = `/api/users/${req.params.userId}/avatar?t=${now}`;
+
+		res.status(201).json({ image: imageUrl, imageUrl });
 		return;
 	},
 );

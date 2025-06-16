@@ -12,31 +12,26 @@ services:
   client:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm run dev -- --host"
+    command: sh -c "npm install && npm run dev -- --host"
     expose:
       - 5173
     volumes:
       - ./client:/app
-      - ./client/node_modules:/app/node_modules:ro
-      - ./client/node_modules/.vite:/app/node_modules/.vite
-      - ./client/node_modules/.vite-temp:/app/node_modules/.vite-temp
     environment:
       - NODE_ENV=development
     
   server:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm run dev"
+    command: sh -c "npm install && npm run dev"
     expose:
       - 3000
     volumes:
       - ./server:/app
-      - ./server/node_modules:/app/node_modules:ro
     env_file:
       - ./server/.env
     depends_on:
       - postgres
-      # - mongo
       - minio
 
   minio:
@@ -51,11 +46,11 @@ services:
       - MINIO_ROOT_USER=admin # access key id
       - MINIO_ROOT_PASSWORD=password # secret access key
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: [ "CMD", "mc", "ready", "local" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    
+
   postgres:
     image: postgres:17.5-alpine
     ports:
@@ -66,19 +61,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=asp_db
-    
-  # mongo:
-  #   image: mongo:8.0.9
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   environment:
-  #     - MONGO_INITDB_ROOT_USERNAME=root
-  #     - MONGO_INITDB_ROOT_PASSWORD=password
-  #     - MONGO_INITDB_DATABASE=asp_mongo
+
 
 volumes:
-  mongo-data:
   postgres-data:
   minio-data:
