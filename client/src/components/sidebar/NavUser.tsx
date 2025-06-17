@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	Bell,
-	ChevronsUpDown,
-	CreditCard,
-	LogOut,
-	UserIcon,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, UserIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,15 +18,19 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth/auth-client";
-import { Link, useLoaderData, useNavigate } from "@tanstack/react-router";
+import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
+import { type UserLoggedIn, authClient } from "@/lib/auth/auth-client";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 
-export function NavUser() {
+function NavUserContent({ user }: { user: UserLoggedIn }) {
 	const { isMobile } = useSidebar();
-	const { user } = useLoaderData({ from: "/_authenticated" });
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
 	const handleLogout = async () => {
+		queryClient.removeQueries(getLoggedInUserQueryOptions());
 		await authClient.signOut({
 			fetchOptions: {
 				onSuccess: () => {
@@ -41,7 +39,6 @@ export function NavUser() {
 			},
 		});
 	};
-
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -107,4 +104,10 @@ export function NavUser() {
 			</SidebarMenuItem>
 		</SidebarMenu>
 	);
+}
+
+export function NavUser() {
+	const { user } = AuthenticatedRoute.useLoaderData();
+
+	return <NavUserContent user={user} />;
 }

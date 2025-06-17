@@ -16,14 +16,14 @@ export const sessionTypeEnum = pgEnum("session_type", [
 	"match",
 	"stage",
 	"competition",
-	"autre"
+	"autre",
 ]);
 
 export const sessionStatusEnum = pgEnum("session_status", [
 	"planifie",
-	"en_cours", 
+	"en_cours",
 	"termine",
-	"annule"
+	"annule",
 ]);
 
 export const users = pgTable("users", {
@@ -231,10 +231,12 @@ export const sessionsSport = pgTable("sessions_sport", {
 	maxParticipants: integer("max_participants"),
 	currentParticipants: integer("current_participants").default(0),
 	notes: text("notes"),
-	coachId: uuid("coach_id")
-		.references(() => users.id, { onDelete: "set null" }),
-	responsibleId: uuid("responsible_id")
-		.references(() => users.id, { onDelete: "set null" }),
+	coachId: uuid("coach_id").references(() => users.id, {
+		onDelete: "set null",
+	}),
+	responsibleId: uuid("responsible_id").references(() => users.id, {
+		onDelete: "set null",
+	}),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => new Date())
@@ -261,10 +263,12 @@ export const sectionResponsibilities = pgTable("section_responsibilities", {
 	userId: uuid("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
-	sectionId: uuid("section_id")
-		.references(() => sections.id, { onDelete: "cascade" }),
-	categoryId: uuid("category_id")
-		.references(() => categories.id, { onDelete: "cascade" }),
+	sectionId: uuid("section_id").references(() => sections.id, {
+		onDelete: "cascade",
+	}),
+	categoryId: uuid("category_id").references(() => categories.id, {
+		onDelete: "cascade",
+	}),
 	role: varchar("role", { length: 100 }).notNull(),
 	assignedAt: timestamp("assigned_at").defaultNow().notNull(),
 	isActive: boolean("is_active").notNull().default(true),
@@ -309,5 +313,7 @@ export type InsertSessionSport = typeof sessionsSport.$inferInsert;
 export type SelectSessionSport = typeof sessionsSport.$inferSelect;
 export type InsertSessionParticipant = typeof sessionParticipants.$inferInsert;
 export type SelectSessionParticipant = typeof sessionParticipants.$inferSelect;
-export type InsertSectionResponsibility = typeof sectionResponsibilities.$inferInsert;
-export type SelectSectionResponsibility = typeof sectionResponsibilities.$inferSelect;
+export type InsertSectionResponsibility =
+	typeof sectionResponsibilities.$inferInsert;
+export type SelectSectionResponsibility =
+	typeof sectionResponsibilities.$inferSelect;

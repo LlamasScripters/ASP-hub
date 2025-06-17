@@ -10,45 +10,45 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
-import { Building2, HomeIcon, type LucideIcon, Shield, UsersIcon } from "lucide-react";
+import {
+	Building2,
+	HomeIcon,
+	type LucideIcon,
+	Shield,
+	UsersIcon,
+} from "lucide-react";
 import type * as React from "react";
+import NavItem, { type NavItemProps } from "./NavItem";
+import NavItems from "./NavItems";
 import { NavUser } from "./NavUser";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
 
-type NavAdminContentItem = {
-	url: LinkProps["to"];
-	title: string;
-	icon: LucideIcon;
-};
-
-const navigationItems: NavAdminContentItem[] = [
+const navigationItems: NavItemProps[] = [
 	{
 		url: "/admin",
 		title: "Accueil",
-		icon: HomeIcon,
+		IconComponent: HomeIcon,
 	},
 	{
 		url: "/admin/users",
 		title: "Utilisateurs",
-		icon: UsersIcon,
+		IconComponent: UsersIcon,
 	},
 	{
 		url: "/admin/facilities/complexes",
 		title: "Complexes",
-		icon: Building2,
+		IconComponent: Building2,
 	},
 	{
 		url: "/admin/dashboard/clubs",
 		title: "Clubs",
-		icon: Shield
-	}
+		IconComponent: Shield,
+	},
 ];
 
 export function AdminSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const location = useLocation().pathname;
-
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
@@ -57,16 +57,7 @@ export function AdminSidebar({
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarMenu>
-						{navigationItems.map((item) => (
-							<SidebarMenuItem key={item.title}>
-								<SidebarMenuButton asChild isActive={location === item.url}>
-									<Link to={item.url}>
-										<item.icon />
-										<span>{item.title}</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						))}
+						<NavItems items={navigationItems} />
 					</SidebarMenu>
 				</SidebarGroup>
 			</SidebarContent>

@@ -7,14 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
 	Form,
 	FormControl,
@@ -30,30 +23,24 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { RoleBadge } from "@/features/admin/components/RoleBadge";
+import UserCreateForm from "@/features/admin/users/components/UserCreateForm";
+import UserResetPasswordForm from "@/features/admin/users/components/UserResetPasswordForm";
+import UsersListSkeleton from "@/features/admin/users/components/UsersListSkeleton";
+import UsersTableList from "@/features/admin/users/components/UsersTableList";
+
 import {
 	type UserLoggedIn,
 	authClient,
 	getAuthErrorMessage,
 } from "@/lib/auth/auth-client";
-import type { AppRole } from "@/lib/auth/auth-config";
+
 import { queryClient } from "@/lib/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { DialogProps } from "@radix-ui/react-dialog";
 import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -89,12 +76,14 @@ const searchParamsSchema = z.object({
 	search: z.string().optional(),
 	limit: z.number().optional(),
 	offset: z.number().optional(),
+	action: z.enum(["create", "role", "reset-password", "delete"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/users")({
-	component: UsersList,
+	component: UsersListPage,
 	validateSearch: zodValidator(searchParamsSchema),
-	loaderDeps: ({ search }) => ({ search }),
+	// avoid reloading the page when the action search param changes
+	loaderDeps: ({ search: { action, ...search } }) => ({ search }),
 	loader: ({ deps: { search } }) => {
 		queryClient.prefetchQuery(listUsersQueryOptions(search));
 	},
@@ -107,11 +96,11 @@ const updateRoleFormSchema = z.object({
 
 type UpdateRoleFormValues = z.infer<typeof updateRoleFormSchema>;
 
-function RoleEditDialog({
+function UserRoleEditDialog({
 	user,
 	...dialogProps
 }: { user: UserLoggedIn } & DialogProps) {
-	const searchParams = Route.useSearch();
+	const { action, ...searchParams } = Route.useSearch();
 	const { onOpenChange } = dialogProps;
 	const form = useForm({
 		resolver: zodResolver(updateRoleFormSchema),
@@ -228,54 +217,170 @@ function RoleEditDialog({
 	);
 }
 
-function UsersListSkeleton() {
+function UserCreateDialog(props: DialogProps) {
+	const { action, ...searchParams } = Route.useSearch();
 	return (
-		<div className="space-y-4">
-			<div className="flex justify-between items-center">
-				<h2 className="text-lg font-semibold">Liste des utilisateurs</h2>
-			</div>
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Nom</TableHead>
-						<TableHead>Prénom</TableHead>
-						<TableHead>Email</TableHead>
-						<TableHead>Rôle</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((key) => {
-						return (
-							<TableRow key={key}>
-								<TableCell>
-									<Skeleton className="size-10" />
-								</TableCell>
-								<TableCell>
-									<Skeleton className="size-10" />
-								</TableCell>
-								<TableCell>
-									<Skeleton className="size-10" />
-								</TableCell>
-								<TableCell>
-									<Skeleton className="size-10" />
-								</TableCell>
-							</TableRow>
+		<Dialog {...props}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Créer un utilisateur</DialogTitle>
+					<DialogDescription>Créer un nouvel utilisateur</DialogDescription>
+				</DialogHeader>
+				<UserCreateForm
+					onSuccess={(user) => {
+						queryClient.setQueryData(
+							listUsersQueryOptions(searchParams).queryKey,
+							(old) => {
+								if (!old) return old;
+								const newUsers = [...old.users, user];
+								const newTotal = newUsers.length;
+								return {
+									total: newTotal,
+									users: newUsers,
+								};
+							},
 						);
-					})}
-				</TableBody>
-			</Table>
-		</div>
+						toast.success("Utilisateur créé avec succès", {
+							description: `L'utilisateur ${user.name} a été créé avec succès`,
+						});
+					}}
+					onError={(err) => {
+						toast.error("Erreur lors de la création de l'utilisateur", {
+							description: err.message,
+						});
+					}}
+				/>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
-export default function UsersList() {
+function UserResetPasswordDialog({
+	user,
+	...dialogProps
+}: { user: UserLoggedIn } & DialogProps) {
+	return (
+		<Dialog {...dialogProps}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+					<DialogDescription>
+						Réinitialiser le mot de passe de l'utilisateur{" "}
+						<span className="font-bold">{user.name}</span>
+					</DialogDescription>
+				</DialogHeader>
+				<UserResetPasswordForm
+					user={user}
+					onSuccess={() => {
+						toast.success("Mot de passe réinitialisé avec succès", {
+							description: `Le mot de passe de l'utilisateur ${user.name} a été réinitialisé avec succès`,
+						});
+					}}
+					onError={(err) => {
+						toast.error("Erreur lors de la réinitialisation du mot de passe", {
+							description: err.message,
+						});
+					}}
+				/>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function UserDeleteDialog({
+	user,
+	onConfirm,
+	onCancel,
+	...dialogProps
+}: {
+	user: UserLoggedIn;
+	onConfirm: () => void;
+	onCancel: () => void;
+} & DialogProps) {
+	return (
+		<Dialog {...dialogProps}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer l'utilisateur</DialogTitle>
+				</DialogHeader>
+				<DialogDescription>
+					Supprimer l'utilisateur {user.name} ({user.email})
+				</DialogDescription>
+				<DialogFooter>
+					<div className="flex gap-2">
+						<Button variant="outline" onClick={onCancel}>
+							Annuler
+						</Button>
+						<Button variant="destructive" onClick={onConfirm}>
+							Supprimer
+						</Button>
+					</div>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function UsersListPage() {
 	const searchParams = Route.useSearch();
+	const navigate = useNavigate({ from: Route.fullPath });
+	const location = useLocation();
+
+	const selectedUser =
+		"selectedUser" in location.state
+			? (location.state.selectedUser as UserLoggedIn | null)
+			: null;
 
 	const { data, isPending } = useQuery(listUsersQueryOptions(searchParams));
+	const deleteUserMutation = useMutation({
+		mutationFn: async (user: UserLoggedIn) => {
+			const { data, error } = await authClient.admin.removeUser({
+				userId: user.id,
+			});
 
-	const [selectedUser, setSelectedUser] = useState<UserLoggedIn | null>(null);
-	const isRoleEditDialogOpen = !!selectedUser;
+			if (error?.code) {
+				throw new Error(getAuthErrorMessage(error.code));
+			}
+
+			if (!data?.success) {
+				throw new Error("Erreur lors de la suppression de l'utilisateur");
+			}
+
+			return true;
+		},
+		onSuccess: () => {
+			toast.success("Utilisateur supprimé avec succès", {
+				description: `L'utilisateur ${selectedUser?.name} a été supprimé avec succès`,
+			});
+			queryClient.setQueryData(
+				listUsersQueryOptions(searchParams).queryKey,
+				(old) => {
+					if (!old) return old;
+					const newUsers = old.users.filter(
+						(user) => user.id !== selectedUser?.id,
+					);
+					const newTotal = newUsers.length;
+					return {
+						total: newTotal,
+						users: newUsers,
+					};
+				},
+			);
+			navigate({
+				search: (prev) => ({
+					...prev,
+					action: undefined,
+				}),
+			});
+		},
+		onError: (err) => {
+			toast.error("Erreur lors de la suppression de l'utilisateur", {
+				description: err.message,
+			});
+		},
+	});
+
+	const action = searchParams.action;
 
 	if (isPending) {
 		return <UsersListSkeleton />;
@@ -287,6 +392,58 @@ export default function UsersList() {
 
 	const { total, users } = data;
 
+	const handleUserRoleEdit = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "role",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleUserResetPassword = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "reset-password",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleUserDelete = (user: UserLoggedIn) => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: "delete",
+			}),
+			state: {
+				//@ts-ignore Unsafe but we know the type of the state
+				selectedUser: user,
+			},
+			mask: { to: "." },
+		});
+	};
+
+	const handleDialogClose = () => {
+		navigate({
+			search: (prev) => ({
+				...prev,
+				action: undefined,
+			}),
+			state: undefined,
+		});
+	};
+
 	return (
 		<div className="space-y-4">
 			<div className="flex justify-between items-center">
@@ -294,65 +451,53 @@ export default function UsersList() {
 					Liste des utilisateurs ({total})
 				</h2>
 				<Button asChild>
-					<Link to="/admin/users/create">Créer un utilisateur</Link>
+					<Link
+						to="."
+						search={(prev) => ({ ...prev, action: "create" })}
+						mask={{ to: "." }}
+					>
+						Créer un utilisateur
+					</Link>
 				</Button>
 			</div>
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Nom</TableHead>
-						<TableHead>Prénom</TableHead>
-						<TableHead>Email</TableHead>
-						<TableHead>Rôle</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{users.map((user) => {
-						const { firstName, lastName } = user;
-						return (
-							<TableRow key={user.id}>
-								<TableCell>{lastName}</TableCell>
-								<TableCell>{firstName}</TableCell>
-								<TableCell>{user.email}</TableCell>
-								<TableCell>
-									<RoleBadge role={user.role as AppRole} />
-								</TableCell>
-								<TableCell>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" size="icon">
-												<span className="sr-only">Ouvrir le menu</span>⋮
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuLabel>Actions</DropdownMenuLabel>
-											<DropdownMenuItem
-												onClick={() => {
-													setSelectedUser(user);
-												}}
-											>
-												Modifier le rôle
-											</DropdownMenuItem>
-											<DropdownMenuSeparator />
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</TableCell>
-							</TableRow>
-						);
-					})}
-				</TableBody>
-			</Table>
+
+			<UsersTableList
+				users={users}
+				onUserRoleEdit={handleUserRoleEdit}
+				onUserResetPassword={handleUserResetPassword}
+				onUserDelete={handleUserDelete}
+			/>
+
 			{selectedUser && (
-				<RoleEditDialog
-					open={isRoleEditDialogOpen}
-					onOpenChange={(open) => {
-						if (!open) {
-							setSelectedUser(null);
-						}
-					}}
+				<>
+					<UserRoleEditDialog
+						open={action === "role"}
+						onOpenChange={handleDialogClose}
+						user={selectedUser}
+					/>
+					<UserResetPasswordDialog
+						open={action === "reset-password"}
+						onOpenChange={handleDialogClose}
+						user={selectedUser}
+					/>
+				</>
+			)}
+
+			<UserCreateDialog
+				open={action === "create"}
+				onOpenChange={handleDialogClose}
+			/>
+
+			{selectedUser && (
+				<UserDeleteDialog
+					open={action === "delete"}
+					onOpenChange={handleDialogClose}
 					user={selectedUser}
-					key={selectedUser?.id} // if key changes, the dialog state is reset
+					onConfirm={() => {
+						deleteUserMutation.mutate(selectedUser);
+						handleDialogClose();
+					}}
+					onCancel={handleDialogClose}
 				/>
 			)}
 		</div>

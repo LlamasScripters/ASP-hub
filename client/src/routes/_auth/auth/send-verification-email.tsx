@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/auth/send-verification-email")({
+export const Route = createFileRoute("/_auth/auth/send-verification-email")({
 	component: RouteComponent,
 });
 

@@ -8,7 +8,9 @@ import { sendConfirmationEmail, sendResetPasswordEmail } from "./email.js";
 import { checkPasswordStrength } from "./password.js";
 
 const SESSION_DURATION = 5 * 60;
-const MIN_PASSWORD_LENGTH = 12;
+export const authConfig = {
+	MIN_PASSWORD_LENGTH: 12,
+} as const;
 
 export const auth = betterAuth({
 	appName: "ASP Hub",
@@ -18,6 +20,13 @@ export const auth = betterAuth({
 		schema,
 	}),
 	trustedOrigins: [process.env.CLIENT_URL],
+	account: {
+		accountLinking: {
+			enabled: true,
+			trustedProviders: ["google", "email-password"],
+			allowDifferentEmails: false,
+		},
+	},
 	user: {
 		additionalFields: {
 			acceptTerms: {
@@ -52,7 +61,7 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
-		minPasswordLength: MIN_PASSWORD_LENGTH,
+		minPasswordLength: authConfig.MIN_PASSWORD_LENGTH,
 		sendResetPassword: async ({ user, url, token }) => {
 			await sendResetPasswordEmail(
 				{

@@ -2,93 +2,81 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
+	SidebarGroup,
 	SidebarHeader,
-	SidebarMenuButton,
-	SidebarMenuItem,
+	SidebarMenu,
 	SidebarRail,
 } from "@/components/ui/sidebar";
+import { Calendar, Home, Settings, Shield, Users } from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
+import type { NavItemProps } from "./NavItem";
+import NavItems from "./NavItems";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
-import { Home, Users, Calendar, Shield, Settings, type LucideIcon } from "lucide-react";
-import { Link, useLocation, type LinkProps } from "@tanstack/react-router";
 
-type NavMainItem = {
-	title: string;
-	url: LinkProps["to"];
-	icon: LucideIcon;
-};
-
-const navigationItems: NavMainItem[] = [
+const navigationItems: NavItemProps[] = [
 	{
 		url: "/dashboard",
 		title: "Tableau de bord",
-		icon: Home,
+		IconComponent: Home,
 	},
 	{
 		url: "/dashboard/members",
 		title: "Adhérents",
-		icon: Users,
+		IconComponent: Users,
 	},
 	{
 		url: "/dashboard/activities",
 		title: "Activités",
-		icon: Calendar,
+		IconComponent: Calendar,
 	},
 	{
 		url: "/dashboard/social",
 		title: "Projets sociaux",
-		icon: Shield,
+		IconComponent: Shield,
 	},
 	// {
 	// 	url: "/dashboard/finances",
 	// 	title: "Finances",
-	// 	icon: CreditCard,
+	// 	IconComponent: CreditCard,
 	// },
 	// {
 	// 	url: "/dashboard/reports",
 	// 	title: "Rapports",
-	// 	icon: FileText,
+	// 	IconComponent: FileText,
 	// },
 	// {
 	// 	url: "/dashboard/statistics",
 	// 	title: "Statistiques",
-	// 	icon: BarChart3,
+	// 	IconComponent: BarChart3,
 	// },
 	// {
 	// 	url: "/dashboard/",
 	// 	title: "Messages",
-	// 	icon: MessageSquare,
+	// 	IconComponent: MessageSquare,
 	// },
 
 	{
 		url: "/user/settings",
 		title: "Paramètres",
-		icon: Settings,
+		IconComponent: Settings,
 	},
 ];
 
 export function UserSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const location = useLocation().pathname;
-
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
 				<SidebarHeaderContent siteName="ASP Hub" />
 			</SidebarHeader>
 			<SidebarContent>
-			{navigationItems.map((item) => (
-							<SidebarMenuItem key={item.title}>
-								<SidebarMenuButton asChild isActive={location === item.url}>
-									<Link to={item.url}>
-										<item.icon />
-										<span>{item.title}</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						))}
+				<SidebarGroup>
+					<SidebarMenu>
+						<NavItems items={navigationItems} />
+					</SidebarMenu>
+				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser />

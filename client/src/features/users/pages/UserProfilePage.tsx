@@ -11,7 +11,7 @@ import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 import { Link } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
 import { Calendar, Edit, Mail, User as UserIcon } from "lucide-react";
-import UserAccountsCard from "../components/UserAccountsCard";
+import UserAccounts from "../components/UserAccounts";
 
 export default function UserProfilePage() {
 	const { user } = AuthenticatedRoute.useLoaderData();
@@ -73,7 +73,7 @@ export default function UserProfilePage() {
 				</CardContent>
 			</Card>
 
-			<UserAccountsCard user={user} />
+			<UserAccounts user={user} />
 		</div>
 	);
 }

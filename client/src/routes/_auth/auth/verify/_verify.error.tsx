@@ -1,7 +1,7 @@
 import VerifyEmailErrorPage from "@/features/auth/verify-email/VerifyEmailErrorPage";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/auth/verify/_verify/error")({
+export const Route = createFileRoute("/_auth/auth/verify/_verify/error")({
 	component: RouteComponent,
 });
 

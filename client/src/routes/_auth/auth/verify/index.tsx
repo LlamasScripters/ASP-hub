@@ -10,7 +10,7 @@ const searchSchema = z
 	})
 	.strict();
 
-export const Route = createFileRoute("/auth/verify/")({
+export const Route = createFileRoute("/_auth/auth/verify/")({
 	loaderDeps: ({ search }) => ({ search }),
 	loader: async ({ deps: { search } }) => {
 		const { error } = await authClient.verifyEmail({

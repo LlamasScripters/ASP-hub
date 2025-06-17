@@ -1,16 +1,11 @@
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 import { Separator } from "@/components/ui/separator";
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/auth-client";
 import ForbiddenPage from "@/routes/-403";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/admin/_admin")({
-	component: AdminLayout,
 	loader: async () => {
 		const { data } = await authClient.admin.hasPermission({
 			permissions: {
@@ -26,12 +21,13 @@ export const Route = createFileRoute("/_authenticated/admin/_admin")({
 
 		return data;
 	},
+	component: AdminLayout,
 	errorComponent: ForbiddenPage,
 });
 
 function AdminLayout() {
 	return (
-		<SidebarProvider>
+		<>
 			<AdminSidebar />
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -43,6 +39,6 @@ function AdminLayout() {
 					<Outlet />
 				</main>
 			</SidebarInset>
-		</SidebarProvider>
+		</>
 	);
 }

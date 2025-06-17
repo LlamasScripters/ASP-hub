@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +26,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function LoginForm() {
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -46,7 +47,7 @@ export function LoginForm() {
 				},
 				{
 					onSuccess: () => {
-						navigate({ to: "/dashboard" });
+						navigate({ to: location.search.redirect ?? "/dashboard" });
 					},
 				},
 			);

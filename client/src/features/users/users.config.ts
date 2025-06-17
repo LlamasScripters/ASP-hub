@@ -15,6 +15,7 @@ export const getLoggedInUserQueryOptions = ({
 			const { data } = await authClient.getSession({
 				fetchOptions: { signal },
 			});
+
 			return data?.user ?? null;
 		},
 		staleTime: authConfig.sessionDuration,

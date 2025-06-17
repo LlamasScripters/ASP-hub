@@ -73,8 +73,6 @@ export function getAuthErrorMessage(code: string) {
 
 export const authClient = createAuthClient({
 	plugins: [
-		twoFactorClient(),
-		adminClient(),
 		inferAdditionalFields({
 			user: {
 				acceptTerms: {
@@ -88,12 +86,15 @@ export const authClient = createAuthClient({
 				},
 				dateOfBirth: {
 					type: "date",
+					required: false,
 				},
 				deletedAt: {
 					type: "date",
 				},
 			},
 		}),
+		twoFactorClient(),
+		adminClient(),
 	],
 });
 

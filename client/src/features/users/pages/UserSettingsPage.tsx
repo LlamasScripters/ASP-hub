@@ -13,7 +13,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { UserPasswordAskResetForm } from "../components/UserPasswordAskResetForm";
 import { UserPasswordUpdateForm } from "../components/UserPasswordUpdateForm";
-import UserSettingsUpdateForm from "../components/UserSettingsUpdateForm";
+import UserUpdateForm from "../components/UserUpdateForm";
 
 export default function UserSettingsPage() {
 	const { user } = AuthenticatedRoute.useLoaderData();
@@ -46,7 +46,7 @@ export default function UserSettingsPage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<UserSettingsUpdateForm user={user} />
+					<UserUpdateForm user={user} />
 				</CardContent>
 			</Card>
 

@@ -1,14 +1,17 @@
-import type { z } from "zod";
+import { z } from "zod/v4";
 
-export function formatZodError(error: z.ZodError): Record<string, string> {
-	const errors = error.issues.reduce(
-		(acc, err) => {
-			const path = err.path.join(".");
-			acc[path] = err.message;
-			return acc;
-		},
-		{} as Record<string, string>,
-	);
+type FormattedZodError = {
+	root?: string;
+} & {
+	[key: string]: string | FormattedZodError;
+};
+
+export function formatZodError(error: z.ZodError): FormattedZodError {
+	const errors = error.issues.reduce((acc, err) => {
+		const path = err.path.length > 0 ? z.core.toDotPath(err.path) : "root";
+		acc[path] = err.message;
+		return acc;
+	}, {} as FormattedZodError);
 
 	return errors;
 }

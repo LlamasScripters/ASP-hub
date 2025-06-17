@@ -1,7 +1,7 @@
 import VerifyEmailLayout from "@/features/auth/verify-email/VerifyEmailLayout";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/auth/verify/_verify")({
+export const Route = createFileRoute("/_auth/auth/verify/_verify")({
 	component: RouteComponent,
 });
 
