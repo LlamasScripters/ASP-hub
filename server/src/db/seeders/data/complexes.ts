@@ -1,402 +1,55 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { complexes, type InsertComplex, type SelectComplex } from "../../schema.js";
+import { STANDARD_HOURS, AQUATIC_HOURS, STADIUM_HOURS, EXTENDED_HOURS, type WeekSchedule } from "../utils/openingHours.js";
 
-const complexesData: InsertComplex[] = [
-  {
-    name: "Complexe Sportif Jean Bouin",
-    description: "Grand complexe sportif avec installations multiples pour tous les sports",
-    street: "Avenue Pierre de Coubertin",
-    city: "Pierrefitte-sur-Seine",
-    postalCode: "93380",
-    numberOfElevators: 2,
-    accessibleForReducedMobility: true,
-    parkingCapacity: 150,
-    openingHours: {
-      monday: { open: "07:00", close: "22:00", closed: false },
-      tuesday: { open: "07:00", close: "22:00", closed: false },
-      wednesday: { open: "07:00", close: "22:00", closed: false },
-      thursday: { open: "07:00", close: "22:00", closed: false },
-      friday: { open: "07:00", close: "20:00", closed: false },
-      saturday: { open: "09:00", close: "18:00", closed: false },
-      sunday: { open: "09:00", close: "17:00", closed: false },
-    }
-  },
-  {
-    name: "Centre Aquatique de Lyon",
-    description: "Centre aquatique moderne avec piscines olympiques",
-    street: "Rue de la Piscine",
-    city: "Pierrefitte-sur-Seine",
-    postalCode: "93380",
-    numberOfElevators: 3,
-    accessibleForReducedMobility: true,
-    parkingCapacity: 200,
-    openingHours: {
-      monday: { open: "06:00", close: "21:00", closed: false },
-      tuesday: { open: "06:00", close: "21:00", closed: false },
-      wednesday: { open: "06:00", close: "21:00", closed: false },
-      thursday: { open: "06:00", close: "21:00", closed: false },
-      friday: { open: "06:00", close: "19:00", closed: false },
-      saturday: { open: "08:00", close: "19:00", closed: false },
-      sunday: { open: null, close: null, closed: true },
-    }
-  },
-  {
-    name: "Stade Municipal de Marseille",
-    description: "Stade avec terrains de football et d'athlétisme",
-    street: "Boulevard du Stade",
+const createComplex = (name: string, street: string, description: string, openingHours: WeekSchedule): InsertComplex => ({
+    name,
+    description,
+    street,
     city: "Pierrefitte-sur-Seine",
     postalCode: "93380",
     numberOfElevators: 1,
-    accessibleForReducedMobility: false,
-    parkingCapacity: 80,
-    openingHours: {
-        monday: { open: "08:00", close: "20:00", closed: false },
-        tuesday: { open: "08:00", close: "20:00", closed: false },
-        wednesday: { open: "08:00", close: "20:00", closed: false },
-        thursday: { open: "08:00", close: "20:00", closed: false },
-        friday: { open: "08:00", close: "18:00", closed: false },
-        saturday: { open: "09:00", close: "17:00", closed: false },
-        sunday: { open: null, close: null, closed: true },
-    }
-  },
-    {
-        name: "Gymnase Pierre de Coubertin",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue du Gymnase",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-        monday: { open: "07:30", close: "22:00", closed: false },
-        tuesday: { open: "07:30", close: "22:00", closed: false },
-        wednesday: { open: "07:30", close: "22:00", closed: false },
-        thursday: { open: "07:30", close: "22:00", closed: false },
-        friday: { open: "07:30", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Oliver Twist",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Rue Oliver Twist",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Didierot",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Rue Didierot",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Charles de Gaulle",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue Charles de Gaulle",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Jiolle",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue du Gymnase Jiolle",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Magassa",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue du Gymnase Magassa",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Molière",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Rue Molière",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Mohamed Ali",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Boulevard Mohamed Ali",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase fiorentino",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue du Gymnase fiorentino",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Complexe Sportif Lionel Messi",
-        description: "Complexe sportif moderne avec terrains de football et gymnase",
-        street: "Avenue Lionel Messi",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Centre Sportif Lebron James",
-        description: "Centre sportif polyvalent avec terrains de basket et gymnase",
-        street: "Avenue Lebron James",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Palais des Sports Ronaldo Nazario",
-        description: "Palais des sports avec terrains de football et gymnase",
-        street: "Boulevard Ronaldo Nazario",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Palais des Sports Serena Williams",
-        description: "Palais des sports avec terrains de tennis et gymnase",
-        street: "Boulevard Serena Williams",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Arenes Sportives Khamzat Chimaev",
-        description: "Arenes sportives avec terrains de combat et gymnase",
-        street: "Avenue Khamzat Chimaev",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Arenes Sportives Georges St-Pierre",
-        description: "Arenes sportives avec terrains de combat et gymnase",
-        street: "Avenue Georges St-Pierre",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Teddy Riner",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue Teddy Riner",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    },
-    {
-        name: "Gymnase Naomi Osaka",
-        description: "Gymnase polyvalent pour sports collectifs et individuels",
-        street: "Avenue Naomi Osaka",
-        city: "Pierrefitte-sur-Seine",
-        postalCode: "93380",
-        numberOfElevators: 1,
-        accessibleForReducedMobility: true,
-        parkingCapacity: 50,
-        openingHours: {
-            monday: { open: "07:30", close: "22:00", closed: false },
-            tuesday: { open: "07:30", close: "22:00", closed: false },
-            wednesday: { open: "07:30", close: "22:00", closed: false },
-            thursday: { open: "07:30", close: "22:00", closed: false },
-            friday: { open: "07:30", close: "20:00", closed: false },
-            saturday: { open: "09:00", close: "18:00", closed: false },
-            sunday: { open: null, close: null, closed: true },
-        }
-    }
+    accessibleForReducedMobility: true,
+    parkingCapacity: 10,
+    openingHours,
+});
+
+const complexesData: InsertComplex[] = [
+    createComplex("Complexe Sportif Pierre de Coubertin", "1 Avenue Pierre de Coubertin", "Complexe sportif polyvalent avec gymnase, piscine et terrains de sport", STANDARD_HOURS),
+    createComplex("Centre Aquatique de Lyon", "10 Rue des Nageurs", "Centre aquatique moderne avec piscine olympique et bassins d'apprentissage", AQUATIC_HOURS),
+    createComplex("Stade Municipal de Pierrefitte", "5 Rue du Stade", "Stade municipal avec terrain de football, piste d'athlétisme et tribunes", STADIUM_HOURS),
+    createComplex("Centre Sportif de la Plaine", "15 Avenue des Sports", "Centre sportif avec terrains de tennis, salle de sport et espace bien-être", EXTENDED_HOURS),
+    createComplex("Complexe Sportif de la Gare", "20 Rue de la Gare", "Complexe sportif avec gymnase, terrains de basket et salle de danse", STANDARD_HOURS),
+    createComplex("Complexe Sportif Jean Bouin", "30 Avenue Jean Bouin", "Complexe sportif avec salle de musculation, terrains de tennis et salle de danse", STANDARD_HOURS),
+    createComplex("Complexe Sportif des Lilas", "25 Rue des Lilas", "Complexe sportif avec gymnase, terrains de football et salle de fitness", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Montagne", "35 Chemin de la Montagne", "Complexe sportif en pleine nature avec terrains de sport et sentiers de randonnée", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Rivière", "40 Rue de la Rivière", "Complexe sportif au bord de la rivière avec activités nautiques et espaces verts", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Forêt", "50 Avenue de la Forêt", "Complexe sportif en pleine forêt avec terrains de sport et sentiers de course", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Plage", "60 Rue de la Plage", "Complexe sportif en bord de mer avec activités nautiques et espaces de détente", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Ville", "70 Avenue de la Ville", "Complexe sportif urbain avec gymnase, terrains de sport et espaces verts", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Campagne", "80 Chemin de la Campagne", "Complexe sportif rural avec terrains de sport et activités en plein air", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Montagne Verte", "90 Rue de la Montagne Verte", "Complexe sportif avec vue panoramique sur la montagne et activités de plein air", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Plaine Blanche", "100 Avenue de la Plaine Blanche", "Complexe sportif avec terrains de sport et espaces de loisirs en pleine nature", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Vallée", "110 Rue de la Vallée", "Complexe sportif en vallée avec activités sportives et espaces de détente", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Côte", "120 Avenue de la Côte", "Complexe sportif en bord de côte avec activités nautiques et espaces de loisirs", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Plaine du Nord", "130 Chemin de la Plaine du Nord", "Complexe sportif avec terrains de sport et activités en plein air dans la plaine du nord", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Plaine du Sud", "140 Chemin de la Plaine du Sud", "Complexe sportif avec terrains de sport et activités en plein air dans la plaine du sud", STANDARD_HOURS),
+    createComplex("Complexe Sportif de la Plaine Centrale", "150 Chemin de la Plaine Centrale", "Complexe sportif avec terrains de sport et activités en plein air dans la plaine centrale", STANDARD_HOURS),
 ];
 
 export async function seedComplexes(db: NodePgDatabase): Promise<SelectComplex[]> {
-  console.log(`Insertion de ${complexesData.length} complexes...`);
+    console.log(`Insertion of ${complexesData.length} complexes...`);
 
-  try {
-    const insertedComplexes = await db
-      .insert(complexes)
-      .values(complexesData)
-      .returning();
-    
-    console.log(`${insertedComplexes.length} complexes créés avec succès`);
-    return insertedComplexes;
-  } catch (error) {
-    console.error("Erreur lors de l'insertion des complexes:", error);
-    throw error;
-  }
+    try {
+        const insertedComplexes = await db
+            .insert(complexes)
+            .values(complexesData)
+            .returning();
+
+        console.log(`${insertedComplexes.length} complexes created successfully`);
+        return insertedComplexes;
+    } catch (error) {
+        console.error("Error during the insertion of complexes:", error);
+        throw error;
+    }
 }

@@ -1,5 +1,17 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { rooms, type InsertRoom, type SelectRoom, type SelectComplex } from "../../schema.js";
+import { STANDARD_HOURS, AQUATIC_HOURS, STADIUM_HOURS, EXTENDED_HOURS, type WeekSchedule } from "../utils/openingHours.js";
+
+const createRoom = (name: string, description: string, sportType: string, complexId: string, openingHours: WeekSchedule): InsertRoom => ({
+  name,
+  description,
+  sportType,
+  isIndoor: true,
+  capacity: 100,
+  accreditation: "accreditation",
+  complexId,
+  openingHours
+});
 
 export async function seedRooms(
   db: NodePgDatabase, 
@@ -7,174 +19,36 @@ export async function seedRooms(
 ): Promise<SelectRoom[]> {
   
   const roomsData: InsertRoom[] = [
-    // Salles pour le Complexe Jean Bouin
-    {
-      name: "Salle de Musculation A",
-      description: "Grande salle de musculation équipée avec matériel moderne",
-      sportType: "Musculation",
-      isIndoor: true,
-      capacity: 30,
-      accreditation: "FFM-2024",
-      complexId: complexes[0].id,
-      openingHours: {
-        monday: { open: "07:00", close: "22:00", closed: false },
-        tuesday: { open: "07:00", close: "22:00", closed: false },
-        wednesday: { open: "07:00", close: "22:00", closed: false },
-        thursday: { open: "07:00", close: "22:00", closed: false },
-        friday: { open: "07:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-      name: "Terrain de Tennis Couvert 1",
-      description: "Terrain de tennis indoor avec surface synthétique",
-      sportType: "Tennis",
-      isIndoor: true,
-      capacity: 4,
-      accreditation: "FFT-2024",
-      complexId: complexes[0].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-      name: "Salle de Danse",
-      description: "Salle spacieuse avec parquet et miroirs pour la danse",
-      sportType: "Danse",
-      isIndoor: true,
-      capacity: 25,
-      complexId: complexes[0].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    
-    // Salles pour le Centre Aquatique de Lyon
-    {
-      name: "Piscine Olympique",
-      description: "Piscine 50m avec 8 couloirs pour la natation",
-      sportType: "Natation",
-      isIndoor: true,
-      capacity: 200,
-      accreditation: "FFN-2024",
-      complexId: complexes[1].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-      name: "Bassin d'Apprentissage",
-      description: "Bassin peu profond pour l'apprentissage de la natation",
-      sportType: "Natation",
-      isIndoor: true,
-      capacity: 50,
-      complexId: complexes[1].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-        name: "Salle de Fitness",
-        description: "Salle de fitness avec équipements cardio et musculation",
-        sportType: "Fitness",
-        isIndoor: true,
-        capacity: 40,
-        accreditation: "FFH-2024",
-        complexId: complexes[1].id,
-        openingHours: {
-          monday: { open: "07:00", close: "22:00", closed: false },
-          tuesday: { open: "07:00", close: "22:00", closed: false },
-          wednesday: { open: "07:00", close: "22:00", closed: false },
-          thursday: { open: "07:00", close: "22:00", closed: false },
-          friday: { open: "07:00", close: "20:00", closed: false },
-          saturday: { open: "09:00", close: "18:00", closed: false },
-          sunday: { open: "09:00", close: "17:00", closed: false },
-        }
-    },
-    
-    // Salles pour le Stade de Marseille
-    {
-      name: "Terrain de Football Principal",
-      description: "Terrain en herbe naturelle aux dimensions officielles",
-      sportType: "Football",
-      isIndoor: false,
-      capacity: 22,
-      accreditation: "FFF-2024",
-      complexId: complexes[2].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-      name: "Piste d'Athlétisme",
-      description: "Piste de 400m avec zones de saut et de lancer",
-      sportType: "Athlétisme",
-      isIndoor: false,
-      capacity: 100,
-      accreditation: "FFA-2024",
-      complexId: complexes[2].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    },
-    {
-      name: "Salle de Boxe",
-      description: "Salle équipée pour la boxe avec ring et sacs de frappe",
-      sportType: "Boxe",
-      isIndoor: true,
-      capacity: 20,
-      accreditation: "FFB-2024",
-      complexId: complexes[2].id,
-      openingHours: {
-        monday: { open: "08:00", close: "22:00", closed: false },
-        tuesday: { open: "08:00", close: "22:00", closed: false },
-        wednesday: { open: "08:00", close: "22:00", closed: false },
-        thursday: { open: "08:00", close: "22:00", closed: false },
-        friday: { open: "08:00", close: "20:00", closed: false },
-        saturday: { open: "09:00", close: "18:00", closed: false },
-        sunday: { open: "09:00", close: "17:00", closed: false },
-      }
-    }
+    // Salles pour le complexe sportif Pierre de Coubertin
+    createRoom("Salle Polyvalente", "Salle polyvalente pour divers sports et activités", "multi-sport", complexes[0].id, STANDARD_HOURS),
+    createRoom("Gymnase Principal", "Gymnase principal avec terrain de basket et tribunes", "basketball", complexes[0].id, STANDARD_HOURS),
+    createRoom("Piscine Olympique", "Piscine olympique pour la natation et les compétitions aquatiques", "natation", complexes[0].id, STANDARD_HOURS),
+    createRoom("Terrain de Football", "Terrain de football en gazon naturel", "football", complexes[0].id, STANDARD_HOURS),
+    createRoom("Salle de Musculation", "Salle de musculation équipée pour l'entraînement", "musculation", complexes[0].id, STANDARD_HOURS),
+
+    // Salles pour le centre aquatique de Lyon
+    createRoom("Bassin Olympique", "Bassin olympique pour les compétitions de natation", "natation", complexes[1].id, AQUATIC_HOURS),
+    createRoom("Bassin d'Apprentissage", "Bassin pour les cours de natation et l'apprentissage", "natation", complexes[1].id, AQUATIC_HOURS),
+    createRoom("Espace Bien-Être", "Espace bien-être avec sauna et hammam", "bien-être", complexes[1].id, AQUATIC_HOURS),
+    createRoom("Salle de Fitness", "Salle de fitness avec équipements modernes", "fitness", complexes[1].id, AQUATIC_HOURS),
+    createRoom("Terrains de Beach Volley", "Terrains de beach volley pour les activités estivales", "beach-volley", complexes[1].id, AQUATIC_HOURS),
+
+    // Salles pour le stade municipal de Pierrefitte
+    createRoom("Terrain de Football Principal", "Terrain principal pour les matchs de football", "football", complexes[2].id, STADIUM_HOURS),
+    createRoom("Piste d'Athlétisme", "Piste d'athlétisme pour les courses et entraînements", "athlétisme", complexes[2].id, STADIUM_HOURS),
+    createRoom("Tribunes", "Tribunes pour les spectateurs lors des événements sportifs", "spectateurs", complexes[2].id, STADIUM_HOURS),
+    createRoom("Salle de Conférence", "Salle de conférence pour les réunions et briefings", "conférence", complexes[2].id, STADIUM_HOURS),
+    createRoom("Terrain de Rugby", "Terrain de rugby pour les entraînements et matchs", "rugby", complexes[2].id, STADIUM_HOURS),
+
+    // Salles pour le centre sportif de la Plaine
+    createRoom("Terrains de Tennis", "Terrains de tennis pour les cours et compétitions", "tennis", complexes[3].id, EXTENDED_HOURS),
+    createRoom("Salle de Sport", "Salle de sport polyvalente pour divers sports", "multi-sport", complexes[3].id, EXTENDED_HOURS),
+    createRoom("Espace Bien-Être", "Espace bien-être avec spa et massages", "bien-être", complexes[3].id, EXTENDED_HOURS),
+    createRoom("Salle de Danse", "Salle de danse pour les cours et répétitions", "danse", complexes[3].id, EXTENDED_HOURS),
+    createRoom("Terrain de Handball", "Terrain de handball pour les entraînements et matchs", "handball", complexes[3].id, EXTENDED_HOURS),
   ];
 
-  console.log(`Insertion de ${roomsData.length} salles...`);
+  console.log(`Insertion of ${roomsData.length} rooms...`);
   
   try {
     const insertedRooms = await db
@@ -182,10 +56,10 @@ export async function seedRooms(
       .values(roomsData)
       .returning();
 
-    console.log(`${insertedRooms.length} salles créées avec succès`);
+    console.log(`${insertedRooms.length} rooms created successfully`);
     return insertedRooms;
   } catch (error) {
-    console.error("Erreur lors de l'insertion des salles:", error);
+    console.error("Error during the insertion of rooms:", error);
     throw error;
   }
 }

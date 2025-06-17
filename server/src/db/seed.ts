@@ -7,30 +7,30 @@ async function main() {
   try {
     switch (command) {
       case "reset":
-        console.log("Suppression des données existantes...");
+        console.log("Deleting all data...");
         await resetDatabase();
-        console.log("Base de données réinitialisée avec succès !");
+        console.log("Database reset successfully!");
         break;
       
       case "seed":
-        console.log("Début du seeding...");
+        console.log("Seeding data...");
         await seedDatabase();
-        console.log("Seeding terminé avec succès !");
+        console.log("Seeding completed successfully!");
         break;
       
       case "fresh":
-        console.log("Reset et seeding complet...");
+        console.log("Reset and seeding completed...");
         await resetDatabase();
         await seedDatabase();
-        console.log("Base de données fraîche créée avec succès !");
+        console.log("Fresh database created successfully!");
         break;
       
       default:
-        console.log("Usage: npm run db:seed [reset|seed|fresh]");
+        console.log("Apply: npm run db:seed [reset|seed|fresh]");
         process.exit(1);
     }
   } catch (error) {
-    console.error("Erreur lors du seeding:", error);
+    console.error("Error during seeding:", error);
     process.exit(1);
   }
 }
