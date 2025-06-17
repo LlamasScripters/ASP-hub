@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -16,20 +16,18 @@ interface RoomEditPageProps {
 export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 	const navigate = useNavigate();
 	const [showSuccess, setShowSuccess] = useState(false);
+	const router = useRouter();
+	const previousPageHref =
+		router.__store.prevState?.resolvedLocation?.href || undefined;
+	console.log("previousPageHref", router);
 
 	const handleSuccess = () => {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: `/admin/facilities/complexes/${complex.id}`,
+				to: `/admin/facilities/complexes/${complex.id}?view=rooms`,
 			});
 		}, 1500);
-	};
-
-	const handleCancel = () => {
-		navigate({
-			to: `/admin/facilities/complexes/${complex.id}`,
-		});
 	};
 
 	return (
@@ -44,10 +42,26 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 						{complex.name}
 					</p>
 				</div>
-				<Button variant="outline" onClick={handleCancel}>
-					<ArrowLeft className="w-4 h-4 mr-2" />
-					Retour
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId"
+							search={{ view: "rooms" }}
+							params={{ complexId: complex.id }}
+						>
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Retour au complexe
+						</Link>
+					</Button>
+					<Button asChild>
+						<Link
+							to="/admin/facilities/rooms/$roomId"
+							params={{ roomId: room.id }}
+						>
+							Voir les détails
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			{showSuccess && (
@@ -71,9 +85,10 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 
 			<RoomForm
 				complexId={complex.id}
+				complexOpeningHours={complex.openingHours}
 				room={room}
 				onSuccess={handleSuccess}
-				onCancel={handleCancel}
+				onCancelLink={previousPageHref}
 			/>
 		</div>
 	);

@@ -88,11 +88,29 @@ docker compose exec server npm run db:migrate
 
     - Générer des migrations:
       ```bash
-      docker compose exec npm run db:generate
+      docker compose exec server npm run db:generate
       ```
     - Lancer les migrations:
       ```bash
-      docker compose exec npm run db:migrate
+      docker compose exec server npm run db:migrate
+      ```
+
+    - Seed la base de données:
+      ```sh
+      cd server
+      npm run db:seed
+      ```
+
+    - Reset la base de données:
+      ```sh
+      cd server
+      npm run db:reset
+      ```
+
+    - Fresh (reset puis seed) la base de données:
+      ```sh
+      cd server
+      npm run db:fresh
       ```
 
     - Lancer l'interface Drizzle Studio pour gérer la base de données depuis une UI:

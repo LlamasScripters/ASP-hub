@@ -3,13 +3,55 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+const days = [
+	"monday",
+	"tuesday",
+	"wednesday",
+	"thursday",
+	"friday",
+	"saturday",
+	"sunday",
+] as const;
+
+const openingHoursEntrySchema = z.object({
+	open: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
+	close: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
+	closed: z.boolean(),
+});
+
+export const openingHoursSchema = z.record(
+	z.enum(days),
+	openingHoursEntrySchema,
+);
+
+export const frenchDays: Record<keyof OpeningHours, string> = {
+	monday: "Lundi",
+	tuesday: "Mardi",
+	wednesday: "Mercredi",
+	thursday: "Jeudi",
+	friday: "Vendredi",
+	saturday: "Samedi",
+	sunday: "Dimanche",
+};
+
 export const roomSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, "Le nom est requis"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
 	complexId: z.string().uuid(),
 	sportType: z.string().min(1, "Le type de sport est requis"),
+	openingHours: openingHoursSchema,
 	isIndoor: z.boolean(),
 	accreditation: z.string().optional(),
+	capacity: z.number().int().nonnegative(),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
 });
@@ -19,16 +61,24 @@ export const createRoomSchema = z.object({
 		.string()
 		.min(1, "Le nom est requis")
 		.max(255, "Le nom ne peut pas dépasser 255 caractères"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
 	complexId: z.string().uuid("ID de complexe invalide"),
 	sportType: z
 		.string()
 		.min(1, "Le type de sport est requis")
 		.max(100, "Le type de sport ne peut pas dépasser 100 caractères"),
+	openingHours: openingHoursSchema,
 	isIndoor: z.boolean().default(true),
 	accreditation: z
 		.string()
 		.max(255, "L'accréditation ne peut pas dépasser 255 caractères")
 		.optional(),
+	capacity: z
+		.number()
+		.int()
+		.nonnegative("La capacité doit être un nombre entier positif"),
 });
 
 export const updateRoomSchema = createRoomSchema
@@ -66,8 +116,8 @@ export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
 export type RoomsPaginatedResponse = z.infer<
 	typeof roomsPaginatedResponseSchema
 >;
-
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 
 interface UseRoomsOptions {
 	complexId: string;
@@ -86,6 +136,9 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		totalPages: number;
 	} | null>(null);
 
+	/**
+	 * Fetches rooms based on the current filters and complexId.
+	 */
 	const fetchRooms = useCallback(async () => {
 		if (
 			!filters.search &&
@@ -149,10 +202,17 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		}
 	}, [complexId, filters, initialData]);
 
+	/**
+	 * Updates the filters for fetching rooms.
+	 * @param newFilters - Partial RoomFilters to update.
+	 */
 	const updateFilters = useCallback((newFilters: Partial<RoomFilters>) => {
 		setFilters((prev) => ({ ...prev, ...newFilters }));
 	}, []);
 
+	/**
+	 * Creates a new room.
+	 */
 	const createRoom = useCallback(
 		async (data: CreateRoomData): Promise<Room | null> => {
 			setLoading(true);
@@ -189,6 +249,9 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		[],
 	);
 
+	/**
+	 * Updates an existing room.
+	 */
 	const updateRoom = useCallback(
 		async (roomId: string, data: UpdateRoomData): Promise<Room | null> => {
 			setLoading(true);
@@ -227,6 +290,9 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		[],
 	);
 
+	/**
+	 * Deletes a room by its ID.
+	 */
 	const deleteRoom = useCallback(async (roomId: string): Promise<boolean> => {
 		setLoading(true);
 		setError(null);
@@ -260,6 +326,9 @@ export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
 		}
 	}, []);
 
+	/**
+	 * Gets a room by its ID.
+	 */
 	const getRoomById = useCallback(
 		async (roomId: string): Promise<Room | null> => {
 			setLoading(true);

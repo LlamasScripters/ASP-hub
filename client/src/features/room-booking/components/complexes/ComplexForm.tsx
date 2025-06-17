@@ -15,20 +15,25 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	createComplexSchema,
+	defaultOpenHours,
+	frenchDays,
 	updateComplexSchema,
 	useComplexes,
 } from "@room-booking/hooks/useComplexes.js";
 import type {
 	Complex,
 	CreateComplexData,
+	OpeningHours,
 	UpdateComplexData,
 } from "@room-booking/hooks/useComplexes.js";
+import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Car,
 	Info,
 	Loader2,
 	MapPin,
+	Timer,
 	Users,
 	//@ts-ignore
 } from "lucide-react";
@@ -36,15 +41,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface ComplexFormProps {
-	complex?: Complex;
+	complex?: Complex & { openingHours: OpeningHours };
 	onSuccess?: (complex: Complex) => void;
-	onCancel?: () => void;
+	onCancelLink?: string;
 }
 
 export function ComplexForm({
 	complex,
 	onSuccess,
-	onCancel,
+	onCancelLink,
 }: ComplexFormProps) {
 	const { createComplex, updateComplex } = useComplexes();
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +62,7 @@ export function ComplexForm({
 		),
 		defaultValues: {
 			name: complex?.name || "",
+			description: complex?.description || "",
 			street: complex?.street || "",
 			city: complex?.city || "",
 			postalCode: complex?.postalCode || "",
@@ -64,8 +70,10 @@ export function ComplexForm({
 			accessibleForReducedMobility:
 				complex?.accessibleForReducedMobility || false,
 			parkingCapacity: complex?.parkingCapacity || 0,
+			openingHours: complex?.openingHours || defaultOpenHours,
 		},
 	});
+	const openingHours = form.watch("openingHours");
 
 	const onSubmit = async (data: CreateComplexData | UpdateComplexData) => {
 		setIsSubmitting(true);
@@ -123,6 +131,25 @@ export function ComplexForm({
 										</FormControl>
 										<FormDescription>
 											Le nom officiel du complexe sportif
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Ex: Complexe polyvalent avec terrains de sport, salles de réunion, etc."
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											Description détaillée du complexe
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -189,6 +216,72 @@ export function ComplexForm({
 									)}
 								/>
 							</div>
+						</div>
+
+						{/* Horaires d'ouverture */}
+						<div className="space-y-4">
+							<div className="flex items-center gap-2 text-sm font-medium">
+								<Timer className="w-4 h-4" />
+								Horaires d'ouverture
+							</div>
+							{openingHours &&
+								Object.entries(frenchDays).map(([key, label]) => {
+									const dayValue =
+										openingHours[key as keyof typeof openingHours];
+									if (!dayValue) return null;
+									const isOpen = !dayValue.closed;
+									return (
+										<div
+											key={key}
+											className="flex items-center justify-between p-3 border rounded-lg"
+										>
+											<span className="w-20 font-medium">{label}</span>
+											<div className="flex items-center gap-2 flex-1 mx-4">
+												<Input
+													type="time"
+													disabled={!isOpen}
+													value={dayValue.open || ""}
+													onChange={(e) =>
+														form.setValue(
+															//@ts-ignore
+															`openingHours.${key}.open`,
+															e.target.value,
+														)
+													}
+												/>
+												<span>à</span>
+												<Input
+													type="time"
+													disabled={!isOpen}
+													value={dayValue.close || ""}
+													onChange={(e) =>
+														form.setValue(
+															//@ts-ignore
+															`openingHours.${key}.close`,
+															e.target.value,
+														)
+													}
+												/>
+											</div>
+											<Checkbox
+												checked={isOpen}
+												onCheckedChange={(checked) => {
+													//@ts-ignore
+													form.setValue(`openingHours.${key}.closed`, !checked);
+													if (!checked) {
+														//@ts-ignore
+														form.setValue(`openingHours.${key}.open`, null);
+														//@ts-ignore
+														form.setValue(`openingHours.${key}.close`, null);
+													}
+												}}
+											/>
+										</div>
+									);
+								})}
+							<p className="text-xs text-muted-foreground">
+								Décochez un jour pour le marquer comme fermé.
+							</p>
 						</div>
 
 						{/* Services et accessibilité */}
@@ -301,14 +394,9 @@ export function ComplexForm({
 
 						{/* Actions */}
 						<div className="flex items-center justify-end space-x-4 pt-6 border-t">
-							{onCancel && (
-								<Button
-									type="button"
-									variant="outline"
-									onClick={onCancel}
-									disabled={isSubmitting}
-								>
-									Annuler
+							{onCancelLink && (
+								<Button variant="outline" asChild>
+									<Link to={onCancelLink}>Annuler</Link>
 								</Button>
 							)}
 							<Button type="submit" disabled={isSubmitting}>

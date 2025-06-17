@@ -1,6 +1,5 @@
 import { useParams } from "@tanstack/react-router";
-// client/src/features/clubs/pages/CategoryCreatePage.tsx
-import { CategoryForm } from "../../components/catogories/CategoryForm";
+import { CategoryForm } from "../../components/categories/CategoryForm";
 
 export function CategoryCreatePage() {
 	const { clubId, sectionId } = useParams({

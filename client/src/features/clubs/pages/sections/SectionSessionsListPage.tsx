@@ -60,8 +60,8 @@ interface Filters {
 }
 
 interface EnrichedSession extends Omit<SessionSport, "categoryId"> {
-	categoryName?: string;
-	categoryId?: string;
+	categoryName: string;
+	categoryId: string;
 }
 
 export function SectionSessionsListPage() {
@@ -535,7 +535,7 @@ export function SectionSessionsListPage() {
 														params={{
 															clubId,
 															sectionId,
-															categoryId: s.categoryId as string,
+															categoryId: s.categoryId,
 															sessionId: s.id,
 														}}
 													>

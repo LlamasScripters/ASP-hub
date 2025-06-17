@@ -2,9 +2,55 @@ import type { InsertRoom, SelectRoom } from "@/db/schema.js";
 import { rooms } from "@/db/schema.js";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
+import { complexesService } from "./complexes.service.js";
+
+function validateAgainstParent(
+	complexSchedule: Record<
+		string,
+		{ open: string | null; close: string | null; closed: boolean }
+	>,
+	roomSchedule: Record<
+		string,
+		{ open: string | null; close: string | null; closed: boolean }
+	>,
+) {
+	for (const day of Object.keys(complexSchedule)) {
+		const p = complexSchedule[day];
+		const c = roomSchedule[day];
+
+		if (p.closed && !c.closed) {
+			throw new Error(
+				`The complex is closed on ${day}, the room must also be closed`,
+			);
+		}
+		if (!p.closed && !c.closed) {
+			if (
+				(c.open !== null && p.open !== null && c.open < p.open) ||
+				(c.close !== null && p.close !== null && c.close > p.close)
+			) {
+				throw new Error(
+					`Room schedule for ${day} is outside the complex's operating hours (${p.open}–${p.close}).`,
+				);
+			}
+		}
+	}
+}
 
 export const roomsService = {
 	create: async (data: InsertRoom) => {
+		const complex = await complexesService.getById(data.complexId);
+		if (!complex) throw new Error("Complexe introuvable");
+		validateAgainstParent(
+			complex.openingHours as Record<
+				string,
+				{ open: string | null; close: string | null; closed: boolean }
+			>,
+			data.openingHours as Record<
+				string,
+				{ open: string | null; close: string | null; closed: boolean }
+			>,
+		);
+
 		const [room] = await db.insert(rooms).values(data).returning();
 		return room;
 	},
@@ -77,6 +123,26 @@ export const roomsService = {
 		id: string,
 		data: Partial<InsertRoom>,
 	): Promise<SelectRoom | undefined> => {
+		const complexId =
+			data.complexId ??
+			(await db.select().from(rooms).where(eq(rooms.id, id)))[0].complexId;
+
+		const complex = await complexesService.getById(complexId);
+		if (!complex) throw new Error("Complexe introuvable");
+
+		if (data.openingHours) {
+			validateAgainstParent(
+				complex.openingHours as Record<
+					string,
+					{ open: string | null; close: string | null; closed: boolean }
+				>,
+				data.openingHours as Record<
+					string,
+					{ open: string | null; close: string | null; closed: boolean }
+				>,
+			);
+		}
+
 		const [updated] = await db
 			.update(rooms)
 			.set(data)

@@ -8,8 +8,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ComplexForm } from "@room-booking/components/complexes/ComplexForm";
-import type { Complex } from "@room-booking/hooks/useComplexes";
+import type { Complex, OpeningHours } from "@room-booking/hooks/useComplexes";
+// import { frenchDays  } from "@room-booking/hooks/useComplexes";
 import { useNavigate } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	ArrowLeft,
@@ -20,23 +22,15 @@ import {
 import { useState } from "react";
 
 interface ComplexEditPageProps {
-	initialComplex: Complex;
+	initialComplex: Complex & { openingHours: OpeningHours };
 }
 
 export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
-	const navigate = useNavigate();
-	const [isNavigating, setIsNavigating] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
-	const handleBack = () => {
-		setIsNavigating(true);
-		navigate({ to: `/admin/facilities/complexes/${initialComplex.id}` });
-	};
-
-	const handleSeeComplexesList = () => {
-		setIsNavigating(true);
-		navigate({ to: "/admin/facilities/complexes" });
-	};
+	const navigate = useNavigate();
+	const router = useRouter();
+	const previousPageHref =
+		router.__store.prevState?.resolvedLocation?.href || undefined;
 
 	const handleSuccess = (updatedComplex: Complex) => {
 		setShowSuccessAlert(true);
@@ -46,24 +40,20 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 		}, 3000);
 
 		setTimeout(() => {
-			setIsNavigating(true);
 			navigate({ to: `/admin/facilities/complexes/${updatedComplex.id}` });
 		}, 1500);
 	};
 
-	const handleCancel = () => {
-		handleBack();
-	};
-
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString("fr-FR", {
+	const fmt = (iso: string) =>
+		new Date(iso).toLocaleDateString("fr-FR", {
 			day: "2-digit",
 			month: "2-digit",
 			year: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
 		});
-	};
+
+	// const { openingHours } = initialComplex;
 
 	return (
 		<div className="space-y-6">
@@ -78,22 +68,22 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleSeeComplexesList}
-						disabled={isNavigating}
-					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retourner à la liste
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							to="/admin/facilities/complexes"
+							search={{ view: "complexes" }}
+						>
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Retour à la liste
+						</Link>
 					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleBack}
-						disabled={isNavigating}
-					>
-						Voir les détails
+					<Button asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId"
+							params={{ complexId: initialComplex.id }}
+						>
+							Voir les détails
+						</Link>
 					</Button>
 				</div>
 			</div>
@@ -126,19 +116,12 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 							<span className="ml-2 text-green-800">{initialComplex.name}</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">Ville :</span>
-							<span className="ml-2 text-green-800">{initialComplex.city}</span>
-						</div>
-						<div>
-							<span className="font-medium text-green-900">Adresse :</span>
-							<span className="ml-2 text-green-800">
-								{initialComplex.street}
+							<span className="font-medium text-green-900">
+								Adresse complète :
 							</span>
-						</div>
-						<div>
-							<span className="font-medium text-green-900">Code postal :</span>
 							<span className="ml-2 text-green-800">
-								{initialComplex.postalCode}
+								{initialComplex.street}, {initialComplex.postalCode},{" "}
+								{initialComplex.city}
 							</span>
 						</div>
 						<div>
@@ -168,10 +151,34 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 								Dernière modification :
 							</span>
 							<span className="ml-2 text-green-800">
-								{formatDate(initialComplex.updatedAt)}
+								{fmt(initialComplex.updatedAt)}
 							</span>
 						</div>
 					</div>
+					{/* <div>
+						<h3 className="text-sm font-semibold mb-3 text-green-900">Horaires d'ouverture :</h3>
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+							{(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
+								const hours = openingHours[day];
+								return (
+									<div key={day} className="flex items-center justify-between p-2 rounded-md border border-green-100">
+										<span className="font-medium text-green-900 text-xs tracking-wide">
+											{frenchDays[day]}
+										</span>
+										<span className="text-green-800 text-sm font-medium">
+											{hours?.closed ? (
+												<span className="text-red-600 text-xs">Fermé</span>
+											) : hours ? (
+												<span className="text-green-700">{hours.open} – {hours.close}</span>
+											) : (
+												<span className="text-gray-500 text-xs">Non défini</span>
+											)}
+										</span>
+									</div>
+								);
+							})}
+						</div>
+					</div> */}
 				</CardContent>
 			</Card>
 
@@ -190,7 +197,7 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 				<ComplexForm
 					complex={initialComplex}
 					onSuccess={handleSuccess}
-					onCancel={handleCancel}
+					onCancelLink={previousPageHref}
 				/>
 			</div>
 		</div>

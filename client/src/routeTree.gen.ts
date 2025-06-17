@@ -46,6 +46,8 @@ import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexImport } from
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/index"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.edit"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.create-reservation"
+import { Route as AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/reservations/$reservationId.edit"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.edit"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.create-room"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
@@ -310,6 +312,20 @@ const AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute =
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport.update({
     id: "/facilities/rooms/$roomId/edit",
     path: "/facilities/rooms/$roomId/edit",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute =
+  AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationImport.update({
+    id: "/facilities/rooms/$roomId/create-reservation",
+    path: "/facilities/rooms/$roomId/create-reservation",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute =
+  AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport.update({
+    id: "/facilities/reservations/$reservationId/edit",
+    path: "/facilities/reservations/$reservationId/edit",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
@@ -699,6 +715,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
+    "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": {
+      id: "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit"
+      path: "/facilities/reservations/$reservationId/edit"
+      fullPath: "/admin/facilities/reservations/$reservationId/edit"
+      preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": {
+      id: "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation"
+      path: "/facilities/rooms/$roomId/create-reservation"
+      fullPath: "/admin/facilities/rooms/$roomId/create-reservation"
+      preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
     "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": {
       id: "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit"
       path: "/facilities/rooms/$roomId/edit"
@@ -957,6 +987,8 @@ interface AuthenticatedAdminAdminRouteChildren {
   AuthenticatedAdminAdminDashboardClubsClubIdEditRoute: typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
   AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute: typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
@@ -996,6 +1028,10 @@ const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren
       AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute,
     AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute:
       AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute,
+    AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute:
+      AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute,
+    AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute:
+      AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute,
     AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute:
       AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute,
     AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute:
@@ -1093,6 +1129,8 @@ export interface FileRoutesByFullPath {
   "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
   "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
@@ -1141,6 +1179,8 @@ export interface FileRoutesByTo {
   "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
   "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
@@ -1198,6 +1238,8 @@ export interface FileRoutesById {
   "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
   "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
@@ -1250,6 +1292,8 @@ export interface FileRouteTypes {
     | "/admin/dashboard/clubs/$clubId/edit"
     | "/admin/facilities/complexes/$complexId/create-room"
     | "/admin/facilities/complexes/$complexId/edit"
+    | "/admin/facilities/reservations/$reservationId/edit"
+    | "/admin/facilities/rooms/$roomId/create-reservation"
     | "/admin/facilities/rooms/$roomId/edit"
     | "/admin/dashboard/clubs/$clubId"
     | "/admin/facilities/complexes/$complexId"
@@ -1297,6 +1341,8 @@ export interface FileRouteTypes {
     | "/admin/dashboard/clubs/$clubId/edit"
     | "/admin/facilities/complexes/$complexId/create-room"
     | "/admin/facilities/complexes/$complexId/edit"
+    | "/admin/facilities/reservations/$reservationId/edit"
+    | "/admin/facilities/rooms/$roomId/create-reservation"
     | "/admin/facilities/rooms/$roomId/edit"
     | "/admin/dashboard/clubs/$clubId"
     | "/admin/facilities/complexes/$complexId"
@@ -1352,6 +1398,8 @@ export interface FileRouteTypes {
     | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit"
+    | "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit"
+    | "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation"
     | "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit"
     | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/"
@@ -1484,6 +1532,8 @@ export const routeTree = rootRoute
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit",
+        "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit",
+        "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation",
         "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit",
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/",
@@ -1608,6 +1658,14 @@ export const routeTree = rootRoute
     },
     "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit": {
       "filePath": "_authenticated/admin/_admin/facilities/complexes/$complexId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": {
+      "filePath": "_authenticated/admin/_admin/facilities/reservations/$reservationId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": {
+      "filePath": "_authenticated/admin/_admin/facilities/rooms/$roomId.create-reservation.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": {

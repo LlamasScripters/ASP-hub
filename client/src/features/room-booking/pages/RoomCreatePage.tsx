@@ -2,7 +2,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RoomForm } from "@room-booking/components/rooms/RoomForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
@@ -19,13 +19,9 @@ export function RoomCreatePage({ complex }: RoomCreatePageProps) {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: `/admin/facilities/complexes/${complex.id}`,
+				to: `/admin/facilities/complexes/${complex.id}?view=rooms`,
 			});
 		}, 1500);
-	};
-
-	const handleCancel = () => {
-		navigate({ to: `/admin/facilities/complexes/${complex.id}` });
 	};
 
 	return (
@@ -37,9 +33,15 @@ export function RoomCreatePage({ complex }: RoomCreatePageProps) {
 						Nouvelle salle pour le complexe {complex.name}
 					</p>
 				</div>
-				<Button variant="outline" onClick={handleCancel}>
-					<ArrowLeft className="w-4 h-4 mr-2" />
-					Retour
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						to="/admin/facilities/complexes/$complexId"
+						search={{ view: "rooms" }}
+						params={{ complexId: complex.id }}
+					>
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour
+					</Link>
 				</Button>
 			</div>
 
@@ -63,8 +65,9 @@ export function RoomCreatePage({ complex }: RoomCreatePageProps) {
 
 			<RoomForm
 				complexId={complex.id}
+				complexOpeningHours={complex.openingHours}
 				onSuccess={handleSuccess}
-				onCancel={handleCancel}
+				onCancelLink={`/admin/facilities/complexes/${complex.id}?view=rooms`}
 			/>
 		</div>
 	);

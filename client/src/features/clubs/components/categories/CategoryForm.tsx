@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft, Calendar, Save, Users } from "lucide-react";
-// client/src/features/clubs/components/CategoryForm.tsx
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";

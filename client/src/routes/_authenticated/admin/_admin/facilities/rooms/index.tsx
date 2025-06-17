@@ -1,6 +1,6 @@
+import { RoomsPage } from "@/features/room-booking/pages/RoomsPage";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { roomsApi } from "@room-booking/lib/api/rooms";
-import { RoomsPage } from "@room-booking/page/RoomsPage";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 interface RoomsLoaderData {

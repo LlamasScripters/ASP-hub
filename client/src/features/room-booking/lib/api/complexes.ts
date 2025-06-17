@@ -21,6 +21,11 @@ export class ComplexesApiClient {
 		this.baseUrl = baseUrl;
 	}
 
+	/**
+	 * Get all complexes with optional filters.
+	 * @param filters : Partial<ComplexFilters>
+	 * @param options : ApiOptions
+	 */
 	async getComplexes(
 		filters?: Partial<ComplexFilters>,
 		options?: ApiOptions,
@@ -65,6 +70,11 @@ export class ComplexesApiClient {
 		return complexesPaginatedResponseSchema.parse(rawData);
 	}
 
+	/**
+	 * Get a complex by its ID.
+	 * @param id : Complex ID
+	 * @param options : ApiOptions
+	 */
 	async getComplexById(id: string, options?: ApiOptions): Promise<Complex> {
 		const response = await fetch(`${this.baseUrl}/complexes/${id}`, {
 			signal: options?.signal,
@@ -78,6 +88,11 @@ export class ComplexesApiClient {
 		return complexSchema.parse(rawData);
 	}
 
+	/**
+	 * This method creates a new complex with the provided data.
+	 * @param data : CreateComplexData
+	 * @param options : ApiOptions
+	 */
 	async createComplex(
 		data: CreateComplexData,
 		options?: ApiOptions,
@@ -99,6 +114,12 @@ export class ComplexesApiClient {
 		return complexSchema.parse(rawData);
 	}
 
+	/**
+	 * Updates an existing complex with the provided data.
+	 * @param id : Complex ID
+	 * @param data : UpdateComplexData
+	 * @param options : ApiOptions
+	 */
 	async updateComplex(
 		id: string,
 		data: UpdateComplexData,
@@ -121,6 +142,11 @@ export class ComplexesApiClient {
 		return complexSchema.parse(rawData);
 	}
 
+	/**
+	 * Deletes a complex by its ID.
+	 * @param id : Complex ID
+	 * @param options : ApiOptions
+	 */
 	async deleteComplex(id: string, options?: ApiOptions) {
 		const response = await fetch(`${this.baseUrl}/complexes/${id}`, {
 			method: "DELETE",

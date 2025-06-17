@@ -20,6 +20,24 @@ const reservationSchema = z.object({
 	]),
 });
 
+const reservationQuerySchema = z
+	.object({
+		startDate: z.string().optional(),
+		endDate: z.string().optional(),
+		page: z.string().optional(),
+		limit: z.string().optional(),
+	})
+	.transform((data) => ({
+		startDate: data.startDate
+			? new Date(data.startDate)
+			: new Date(new Date().setDate(1)), // First day of current month
+		endDate: data.endDate
+			? new Date(data.endDate)
+			: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
+		page: Number.parseInt(data.page || "1", 10),
+		limit: Number.parseInt(data.limit || "20", 10),
+	}));
+
 //@ts-ignore
 reservationsRouter.get("/", async (req: Request, res: Response) => {
 	const reservations = await reservationsService.getAll();

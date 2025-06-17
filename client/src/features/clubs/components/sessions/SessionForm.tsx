@@ -144,7 +144,6 @@ export function SessionForm({
 				const field = error.path[0] as string;
 				formattedErrors[field] = error.message;
 			}
-
 			setErrors(formattedErrors);
 			setIsLoading(false);
 			return;

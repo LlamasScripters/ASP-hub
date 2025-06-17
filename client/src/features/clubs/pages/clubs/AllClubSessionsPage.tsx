@@ -71,10 +71,10 @@ interface Filters {
 }
 
 interface EnrichedSession extends Omit<SessionSport, "categoryId"> {
-	categoryName?: string;
-	sectionName?: string;
-	categoryId?: string;
-	sectionId?: string;
+	categoryName: string;
+	sectionName: string;
+	categoryId: string;
+	sectionId: string;
 }
 
 export function AllClubSessionsPage() {
@@ -765,8 +765,8 @@ export function AllClubSessionsPage() {
 																to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
 																params={{
 																	clubId,
-																	sectionId: s.sectionId as string,
-																	categoryId: s.categoryId as string,
+																	sectionId: s.sectionId,
+																	categoryId: s.categoryId,
 																	sessionId: s.id,
 																}}
 															>

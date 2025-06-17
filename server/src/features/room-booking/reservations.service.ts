@@ -1,6 +1,6 @@
 import type { InsertReservation, SelectReservation } from "@/db/schema.js";
 import { reservations } from "@/db/schema.js";
-import { and, eq, gt, lt, ne, or } from "drizzle-orm";
+import { and, eq, gt, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 
 export const reservationsService = {
@@ -61,12 +61,56 @@ export const reservationsService = {
 		return await db.select().from(reservations);
 	},
 
+	getPaginatedByRoomAndDateRange: async (
+		roomId: string,
+		startDate: Date,
+		endDate: Date,
+	): Promise<{
+		data: SelectReservation[];
+		total: number;
+	}> => {
+		const [data, total] = await Promise.all([
+			db
+				.select()
+				.from(reservations)
+				.where(
+					and(
+						eq(reservations.roomId, roomId),
+						gt(reservations.startAt, startDate),
+						lt(reservations.endAt, endDate),
+					),
+				)
+				.orderBy(reservations.startAt),
+			db
+				.select({ count: sql<number>`count(${reservations.id})` })
+				.from(reservations)
+				.where(
+					and(
+						eq(reservations.roomId, roomId),
+						gt(reservations.startAt, startDate),
+						lt(reservations.endAt, endDate),
+					),
+				),
+		]);
+		return {
+			data,
+			total: total[0].count,
+		};
+	},
+
 	getById: async (id: string): Promise<SelectReservation | undefined> => {
 		const [res] = await db
 			.select()
 			.from(reservations)
 			.where(eq(reservations.id, id));
 		return res;
+	},
+
+	getByRoomId: async (roomId: string): Promise<SelectReservation[]> => {
+		return await db
+			.select()
+			.from(reservations)
+			.where(eq(reservations.roomId, roomId));
 	},
 
 	update: async (

@@ -3,14 +3,65 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+const days = [
+	"monday",
+	"tuesday",
+	"wednesday",
+	"thursday",
+	"friday",
+	"saturday",
+	"sunday",
+] as const;
+
+const openingHoursEntrySchema = z.object({
+	open: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
+	close: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
+	closed: z.boolean(),
+});
+
+export const openingHoursSchema = z.record(
+	z.enum(days),
+	openingHoursEntrySchema,
+);
+
+export const defaultOpenHours = {
+	monday: { open: "08:00", close: "20:00", closed: false },
+	tuesday: { open: "08:00", close: "20:00", closed: false },
+	wednesday: { open: "08:00", close: "20:00", closed: false },
+	thursday: { open: "08:00", close: "20:00", closed: false },
+	friday: { open: "08:00", close: "18:00", closed: false },
+	saturday: { open: "10:00", close: "16:00", closed: false },
+	sunday: { open: null, close: null, closed: true },
+};
+
+export const frenchDays: Record<keyof OpeningHours, string> = {
+	monday: "Lundi",
+	tuesday: "Mardi",
+	wednesday: "Mercredi",
+	thursday: "Jeudi",
+	friday: "Vendredi",
+	saturday: "Samedi",
+	sunday: "Dimanche",
+};
+
 export const complexSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, "Le nom est requis"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
 	street: z.string().min(1, "La rue est requise"),
 	city: z.string().min(1, "La ville est requise"),
 	postalCode: z
 		.string()
 		.min(5, "Le code postal doit contenir au moins 5 caractères"),
+	openingHours: openingHoursSchema,
 	numberOfElevators: z.number().int().nonnegative(),
 	accessibleForReducedMobility: z.boolean(),
 	parkingCapacity: z.number().int().nonnegative(),
@@ -23,6 +74,9 @@ export const createComplexSchema = z.object({
 		.string()
 		.min(1, "Le nom est requis")
 		.max(255, "Le nom ne peut pas dépasser 255 caractères"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
 	street: z
 		.string()
 		.min(1, "La rue est requise")
@@ -35,6 +89,7 @@ export const createComplexSchema = z.object({
 		.string()
 		.min(5, "Le code postal doit contenir au moins 5 caractères")
 		.max(20, "Le code postal ne peut pas dépasser 20 caractères"),
+	openingHours: openingHoursSchema,
 	numberOfElevators: z
 		.number()
 		.int("Le nombre d'ascenseurs doit être un nombre entier")
@@ -102,6 +157,7 @@ export type UpdateComplexData = z.infer<typeof updateComplexSchema>;
 export type ComplexFilters = z.infer<typeof complexFiltersSchema>;
 export type ComplexStats = z.infer<typeof complexStatsSchema>;
 export type PaginationInfo = z.infer<typeof paginationSchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 
 function formatZodErrors(errors: z.ZodError): string {
 	return errors.errors
@@ -138,9 +194,10 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		}
 	});
 
-	// Fetch complexes with current filters
+	/**
+	 * Fetch complexes from the API based on current filters.
+	 */
 	const fetchComplexes = useCallback(async () => {
-		// Si pas de recherche et qu'on a des données initiales, ne pas faire de requête
 		if (!filters.search && initialData.length > 0) {
 			return;
 		}
@@ -183,7 +240,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		}
 	}, [filters, initialData]);
 
-	// Update filters and trigger fetch
+	/**
+	 * Update filters and reset pagination to page 1.
+	 */
 	const updateFilters = useCallback(
 		(newFilters: Partial<ComplexFilters>) => {
 			try {
@@ -205,7 +264,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[filters],
 	);
 
-	// Create new complex
+	/**
+	 * Create a new complex.
+	 */
 	const createComplex = useCallback(
 		async (data: CreateComplexData): Promise<Complex | null> => {
 			setLoading(true);
@@ -220,7 +281,6 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 						description: "Complexe créé avec succès",
 					});
 
-					// Add to current list
 					setComplexes((prev) => [result, ...prev]);
 					return result;
 				}
@@ -246,7 +306,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
-	// Update complex
+	/**
+	 * Update an existing complex.
+	 */
 	const updateComplex = useCallback(
 		async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
 			setLoading(true);
@@ -262,7 +324,6 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 						description: "Complexe mis à jour avec succès",
 					});
 
-					// Update the complex in the current list
 					setComplexes((prev) =>
 						prev.map((complex) => (complex.id === id ? result : complex)),
 					);
@@ -290,7 +351,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
-	// Delete complex
+	/**
+	 * Delete a complex by its ID.
+	 */
 	const deleteComplex = useCallback(async (id: string): Promise<boolean> => {
 		setLoading(true);
 		setError(null);
@@ -304,7 +367,6 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 					description: "Complexe supprimé avec succès",
 				});
 
-				// Remove the complex from the current list
 				setComplexes((prev) => prev.filter((complex) => complex.id !== id));
 				return true;
 			}
@@ -328,7 +390,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		}
 	}, []);
 
-	// Get complex by ID
+	/**
+	 * Fetch a complex by its ID.
+	 */
 	const getComplexById = useCallback(
 		async (id: string): Promise<Complex | null> => {
 			setLoading(true);
@@ -363,14 +427,15 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 		[],
 	);
 
-	// Fetch complexes when filters change (only if search is active)
 	useEffect(() => {
 		if (filters.search) {
 			fetchComplexes();
 		}
 	}, [fetchComplexes, filters.search]);
 
-	// Pagination helpers
+	/**
+	 * Navigate to a specific page in the pagination.
+	 */
 	const goToPage = useCallback(
 		(page: number) => {
 			try {
@@ -425,7 +490,9 @@ export function useComplexes(options: UseComplexesOptions = {}) {
 	};
 }
 
-// Hook for complex statistics
+/**
+ * Hook to fetch and manage complex statistics.
+ */
 export function useComplexStats() {
 	const [stats, setStats] = useState<ComplexStats | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -472,7 +539,9 @@ export function useComplexStats() {
 	};
 }
 
-// Hook pour valider les données de formulaire en temps réel
+/**
+ * Hook to validate complex data for creation and updates.
+ */
 export function useComplexValidation() {
 	const validateCreateData = useCallback((data: unknown) => {
 		try {

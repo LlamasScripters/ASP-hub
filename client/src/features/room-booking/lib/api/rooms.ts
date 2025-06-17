@@ -21,6 +21,13 @@ export class RoomsApiClient {
 		this.baseUrl = baseUrl;
 	}
 
+	/**
+	 * Get all rooms with optional filters and pagination.
+	 * @param filters - Optional filters for room search.
+	 * @param page - Page number for pagination (default is 1).
+	 * @param limit - Number of rooms per page (default is 20).
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async getRooms(
 		filters?: Partial<RoomFilters>,
 		page = 1,
@@ -52,6 +59,13 @@ export class RoomsApiClient {
 		return roomsPaginatedResponseSchema.parse(rawData);
 	}
 
+	/**
+	 * Get rooms by complex ID with pagination.
+	 * @param complexId - The ID of the complex to filter rooms by.
+	 * @param page - Page number for pagination (default is 1).
+	 * @param limit - Number of rooms per page (default is 20).
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async getRoomsByComplexId(
 		complexId: string,
 		page = 1,
@@ -87,6 +101,11 @@ export class RoomsApiClient {
 		return roomsPaginatedResponseSchema.parse(rawData);
 	}
 
+	/**
+	 * Get a single room by its ID.
+	 * @param roomId - The ID of the room to retrieve.
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async getRoomById(roomId: string, options?: ApiOptions): Promise<Room> {
 		const response = await fetch(`${this.baseUrl}/rooms/${roomId}`, {
 			signal: options?.signal,
@@ -100,6 +119,11 @@ export class RoomsApiClient {
 		return roomSchema.parse(rawData);
 	}
 
+	/**
+	 * Create a new room.
+	 * @param data - The data for the new room.
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async createRoom(data: CreateRoomData, options?: ApiOptions): Promise<Room> {
 		const response = await fetch(`${this.baseUrl}/rooms`, {
 			method: "POST",
@@ -118,6 +142,12 @@ export class RoomsApiClient {
 		return roomSchema.parse(rawData);
 	}
 
+	/**
+	 * Update an existing room.
+	 * @param roomId - The ID of the room to update.
+	 * @param data - The updated data for the room.
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async updateRoom(
 		roomId: string,
 		data: UpdateRoomData,
@@ -140,6 +170,11 @@ export class RoomsApiClient {
 		return roomSchema.parse(rawData);
 	}
 
+	/**
+	 * Delete a room by its ID.
+	 * @param roomId - The ID of the room to delete.
+	 * @param options - Optional API options (e.g., AbortSignal).
+	 */
 	async deleteRoom(roomId: string, options?: ApiOptions): Promise<boolean> {
 		const response = await fetch(`${this.baseUrl}/rooms/${roomId}`, {
 			method: "DELETE",

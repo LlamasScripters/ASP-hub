@@ -29,7 +29,6 @@ import {
 	Trash2,
 	Users,
 } from "lucide-react";
-// client/src/features/clubs/pages/sections/SectionsListPage.tsx
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Category, Section } from "../../types";

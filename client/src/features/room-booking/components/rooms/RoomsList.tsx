@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -26,10 +33,13 @@ import {
 } from "@/components/ui/table";
 import { useRooms } from "@room-booking/hooks/useRooms";
 import type { Room } from "@room-booking/hooks/useRooms";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	Calendar,
+	ChevronLeft,
+	ChevronRight,
 	CircleOff,
+	Filter,
 	Loader2,
 	MoreHorizontal,
 	Plus,
@@ -38,32 +48,103 @@ import {
 	Warehouse,
 	//@ts-ignore
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface RoomsListProps {
 	complexId: string;
 	initialRooms: Room[];
-	onCreateClick?: () => void;
-	onEditClick?: (room: Room) => void;
 }
 
-export function RoomsList({
-	complexId,
-	initialRooms,
-	onCreateClick,
-	onEditClick,
-}: RoomsListProps) {
+export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
+	const [sportTypeFilter, setSportTypeFilter] = useState<string>("all");
+	const [roomTypeFilter, setRoomTypeFilter] = useState<string>("all");
+	const [accreditationFilter, setAccreditationFilter] = useState<string>("all");
+	const itemsPerPage = 10;
 
-	const { rooms, loading, error, updateFilters, deleteRoom } = useRooms({
+	const {
+		rooms: fetchedRooms,
+		loading,
+		error,
+		updateFilters,
+		deleteRoom,
+	} = useRooms({
 		complexId,
 		initialData: initialRooms,
 	});
-	const navigate = useNavigate();
+
+	const allRooms = fetchedRooms.length > 0 ? fetchedRooms : initialRooms;
+
+	const availableSportTypes = useMemo(() => {
+		const types = Array.from(new Set(allRooms.map((room) => room.sportType)));
+		return types.sort();
+	}, [allRooms]);
+
+	const filteredRooms = useMemo(() => {
+		let filtered = allRooms;
+
+		if (searchTerm) {
+			const lowerSearchTerm = searchTerm.toLowerCase();
+			filtered = filtered.filter(
+				(room) =>
+					room.name.toLowerCase().includes(lowerSearchTerm) ||
+					room.sportType.toLowerCase().includes(lowerSearchTerm) ||
+					room.accreditation?.toLowerCase().includes(lowerSearchTerm),
+			);
+		}
+
+		if (sportTypeFilter !== "all") {
+			filtered = filtered.filter((room) => room.sportType === sportTypeFilter);
+		}
+
+		if (roomTypeFilter !== "all") {
+			filtered = filtered.filter((room) => {
+				if (roomTypeFilter === "indoor") {
+					return room.isIndoor;
+				}
+				if (roomTypeFilter === "outdoor") {
+					return !room.isIndoor;
+				}
+				return true;
+			});
+		}
+
+		if (accreditationFilter !== "all") {
+			filtered = filtered.filter((room) => {
+				if (accreditationFilter === "with-accreditation") {
+					return room.accreditation && room.accreditation.trim() !== "";
+				}
+				if (accreditationFilter === "without-accreditation") {
+					return !room.accreditation || room.accreditation.trim() === "";
+				}
+				return true;
+			});
+		}
+
+		return filtered;
+	}, [
+		allRooms,
+		searchTerm,
+		sportTypeFilter,
+		roomTypeFilter,
+		accreditationFilter,
+	]);
+
+	const totalPages = Math.ceil(filteredRooms.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentRooms = filteredRooms.slice(startIndex, endIndex);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, []);
+	// useEffect(() => {
+	//     setCurrentPage(1);
+	// }, [filteredRooms.length]);
 
 	const handleSearch = (value: string) => {
 		setSearchTerm(value);
-		updateFilters({ search: value || undefined });
 	};
 
 	const handleDelete = async (room: Room) => {
@@ -74,10 +155,6 @@ export function RoomsList({
 		) {
 			await deleteRoom(room.id);
 		}
-	};
-
-	const handleSeeDetails = (roomId: string) => {
-		navigate({ to: `/admin/facilities/rooms/${roomId}` });
 	};
 
 	const formatDate = (dateString: string) => {
@@ -104,34 +181,163 @@ export function RoomsList({
 		return colors[sportType] || "bg-gray-100 text-gray-800";
 	};
 
-	// Use initial data if no search is active and no loading
-	const displayRooms = searchTerm || loading ? rooms : initialRooms;
+	const goToPage = (page: number) => {
+		setCurrentPage(page);
+	};
+
+	const nextPage = () => {
+		if (currentPage < totalPages) {
+			setCurrentPage(currentPage + 1);
+		}
+	};
+
+	const prevPage = () => {
+		if (currentPage > 1) {
+			setCurrentPage(currentPage - 1);
+		}
+	};
+
+	// Générer les numéros de page à afficher
+	const getPageNumbers = () => {
+		const pages = [];
+		const maxVisible = 5;
+
+		if (totalPages <= maxVisible) {
+			for (let i = 1; i <= totalPages; i++) {
+				pages.push(i);
+			}
+		} else {
+			const start = Math.max(1, currentPage - 2);
+			const end = Math.min(totalPages, start + maxVisible - 1);
+
+			for (let i = start; i <= end; i++) {
+				pages.push(i);
+			}
+		}
+
+		return pages;
+	};
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Salles du complexe</CardTitle>
-				<CardDescription>
-					{displayRooms.length} salle{displayRooms.length > 1 ? "s" : ""}{" "}
-					trouvée{displayRooms.length > 1 ? "s" : ""}
-				</CardDescription>
+				<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+					<div>
+						<CardTitle>Salles du complexe</CardTitle>
+						<CardDescription>
+							{filteredRooms.length} salle{filteredRooms.length > 1 ? "s" : ""}{" "}
+							trouvée{filteredRooms.length > 1 ? "s" : ""}
+							{filteredRooms.length !== allRooms.length &&
+								` sur ${allRooms.length} au total`}
+						</CardDescription>
+					</div>
+					<Button asChild>
+						<Link
+							to="/admin/facilities/complexes/$complexId/create-room"
+							params={{ complexId }}
+						>
+							<Plus className="w-4 h-4 mr-2" />
+							Nouvelle salle
+						</Link>
+					</Button>
+				</div>
 			</CardHeader>
 			<CardContent>
-				{/* Barre de recherche */}
-				<div className="flex flex-col gap-4 mb-6 md:flex-row">
-					<div className="relative flex-1">
-						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-						<Input
-							placeholder="Rechercher une salle par nom ou sport..."
-							className="pl-8"
-							value={searchTerm}
-							onChange={(e) => handleSearch(e.target.value)}
-						/>
+				{/* Barre de recherche et filtres */}
+				<div className="flex flex-col gap-4 mb-6">
+					<div className="flex flex-col gap-4 md:flex-row">
+						<div className="relative flex-1">
+							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+							<Input
+								placeholder="Rechercher une salle par nom, sport ou accréditation..."
+								className="pl-8"
+								value={searchTerm}
+								onChange={(e) => handleSearch(e.target.value)}
+							/>
+						</div>
+						<div className="flex gap-2">
+							<Select
+								value={sportTypeFilter}
+								onValueChange={setSportTypeFilter}
+							>
+								<SelectTrigger className="w-[150px]">
+									<SelectValue placeholder="Type de sport" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">Tous les sports</SelectItem>
+									{availableSportTypes.map((sport) => (
+										<SelectItem key={sport} value={sport}>
+											{sport}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<Select value={roomTypeFilter} onValueChange={setRoomTypeFilter}>
+								<SelectTrigger className="w-[140px]">
+									<SelectValue placeholder="Type de salle" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">Toutes</SelectItem>
+									<SelectItem value="indoor">Intérieure</SelectItem>
+									<SelectItem value="outdoor">Extérieure</SelectItem>
+								</SelectContent>
+							</Select>
+							<Select
+								value={accreditationFilter}
+								onValueChange={setAccreditationFilter}
+							>
+								<SelectTrigger className="w-[140px]">
+									<SelectValue placeholder="Accréditation" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">Toutes</SelectItem>
+									<SelectItem value="with-accreditation">Avec</SelectItem>
+									<SelectItem value="without-accreditation">Sans</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
-					<Button onClick={onCreateClick}>
-						<Plus className="w-4 h-4 mr-2" />
-						Nouvelle salle
-					</Button>
+					{(searchTerm ||
+						sportTypeFilter !== "all" ||
+						roomTypeFilter !== "all" ||
+						accreditationFilter !== "all") && (
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Filter className="w-4 h-4" />
+							<span>Filtres actifs:</span>
+							{searchTerm && (
+								<Badge variant="secondary">Recherche: {searchTerm}</Badge>
+							)}
+							{sportTypeFilter !== "all" && (
+								<Badge variant="secondary">Sport: {sportTypeFilter}</Badge>
+							)}
+							{roomTypeFilter !== "all" && (
+								<Badge variant="secondary">
+									Type:{" "}
+									{roomTypeFilter === "indoor" ? "Intérieure" : "Extérieure"}
+								</Badge>
+							)}
+							{accreditationFilter !== "all" && (
+								<Badge variant="secondary">
+									Accréditation:{" "}
+									{accreditationFilter === "with-accreditation"
+										? "Avec"
+										: "Sans"}
+								</Badge>
+							)}
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => {
+									setSearchTerm("");
+									setSportTypeFilter("all");
+									setRoomTypeFilter("all");
+									setAccreditationFilter("all");
+								}}
+							>
+								Effacer
+							</Button>
+						</div>
+					)}
 				</div>
 
 				{/* Table */}
@@ -148,12 +354,12 @@ export function RoomsList({
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{loading && searchTerm ? (
+							{loading ? (
 								<TableRow>
 									<TableCell colSpan={6} className="h-24 text-center">
 										<div className="flex items-center justify-center">
 											<Loader2 className="w-6 h-6 animate-spin mr-2" />
-											Recherche en cours...
+											Chargement...
 										</div>
 									</TableCell>
 								</TableRow>
@@ -166,8 +372,8 @@ export function RoomsList({
 										{error}
 									</TableCell>
 								</TableRow>
-							) : displayRooms.length > 0 ? (
-								displayRooms.map((room) => (
+							) : currentRooms.length > 0 ? (
+								currentRooms.map((room) => (
 									<TableRow key={room.id}>
 										<TableCell>
 											<div className="flex items-center">
@@ -226,15 +432,24 @@ export function RoomsList({
 												<DropdownMenuContent align="end">
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuSeparator />
-													<DropdownMenuItem
-														onClick={() => handleSeeDetails(room.id)}
-													>
-														Voir les détails
+													<DropdownMenuItem asChild>
+														<Link
+															to="/admin/facilities/rooms/$roomId"
+															params={{ roomId: room.id }}
+															className="w-full cursor-pointer"
+														>
+															Voir les détails
+														</Link>
 													</DropdownMenuItem>
-													<DropdownMenuItem onClick={() => onEditClick?.(room)}>
-														Modifier
+													<DropdownMenuItem asChild>
+														<Link
+															to="/admin/facilities/rooms/$roomId/edit"
+															params={{ roomId: room.id }}
+															className="w-full cursor-pointer"
+														>
+															Modifier
+														</Link>
 													</DropdownMenuItem>
-													<DropdownMenuItem>Voir le planning</DropdownMenuItem>
 													<DropdownMenuSeparator />
 													<DropdownMenuItem
 														className="text-red-600"
@@ -256,8 +471,11 @@ export function RoomsList({
 												Aucune salle trouvée
 											</h3>
 											<p className="text-gray-500 mb-4">
-												{searchTerm
-													? "Aucune salle ne correspond à votre recherche."
+												{searchTerm ||
+												sportTypeFilter !== "all" ||
+												roomTypeFilter !== "all" ||
+												accreditationFilter !== "all"
+													? "Aucune salle ne correspond à vos critères de recherche."
 													: "Commencez par créer votre première salle."}
 											</p>
 										</div>
@@ -267,6 +485,51 @@ export function RoomsList({
 						</TableBody>
 					</Table>
 				</div>
+
+				{/* Pagination */}
+				{totalPages > 1 && (
+					<div className="flex items-center justify-between mt-4">
+						<div className="text-sm text-muted-foreground">
+							Affichage de {startIndex + 1} à{" "}
+							{Math.min(endIndex, filteredRooms.length)} sur{" "}
+							{filteredRooms.length} salles
+						</div>
+						<div className="flex items-center space-x-2">
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={prevPage}
+								disabled={currentPage === 1}
+							>
+								<ChevronLeft className="h-4 w-4" />
+								<span className="sr-only">Page précédente</span>
+							</Button>
+
+							<div className="flex items-center space-x-1">
+								{getPageNumbers().map((page) => (
+									<Button
+										key={page}
+										variant={currentPage === page ? "default" : "outline"}
+										size="sm"
+										onClick={() => goToPage(page)}
+									>
+										{page}
+									</Button>
+								))}
+							</div>
+
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={nextPage}
+								disabled={currentPage === totalPages}
+							>
+								<ChevronRight className="h-4 w-4" />
+								<span className="sr-only">Page suivante</span>
+							</Button>
+						</div>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

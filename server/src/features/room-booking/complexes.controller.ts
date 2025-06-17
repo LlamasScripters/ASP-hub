@@ -7,12 +7,35 @@ const complexesRouter = Router();
 
 const complexSchema = z.object({
 	name: z.string().min(1).max(255),
+	description: z.string().max(500),
 	street: z.string().min(1).max(255),
 	city: z.string().min(1).max(100),
 	postalCode: z.string().min(5).max(20),
 	numberOfElevators: z.number().int().min(0),
 	accessibleForReducedMobility: z.boolean(),
 	parkingCapacity: z.number().int().min(0),
+	openingHours: z.record(
+		z.enum([
+			"monday",
+			"tuesday",
+			"wednesday",
+			"thursday",
+			"friday",
+			"saturday",
+			"sunday",
+		]),
+		z.object({
+			open: z
+				.string()
+				.regex(/^\d{2}:\d{2}$/)
+				.nullable(),
+			close: z
+				.string()
+				.regex(/^\d{2}:\d{2}$/)
+				.nullable(),
+			closed: z.boolean(),
+		}),
+	),
 });
 
 const complexQuerySchema = z

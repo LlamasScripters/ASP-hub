@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -26,7 +33,7 @@ import {
 } from "@/components/ui/table";
 import { useComplexes } from "@room-booking/hooks/useComplexes";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
 	Accessibility,
 	Building,
@@ -35,6 +42,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	CircleOff,
+	Filter,
 	Loader2,
 	MapPin,
 	MoreHorizontal,
@@ -42,41 +50,86 @@ import {
 	Search,
 	//@ts-ignore
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface ComplexListProps {
-	onCreateClick?: () => void;
-	onEditClick?: (complexId: string) => void;
 	initialComplexes?: Complex[];
 }
 
-export function ComplexList({
-	onCreateClick,
-	onEditClick,
-	initialComplexes = [],
-}: ComplexListProps) {
-	const navigate = useNavigate();
+export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
+	const [accessibilityFilter, setAccessibilityFilter] = useState<string>("all");
+	const [parkingFilter, setParkingFilter] = useState<string>("all");
+	const itemsPerPage = 10;
 
 	const {
-		complexes,
+		complexes: fetchedComplexes,
 		pagination,
 		loading,
 		error,
 		updateFilters,
 		deleteComplex,
-		nextPage,
-		prevPage,
-		goToPage,
 	} = useComplexes({
 		page: 1,
-		limit: 10,
+		limit: 50,
 		initialData: initialComplexes,
 	});
 
+	const allComplexes =
+		fetchedComplexes.length > 0 ? fetchedComplexes : initialComplexes;
+
+	const filteredComplexes = useMemo(() => {
+		let filtered = allComplexes;
+
+		if (searchTerm) {
+			const lowerSearchTerm = searchTerm.toLowerCase();
+			filtered = filtered.filter(
+				(complex) =>
+					complex.name.toLowerCase().includes(lowerSearchTerm) ||
+					complex.city.toLowerCase().includes(lowerSearchTerm) ||
+					complex.street.toLowerCase().includes(lowerSearchTerm),
+			);
+		}
+
+		if (accessibilityFilter !== "all") {
+			filtered = filtered.filter((complex) => {
+				if (accessibilityFilter === "accessible") {
+					return complex.accessibleForReducedMobility;
+				}
+				if (accessibilityFilter === "not-accessible") {
+					return !complex.accessibleForReducedMobility;
+				}
+				return true;
+			});
+		}
+
+		if (parkingFilter !== "all") {
+			filtered = filtered.filter((complex) => {
+				if (parkingFilter === "with-parking") {
+					return complex.parkingCapacity > 0;
+				}
+				if (parkingFilter === "no-parking") {
+					return complex.parkingCapacity === 0;
+				}
+				return true;
+			});
+		}
+
+		return filtered;
+	}, [allComplexes, searchTerm, accessibilityFilter, parkingFilter]);
+
+	const totalPages = Math.ceil(filteredComplexes.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentComplexes = filteredComplexes.slice(startIndex, endIndex);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, []);
+
 	const handleSearch = (value: string) => {
 		setSearchTerm(value);
-		updateFilters({ search: value || undefined });
 	};
 
 	const handleDelete = async (id: string, name: string) => {
@@ -89,10 +142,6 @@ export function ComplexList({
 		}
 	};
 
-	const handleViewDetails = (complexId: string) => {
-		navigate({ to: `/admin/facilities/complexes/${complexId}` });
-	};
-
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
 			day: "2-digit",
@@ -101,7 +150,41 @@ export function ComplexList({
 		});
 	};
 
-	const displayComplexes = searchTerm || loading ? complexes : initialComplexes;
+	const goToPage = (page: number) => {
+		setCurrentPage(page);
+	};
+
+	const nextPage = () => {
+		if (currentPage < totalPages) {
+			setCurrentPage(currentPage + 1);
+		}
+	};
+
+	const prevPage = () => {
+		if (currentPage > 1) {
+			setCurrentPage(currentPage - 1);
+		}
+	};
+
+	const getPageNumbers = () => {
+		const pages = [];
+		const maxVisible = 5;
+
+		if (totalPages <= maxVisible) {
+			for (let i = 1; i <= totalPages; i++) {
+				pages.push(i);
+			}
+		} else {
+			const start = Math.max(1, currentPage - 2);
+			const end = Math.min(totalPages, start + maxVisible - 1);
+
+			for (let i = start; i <= end; i++) {
+				pages.push(i);
+			}
+		}
+
+		return pages;
+	};
 
 	return (
 		<div className="space-y-6">
@@ -111,29 +194,94 @@ export function ComplexList({
 						<div>
 							<CardTitle>Liste des complexes</CardTitle>
 							<CardDescription>
-								{displayComplexes.length} complexe
-								{displayComplexes.length > 1 ? "s" : ""} trouvé
-								{displayComplexes.length > 1 ? "s" : ""}
+								{filteredComplexes.length} complexe
+								{filteredComplexes.length > 1 ? "s" : ""} trouvé
+								{filteredComplexes.length > 1 ? "s" : ""}
+								{filteredComplexes.length !== allComplexes.length &&
+									` sur ${allComplexes.length} au total`}
 							</CardDescription>
 						</div>
-						<Button onClick={onCreateClick}>
-							<Plus className="w-4 h-4 mr-2" />
-							Nouveau complexe
+						<Button asChild>
+							<Link to="/admin/facilities/complexes/create">
+								<Plus className="w-4 h-4 mr-2" />
+								Nouveau complexe
+							</Link>
 						</Button>
 					</div>
 				</CardHeader>
 				<CardContent>
-					{/* Barre de recherche */}
-					<div className="flex flex-col gap-4 mb-6 md:flex-row">
-						<div className="relative flex-1">
-							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input
-								placeholder="Rechercher un complexe par nom ou ville..."
-								className="pl-8"
-								value={searchTerm}
-								onChange={(e) => handleSearch(e.target.value)}
-							/>
+					{/* Barre de recherche et filtres */}
+					<div className="flex flex-col gap-4 mb-6">
+						<div className="flex flex-col gap-4 md:flex-row">
+							<div className="relative flex-1">
+								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+								<Input
+									placeholder="Rechercher un complexe par nom, ville ou adresse..."
+									className="pl-8"
+									value={searchTerm}
+									onChange={(e) => handleSearch(e.target.value)}
+								/>
+							</div>
+							<div className="flex gap-2">
+								<Select
+									value={accessibilityFilter}
+									onValueChange={setAccessibilityFilter}
+								>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Accessibilité" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Toutes</SelectItem>
+										<SelectItem value="accessible">PMR Accessible</SelectItem>
+										<SelectItem value="not-accessible">Standard</SelectItem>
+									</SelectContent>
+								</Select>
+								<Select value={parkingFilter} onValueChange={setParkingFilter}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Parking" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Tous</SelectItem>
+										<SelectItem value="with-parking">Avec parking</SelectItem>
+										<SelectItem value="no-parking">Sans parking</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
+						{(searchTerm ||
+							accessibilityFilter !== "all" ||
+							parkingFilter !== "all") && (
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Filter className="w-4 h-4" />
+								<span>Filtres actifs:</span>
+								{searchTerm && (
+									<Badge variant="secondary">Recherche: {searchTerm}</Badge>
+								)}
+								{accessibilityFilter !== "all" && (
+									<Badge variant="secondary">
+										Accessibilité:{" "}
+										{accessibilityFilter === "accessible" ? "PMR" : "Standard"}
+									</Badge>
+								)}
+								{parkingFilter !== "all" && (
+									<Badge variant="secondary">
+										Parking:{" "}
+										{parkingFilter === "with-parking" ? "Avec" : "Sans"}
+									</Badge>
+								)}
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => {
+										setSearchTerm("");
+										setAccessibilityFilter("all");
+										setParkingFilter("all");
+									}}
+								>
+									Effacer
+								</Button>
+							</div>
+						)}
 					</div>
 
 					{/* Table */}
@@ -150,12 +298,12 @@ export function ComplexList({
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{loading && searchTerm ? (
+								{loading ? (
 									<TableRow>
 										<TableCell colSpan={6} className="h-24 text-center">
 											<div className="flex items-center justify-center">
 												<Loader2 className="w-6 h-6 animate-spin mr-2" />
-												Recherche en cours...
+												Chargement...
 											</div>
 										</TableCell>
 									</TableRow>
@@ -168,8 +316,8 @@ export function ComplexList({
 											{error}
 										</TableCell>
 									</TableRow>
-								) : displayComplexes.length > 0 ? (
-									displayComplexes.map((complex) => (
+								) : currentComplexes.length > 0 ? (
+									currentComplexes.map((complex) => (
 										<TableRow key={complex.id}>
 											<TableCell>
 												<div className="flex items-center">
@@ -250,15 +398,25 @@ export function ComplexList({
 													<DropdownMenuContent align="end">
 														<DropdownMenuLabel>Actions</DropdownMenuLabel>
 														<DropdownMenuSeparator />
-														<DropdownMenuItem
-															onClick={() => handleViewDetails(complex.id)}
-														>
-															Voir les détails
+														<DropdownMenuItem asChild>
+															<Link
+																to={"/admin/facilities/complexes/$complexId"}
+																params={{ complexId: complex.id }}
+																className="w-full cursor-pointer"
+															>
+																Voir les détails
+															</Link>
 														</DropdownMenuItem>
-														<DropdownMenuItem
-															onClick={() => onEditClick?.(complex.id)}
-														>
-															Modifier
+														<DropdownMenuItem asChild>
+															<Link
+																to={
+																	"/admin/facilities/complexes/$complexId/edit"
+																}
+																params={{ complexId: complex.id }}
+																className="w-full cursor-pointer"
+															>
+																Modifier
+															</Link>
 														</DropdownMenuItem>
 														<DropdownMenuSeparator />
 														<DropdownMenuItem
@@ -283,8 +441,10 @@ export function ComplexList({
 													Aucun complexe trouvé
 												</h3>
 												<p className="text-gray-500 mb-4">
-													{searchTerm
-														? "Aucun complexe ne correspond à votre recherche."
+													{searchTerm ||
+													accessibilityFilter !== "all" ||
+													parkingFilter !== "all"
+														? "Aucun complexe ne correspond à vos critères de recherche."
 														: "Commencez par créer votre premier complexe sportif."}
 												</p>
 											</div>
@@ -295,60 +455,43 @@ export function ComplexList({
 						</Table>
 					</div>
 
-					{/* Pagination - seulement si on a des résultats de recherche */}
-					{pagination && pagination.totalPages > 1 && searchTerm && (
+					{/* Pagination */}
+					{totalPages > 1 && (
 						<div className="flex items-center justify-between mt-4">
 							<div className="text-sm text-muted-foreground">
-								Affichage de{" "}
-								{Math.min(
-									pagination.totalCount,
-									(pagination.page - 1) * pagination.limit + 1,
-								)}{" "}
-								à{" "}
-								{Math.min(
-									pagination.totalCount,
-									pagination.page * pagination.limit,
-								)}{" "}
-								sur {pagination.totalCount} complexes
+								Affichage de {startIndex + 1} à{" "}
+								{Math.min(endIndex, filteredComplexes.length)} sur{" "}
+								{filteredComplexes.length} complexes
 							</div>
 							<div className="flex items-center space-x-2">
 								<Button
 									variant="outline"
 									size="icon"
 									onClick={prevPage}
-									disabled={!pagination.hasPrev || loading}
+									disabled={currentPage === 1}
 								>
 									<ChevronLeft className="h-4 w-4" />
 									<span className="sr-only">Page précédente</span>
 								</Button>
 
 								<div className="flex items-center space-x-1">
-									{Array.from(
-										{ length: Math.min(5, pagination.totalPages) },
-										(_, i) => {
-											const page = i + 1;
-											return (
-												<Button
-													key={page}
-													variant={
-														pagination.page === page ? "default" : "outline"
-													}
-													size="sm"
-													onClick={() => goToPage(page)}
-													disabled={loading}
-												>
-													{page}
-												</Button>
-											);
-										},
-									)}
+									{getPageNumbers().map((page) => (
+										<Button
+											key={page}
+											variant={currentPage === page ? "default" : "outline"}
+											size="sm"
+											onClick={() => goToPage(page)}
+										>
+											{page}
+										</Button>
+									))}
 								</div>
 
 								<Button
 									variant="outline"
 									size="icon"
 									onClick={nextPage}
-									disabled={!pagination.hasNext || loading}
+									disabled={currentPage === totalPages}
 								>
 									<ChevronRight className="h-4 w-4" />
 									<span className="sr-only">Page suivante</span>

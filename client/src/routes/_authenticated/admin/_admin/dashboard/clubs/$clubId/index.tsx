@@ -9,7 +9,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Club } from "@/features/clubs/types";
-// client/src/routes/_authenticated/dashboard/clubs/$clubId/index.tsx
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
 	Building2,
