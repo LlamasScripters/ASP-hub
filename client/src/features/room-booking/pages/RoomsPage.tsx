@@ -27,8 +27,7 @@ import {
     CalendarDays,
     Clock,
     Filter,
-    LayoutList,
-    MapPin,
+    Notebook ,
     Plus,
     Search,
     TrendingUp,
@@ -36,6 +35,7 @@ import {
     Vote,
     Warehouse,
     XCircle,
+    //@ts-ignore
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -403,8 +403,8 @@ export function RoomsPage({ initialRooms = [] }: RoomsPageProps) {
                                                     {room.name}
                                                 </CardTitle>
                                                 <CardDescription className="flex items-center gap-2 mt-1">
-                                                    <MapPin className="w-3 h-3" />
-                                                    {room.complexName || "Complexe non défini"}
+                                                    <Notebook  className="w-3 h-3" />
+                                                    {room.description}
                                                 </CardDescription>
                                             </div>
                                             <Badge variant="outline" className={getSportBadgeColor(room.sportType)}>
