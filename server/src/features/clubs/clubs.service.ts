@@ -1,18 +1,18 @@
-import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { db } from "@/db/index.js";
 import {
-	clubs,
-	sections,
-	categories,
-	sessionsSport,
-	sessionParticipants,
-	sectionResponsibilities,
-	users,
+	type InsertCategory,
 	type InsertClub,
 	type InsertSection,
-	type InsertCategory,
 	type InsertSessionSport,
+	categories,
+	clubs,
+	sectionResponsibilities,
+	sections,
+	sessionParticipants,
+	sessionsSport,
+	users,
 } from "@/db/schema.js";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 export const clubsService = {
 	// clubs (asp)
@@ -66,7 +66,9 @@ export const clubsService = {
 				createdAt: sections.createdAt,
 				clubName: clubs.name,
 				clubId_join: clubs.id,
-				categoriesCount: sql<number>`count(${categories.id})`.as('categoriesCount'),
+				categoriesCount: sql<number>`count(${categories.id})`.as(
+					"categoriesCount",
+				),
 			})
 			.from(sections)
 			.leftJoin(clubs, eq(clubs.id, sections.clubId))
@@ -85,7 +87,9 @@ export const clubsService = {
 				color: sections.color,
 				isActive: sections.isActive,
 				createdAt: sections.createdAt,
-				categoriesCount: sql<number>`count(${categories.id})`.as('categoriesCount'),
+				categoriesCount: sql<number>`count(${categories.id})`.as(
+					"categoriesCount",
+				),
 			})
 			.from(sections)
 			.leftJoin(categories, eq(categories.sectionId, sections.id))
@@ -101,7 +105,7 @@ export const clubsService = {
 			.where(and(eq(sections.id, sectionId), eq(sections.clubId, clubId)));
 		return section;
 	},
-	  
+
 	async createSection(data: InsertSection) {
 		const [section] = await db.insert(sections).values(data).returning();
 		return section;
@@ -140,14 +144,23 @@ export const clubsService = {
 				sectionId_join: sections.id,
 				clubName: clubs.name,
 				clubId_join: clubs.id,
-				sessionsCount: sql<number>`count(${sessionsSport.id})`.as('sessionsCount'),
+				sessionsCount: sql<number>`count(${sessionsSport.id})`.as(
+					"sessionsCount",
+				),
 			})
 			.from(categories)
 			.leftJoin(sections, eq(sections.id, categories.sectionId))
 			.leftJoin(clubs, eq(clubs.id, sections.clubId))
 			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
 			.where(eq(categories.isActive, true))
-			.groupBy(categories.id, sections.id, sections.name, sections.color, clubs.id, clubs.name)
+			.groupBy(
+				categories.id,
+				sections.id,
+				sections.name,
+				sections.color,
+				clubs.id,
+				clubs.name,
+			)
 			.orderBy(asc(sections.name), asc(categories.name));
 	},
 
@@ -161,11 +174,15 @@ export const clubsService = {
 				ageMax: categories.ageMax,
 				isActive: categories.isActive,
 				createdAt: categories.createdAt,
-				sessionsCount: sql<number>`count(${sessionsSport.id})`.as('sessionsCount'),
+				sessionsCount: sql<number>`count(${sessionsSport.id})`.as(
+					"sessionsCount",
+				),
 			})
 			.from(categories)
 			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
-			.where(and(eq(categories.sectionId, sectionId), eq(categories.isActive, true)))
+			.where(
+				and(eq(categories.sectionId, sectionId), eq(categories.isActive, true)),
+			)
 			.groupBy(categories.id)
 			.orderBy(asc(categories.name));
 	},
@@ -292,7 +309,7 @@ export const clubsService = {
 			.leftJoin(categories, eq(categories.id, sessionsSport.categoryId))
 			.leftJoin(sections, eq(sections.id, categories.sectionId))
 			.where(eq(sessionsSport.id, id));
-		
+
 		return session;
 	},
 
@@ -338,14 +355,14 @@ export const clubsService = {
 			.insert(sessionParticipants)
 			.values({ sessionId, userId })
 			.returning();
-		
+
 		await db
 			.update(sessionsSport)
 			.set({
 				currentParticipants: sql`${sessionsSport.currentParticipants} + 1`,
 			})
 			.where(eq(sessionsSport.id, sessionId));
-		
+
 		return participant;
 	},
 
@@ -355,10 +372,10 @@ export const clubsService = {
 			.where(
 				and(
 					eq(sessionParticipants.sessionId, sessionId),
-					eq(sessionParticipants.userId, userId)
-				)
+					eq(sessionParticipants.userId, userId),
+				),
 			);
-		
+
 		// met à jour le compteur de participants
 		await db
 			.update(sessionsSport)
@@ -383,12 +400,15 @@ export const clubsService = {
 			})
 			.from(sectionResponsibilities)
 			.leftJoin(sections, eq(sections.id, sectionResponsibilities.sectionId))
-			.leftJoin(categories, eq(categories.id, sectionResponsibilities.categoryId))
+			.leftJoin(
+				categories,
+				eq(categories.id, sectionResponsibilities.categoryId),
+			)
 			.where(
 				and(
 					eq(sectionResponsibilities.userId, userId),
-					eq(sectionResponsibilities.isActive, true)
-				)
+					eq(sectionResponsibilities.isActive, true),
+				),
 			)
 			.orderBy(asc(sections.name));
 	},
