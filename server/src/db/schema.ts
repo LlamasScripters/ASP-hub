@@ -291,21 +291,12 @@ export const sectionResponsibilities = pgTable("section_responsibilities", {
 	isActive: boolean("is_active").notNull().default(true),
 });
 
-
 export const etatArticle = pgEnum("etat_article", [
 	"brouillon",
 	"publié",
 	"archivé",
 	"suppression logique",
 ]);
-
-
-// Tables de la partie blog (Articles) 
-export const article = pgTable("article", {
-	id: uuid("id").primaryKey(),
-	titre: text("titre").notNull(),
-	
-});
 
 // Enumerations for states
 export const articleStateEnum = pgEnum("article_state", [
@@ -362,18 +353,18 @@ export const articles = pgTable("articles", {
 export const articleTags = pgTable(
 	"article_tags",
 	{
-	  articleId: uuid("article_id")
-		.notNull()
-		.references(() => articles.id, { onDelete: "cascade" }),
-	  tagId: integer("tag_id")
-		.notNull()
-		.references(() => tags.id, { onDelete: "cascade" }),
-	  createdAt: timestamp("created_at").defaultNow().notNull(),
+		articleId: uuid("article_id")
+			.notNull()
+			.references(() => articles.id, { onDelete: "cascade" }),
+		tagId: integer("tag_id")
+			.notNull()
+			.references(() => tags.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => ({
-	  primaryKey: primaryKey({ columns: [table.articleId, table.tagId] }),
-	})
-  );
+		primaryKey: primaryKey({ columns: [table.articleId, table.tagId] }),
+	}),
+);
 
 // Comments table
 export const comments = pgTable("comments", {
@@ -425,19 +416,11 @@ export const commentReactions = pgTable("comment_reactions", {
 });
 
 // Types for enumerations
-export const articleStateValues = [
-	"draft",
-	"published", 
-	"archived",
-] as const;
+export const articleStateValues = ["draft", "published", "archived"] as const;
 export type ArticleState = (typeof articleStateValues)[number];
 
-export const commentStateValues = [
-	"published",
-	"archived", 
-] as const;
+export const commentStateValues = ["published", "archived"] as const;
 export type CommentState = (typeof commentStateValues)[number];
-
 
 export type InsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -482,3 +465,13 @@ export type InsertSectionResponsibility =
 	typeof sectionResponsibilities.$inferInsert;
 export type SelectSectionResponsibility =
 	typeof sectionResponsibilities.$inferSelect;
+
+// Blog types
+export type InsertTag = typeof tags.$inferInsert;
+export type SelectTag = typeof tags.$inferSelect;
+export type InsertArticle = typeof articles.$inferInsert;
+export type SelectArticle = typeof articles.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;
+export type SelectComment = typeof comments.$inferSelect;
+export type InsertReaction = typeof reactions.$inferInsert;
+export type SelectReaction = typeof reactions.$inferSelect;
