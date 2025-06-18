@@ -18,7 +18,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Table,
 	TableBody,
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Link, useParams } from "@tanstack/react-router";
 import {
+	ArrowLeft,
 	ChevronDown,
 	ChevronUp,
 	Edit,
@@ -50,6 +50,11 @@ interface Filters {
 	ageMax: string;
 	ageRange: string;
 }
+
+// fonction pour vérifier si un âge est valide
+const isValidAge = (age: number | undefined | null): age is number => {
+	return age !== undefined && age !== null && age >= 0;
+};
 
 export function CategoriesListPage() {
 	const { clubId, sectionId } = useParams({
@@ -115,17 +120,31 @@ export function CategoriesListPage() {
 			const nameMatch = category.name
 				.toLowerCase()
 				.includes(filters.name.toLowerCase());
+
+			// amélioration du filtrage pour les âges undefined
 			const ageMinMatch =
 				filters.ageMin === "" ||
-				category.ageMin?.toString().includes(filters.ageMin);
+				(isValidAge(category.ageMin) &&
+					category.ageMin.toString().includes(filters.ageMin)) ||
+				(!isValidAge(category.ageMin) &&
+					filters.ageMin.toLowerCase().includes("non"));
+
 			const ageMaxMatch =
 				filters.ageMax === "" ||
-				category.ageMax?.toString().includes(filters.ageMax);
+				(isValidAge(category.ageMax) &&
+					category.ageMax.toString().includes(filters.ageMax)) ||
+				(!isValidAge(category.ageMax) &&
+					filters.ageMax.toLowerCase().includes("non"));
+
 			const ageRangeMatch =
 				filters.ageRange === "" ||
-				(category.ageMin !== undefined &&
-					category.ageMax !== undefined &&
-					`${category.ageMin} → ${category.ageMax}`.includes(filters.ageRange));
+				(isValidAge(category.ageMin) &&
+					isValidAge(category.ageMax) &&
+					`${category.ageMin} - ${category.ageMax}`.includes(
+						filters.ageRange,
+					)) ||
+				((!isValidAge(category.ageMin) || !isValidAge(category.ageMax)) &&
+					filters.ageRange.toLowerCase().includes("non"));
 
 			return nameMatch && ageMinMatch && ageMaxMatch && ageRangeMatch;
 		});
@@ -141,12 +160,12 @@ export function CategoriesListPage() {
 					bValue = b.name.toLowerCase();
 					break;
 				case "ageMin":
-					aValue = a.ageMin ?? 0;
-					bValue = b.ageMin ?? 0;
+					aValue = isValidAge(a.ageMin) ? a.ageMin : -1; // -1 pour que les undefined soient en premier
+					bValue = isValidAge(b.ageMin) ? b.ageMin : -1;
 					break;
 				case "ageMax":
-					aValue = a.ageMax ?? 0;
-					bValue = b.ageMax ?? 0;
+					aValue = isValidAge(a.ageMax) ? a.ageMax : -1; // -1 pour que les undefined soient en premier
+					bValue = isValidAge(b.ageMax) ? b.ageMax : -1;
 					break;
 				default:
 					return 0;
@@ -201,25 +220,34 @@ export function CategoriesListPage() {
 
 	return (
 		<div className="container mx-auto p-6 space-y-8">
-			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-				<div className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">
-						Catégories de la section {sectionName}
-					</h1>
-					<p className="text-muted-foreground">
-						Gérez les catégories de la section{" "}
-						<span className="font-medium">{sectionName}</span>
-					</p>
-				</div>
-				<Link
-					to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
-					params={{ clubId, sectionId }}
-				>
-					<Button className="w-full md:w-auto">
-						<Users className="mr-2 h-4 w-4" />
-						Créer une catégorie
+			<div className="flex flex-col gap-4">
+				<Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+					<Button variant="ghost" className="w-fit">
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Retour aux sections
 					</Button>
 				</Link>
+
+				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div className="space-y-1">
+						<h1 className="text-3xl font-bold tracking-tight">
+							Catégories de la section {sectionName}
+						</h1>
+						<p className="text-muted-foreground">
+							Gérez les catégories de la section{" "}
+							<span className="font-medium">{sectionName}</span>
+						</p>
+					</div>
+					<Link
+						to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+						params={{ clubId, sectionId }}
+					>
+						<Button className="w-full md:w-auto">
+							<Users className="mr-2 h-4 w-4" />
+							Créer une catégorie
+						</Button>
+					</Link>
+				</div>
 			</div>
 
 			<Card>
@@ -249,10 +277,14 @@ export function CategoriesListPage() {
 						</div>
 						<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="name"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Nom de la catégorie
-								</Label>
+								</label>
 								<Input
+									id="name"
 									placeholder="Rechercher par nom..."
 									value={filters.name}
 									onChange={(e) => handleFilterChange("name", e.target.value)}
@@ -260,10 +292,14 @@ export function CategoriesListPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="ageMin"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Âge minimum
-								</Label>
+								</label>
 								<Input
+									id="ageMin"
 									placeholder="Ex: 12"
 									value={filters.ageMin}
 									onChange={(e) => handleFilterChange("ageMin", e.target.value)}
@@ -271,10 +307,14 @@ export function CategoriesListPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="ageMax"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Âge maximum
-								</Label>
+								</label>
 								<Input
+									id="ageMax"
 									placeholder="Ex: 18"
 									value={filters.ageMax}
 									onChange={(e) => handleFilterChange("ageMax", e.target.value)}
@@ -282,11 +322,15 @@ export function CategoriesListPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="ageRange"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Tranche d'âge
-								</Label>
+								</label>
 								<Input
-									placeholder="Ex: 12 → 18"
+									id="ageRange"
+									placeholder="Ex: 12 - 18"
 									value={filters.ageRange}
 									onChange={(e) =>
 										handleFilterChange("ageRange", e.target.value)

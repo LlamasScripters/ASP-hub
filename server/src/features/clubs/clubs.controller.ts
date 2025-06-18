@@ -1,4 +1,4 @@
-import type { InsertSessionSport } from "@/db/schema.js";
+import { type SelectSessionSport, Session } from "@/db/schema.js";
 import { type Request, type Response, Router } from "express";
 import { clubsService } from "./clubs.service.js";
 
@@ -194,7 +194,7 @@ clubsRouter.put("/sessions/:sessionId", async (req: Request, res: Response) => {
 			categoryId,
 		} = req.body;
 
-		const updateData: Partial<InsertSessionSport> = {};
+		const updateData: Partial<SelectSessionSport> = {};
 
 		if (title !== undefined) updateData.title = title;
 		if (description !== undefined) updateData.description = description;
@@ -591,6 +591,7 @@ clubsRouter.get(
 				location: s.location,
 				maxParticipants: s.maxParticipants,
 				currentParticipants: s.currentParticipants,
+				categoryId: s.categoryId,
 				coach: s.coachId
 					? {
 							id: s.coachId,
@@ -623,12 +624,14 @@ clubsRouter.post(
 				type,
 				status,
 				maxParticipants,
+				notes,
+				categoryId,
 			} = req.body;
 
-			const categoryId = req.params.categoryId;
+			const finalCategoryId = categoryId || req.params.categoryId;
 
 			const created = await clubsService.createSession({
-				categoryId,
+				categoryId: finalCategoryId,
 				title,
 				description,
 				startDate: new Date(startDate),
@@ -637,6 +640,7 @@ clubsRouter.post(
 				type,
 				status,
 				maxParticipants: maxParticipants ? Number(maxParticipants) : null,
+				notes,
 			});
 
 			res.status(201).json(created);

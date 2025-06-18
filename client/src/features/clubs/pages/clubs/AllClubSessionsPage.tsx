@@ -18,7 +18,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -229,12 +228,12 @@ export function AllClubSessionsPage() {
 			const sectionMatch =
 				filters.sectionName === "" ||
 				session.sectionName
-					?.toLowerCase()
+					.toLowerCase()
 					.includes(filters.sectionName.toLowerCase());
 			const categoryMatch =
 				filters.categoryName === "" ||
 				session.categoryName
-					?.toLowerCase()
+					.toLowerCase()
 					.includes(filters.categoryName.toLowerCase());
 			const typeMatch =
 				filters.type === "" ||
@@ -521,10 +520,14 @@ export function AllClubSessionsPage() {
 								</div>
 								<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 									<div className="space-y-2">
-										<Label className="text-xs font-medium text-muted-foreground">
+										<label
+											htmlFor="title"
+											className="text-xs font-medium text-muted-foreground"
+										>
 											Titre
-										</Label>
+										</label>
 										<Input
+											id="title"
 											placeholder="Rechercher par titre..."
 											value={filters.title}
 											onChange={(e) =>
@@ -534,10 +537,14 @@ export function AllClubSessionsPage() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs font-medium text-muted-foreground">
+										<label
+											htmlFor="sectionName"
+											className="text-xs font-medium text-muted-foreground"
+										>
 											Section
-										</Label>
+										</label>
 										<Input
+											id="sectionName"
 											placeholder="Filtrer par section..."
 											value={filters.sectionName}
 											onChange={(e) =>
@@ -547,10 +554,14 @@ export function AllClubSessionsPage() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs font-medium text-muted-foreground">
+										<label
+											htmlFor="categoryName"
+											className="text-xs font-medium text-muted-foreground"
+										>
 											Catégorie
-										</Label>
+										</label>
 										<Input
+											id="categoryName"
 											placeholder="Filtrer par catégorie..."
 											value={filters.categoryName}
 											onChange={(e) =>
@@ -560,16 +571,19 @@ export function AllClubSessionsPage() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs font-medium text-muted-foreground">
+										<label
+											htmlFor="type"
+											className="text-xs font-medium text-muted-foreground"
+										>
 											Type
-										</Label>
+										</label>
 										<Select
 											value={filters.type}
 											onValueChange={(value) =>
 												handleFilterChange("type", value)
 											}
 										>
-											<SelectTrigger className="h-8">
+											<SelectTrigger className="h-8" id="type">
 												<SelectValue placeholder="Tous les types" />
 											</SelectTrigger>
 											<SelectContent>
@@ -591,16 +605,19 @@ export function AllClubSessionsPage() {
 										</Select>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs font-medium text-muted-foreground">
+										<label
+											htmlFor="status"
+											className="text-xs font-medium text-muted-foreground"
+										>
 											Statut
-										</Label>
+										</label>
 										<Select
 											value={filters.status}
 											onValueChange={(value) =>
 												handleFilterChange("status", value)
 											}
 										>
-											<SelectTrigger className="h-8">
+											<SelectTrigger className="h-8" id="status">
 												<SelectValue placeholder="Tous les statuts" />
 											</SelectTrigger>
 											<SelectContent>

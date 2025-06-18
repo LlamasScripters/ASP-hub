@@ -35,27 +35,6 @@ const navigationItems: NavItemProps[] = [
 		title: "Projets sociaux",
 		IconComponent: Shield,
 	},
-	// {
-	// 	url: "/dashboard/finances",
-	// 	title: "Finances",
-	// 	IconComponent: CreditCard,
-	// },
-	// {
-	// 	url: "/dashboard/reports",
-	// 	title: "Rapports",
-	// 	IconComponent: FileText,
-	// },
-	// {
-	// 	url: "/dashboard/statistics",
-	// 	title: "Statistiques",
-	// 	IconComponent: BarChart3,
-	// },
-	// {
-	// 	url: "/dashboard/",
-	// 	title: "Messages",
-	// 	IconComponent: MessageSquare,
-	// },
-
 	{
 		url: "/user/settings",
 		title: "Paramètres",

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Club } from "@/features/clubs/types";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
+	ArrowLeft,
 	Building2,
 	Calendar,
 	FileText,
@@ -133,6 +135,12 @@ function ClubOverviewPage() {
 							Tableau de bord de gestion du club
 						</p>
 					</div>
+					<Link to="/admin/dashboard/clubs">
+						<Button variant="outline" className="flex items-center gap-2">
+							<ArrowLeft className="h-4 w-4" />
+							Retour à l'association
+						</Button>
+					</Link>
 				</div>
 
 				{/* Informations du club */}

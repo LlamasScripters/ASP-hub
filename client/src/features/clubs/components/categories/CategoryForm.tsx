@@ -12,7 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertCircle, ArrowLeft, Calendar, Save, Users } from "lucide-react";
+import {
+	AlertCircle,
+	AlertTriangle,
+	ArrowLeft,
+	Calendar,
+	Loader2,
+	Save,
+	Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,13 +35,48 @@ const schema = z
 	})
 	.refine(
 		(data) => {
+			// si on un âge est défini, l'autre doit l'être aussi
+			if ((data.ageMin !== undefined) !== (data.ageMax !== undefined)) {
+				return false;
+			}
+			// si les deux sont définis, âge min doit être inférieur à ou égal à âge max
+			if (data.ageMin !== undefined && data.ageMax !== undefined) {
+				if (data.ageMin > data.ageMax) {
+					return false;
+				}
+				if (data.ageMin === data.ageMax) {
+					return false;
+				}
+			}
+			return true;
+		},
+		{
+			message:
+				"Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum",
+			path: ["ageRange"],
+		},
+	)
+	.refine(
+		(data) => {
 			if (data.ageMin !== undefined && data.ageMax !== undefined) {
 				return data.ageMin <= data.ageMax;
 			}
 			return true;
 		},
 		{
-			message: "L'âge minimum doit être inférieur ou égal à l'âge maximum",
+			message: "L'âge minimum doit être inférieur à l'âge maximum",
+			path: ["ageMax"],
+		},
+	)
+	.refine(
+		(data) => {
+			if (data.ageMin !== undefined && data.ageMax !== undefined) {
+				return data.ageMin !== data.ageMax;
+			}
+			return true;
+		},
+		{
+			message: "L'âge minimum et maximum ne peuvent pas être identiques",
 			path: ["ageMax"],
 		},
 	);
@@ -53,9 +96,35 @@ export function CategoryForm({
 	const [form, setForm] = useState<Partial<Category>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(false);
+	const [existingCategories, setExistingCategories] = useState<Category[]>([]);
+	const [isLoadingExistingCategories, setIsLoadingExistingCategories] =
+		useState(true);
+
+	// récupération des catégories existantes au chargement
+	useEffect(() => {
+		const fetchExistingCategories = async () => {
+			try {
+				setIsLoadingExistingCategories(true);
+				const response = await fetch(
+					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
+				);
+				if (!response.ok)
+					throw new Error("Erreur lors du chargement des catégories");
+				const categories: Category[] = await response.json();
+				setExistingCategories(categories);
+			} catch (error) {
+				console.error("Erreur lors du chargement des catégories:", error);
+				toast.error("Erreur lors du chargement des catégories existantes");
+			} finally {
+				setIsLoadingExistingCategories(false);
+			}
+		};
+
+		fetchExistingCategories();
+	}, [clubId, sectionId]);
 
 	useEffect(() => {
-		if (mode === "edit" && categoryId) {
+		if (mode === "edit" && categoryId && !isLoadingExistingCategories) {
 			setIsLoading(true);
 			fetch(
 				`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
@@ -64,12 +133,94 @@ export function CategoryForm({
 				.then(setForm)
 				.finally(() => setIsLoading(false));
 		}
-	}, [mode, categoryId, clubId, sectionId]);
+	}, [mode, categoryId, clubId, sectionId, isLoadingExistingCategories]);
+
+	// validation pour les noms dupliqués
+	const validateDuplicateName = (name: string) => {
+		if (!name.trim()) return null;
+
+		const normalizedName = name.trim().toLowerCase();
+		const duplicateCategory = existingCategories.find(
+			(category) =>
+				category.name.trim().toLowerCase() === normalizedName &&
+				category.id !== categoryId, // exclusion la catégorie actuelle en mode édition
+		);
+
+		return duplicateCategory
+			? "Une catégorie avec ce nom existe déjà dans cette section"
+			: null;
+	};
+
+	// validation en temps réel des âges
+	const validateAgeRange = (ageMin?: number, ageMax?: number) => {
+		// si un âge est défini, l'autre doit l'être aussi
+		if ((ageMin !== undefined) !== (ageMax !== undefined)) {
+			return "Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum";
+		}
+
+		// si les deux sont définis, validation de cohérence
+		if (ageMin !== undefined && ageMax !== undefined) {
+			if (ageMin > ageMax) {
+				return "L'âge minimum ne peut pas être supérieur à l'âge maximum";
+			}
+			if (ageMin === ageMax) {
+				return "L'âge minimum et maximum ne peuvent pas être identiques";
+			}
+		}
+
+		return null;
+	};
+
+	const ageRangeError = validateAgeRange(form.ageMin, form.ageMax);
+	const duplicateNameError = validateDuplicateName(form.name || "");
+	const isValidAgeRange =
+		form.ageMin !== undefined && form.ageMax !== undefined && !ageRangeError;
+	const hasPartialAge =
+		(form.ageMin !== undefined) !== (form.ageMax !== undefined);
+
+	const handleAgeMinChange = (value: string) => {
+		const ageMin = value ? Number(value) : undefined;
+		setForm((prev) => ({ ...prev, ageMin }));
+	};
+
+	const handleAgeMaxChange = (value: string) => {
+		const ageMax = value ? Number(value) : undefined;
+		setForm((prev) => ({ ...prev, ageMax }));
+	};
+
+	const handleNameChange = (value: string) => {
+		setForm((prev) => ({ ...prev, name: value }));
+
+		// nettoyer l'erreur de nom dupliqué si elle existe
+		if (
+			errors.name === "Une catégorie avec ce nom existe déjà dans cette section"
+		) {
+			setErrors((prev) => {
+				const { name, ...newErrors } = prev;
+				return newErrors;
+			});
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setErrors({});
 		setIsLoading(true);
+
+		// validation des noms dupliqués
+		const nameError = validateDuplicateName(form.name || "");
+		if (nameError) {
+			setErrors({ name: nameError });
+			setIsLoading(false);
+			return;
+		}
+
+		// validation côté client
+		if (ageRangeError) {
+			setErrors({ ageRange: ageRangeError });
+			setIsLoading(false);
+			return;
+		}
 
 		const parsed = schema.safeParse({
 			...form,
@@ -89,14 +240,18 @@ export function CategoryForm({
 		}
 
 		try {
+			let response: Response;
 			if (mode === "create") {
-				await fetch(`/api/clubs/${clubId}/sections/${sectionId}/categories`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(parsed.data),
-				});
+				response = await fetch(
+					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(parsed.data),
+					},
+				);
 			} else {
-				await fetch(
+				response = await fetch(
 					`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
 					{
 						method: "PUT",
@@ -104,6 +259,21 @@ export function CategoryForm({
 						body: JSON.stringify(parsed.data),
 					},
 				);
+			}
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				if (
+					response.status === 409 ||
+					errorData.message?.includes("existe déjà")
+				) {
+					setErrors({
+						name: "Une catégorie avec ce nom existe déjà dans cette section",
+					});
+					setIsLoading(false);
+					return;
+				}
+				throw new Error(errorData.message || "Erreur lors de la sauvegarde");
 			}
 
 			toast.success(
@@ -130,6 +300,21 @@ export function CategoryForm({
 			params: { clubId, sectionId },
 		});
 	};
+
+	if (isLoadingExistingCategories) {
+		return (
+			<div className="container mx-auto p-6 max-w-2xl">
+				<Card>
+					<CardContent className="pt-6">
+						<div className="flex items-center justify-center space-x-2">
+							<Loader2 className="h-6 w-6 animate-spin" />
+							<span>Chargement des données...</span>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto p-6 max-w-2xl">
@@ -190,11 +375,17 @@ export function CategoryForm({
 										id="name"
 										placeholder="Ex: U15, Seniors, Débutants..."
 										value={form.name ?? ""}
-										onChange={(e) => setForm({ ...form, name: e.target.value })}
-										className={errors.name ? "border-destructive" : ""}
+										onChange={(e) => handleNameChange(e.target.value)}
+										className={
+											errors.name || duplicateNameError
+												? "border-destructive"
+												: ""
+										}
 									/>
-									{errors.name && (
-										<p className="text-sm text-destructive">{errors.name}</p>
+									{(errors.name || duplicateNameError) && (
+										<p className="text-sm text-destructive">
+											{errors.name || duplicateNameError}
+										</p>
 									)}
 								</div>
 
@@ -243,15 +434,12 @@ export function CategoryForm({
 											min="0"
 											max="100"
 											value={form.ageMin ?? ""}
-											onChange={(e) =>
-												setForm({
-													...form,
-													ageMin: e.target.value
-														? Number(e.target.value)
-														: undefined,
-												})
+											onChange={(e) => handleAgeMinChange(e.target.value)}
+											className={
+												errors.ageMin || ageRangeError
+													? "border-destructive"
+													: ""
 											}
-											className={errors.ageMin ? "border-destructive" : ""}
 										/>
 										{errors.ageMin && (
 											<p className="text-sm text-destructive">
@@ -271,15 +459,12 @@ export function CategoryForm({
 											min="0"
 											max="100"
 											value={form.ageMax ?? ""}
-											onChange={(e) =>
-												setForm({
-													...form,
-													ageMax: e.target.value
-														? Number(e.target.value)
-														: undefined,
-												})
+											onChange={(e) => handleAgeMaxChange(e.target.value)}
+											className={
+												errors.ageMax || ageRangeError
+													? "border-destructive"
+													: ""
 											}
-											className={errors.ageMax ? "border-destructive" : ""}
 										/>
 										{errors.ageMax && (
 											<p className="text-sm text-destructive">
@@ -289,13 +474,54 @@ export function CategoryForm({
 									</div>
 								</div>
 
-								{form.ageMin !== undefined && form.ageMax !== undefined && (
-									<div className="p-3 bg-muted rounded-lg">
-										<p className="text-sm text-muted-foreground">
-											Cette catégorie acceptera les participants âgés de{" "}
-											<span className="font-medium text-foreground">
+								{/* Erreur de tranche d'âge */}
+								{ageRangeError && (
+									<Alert variant="destructive">
+										<AlertTriangle className="h-4 w-4" />
+										<AlertDescription>{ageRangeError}</AlertDescription>
+									</Alert>
+								)}
+
+								{/* Aperçu de la tranche d'âge valide */}
+								{isValidAgeRange && (
+									<div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+										<p className="text-sm text-green-700">
+											✅ Cette catégorie acceptera les participants âgés de{" "}
+											<span className="font-semibold">
 												{form.ageMin} à {form.ageMax} ans
 											</span>
+											{form.ageMin !== undefined &&
+												form.ageMax !== undefined && (
+													<>
+														{" "}
+														({form.ageMax - form.ageMin + 1} années couvertes)
+													</>
+												)}
+										</p>
+									</div>
+								)}
+
+								{/* Avertissement pour âge partiel */}
+								{hasPartialAge && (
+									<div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+										<p className="text-sm text-orange-700">
+											⚠️ <strong>Attention :</strong> Vous devez remplir à la
+											fois l'âge minimum et maximum pour définir une limite
+											d'âge, ou laisser les deux champs vides pour une catégorie
+											sans restriction.
+										</p>
+									</div>
+								)}
+
+								{/* Aide pour les tranches d'âge */}
+								{!form.ageMin && !form.ageMax && (
+									<div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+										<p className="text-sm text-blue-700">
+											💡 <strong>Options disponibles :</strong>
+											<br />• Laissez vide pour une catégorie{" "}
+											<strong>sans restriction d'âge</strong>
+											<br />• Ou remplissez <strong>les deux champs</strong>{" "}
+											pour définir une tranche d'âge spécifique
 										</p>
 									</div>
 								)}
@@ -315,7 +541,9 @@ export function CategoryForm({
 								</Button>
 								<Button
 									type="submit"
-									disabled={isLoading}
+									disabled={
+										isLoading || !!ageRangeError || !!duplicateNameError
+									}
 									className="min-w-[120px]"
 								>
 									{isLoading ? (

@@ -50,7 +50,13 @@ const clubSchema = z.object({
 		.email("Adresse email invalide")
 		.optional()
 		.or(z.literal("")),
-	phone: z.string().optional(),
+	phone: z
+		.string()
+		.optional()
+		.refine((val) => !val || /^0[0-9]{9}$/.test(val), {
+			message:
+				"Veuillez mettre un numéro de téléphone valide (10 chiffres commençant par 0)",
+		}),
 	website: z
 		.string()
 		.url("L'URL du site web est invalide")
@@ -136,7 +142,9 @@ export function ClubForm({
 					? "Club créé avec succès !"
 					: "Club modifié avec succès !",
 			);
-			navigate({ to: "/admin/dashboard/clubs" });
+
+			// Redirection vers la page précédente
+			navigate({ to: "..", replace: true });
 		} catch (error) {
 			console.error("Erreur:", error);
 			toast.error("Une erreur est survenue lors de la sauvegarde");
@@ -146,9 +154,8 @@ export function ClubForm({
 	};
 
 	const handleCancel = () => {
-		if (mode === "edit" && clubId) {
-			navigate({ to: "/admin/dashboard/clubs/$clubId", params: { clubId } });
-		}
+		// Redirection vers la page précédente
+		navigate({ to: "..", replace: true });
 	};
 
 	if (isLoading && mode === "edit") {
@@ -328,13 +335,30 @@ export function ClubForm({
 												<FormControl>
 													<Input
 														type="tel"
-														placeholder="01 23 45 67 89"
+														placeholder="0123456789"
 														className="h-11"
+														maxLength={10}
 														{...field}
+														onPaste={(e) => {
+															e.preventDefault();
+															const pastedText =
+																e.clipboardData.getData("text");
+															const cleanedPhone = pastedText.replace(
+																/\D/g,
+																"",
+															);
+															const limitedPhone = cleanedPhone.slice(0, 10);
+															field.onChange(limitedPhone);
+														}}
+														onChange={(e) => {
+															const value = e.target.value.replace(/\D/g, "");
+															field.onChange(value);
+														}}
 													/>
 												</FormControl>
 												<FormDescription>
-													Numéro de téléphone de contact.
+													Numéro de téléphone à 10 chiffres (sans espaces ni
+													tirets).
 												</FormDescription>
 												<FormMessage />
 											</FormItem>

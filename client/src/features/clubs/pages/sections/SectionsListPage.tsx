@@ -18,7 +18,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Calendar,
@@ -41,6 +41,7 @@ export function SectionsListPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/",
 	});
+	const navigate = useNavigate();
 	const [sections, setSections] = useState<EnrichedSection[]>([]);
 	const [allCategories, setAllCategories] = useState<Category[]>([]);
 	const [categoriesCountBySection, setCategoriesCountBySection] = useState<
@@ -51,6 +52,10 @@ export function SectionsListPage() {
 		null,
 	);
 	const [isDeleting, setIsDeleting] = useState(false);
+
+	const handleGoBack = () => {
+		navigate({ to: ".." });
+	};
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -187,13 +192,13 @@ export function SectionsListPage() {
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 					<div className="space-y-2">
 						<div className="flex items-center gap-3">
-							<Link
-								to="/admin/dashboard/clubs/$clubId"
-								params={{ clubId }}
+							<button
+								type="button"
+								onClick={handleGoBack}
 								className="text-muted-foreground hover:text-foreground transition-colors"
 							>
 								<ArrowLeft className="h-6 w-6" />
-							</Link>
+							</button>
 							<h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
 								<FolderOpen className="h-8 w-8 text-primary" />
 								Sections du club

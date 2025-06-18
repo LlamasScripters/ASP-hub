@@ -18,7 +18,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Link, useParams } from "@tanstack/react-router";
 import {
+	ArrowLeft,
 	Calendar,
 	ChevronDown,
 	ChevronUp,
@@ -69,6 +69,7 @@ export function SectionSessionsListPage() {
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
 	});
 	const [sessions, setSessions] = useState<EnrichedSession[]>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
 	const [sectionName, setSectionName] = useState("");
 	const [sortField, setSortField] = useState<SortField>("startDate");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -85,12 +86,14 @@ export function SectionSessionsListPage() {
 
 	useEffect(() => {
 		const fetchSectionSessions = async () => {
-			const categories: Category[] = await fetch(
+			const categoriesData: Category[] = await fetch(
 				`/api/clubs/${clubId}/sections/${sectionId}/categories`,
 			).then((res) => res.json());
+			setCategories(categoriesData);
+
 			const result: EnrichedSession[] = [];
 
-			for (const cat of categories) {
+			for (const cat of categoriesData) {
 				const catSessions: SessionSport[] = await fetch(
 					`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`,
 				).then((res) => res.json());
@@ -191,7 +194,7 @@ export function SectionSessionsListPage() {
 			const categoryMatch =
 				filters.categoryName === "" ||
 				session.categoryName
-					?.toLowerCase()
+					.toLowerCase()
 					.includes(filters.categoryName.toLowerCase());
 			const typeMatch =
 				filters.type === "" ||
@@ -286,6 +289,21 @@ export function SectionSessionsListPage() {
 		<div className="container mx-auto p-6 space-y-8">
 			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 				<div className="space-y-1">
+					<div className="flex items-center gap-4">
+						<Link
+							to="/admin/dashboard/clubs/$clubId/sections"
+							params={{ clubId }}
+						>
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex items-center gap-2"
+							>
+								<ArrowLeft className="h-4 w-4" />
+								Retour aux sections
+							</Button>
+						</Link>
+					</div>
 					<h1 className="text-3xl font-bold tracking-tight">
 						Sessions de {sectionName}
 					</h1>
@@ -294,17 +312,35 @@ export function SectionSessionsListPage() {
 						<span className="font-medium">{sectionName}</span>
 					</p>
 				</div>
-				{sessions.length > 0 && sessions[0].categoryId && (
-					<Link
-						to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
-						params={{ clubId, sectionId, categoryId: sessions[0].categoryId }}
-					>
-						<Button className="w-full md:w-auto">
-							<Plus className="mr-2 h-4 w-4" />
-							Créer une session
-						</Button>
-					</Link>
-				)}
+				<div className="flex flex-col gap-2 w-full md:w-auto">
+					{categories.length > 0 ? (
+						<Link
+							to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+							params={{ clubId, sectionId, categoryId: categories[0].id }}
+						>
+							<Button className="w-full md:w-auto">
+								<Plus className="mr-2 h-4 w-4" />
+								Créer une session
+							</Button>
+						</Link>
+					) : (
+						<div className="text-center md:text-right">
+							<p className="text-sm text-muted-foreground mb-2">
+								Aucune catégorie trouvée. Créez d'abord une catégorie pour
+								pouvoir ajouter des sessions.
+							</p>
+							<Link
+								to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+								params={{ clubId, sectionId }}
+							>
+								<Button variant="outline" className="w-full md:w-auto">
+									<Plus className="mr-2 h-4 w-4" />
+									Créer une catégorie
+								</Button>
+							</Link>
+						</div>
+					)}
+				</div>
 			</div>
 
 			<Card>
@@ -335,10 +371,14 @@ export function SectionSessionsListPage() {
 						</div>
 						<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="title"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Titre de la session
-								</Label>
+								</label>
 								<Input
+									id="title"
 									placeholder="Rechercher par titre..."
 									value={filters.title}
 									onChange={(e) => handleFilterChange("title", e.target.value)}
@@ -346,10 +386,14 @@ export function SectionSessionsListPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="categoryName"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Catégorie
-								</Label>
+								</label>
 								<Input
+									id="categoryName"
 									placeholder="Filtrer par catégorie..."
 									value={filters.categoryName}
 									onChange={(e) =>
@@ -359,14 +403,17 @@ export function SectionSessionsListPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="type"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Type
-								</Label>
+								</label>
 								<Select
 									value={filters.type}
 									onValueChange={(value) => handleFilterChange("type", value)}
 								>
-									<SelectTrigger className="h-8">
+									<SelectTrigger className="h-8" id="type">
 										<SelectValue placeholder="Tous les types" />
 									</SelectTrigger>
 									<SelectContent>
@@ -388,14 +435,17 @@ export function SectionSessionsListPage() {
 								</Select>
 							</div>
 							<div className="space-y-2">
-								<Label className="text-xs font-medium text-muted-foreground">
+								<label
+									htmlFor="status"
+									className="text-xs font-medium text-muted-foreground"
+								>
 									Statut
-								</Label>
+								</label>
 								<Select
 									value={filters.status}
 									onValueChange={(value) => handleFilterChange("status", value)}
 								>
-									<SelectTrigger className="h-8">
+									<SelectTrigger className="h-8" id="status">
 										<SelectValue placeholder="Tous les statuts" />
 									</SelectTrigger>
 									<SelectContent>

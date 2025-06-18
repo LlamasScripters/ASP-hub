@@ -25,6 +25,7 @@ import {
 	Calendar,
 	Clock,
 	FileText,
+	Loader2,
 	MapPin,
 	Save,
 } from "lucide-react";
@@ -59,12 +60,38 @@ const sessionSchema = z
 		},
 	);
 
-// Fonction pour formater une date ISO en format datetime-local
+// fonction pour convertir du datetime-local en ISO
+const formatDateForAPI = (localDateTime: string): string => {
+	if (!localDateTime) return "";
+	try {
+		const date = new Date(localDateTime);
+		return date.toISOString();
+	} catch (error) {
+		console.error("Error converting date to ISO:", error);
+		return localDateTime; // fallback à la valeur originale
+	}
+};
+
+// fonction pour formater une date ISO en datetime-local
 const formatDateForInput = (isoDate: string): string => {
 	if (!isoDate) return "";
-	const date = new Date(isoDate);
-	// Format YYYY-MM-DDTHH:MM (sans secondes ni millisecondes)
-	return date.toISOString().slice(0, 16);
+	try {
+		const date = new Date(isoDate);
+		// vérifier si la date est valide
+		if (Number.isNaN(date.getTime())) return "";
+
+		// format YYYY-MM-DDTHH:MM
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		const hours = String(date.getHours()).padStart(2, "0");
+		const minutes = String(date.getMinutes()).padStart(2, "0");
+
+		return `${year}-${month}-${day}T${hours}:${minutes}`;
+	} catch (error) {
+		console.error("Error formatting date:", error);
+		return "";
+	}
 };
 
 export function SessionForm({
@@ -82,9 +109,17 @@ export function SessionForm({
 }) {
 	const navigate = useNavigate();
 	const [categories, setCategories] = useState<Category[]>([]);
+	const [existingSessions, setExistingSessions] = useState<SessionSport[]>([]);
+	const [isLoadingExistingSessions, setIsLoadingExistingSessions] =
+		useState(true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [sectionName, setSectionName] = useState("");
+	const [dateValidation, setDateValidation] = useState<{
+		isValid: boolean;
+		message: string;
+		type: "error" | "warning" | "info" | null;
+	}>({ isValid: true, message: "", type: null });
 
 	const [form, setForm] = useState<Partial<SessionSport>>({
 		type: "entrainement",
@@ -92,8 +127,58 @@ export function SessionForm({
 		categoryId: categoryId,
 	});
 
+	// récupération des sessions existantes au chargement
+	useEffect(() => {
+		const fetchExistingSessions = async () => {
+			try {
+				setIsLoadingExistingSessions(true);
+				const categoriesRes = await fetch(
+					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
+				);
+				const categoriesData: Category[] = await categoriesRes.json();
+
+				const allSessions: SessionSport[] = [];
+				for (const cat of categoriesData) {
+					try {
+						const sessionsRes = await fetch(
+							`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`,
+						);
+						if (sessionsRes.ok) {
+							const sessionsData: SessionSport[] = await sessionsRes.json();
+							console.log(
+								`Sessions from API for category ${cat.name}:`,
+								JSON.stringify(sessionsData, null, 2),
+							);
+							const sessionsWithCategoryId = sessionsData.map((session) => ({
+								...session,
+								categoryId: cat.id,
+							}));
+							allSessions.push(...sessionsWithCategoryId);
+						}
+					} catch (error) {
+						console.error(
+							`Erreur lors du chargement des sessions pour la catégorie ${cat.id}:`,
+							error,
+						);
+					}
+				}
+
+				setExistingSessions(allSessions);
+			} catch (error) {
+				console.error("Erreur lors du chargement des sessions:", error);
+				toast.error("Erreur lors du chargement des sessions existantes");
+			} finally {
+				setIsLoadingExistingSessions(false);
+			}
+		};
+
+		fetchExistingSessions();
+	}, [clubId, sectionId]);
+
 	useEffect(() => {
 		const fetchData = async () => {
+			if (isLoadingExistingSessions) return;
+
 			setIsLoading(true);
 			try {
 				// Fetch categories
@@ -114,7 +199,20 @@ export function SessionForm({
 				if (mode === "edit" && sessionId) {
 					const sessionRes = await fetch(`/api/clubs/sessions/${sessionId}`);
 					const sessionData = await sessionRes.json();
-					setForm(sessionData);
+
+					// Ensure proper date formatting for datetime-local inputs
+					const formattedSessionData = {
+						...sessionData,
+						startDate: sessionData.startDate
+							? formatDateForInput(sessionData.startDate)
+							: "",
+						endDate: sessionData.endDate
+							? formatDateForInput(sessionData.endDate)
+							: "",
+						notes: sessionData.notes || "",
+					};
+
+					setForm(formattedSessionData);
 				}
 			} catch (error) {
 				setErrors({ general: "Erreur lors du chargement des données" });
@@ -124,19 +222,194 @@ export function SessionForm({
 		};
 
 		fetchData();
-	}, [mode, sessionId, clubId, sectionId]);
+	}, [
+		mode,
+		sessionId,
+		clubId,
+		sectionId,
+
+		isLoadingExistingSessions,
+	]);
+
+	// validation pour les titres dupliqués
+	const validateDuplicateTitle = (
+		title: string,
+		selectedCategoryId: string,
+	) => {
+		if (!title.trim() || !selectedCategoryId) return null;
+
+		console.log(
+			"Validation - Title:",
+			title,
+			"CategoryId:",
+			selectedCategoryId,
+		);
+		console.log("Existing sessions:", existingSessions);
+
+		const normalizedTitle = title.trim().toLowerCase();
+		console.log("Normalized title:", normalizedTitle);
+
+		// Log each session for debugging
+		existingSessions.forEach((session, index) => {
+			console.log(`Session ${index}:`, {
+				title: session.title,
+				normalizedTitle: session.title.trim().toLowerCase(),
+				categoryId: session.categoryId,
+				id: session.id,
+				titleMatch: session.title.trim().toLowerCase() === normalizedTitle,
+				categoryMatch: session.categoryId === selectedCategoryId,
+			});
+		});
+
+		const duplicateSession = existingSessions.find(
+			(session) =>
+				session.title.trim().toLowerCase() === normalizedTitle &&
+				session.categoryId === selectedCategoryId &&
+				session.id !== sessionId, // exclusion la session actuelle en mode édition
+		);
+
+		console.log("Duplicate found:", duplicateSession);
+
+		return duplicateSession
+			? "Une session avec ce titre existe déjà pour cette catégorie"
+			: null;
+	};
+
+	const validateDates = (startDate: string, endDate: string) => {
+		if (!startDate && !endDate) {
+			setDateValidation({ isValid: true, message: "", type: null });
+			return;
+		}
+
+		if (!startDate && endDate) {
+			setDateValidation({
+				isValid: false,
+				message: "Veuillez renseigner la date de début",
+				type: "warning",
+			});
+			return;
+		}
+
+		if (startDate && !endDate) {
+			setDateValidation({
+				isValid: false,
+				message: "Veuillez renseigner la date de fin",
+				type: "warning",
+			});
+			return;
+		}
+
+		if (startDate && endDate) {
+			const start = new Date(startDate);
+			const end = new Date(endDate);
+
+			if (start > end) {
+				setDateValidation({
+					isValid: false,
+					message:
+						"⚠️ La date de début ne peut pas être postérieure à la date de fin !",
+					type: "error",
+				});
+				return;
+			}
+
+			if (start.getTime() === end.getTime()) {
+				setDateValidation({
+					isValid: false,
+					message:
+						"⚠️ Les dates de début et fin ne peuvent pas être identiques ! Une session doit avoir une durée minimale.",
+					type: "error",
+				});
+				return;
+			}
+
+			// calcul des durées
+			const durationMs = end.getTime() - start.getTime();
+			const durationMinutes = Math.floor(durationMs / (1000 * 60));
+			const hours = Math.floor(durationMinutes / 60);
+			const minutes = durationMinutes % 60;
+
+			let durationText = "";
+			if (hours > 0) {
+				durationText += `${hours}h`;
+				if (minutes > 0) durationText += ` ${minutes}min`;
+			} else {
+				durationText = `${minutes}min`;
+			}
+
+			setDateValidation({
+				isValid: true,
+				message: `Durée de la session : ${durationText}`,
+				type: "info",
+			});
+		}
+	};
+
+	// validation en temps réel pour les titres et catégories
+	const duplicateTitleError = validateDuplicateTitle(
+		form.title || "",
+		form.categoryId || "",
+	);
+
+	const handleTitleChange = (value: string) => {
+		setForm((prev) => ({ ...prev, title: value }));
+
+		// nettoye l'erreur de titre dupliqué si elle existe
+		if (
+			errors.title ===
+			"Une session avec ce titre existe déjà pour cette catégorie"
+		) {
+			setErrors((prev) => {
+				const { title, ...newErrors } = prev;
+				return newErrors;
+			});
+		}
+	};
+
+	// effect pour valider les dates quand elles changent
+	useEffect(() => {
+		validateDates(form.startDate || "", form.endDate || "");
+
+		// biome-ignore lint/correctness/useExhaustiveDependencies: react-compiler is able to handle this
+	}, [form.startDate, form.endDate, validateDates]);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setErrors({});
 		setIsLoading(true);
 
-		const parsed = sessionSchema.safeParse({
+		console.log("Form submission started:", { mode, form }); // Debug log
+
+		// validation des titres dupliqués
+		const titleError = validateDuplicateTitle(
+			form.title || "",
+			form.categoryId || "",
+		);
+		if (titleError) {
+			setErrors({ title: titleError });
+			setIsLoading(false);
+			return;
+		}
+
+		// vérifie la validation des dates en premier
+		if (!dateValidation.isValid) {
+			setErrors({
+				general: "Veuillez corriger les erreurs de dates avant de continuer",
+			});
+			setIsLoading(false);
+			return;
+		}
+
+		const formData = {
 			...form,
+			startDate: form.startDate ? formatDateForAPI(form.startDate) : undefined,
+			endDate: form.endDate ? formatDateForAPI(form.endDate) : undefined,
 			maxParticipants: form.maxParticipants
 				? Number(form.maxParticipants)
 				: undefined,
-		});
+		};
+
+		const parsed = sessionSchema.safeParse(formData);
 
 		if (!parsed.success) {
 			const formattedErrors: Record<string, string> = {};
@@ -160,14 +433,22 @@ export function SessionForm({
 			const response = await fetch(url, {
 				method,
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					...parsed.data,
-					categoryId,
-				}),
+				body: JSON.stringify(parsed.data),
 			});
 
 			if (!response.ok) {
-				throw new Error("Erreur lors de la sauvegarde");
+				const errorData = await response.json().catch(() => ({}));
+				if (
+					response.status === 409 ||
+					errorData.message?.includes("existe déjà")
+				) {
+					setErrors({
+						title: "Une session avec ce titre existe déjà pour cette catégorie",
+					});
+					setIsLoading(false);
+					return;
+				}
+				throw new Error(`Erreur lors de la sauvegarde: ${response.status}`);
 			}
 
 			toast.success(
@@ -175,12 +456,16 @@ export function SessionForm({
 					? "Session créée avec succès !"
 					: "Session modifiée avec succès !",
 			);
-			navigate({
-				to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
-				params: { clubId, sectionId },
-			});
+
+			// délai pour s'assurer que le toast s'affiche avant la navigation
+			setTimeout(() => {
+				navigate({
+					to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
+					params: { clubId, sectionId },
+				});
+			}, 500);
 		} catch (error) {
-			console.error("Erreur:", error);
+			console.error("Erreur complète:", error);
 			toast.error("Erreur lors de la sauvegarde de la session");
 			setErrors({ general: "Erreur lors de la sauvegarde de la session" });
 		} finally {
@@ -194,6 +479,21 @@ export function SessionForm({
 			params: { clubId, sectionId },
 		});
 	};
+
+	if (isLoadingExistingSessions) {
+		return (
+			<div className="p-6 max-w-4xl mx-auto">
+				<Card>
+					<CardContent className="pt-6">
+						<div className="flex items-center justify-center space-x-2">
+							<Loader2 className="h-6 w-6 animate-spin" />
+							<span>Chargement des données...</span>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
 		<div className="p-6 max-w-4xl mx-auto">
@@ -255,27 +555,36 @@ export function SessionForm({
 										<Label htmlFor="categoryId" className="text-sm font-medium">
 											Catégorie <span className="text-destructive">*</span>
 										</Label>
-										<Select
-											value={form.categoryId || ""}
-											onValueChange={(value) =>
-												setForm({ ...form, categoryId: value })
-											}
-										>
-											<SelectTrigger
-												className={
-													errors.categoryId ? "border-destructive" : ""
-												}
+										{categories.length > 0 ? (
+											<Select
+												value={form.categoryId || ""}
+												onValueChange={(value) => {
+													setForm((prev) => ({ ...prev, categoryId: value }));
+												}}
 											>
-												<SelectValue placeholder="Choisir une catégorie" />
-											</SelectTrigger>
-											<SelectContent>
-												{categories.map((cat) => (
-													<SelectItem key={cat.id} value={cat.id}>
-														{cat.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
+												<SelectTrigger
+													className={
+														errors.categoryId ? "border-destructive" : ""
+													}
+												>
+													<SelectValue placeholder="Choisir une catégorie" />
+												</SelectTrigger>
+												<SelectContent>
+													{categories.map((cat) => (
+														<SelectItem key={cat.id} value={cat.id}>
+															{cat.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										) : (
+											<div className="flex items-center space-x-2">
+												<Loader2 className="h-4 w-4 animate-spin" />
+												<span className="text-sm text-muted-foreground">
+													Chargement des catégories...
+												</span>
+											</div>
+										)}
 										{errors.categoryId && (
 											<p className="text-sm text-destructive">
 												{errors.categoryId}
@@ -292,13 +601,17 @@ export function SessionForm({
 											id="title"
 											placeholder="Ex: Entraînement technique, Match amical..."
 											value={form.title ?? ""}
-											onChange={(e) =>
-												setForm({ ...form, title: e.target.value })
+											onChange={(e) => handleTitleChange(e.target.value)}
+											className={
+												errors.title || duplicateTitleError
+													? "border-destructive"
+													: ""
 											}
-											className={errors.title ? "border-destructive" : ""}
 										/>
-										{errors.title && (
-											<p className="text-sm text-destructive">{errors.title}</p>
+										{(errors.title || duplicateTitleError) && (
+											<p className="text-sm text-destructive">
+												{errors.title || duplicateTitleError}
+											</p>
 										)}
 									</div>
 								</div>
@@ -342,7 +655,7 @@ export function SessionForm({
 										<Input
 											id="startDate"
 											type="datetime-local"
-											value={formatDateForInput(form.startDate ?? "")}
+											value={form.startDate ?? ""}
 											onChange={(e) =>
 												setForm({ ...form, startDate: e.target.value })
 											}
@@ -363,7 +676,7 @@ export function SessionForm({
 										<Input
 											id="endDate"
 											type="datetime-local"
-											value={formatDateForInput(form.endDate ?? "")}
+											value={form.endDate ?? ""}
 											onChange={(e) =>
 												setForm({ ...form, endDate: e.target.value })
 											}
@@ -376,6 +689,29 @@ export function SessionForm({
 										)}
 									</div>
 								</div>
+
+								{/* Validation des dates en temps réel */}
+								{dateValidation.message && (
+									<Alert
+										variant={
+											dateValidation.type === "error"
+												? "destructive"
+												: "default"
+										}
+										className={
+											dateValidation.type === "error"
+												? "border-destructive bg-destructive/10"
+												: dateValidation.type === "warning"
+													? "border-orange-500 bg-orange-50 text-orange-800"
+													: "border-blue-500 bg-blue-50 text-blue-800"
+										}
+									>
+										<AlertCircle className="h-4 w-4" />
+										<AlertDescription className="font-medium">
+											{dateValidation.message}
+										</AlertDescription>
+									</Alert>
+								)}
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 									<div className="space-y-2">
@@ -471,15 +807,33 @@ export function SessionForm({
 											type="number"
 											placeholder="Ex: 20"
 											min="1"
+											max="9999"
 											value={form.maxParticipants ?? ""}
-											onChange={(e) =>
-												setForm({
-													...form,
-													maxParticipants: e.target.value
-														? Number(e.target.value)
-														: undefined,
-												})
-											}
+											onChange={(e) => {
+												const value = e.target.value;
+												if (value === "" || /^\d+$/.test(value)) {
+													setForm({
+														...form,
+														maxParticipants: value ? Number(value) : undefined,
+													});
+												}
+											}}
+											onKeyDown={(e) => {
+												if (
+													![
+														"Backspace",
+														"Delete",
+														"Tab",
+														"Escape",
+														"Enter",
+														"ArrowLeft",
+														"ArrowRight",
+													].includes(e.key) &&
+													!/^\d$/.test(e.key)
+												) {
+													e.preventDefault();
+												}
+											}}
 										/>
 									</div>
 								</div>
@@ -492,9 +846,9 @@ export function SessionForm({
 										id="notes"
 										placeholder="Notes, consignes particulières, matériel requis..."
 										value={form.notes ?? ""}
-										onChange={(e) =>
-											setForm({ ...form, notes: e.target.value })
-										}
+										onChange={(e) => {
+											setForm({ ...form, notes: e.target.value });
+										}}
 										rows={3}
 										className="resize-none"
 									/>
@@ -515,7 +869,11 @@ export function SessionForm({
 								</Button>
 								<Button
 									type="submit"
-									disabled={isLoading}
+									disabled={
+										isLoading ||
+										!dateValidation.isValid ||
+										!!duplicateTitleError
+									}
 									className="min-w-[120px]"
 								>
 									{isLoading ? (
