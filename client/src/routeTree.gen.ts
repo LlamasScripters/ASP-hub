@@ -28,7 +28,9 @@ import { Route as AuthenticatedAdminAdminIndexImport } from "./routes/_authentic
 import { Route as AuthAuthVerifyIndexImport } from "./routes/_auth/auth/verify/index"
 import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
 import { Route as AuthAuthVerifyVerifyImport } from "./routes/_auth/auth/verify/_verify"
+import { Route as AuthenticatedAdminAdminBlogIndexImport } from "./routes/_authenticated/admin/_admin/blog/index"
 import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
+import { Route as AuthenticatedAdminAdminBlogCreateImport } from "./routes/_authenticated/admin/_admin/blog/create"
 import { Route as AuthenticatednonadminNonadminUserUserImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user"
 import { Route as AuthenticatednonadminNonadminDashboardSocialImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
 import { Route as AuthenticatednonadminNonadminDashboardMembersImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
@@ -38,10 +40,14 @@ import { Route as AuthAuthVerifyVerifyErrorImport } from "./routes/_auth/auth/ve
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/index"
+import { Route as AuthenticatedAdminAdminBlogBlogIdIndexImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/index"
+import { Route as AuthenticatednonadminNonadminDashboardBlogIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesCreateImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/create"
 import { Route as AuthenticatedAdminAdminDashboardClubsCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/create"
+import { Route as AuthenticatedAdminAdminBlogBlogIdEditImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/edit"
 import { Route as AuthenticatednonadminNonadminUserUserSettingsImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.settings"
 import { Route as AuthenticatednonadminNonadminUserUserProfileImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.profile"
+import { Route as AuthenticatednonadminNonadminDashboardBlogBlogIdImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/index"
@@ -191,11 +197,25 @@ const AuthAuthVerifyVerifyRoute = AuthAuthVerifyVerifyImport.update({
   getParentRoute: () => AuthAuthVerifyRoute,
 } as any)
 
+const AuthenticatedAdminAdminBlogIndexRoute =
+  AuthenticatedAdminAdminBlogIndexImport.update({
+    id: "/blog/",
+    path: "/blog/",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
 const AuthenticatednonadminNonadminDashboardIndexRoute =
   AuthenticatednonadminNonadminDashboardIndexImport.update({
     id: "/dashboard/",
     path: "/dashboard/",
     getParentRoute: () => AuthenticatednonadminNonadminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminBlogCreateRoute =
+  AuthenticatedAdminAdminBlogCreateImport.update({
+    id: "/blog/create",
+    path: "/blog/create",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
 const AuthenticatednonadminNonadminUserUserRoute =
@@ -259,6 +279,20 @@ const AuthenticatedAdminAdminDashboardClubsIndexRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
+const AuthenticatedAdminAdminBlogBlogIdIndexRoute =
+  AuthenticatedAdminAdminBlogBlogIdIndexImport.update({
+    id: "/blog/$blogId/",
+    path: "/blog/$blogId/",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatednonadminNonadminDashboardBlogIndexRoute =
+  AuthenticatednonadminNonadminDashboardBlogIndexImport.update({
+    id: "/dashboard/blog/",
+    path: "/dashboard/blog/",
+    getParentRoute: () => AuthenticatednonadminNonadminRoute,
+  } as any)
+
 const AuthenticatedAdminAdminFacilitiesComplexesCreateRoute =
   AuthenticatedAdminAdminFacilitiesComplexesCreateImport.update({
     id: "/facilities/complexes/create",
@@ -270,6 +304,13 @@ const AuthenticatedAdminAdminDashboardClubsCreateRoute =
   AuthenticatedAdminAdminDashboardClubsCreateImport.update({
     id: "/dashboard/clubs/create",
     path: "/dashboard/clubs/create",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminBlogBlogIdEditRoute =
+  AuthenticatedAdminAdminBlogBlogIdEditImport.update({
+    id: "/blog/$blogId/edit",
+    path: "/blog/$blogId/edit",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
@@ -285,6 +326,13 @@ const AuthenticatednonadminNonadminUserUserProfileRoute =
     id: "/profile",
     path: "/profile",
     getParentRoute: () => AuthenticatednonadminNonadminUserUserRoute,
+  } as any)
+
+const AuthenticatednonadminNonadminDashboardBlogBlogIdRoute =
+  AuthenticatednonadminNonadminDashboardBlogBlogIdImport.update({
+    id: "/dashboard/blog/$blogId",
+    path: "/dashboard/blog/$blogId",
+    getParentRoute: () => AuthenticatednonadminNonadminRoute,
   } as any)
 
 const AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute =
@@ -638,11 +686,32 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatednonadminNonadminUserUserImport
       parentRoute: typeof AuthenticatednonadminNonadminUserRoute
     }
+    "/_authenticated/admin/_admin/blog/create": {
+      id: "/_authenticated/admin/_admin/blog/create"
+      path: "/blog/create"
+      fullPath: "/admin/blog/create"
+      preLoaderRoute: typeof AuthenticatedAdminAdminBlogCreateImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
       id: "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
       path: "/dashboard"
       fullPath: "/dashboard"
       preLoaderRoute: typeof AuthenticatednonadminNonadminDashboardIndexImport
+      parentRoute: typeof AuthenticatednonadminNonadminImport
+    }
+    "/_authenticated/admin/_admin/blog/": {
+      id: "/_authenticated/admin/_admin/blog/"
+      path: "/blog"
+      fullPath: "/admin/blog"
+      preLoaderRoute: typeof AuthenticatedAdminAdminBlogIndexImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": {
+      id: "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
+      path: "/dashboard/blog/$blogId"
+      fullPath: "/dashboard/blog/$blogId"
+      preLoaderRoute: typeof AuthenticatednonadminNonadminDashboardBlogBlogIdImport
       parentRoute: typeof AuthenticatednonadminNonadminImport
     }
     "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": {
@@ -659,6 +728,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatednonadminNonadminUserUserSettingsImport
       parentRoute: typeof AuthenticatednonadminNonadminUserUserImport
     }
+    "/_authenticated/admin/_admin/blog/$blogId/edit": {
+      id: "/_authenticated/admin/_admin/blog/$blogId/edit"
+      path: "/blog/$blogId/edit"
+      fullPath: "/admin/blog/$blogId/edit"
+      preLoaderRoute: typeof AuthenticatedAdminAdminBlogBlogIdEditImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
     "/_authenticated/admin/_admin/dashboard/clubs/create": {
       id: "/_authenticated/admin/_admin/dashboard/clubs/create"
       path: "/dashboard/clubs/create"
@@ -671,6 +747,20 @@ declare module "@tanstack/react-router" {
       path: "/facilities/complexes/create"
       fullPath: "/admin/facilities/complexes/create"
       preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesCreateImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": {
+      id: "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
+      path: "/dashboard/blog"
+      fullPath: "/dashboard/blog"
+      preLoaderRoute: typeof AuthenticatednonadminNonadminDashboardBlogIndexImport
+      parentRoute: typeof AuthenticatednonadminNonadminImport
+    }
+    "/_authenticated/admin/_admin/blog/$blogId/": {
+      id: "/_authenticated/admin/_admin/blog/$blogId/"
+      path: "/blog/$blogId"
+      fullPath: "/admin/blog/$blogId"
+      preLoaderRoute: typeof AuthenticatedAdminAdminBlogBlogIdIndexImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/dashboard/clubs/": {
@@ -941,6 +1031,8 @@ interface AuthenticatednonadminNonadminRouteChildren {
   AuthenticatednonadminNonadminDashboardSocialRoute: typeof AuthenticatednonadminNonadminDashboardSocialRoute
   AuthenticatednonadminNonadminUserRoute: typeof AuthenticatednonadminNonadminUserRouteWithChildren
   AuthenticatednonadminNonadminDashboardIndexRoute: typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  AuthenticatednonadminNonadminDashboardBlogBlogIdRoute: typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
+  AuthenticatednonadminNonadminDashboardBlogIndexRoute: typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
 }
 
 const AuthenticatednonadminNonadminRouteChildren: AuthenticatednonadminNonadminRouteChildren =
@@ -955,6 +1047,10 @@ const AuthenticatednonadminNonadminRouteChildren: AuthenticatednonadminNonadminR
       AuthenticatednonadminNonadminUserRouteWithChildren,
     AuthenticatednonadminNonadminDashboardIndexRoute:
       AuthenticatednonadminNonadminDashboardIndexRoute,
+    AuthenticatednonadminNonadminDashboardBlogBlogIdRoute:
+      AuthenticatednonadminNonadminDashboardBlogBlogIdRoute,
+    AuthenticatednonadminNonadminDashboardBlogIndexRoute:
+      AuthenticatednonadminNonadminDashboardBlogIndexRoute,
   }
 
 const AuthenticatednonadminNonadminRouteWithChildren =
@@ -979,8 +1075,12 @@ const AuthenticatednonadminRouteWithChildren =
 interface AuthenticatedAdminAdminRouteChildren {
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
+  AuthenticatedAdminAdminBlogCreateRoute: typeof AuthenticatedAdminAdminBlogCreateRoute
+  AuthenticatedAdminAdminBlogIndexRoute: typeof AuthenticatedAdminAdminBlogIndexRoute
+  AuthenticatedAdminAdminBlogBlogIdEditRoute: typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   AuthenticatedAdminAdminDashboardClubsCreateRoute: typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   AuthenticatedAdminAdminFacilitiesComplexesCreateRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  AuthenticatedAdminAdminBlogBlogIdIndexRoute: typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   AuthenticatedAdminAdminDashboardClubsIndexRoute: typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   AuthenticatedAdminAdminFacilitiesComplexesIndexRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   AuthenticatedAdminAdminFacilitiesRoomsIndexRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
@@ -1012,10 +1112,18 @@ const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren
   {
     AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
     AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
+    AuthenticatedAdminAdminBlogCreateRoute:
+      AuthenticatedAdminAdminBlogCreateRoute,
+    AuthenticatedAdminAdminBlogIndexRoute:
+      AuthenticatedAdminAdminBlogIndexRoute,
+    AuthenticatedAdminAdminBlogBlogIdEditRoute:
+      AuthenticatedAdminAdminBlogBlogIdEditRoute,
     AuthenticatedAdminAdminDashboardClubsCreateRoute:
       AuthenticatedAdminAdminDashboardClubsCreateRoute,
     AuthenticatedAdminAdminFacilitiesComplexesCreateRoute:
       AuthenticatedAdminAdminFacilitiesComplexesCreateRoute,
+    AuthenticatedAdminAdminBlogBlogIdIndexRoute:
+      AuthenticatedAdminAdminBlogBlogIdIndexRoute,
     AuthenticatedAdminAdminDashboardClubsIndexRoute:
       AuthenticatedAdminAdminDashboardClubsIndexRoute,
     AuthenticatedAdminAdminFacilitiesComplexesIndexRoute:
@@ -1118,11 +1226,17 @@ export interface FileRoutesByFullPath {
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
@@ -1168,11 +1282,17 @@ export interface FileRoutesByTo {
   "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
   "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
@@ -1227,11 +1347,17 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
   "/_authenticated/(nonadmin)/_nonadmin/user": typeof AuthenticatednonadminNonadminUserRouteWithChildren
   "/_authenticated/(nonadmin)/_nonadmin/user/_user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/_authenticated/admin/_admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/_authenticated/admin/_admin/blog/": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/_authenticated/admin/_admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/_authenticated/admin/_admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/_authenticated/admin/_admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/_authenticated/admin/_admin/blog/$blogId/": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/_authenticated/admin/_admin/dashboard/clubs/": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/_authenticated/admin/_admin/facilities/complexes/": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/_authenticated/admin/_admin/facilities/rooms/": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
@@ -1281,11 +1407,17 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
+    | "/admin/blog/create"
     | "/dashboard"
+    | "/admin/blog"
+    | "/dashboard/blog/$blogId"
     | "/user/profile"
     | "/user/settings"
+    | "/admin/blog/$blogId/edit"
     | "/admin/dashboard/clubs/create"
     | "/admin/facilities/complexes/create"
+    | "/dashboard/blog"
+    | "/admin/blog/$blogId"
     | "/admin/dashboard/clubs"
     | "/admin/facilities/complexes"
     | "/admin/facilities/rooms"
@@ -1330,11 +1462,17 @@ export interface FileRouteTypes {
     | "/dashboard/members"
     | "/dashboard/social"
     | "/user"
+    | "/admin/blog/create"
     | "/dashboard"
+    | "/admin/blog"
+    | "/dashboard/blog/$blogId"
     | "/user/profile"
     | "/user/settings"
+    | "/admin/blog/$blogId/edit"
     | "/admin/dashboard/clubs/create"
     | "/admin/facilities/complexes/create"
+    | "/dashboard/blog"
+    | "/admin/blog/$blogId"
     | "/admin/dashboard/clubs"
     | "/admin/facilities/complexes"
     | "/admin/facilities/rooms"
@@ -1387,11 +1525,17 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
     | "/_authenticated/(nonadmin)/_nonadmin/user"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user"
+    | "/_authenticated/admin/_admin/blog/create"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
+    | "/_authenticated/admin/_admin/blog/"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
+    | "/_authenticated/admin/_admin/blog/$blogId/edit"
     | "/_authenticated/admin/_admin/dashboard/clubs/create"
     | "/_authenticated/admin/_admin/facilities/complexes/create"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
+    | "/_authenticated/admin/_admin/blog/$blogId/"
     | "/_authenticated/admin/_admin/dashboard/clubs/"
     | "/_authenticated/admin/_admin/facilities/complexes/"
     | "/_authenticated/admin/_admin/facilities/rooms/"
@@ -1508,7 +1652,9 @@ export const routeTree = rootRoute
         "/_authenticated/(nonadmin)/_nonadmin/dashboard/members",
         "/_authenticated/(nonadmin)/_nonadmin/dashboard/social",
         "/_authenticated/(nonadmin)/_nonadmin/user",
-        "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
       ]
     },
     "/_authenticated/admin": {
@@ -1524,8 +1670,12 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/admin/_admin/users",
         "/_authenticated/admin/_admin/",
+        "/_authenticated/admin/_admin/blog/create",
+        "/_authenticated/admin/_admin/blog/",
+        "/_authenticated/admin/_admin/blog/$blogId/edit",
         "/_authenticated/admin/_admin/dashboard/clubs/create",
         "/_authenticated/admin/_admin/facilities/complexes/create",
+        "/_authenticated/admin/_admin/blog/$blogId/",
         "/_authenticated/admin/_admin/dashboard/clubs/",
         "/_authenticated/admin/_admin/facilities/complexes/",
         "/_authenticated/admin/_admin/facilities/rooms/",
@@ -1616,8 +1766,20 @@ export const routeTree = rootRoute
         "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
       ]
     },
+    "/_authenticated/admin/_admin/blog/create": {
+      "filePath": "_authenticated/admin/_admin/blog/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
       "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/index.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/blog/": {
+      "filePath": "_authenticated/admin/_admin/blog/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId.tsx",
       "parent": "/_authenticated/(nonadmin)/_nonadmin"
     },
     "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": {
@@ -1628,12 +1790,24 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/(nonadmin)/_nonadmin/user/_user.settings.tsx",
       "parent": "/_authenticated/(nonadmin)/_nonadmin/user/_user"
     },
+    "/_authenticated/admin/_admin/blog/$blogId/edit": {
+      "filePath": "_authenticated/admin/_admin/blog/$blogId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
     "/_authenticated/admin/_admin/dashboard/clubs/create": {
       "filePath": "_authenticated/admin/_admin/dashboard/clubs/create.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/facilities/complexes/create": {
       "filePath": "_authenticated/admin/_admin/facilities/complexes/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/blog/$blogId/": {
+      "filePath": "_authenticated/admin/_admin/blog/$blogId/index.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/dashboard/clubs/": {
