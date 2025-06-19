@@ -37,7 +37,7 @@ export async function sendConfirmationEmail(
 	user: UserBrevo,
 	confirmationToken: string,
 ): Promise<void> {
-	const url = new URL("/auth/verify", process.env.CLIENT_URL);
+	const url = new URL("/auth/verify", process.env.HOST);
 	url.searchParams.append("token", confirmationToken);
 
 	await sendEmail(user, templateIds.confirmation, {
@@ -50,7 +50,7 @@ export async function sendResetPasswordEmail(
 	user: UserBrevo,
 	resetPasswordToken: string,
 ): Promise<void> {
-	const url = new URL("/auth/reset-password", process.env.CLIENT_URL);
+	const url = new URL("/auth/reset-password", process.env.HOST);
 	url.searchParams.append("token", resetPasswordToken);
 	await sendEmail(user, templateIds.resetPassword, {
 		TOKEN_URL: url.toString(),

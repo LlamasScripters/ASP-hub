@@ -1,9 +1,8 @@
+import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-
-import { resolve } from "node:path";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 const ReactCompilerConfig = {
 	target: "19",
@@ -20,14 +19,16 @@ export default defineConfig({
 		}),
 		tailwindcss(),
 	],
-	test: {
-		globals: true,
-		environment: "jsdom",
-	},
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "./src"),
 			"@room-booking": resolve(__dirname, "./src/features/room-booking"),
 		},
+	},
+	server: {
+		host: true,
+		port: 5173,
+		strictPort: true,
+		allowedHosts: ["client_upstream"],
 	},
 });
