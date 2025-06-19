@@ -99,86 +99,68 @@ export function ComplexEditPage({ initialComplex }: ComplexEditPageProps) {
 			)}
 
 			{/* Informations du complexe actuel */}
-			<Card className="bg-green-50 border-green-200">
+			<Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2 text-green-900">
+					<CardTitle className="flex items-center gap-2 text-green-900 dark:text-green-100">
 						<Building className="w-5 h-5" />
 						Informations actuelles
 					</CardTitle>
-					<CardDescription className="text-green-700">
+					<CardDescription className="text-green-700 dark:text-green-300">
 						Voici les informations actuellement enregistrées pour ce complexe
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 						<div>
-							<span className="font-medium text-green-900">Nom :</span>
-							<span className="ml-2 text-green-800">{initialComplex.name}</span>
+							<span className="font-medium text-green-900 dark:text-green-100">
+								Nom :
+							</span>
+							<span className="ml-2 text-green-800 dark:text-green-200">
+								{initialComplex.name}
+							</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">
+							<span className="font-medium text-green-900 dark:text-green-100">
 								Adresse complète :
 							</span>
-							<span className="ml-2 text-green-800">
+							<span className="ml-2 text-green-800 dark:text-green-200">
 								{initialComplex.street}, {initialComplex.postalCode},{" "}
 								{initialComplex.city}
 							</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">
+							<span className="font-medium text-green-900 dark:text-green-100">
 								Places de parking :
 							</span>
-							<span className="ml-2 text-green-800">
+							<span className="ml-2 text-green-800 dark:text-green-200">
 								{initialComplex.parkingCapacity}
 							</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">Ascenseurs :</span>
-							<span className="ml-2 text-green-800">
+							<span className="font-medium text-green-900 dark:text-green-100">
+								Ascenseurs :
+							</span>
+							<span className="ml-2 text-green-800 dark:text-green-200">
 								{initialComplex.numberOfElevators}
 							</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">
+							<span className="font-medium text-green-900 dark:text-green-100">
 								Accessibilité PMR :
 							</span>
-							<span className="ml-2 text-green-800">
+							<span className="ml-2 text-green-800 dark:text-green-200">
 								{initialComplex.accessibleForReducedMobility ? "Oui" : "Non"}
 							</span>
 						</div>
 						<div>
-							<span className="font-medium text-green-900">
+							<span className="font-medium text-green-900 dark:text-green-100">
 								Dernière modification :
 							</span>
-							<span className="ml-2 text-green-800">
+							<span className="ml-2 text-green-800 dark:text-green-200">
 								{fmt(initialComplex.updatedAt)}
 							</span>
 						</div>
 					</div>
-					{/* <div>
-						<h3 className="text-sm font-semibold mb-3 text-green-900">Horaires d'ouverture :</h3>
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-							{(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
-								const hours = openingHours[day];
-								return (
-									<div key={day} className="flex items-center justify-between p-2 rounded-md border border-green-100">
-										<span className="font-medium text-green-900 text-xs tracking-wide">
-											{frenchDays[day]}
-										</span>
-										<span className="text-green-800 text-sm font-medium">
-											{hours?.closed ? (
-												<span className="text-red-600 text-xs">Fermé</span>
-											) : hours ? (
-												<span className="text-green-700">{hours.open} – {hours.close}</span>
-											) : (
-												<span className="text-gray-500 text-xs">Non défini</span>
-											)}
-										</span>
-									</div>
-								);
-							})}
-						</div>
-					</div> */}
 				</CardContent>
 			</Card>
 

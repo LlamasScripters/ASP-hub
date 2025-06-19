@@ -243,13 +243,13 @@ export function ReservationList({
 	};
 
 	const renderWeekView = () => (
-		<div className="border rounded-lg bg-white overflow-hidden">
+		<div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden">
 			<ScrollArea className="h-[700px]">
 				<div className="min-w-[800px]">
 					{/* En-tête avec les jours */}
-					<div className="grid grid-cols-8 border-b bg-gray-50 sticky top-0 z-20">
-						<div className="p-3 border-r bg-gray-100">
-							<div className="text-xs font-semibold text-center text-gray-600">
+					<div className="grid grid-cols-8 border-b bg-gray-50 dark:bg-gray-800 sticky top-0 z-20">
+						<div className="p-3 border-r bg-gray-100 dark:bg-gray-900">
+							<div className="text-xs font-semibold text-center text-gray-600 dark:text-gray-400">
 								Heures
 							</div>
 						</div>
@@ -265,27 +265,27 @@ export function ReservationList({
 							return (
 								<div
 									key={key}
-									className={`p-3 border-r ${isToday ? "bg-blue-50" : "bg-gray-50"} ${!isOpen ? "bg-gray-200" : ""}`}
+									className={`p-3 border-r ${isToday ? "bg-blue-50 dark:bg-blue-900/30" : "bg-gray-50 dark:bg-gray-800"} ${!isOpen ? "bg-gray-200 dark:bg-gray-700" : ""}`}
 								>
 									<div className="text-center">
 										<div
-											className={`text-sm font-semibold ${isToday ? "text-blue-600" : "text-gray-900"} ${!isOpen ? "text-gray-500" : ""}`}
+											className={`text-sm font-semibold ${isToday ? "text-blue-600 dark:text-blue-400" : "text-gray-900 dark:text-gray-100"} ${!isOpen ? "text-gray-500 dark:text-gray-400" : ""}`}
 										>
 											{d.toLocaleDateString("fr-FR", { weekday: "short" })}
 										</div>
 										<div
-											className={`text-xs ${isToday ? "text-blue-600" : "text-gray-600"} ${!isOpen ? "text-gray-500" : ""}`}
+											className={`text-xs ${isToday ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"} ${!isOpen ? "text-gray-500 dark:text-gray-400" : ""}`}
 										>
 											{d.getDate()}/{d.getMonth() + 1}
 										</div>
 										{!isOpen ? (
-											<div className="flex items-center justify-center gap-1 text-red-500 mt-1">
+											<div className="flex items-center justify-center gap-1 text-red-500 dark:text-red-400 mt-1">
 												<Clock className="w-3 h-3" />
 												<span className="text-[10px]">Fermé</span>
 											</div>
 										) : (
 											roomHours && (
-												<div className="text-[10px] text-gray-500 mt-1">
+												<div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
 													{roomHours.openTime} - {roomHours.closeTime}
 												</div>
 											)
@@ -299,17 +299,17 @@ export function ReservationList({
 					{/* Grille horaire */}
 					<div className="grid grid-cols-8 relative">
 						{/* Colonne des heures */}
-						<div className="border-r bg-gray-50">
+						<div className="border-r bg-gray-50 dark:bg-gray-800">
 							{timeSlots.map((time, idx) => (
 								<div
 									key={time}
-									className="border-b flex items-center justify-center text-xs text-gray-500 bg-gray-50"
+									className="border-b flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800"
 									style={{ height: `${HOUR_HEIGHT}px` }}
 								>
 									<div className="text-center">
 										<div className="font-medium">{time}</div>
 										{idx < timeSlots.length - 1 && (
-											<div className="text-[10px] text-gray-400 mt-1">
+											<div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
 												{timeSlots[idx + 1]?.substring(0, 2)}h
 											</div>
 										)}
@@ -336,7 +336,7 @@ export function ReservationList({
 							return (
 								<div
 									key={key}
-									className={`relative border-r ${isToday ? "bg-blue-50/30" : "bg-white"}`}
+									className={`relative border-r ${isToday ? "bg-blue-50/30 dark:bg-blue-900/20" : "bg-white dark:bg-gray-900"}`}
 								>
 									{/* Grille horaire de fond */}
 									{timeSlots.map((time, idx) => {
@@ -351,17 +351,17 @@ export function ReservationList({
 										return (
 											<div
 												key={time}
-												className={`border-b relative ${
+												className={`border-b border-gray-200 dark:border-gray-700 relative ${
 													isClosedTime
-														? "bg-gray-100 bg-opacity-80"
+														? "bg-gray-100 dark:bg-gray-800 bg-opacity-80"
 														: idx % 2 === 0
-															? "bg-white"
-															: "bg-gray-50/30"
+															? "bg-white dark:bg-gray-900"
+															: "bg-gray-50/30 dark:bg-gray-800/30"
 												}`}
 												style={{ height: `${HOUR_HEIGHT}px` }}
 											>
 												{/* Ligne médiane pour les demi-heures */}
-												<div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200/50" />
+												<div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200/50 dark:bg-gray-600/50" />
 
 												{/* Indicateur d'heure fermée */}
 												{isClosedTime && (
@@ -437,7 +437,7 @@ export function ReservationList({
 															<div className="flex justify-between items-end mt-1">
 																<Badge
 																	variant="secondary"
-																	className="text-[8px] px-1 py-0 bg-white/50"
+																	className="text-[8px] px-1 py-0 bg-white/50 dark:bg-gray-800/50"
 																>
 																	{reservationStatusEnumTranslated[
 																		reservation.status
@@ -448,7 +448,7 @@ export function ReservationList({
 																	variant="ghost"
 																	asChild
 																	title="Modifier"
-																	className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+																	className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800"
 																>
 																	<Link
 																		to="/admin/facilities/reservations/$reservationId/edit"
@@ -475,10 +475,10 @@ export function ReservationList({
 													((currentMinutes - 360) / 60) * HOUR_HEIGHT;
 												return (
 													<div
-														className="absolute left-0 right-0 h-0.5 bg-red-500 z-30"
+														className="absolute left-0 right-0 h-0.5 bg-red-500 dark:bg-red-400 z-30"
 														style={{ top: `${currentOffset}px` }}
 													>
-														<div className="absolute -left-2 -top-1 w-3 h-3 bg-red-500 rounded-full" />
+														<div className="absolute -left-2 -top-1 w-3 h-3 bg-red-500 dark:bg-red-400 rounded-full" />
 													</div>
 												);
 											}
@@ -495,13 +495,13 @@ export function ReservationList({
 
 	const renderMonthView = () => (
 		<ScrollArea className="h-[500px] border rounded-lg">
-			<div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-y">
+			<div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-y divide-gray-200 dark:divide-gray-700">
 				{dateGrid.map((cell, idx) => {
 					if (cell.isPlaceholder || !cell.date) {
 						return (
 							<div
 								key={`empty-${referenceDate.toISOString()}-${idx}`}
-								className="flex flex-col min-h-[100px] bg-gray-50 p-2"
+								className="flex flex-col min-h-[100px] bg-gray-50 dark:bg-gray-800 p-2"
 							/>
 						);
 					}
@@ -516,23 +516,29 @@ export function ReservationList({
 						<div
 							key={key}
 							className={`flex flex-col min-h-[100px] p-2 ${
-								!isOpen ? "bg-gray-100" : "bg-white"
+								!isOpen
+									? "bg-gray-100 dark:bg-gray-800"
+									: "bg-white dark:bg-gray-900"
 							}`}
 						>
-							<div className="border-b pb-1 mb-1 text-xs font-semibold flex items-center justify-between">
+							<div className="border-b border-gray-200 dark:border-gray-700 pb-1 mb-1 text-xs font-semibold flex items-center justify-between">
 								<span
-									className={isOpen ? "text-muted-foreground" : "text-red-500"}
+									className={
+										isOpen
+											? "text-muted-foreground dark:text-gray-400"
+											: "text-red-500 dark:text-red-400"
+									}
 								>
 									{formatDateShort(d)}
 								</span>
 								{!isOpen && (
-									<div className="flex items-center gap-1 text-red-500">
+									<div className="flex items-center gap-1 text-red-500 dark:text-red-400">
 										<Clock className="w-3 h-3" />
 										<span className="text-[10px]">Fermé</span>
 									</div>
 								)}
 								{isOpen && roomHours && (
-									<div className="text-[10px] text-muted-foreground">
+									<div className="text-[10px] text-muted-foreground dark:text-gray-400">
 										{roomHours.openTime} - {roomHours.closeTime}
 									</div>
 								)}
@@ -545,24 +551,24 @@ export function ReservationList({
 											key={r.id}
 											className={`rounded-md p-2 transition-colors flex justify-between items-start ${
 												isOpen
-													? "bg-gray-50 hover:bg-gray-100"
-													: "bg-gray-200 opacity-60"
+													? "bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+													: "bg-gray-200 dark:bg-gray-700 opacity-60"
 											}`}
 										>
 											<div className="flex-1 pr-2">
 												<div className="flex items-center justify-between">
-													<span className="text-xs font-medium text-gray-800">
+													<span className="text-xs font-medium text-gray-800 dark:text-gray-200">
 														{r.title}
 													</span>
 													<Badge
 														variant="outline"
-														className="text-[9px] px-1 py-[1px]"
+														className="text-[9px] px-1 py-[1px] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
 													>
 														{reservationStatusEnumTranslated[r.status] ||
 															r.status}
 													</Badge>
 												</div>
-												<div className="mt-1 text-[10px] text-muted-foreground">
+												<div className="mt-1 text-[10px] text-muted-foreground dark:text-gray-400">
 													{new Date(r.startAt).toLocaleTimeString("fr-FR", {
 														hour: "2-digit",
 														minute: "2-digit",
@@ -579,7 +585,7 @@ export function ReservationList({
 												variant="ghost"
 												asChild
 												title="Modifier"
-												className="text-gray-400 hover:text-gray-600 mt-1"
+												className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 mt-1"
 												disabled={!isOpen}
 											>
 												<Link
@@ -594,7 +600,7 @@ export function ReservationList({
 								</div>
 							) : (
 								<div className="flex-1 flex items-center justify-center">
-									<span className="text-[11px] text-gray-300 text-center">
+									<span className="text-[11px] text-gray-300 dark:text-gray-600 text-center">
 										{isOpen ? "Aucune réservation" : "-"}
 									</span>
 								</div>

@@ -255,9 +255,9 @@ export function RoomForm({
 										return (
 											<div
 												key={key}
-												className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+												className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 dark:bg-gray-800"
 											>
-												<span className="w-20 font-medium text-gray-500">
+												<span className="w-20 font-medium text-gray-500 dark:text-gray-400">
 													{label}
 												</span>
 												<div className="flex items-center gap-2 flex-1 mx-4">
