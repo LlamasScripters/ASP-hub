@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import BlogCreatePage from "@/features/clubs/pages/blog/BlogCreatePage";
+import BlogCreatePage from "@/features/blog/BlogCreatePage";
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/blog/create")({
   component: BlogCreatePage,

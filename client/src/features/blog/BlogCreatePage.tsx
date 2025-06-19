@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SimpleEditor } from '@/components/templates/simple/simple-editor';
-import { useCreateBlog, type CreateBlogData } from "../../pages/blog/hooks/useBlogQueries.ts";
+import { useCreateBlog, type CreateBlogData } from "./hooks/useBlogQueries.ts";
 import { useQuery } from "@tanstack/react-query";
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { toast } from "sonner";

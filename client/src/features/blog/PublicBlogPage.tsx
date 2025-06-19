@@ -8,18 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Search, 
   Calendar, 
-  Clock, 
-  User, 
   BookOpen, 
   Filter,
   SortDesc,
   SortAsc,
-  Heart,
   MessageCircle,
-  Share2,
-  Eye
+  Share2
 } from "lucide-react";
-import { type Blog, useTags } from "../../pages/blog/hooks/useBlogQueries.ts";
+import { type Blog, useTags } from "./hooks/useBlogQueries.ts";
 
 interface PublicBlogPageProps {
   blogs: Blog[];
@@ -31,7 +27,7 @@ export function PublicBlogPage({ blogs }: PublicBlogPageProps) {
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
 
   // Récupérer tous les tags depuis l'API
-  const { data: tags = [], isLoading: tagsLoading } = useTags();
+  const { data: tags = [] } = useTags();
   
   // Extraire tous les tags uniques des articles
   const allTags = useMemo(() => {
@@ -82,16 +78,11 @@ export function PublicBlogPage({ blogs }: PublicBlogPageProps) {
     return temp.textContent || temp.innerText || '';
   };
 
-  const getReadingTime = (content: string) => {
-    const wordCount = stripHtml(content).split(' ').length;
-    const readingTime = Math.ceil(wordCount / 200); // 200 mots par minute
-    return readingTime;
-  };
 
   return (
-    <div className="min-h-screen bg-sidebar dark:bg-sidebar">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-white bg-sidebar dark:bg-sidebar shadow-sm border-b">
+      <div className="bg-background shadow-sm border-b">
         <div className="container mx-auto px-4 py-12">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
@@ -258,17 +249,9 @@ export function PublicBlogPage({ blogs }: PublicBlogPageProps) {
                 <CardFooter className="pt-3 border-t">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400">
-                      <button className="flex items-center gap-1 hover:text-red-500 transition-colors">
-                        <Heart className="h-4 w-4" />
-                        <span className="text-xs">24</span>
-                      </button>
                       <button className="flex items-center gap-1 hover:text-blue-500 transition-colors">
                         <MessageCircle className="h-4 w-4" />
                         <span className="text-xs">{blog.commentsCount || 0}</span>
-                      </button>
-                      <button className="flex items-center gap-1 hover:text-green-500 transition-colors">
-                        <Eye className="h-4 w-4" />
-                        <span className="text-xs">156</span>
                       </button>
                     </div>
                     

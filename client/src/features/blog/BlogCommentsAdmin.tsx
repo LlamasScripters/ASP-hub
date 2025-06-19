@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { MessageCircle, Eye, EyeOff, Shield, User, Calendar, AlertTriangle } from "lucide-react";
+import { MessageCircle, Eye, EyeOff, Shield, Calendar, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -44,7 +45,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
       setComments(data);
     } catch (error) {
       console.error('Erreur:', error);
-      alert("Erreur: Impossible de charger les commentaires");
+      toast.error("Impossible de charger les commentaires");
     } finally {
       setLoading(false);
     }
@@ -78,7 +79,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
       console.log(`Commentaire ${action === 'hide' ? 'masqué' : 'affiché'} avec succès`);
     } catch (error) {
       console.error('Erreur:', error);
-      alert("Erreur: Impossible de modifier le commentaire");
+      toast.error("Impossible de modifier le commentaire");
     } finally {
       setUpdatingComments(prev => {
         const newSet = new Set(prev);

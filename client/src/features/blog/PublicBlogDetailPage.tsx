@@ -8,22 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Calendar, 
-  User, 
+  User,
   MessageCircle, 
   Share2, 
-  Eye,
   Facebook,
   Twitter,
   Linkedin,
   Copy,
   ChevronUp
 } from "lucide-react";
-import { type Blog, useComments, useCreateComment, type CreateCommentData } from "../../pages/blog/hooks/useBlogQueries.ts";
+import { type Blog, useComments, useCreateComment, type CreateCommentData } from "./hooks/useBlogQueries.ts";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
-import { ReactionsBar } from "./components/ReactionsBar";
-import { CommentReactionsBar } from "./components/CommentReactionsBar";
+import { ReactionsBar } from "./components/ReactionsBar.tsx";
+import { CommentReactionsBar } from "./components/CommentReactionsBar.tsx";
 
 interface PublicBlogDetailPageProps {
   blog: Blog;
@@ -133,7 +132,7 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-sidebar dark:bg-sidebar">
+    <div className="min-h-screen bg-background">
       {/* Barre de progression de lecture */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 z-50">
         <div 
@@ -212,10 +211,6 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
                   <Calendar className="h-4 w-4" />
                   <span>{formatDate(blog.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  <span>247 vues</span>
-                </div>
               </div>
             </div>
 
@@ -273,11 +268,6 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
                     <span className="font-medium">
                       {commentsLoading ? '...' : comments.length} commentaire{comments.length > 1 ? 's' : ''}
                     </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                    <Eye className="h-5 w-5" />
-                    <span className="font-medium">247 vues</span>
                   </div>
                 </div>
                 

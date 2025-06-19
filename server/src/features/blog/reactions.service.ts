@@ -5,7 +5,6 @@ import {
   reactions,
   articleReactions,
   commentReactions,
-  users,
 } from "@/db/schema.js";
 
 export interface CreateArticleReactionData {

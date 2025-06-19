@@ -1,5 +1,5 @@
 // article.service.ts
-import { eq, and, desc, sql, isNull, like, inArray } from "drizzle-orm";
+import { eq, and, desc, isNull, inArray } from "drizzle-orm";
 import { db } from "@/db/index.js";
 import {
   articles,
@@ -7,9 +7,6 @@ import {
   tags,
   articleTags,
   users,
-  reactions,
-  articleReactions,
-  commentReactions,
   type ArticleState,
 } from "@/db/schema.js";
 
@@ -239,8 +236,6 @@ export const articleService = {
       .returning();
 
     if (tagNames !== undefined) {
-      console.log("Mise à jour des tags pour l'article", id, "avec les tags:", tagNames);
-      
       // Supprime les anciennes liaisons
       await db.delete(articleTags).where(eq(articleTags.articleId, id));
       
@@ -255,20 +250,15 @@ export const articleService = {
           (t) => !existingTagNames.includes(t)
         );
         
-        console.log("Tags existants:", existingTagNames);
-        console.log("Nouveaux tags à créer:", newTagNames);
-        
         let newTags: typeof existingTags = [];
         if (newTagNames.length > 0) {
           newTags = await db
             .insert(tags)
             .values(newTagNames.map((name) => ({ name })))
             .returning();
-          console.log("Tags créés:", newTags);
         }
         
         const allTags = [...existingTags, ...newTags];
-        console.log("Tous les tags à lier:", allTags);
         
         if (allTags.length > 0) {
           await db.insert(articleTags).values(
@@ -277,10 +267,7 @@ export const articleService = {
               tagId: tag.id,
             }))
           );
-          console.log("Liaisons article-tags créées");
         }
-      } else {
-        console.log("Aucun tag à lier, toutes les anciennes liaisons ont été supprimées");
       }
     }
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { blogApi, type BlogDetailLoaderData } from "../../../../../../../src/features/clubs/pages/blog/lib/blog.ts";
-import BlogViewPage from "@/features/clubs/pages/blog/BlogViewPage.tsx";
+import { blogApi, type BlogDetailLoaderData } from "../../../../../../features/blog/lib/blog.ts";
+import BlogViewPage from "@/features/blog/BlogViewPage.tsx";
 
 export const Route = createFileRoute("/_authenticated/admin/_admin/blog/$blogId/")({
   component: BlogViewPageWrapper,

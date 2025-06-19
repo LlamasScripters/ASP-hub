@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Edit, Calendar, User, MessageCircle, Eye, Clock, EyeOff, Shield } from "lucide-react";
-import { type Blog } from "../../pages/blog/hooks/useBlogQueries.ts";
-import { BlogCommentsAdmin } from "./BlogCommentsAdmin";
+import { ArrowLeft, Edit, Calendar, User, MessageCircle, Eye, Clock } from "lucide-react";
+import { type Blog } from "./hooks/useBlogQueries.ts";
+import { BlogCommentsAdmin } from "./BlogCommentsAdmin.tsx";
 
 interface BlogViewPageProps {
   blog: Blog;
@@ -35,13 +35,6 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
     }
   };
 
-  const formatDateShort = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6 max-w-4xl">

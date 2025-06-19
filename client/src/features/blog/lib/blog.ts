@@ -1,5 +1,5 @@
 // lib/api/blog.ts
-import type { ArticleState } from "../../../../../../../server/src/db/schema";
+import type { ArticleState } from "../../../../../server/src/db/schema";
 
 export interface Blog {
   id: string;

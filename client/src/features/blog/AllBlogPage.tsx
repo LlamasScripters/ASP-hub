@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, Edit, Trash2, Eye, Plus, FileText, Calendar } from "lucide-react";
-import { useBlogs, useDeleteBlog, type Blog } from "../../pages/blog/hooks/useBlogQueries.ts";
+import { useBlogs, useDeleteBlog, type Blog } from "./hooks/useBlogQueries.ts";
 
 interface AllBlogPageProps {
   blogs?: Blog[];  // Pour compatibilité avec le router loader

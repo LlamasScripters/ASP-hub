@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { SimpleEditor } from '@/components/templates/simple/simple-editor';
-import { useUpdateBlog, useTags, type Blog, type UpdateBlogData, type Tag } from "../../pages/blog/hooks/useBlogQueries.ts";
+import { useUpdateBlog, useTags, type Blog, type UpdateBlogData, type Tag } from "./hooks/useBlogQueries.ts";
 import { toast } from "sonner";
 import { X, Plus, Check } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -99,9 +99,6 @@ export default function BlogEditPage({ blog }: BlogEditPageProps) {
       commentsEnabled,
     };
 
-    console.log("Données envoyées au backend:", blogData);
-    console.log("Tags sélectionnés:", selectedTags);
-    console.log("Tags array:", tagArray);
 
     try {
       await updateBlogMutation.mutateAsync({ id: blog.id, data: blogData });
