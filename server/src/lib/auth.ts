@@ -19,7 +19,7 @@ export const auth = betterAuth({
 		usePlural: true,
 		schema,
 	}),
-	trustedOrigins: [process.env.CLIENT_URL],
+	trustedOrigins: [process.env.HOST],
 	account: {
 		accountLinking: {
 			enabled: true,

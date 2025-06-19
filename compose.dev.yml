@@ -1,10 +1,11 @@
 services:
   nginx:
     image: nginx:1.27.5-alpine
+    restart: unless-stopped
     ports:
       - "8080:8080"
     volumes:
-      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf
+      - ./client/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - client
       - server
@@ -12,20 +13,15 @@ services:
   client:
     image: node:22.15.0-alpine
     working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host"
-    expose:
-      - 5173
+    command: sh -c "npm install && npm run dev"
     volumes:
       - ./client:/app
-    environment:
-      - NODE_ENV=development
-    
+      - client_node_modules:/app/node_modules
+        
   server:
     image: node:22.15.0-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev"
-    expose:
-      - 3000
     volumes:
       - ./server:/app
     environment:
@@ -68,3 +64,4 @@ services:
 volumes:
   postgres-data:
   minio-data:
+  client_node_modules:

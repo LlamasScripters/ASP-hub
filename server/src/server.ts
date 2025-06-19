@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth.js";
-import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
+import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -18,7 +18,7 @@ const server = express();
 server.use(helmet());
 server.use(
 	cors({
-		origin: process.env.CLIENT_URL || "*",
+		origin: process.env.HOST || "*",
 		credentials: true,
 	}),
 );
