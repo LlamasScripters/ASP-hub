@@ -1,12 +1,8 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { db } from "../index.js";
 import { seedComplexes } from "./data/complexes.js";
 import { seedReservations } from "./data/reservations.js";
 import { seedRooms } from "./data/rooms.js";
 import { resetAllTables } from "./reset.js";
-
-export const db = drizzle(
-	"postgresql://postgres:password@localhost:5432/asp_db",
-);
 
 export async function seedDatabase() {
 	console.log("Begin of database seeding...");

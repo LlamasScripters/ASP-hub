@@ -96,21 +96,18 @@ docker compose exec server npm run db:migrate
       ```
 
     - Seed la base de données:
-      ```sh
-      cd server
-      npm run db:seed
+      ```bash
+      docker compose exec server npm run db:seed
       ```
 
     - Reset la base de données:
-      ```sh
-      cd server
-      npm run db:reset
+      ```bash
+      docker compose exec server npm run db:reset
       ```
 
     - Fresh (reset puis seed) la base de données:
-      ```sh
-      cd server
-      npm run db:fresh
+      ```bash
+      docker compose exec server npm run db:fresh
       ```
 
     - Lancer l'interface Drizzle Studio pour gérer la base de données depuis une UI:
