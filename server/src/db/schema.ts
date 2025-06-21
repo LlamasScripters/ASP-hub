@@ -5,11 +5,11 @@ import {
 	jsonb,
 	pgEnum,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	uuid,
 	varchar,
-	primaryKey,
 } from "drizzle-orm/pg-core";
 
 // énumérations pour les types

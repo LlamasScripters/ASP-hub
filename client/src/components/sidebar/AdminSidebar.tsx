@@ -14,9 +14,9 @@ import {
 	Building2Icon,
 	HomeIcon,
 	type LucideIcon,
+	RssIcon,
 	ShieldIcon,
 	UsersIcon,
-	RssIcon,
 } from "lucide-react";
 import type * as React from "react";
 import NavItem, { type NavItemProps } from "./NavItem";

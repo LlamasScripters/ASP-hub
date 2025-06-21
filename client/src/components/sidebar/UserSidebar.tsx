@@ -7,51 +7,50 @@ import {
 	SidebarMenu,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import { Calendar, Home, Settings, Shield, Users } from "lucide-react";
+import {
+	CalendarIcon,
+	HomeIcon,
+	RssIcon,
+	SettingsIcon,
+	ShieldIcon,
+	UsersIcon,
+} from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
 import type { NavItemProps } from "./NavItem";
 import NavItems from "./NavItems";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";
-<<<<<<< HEAD
-=======
-import { Home, Users, Calendar, Shield, Settings, type LucideIcon, Rss  } from "lucide-react";
-import { Link, useLocation, type LinkProps } from "@tanstack/react-router";
->>>>>>> 7721a2e (feat(navigation): add blog links to sidebar menus)
 
 const navigationItems: NavItemProps[] = [
 	{
 		url: "/dashboard",
 		title: "Tableau de bord",
-		IconComponent: Home,
+		IconComponent: HomeIcon,
 	},
 	{
 		url: "/dashboard/members",
 		title: "Adhérents",
-		IconComponent: Users,
+		IconComponent: UsersIcon,
 	},
 	{
 		url: "/dashboard/activities",
 		title: "Activités",
-		IconComponent: Calendar,
+		IconComponent: CalendarIcon,
 	},
 	{
 		url: "/dashboard/social",
 		title: "Projets sociaux",
-		IconComponent: Shield,
+		IconComponent: ShieldIcon,
 	},
-<<<<<<< HEAD
-=======
 	{
 		url: "/dashboard/blog",
 		title: "Blog",
-		icon: Rss,
+		IconComponent: RssIcon,
 	},
->>>>>>> 7721a2e (feat(navigation): add blog links to sidebar menus)
 	{
 		url: "/user/settings",
 		title: "Paramètres",
-		IconComponent: Settings,
+		IconComponent: SettingsIcon,
 	},
 ];
 

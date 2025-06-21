@@ -3,15 +3,15 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import articlesRouter from "./features/blog/article.controller.js";
+import commentsRouter from "./features/blog/comments.controller.js";
+import reactionsRouter from "./features/blog/reactions.controller.js";
+import tagsRouter from "./features/blog/tags.controller.js";
 import clubsRouter from "./features/clubs/clubs.controller.js";
 import complexesRouter from "./features/room-booking/complexes.controller.js";
 import reservationsRouter from "./features/room-booking/reservations.controller.js";
 import roomsRouter from "./features/room-booking/rooms.controller.js";
 import usersRouter from "./features/users/users.controller.js";
-import articlesRouter from "./features/blog/article.controller.js";
-import tagsRouter from "./features/blog/tags.controller.js";
-import commentsRouter from "./features/blog/comments.controller.js";
-import reactionsRouter from "./features/blog/reactions.controller.js";
 
 const server = express();
 
