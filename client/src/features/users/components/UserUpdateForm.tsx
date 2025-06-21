@@ -165,13 +165,15 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 				);
 			}
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries(getLoggedInUserQueryOptions());
-			toast.success("Profil mis à jour avec succès !");
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries(getLoggedInUserQueryOptions()),
+				queryClient.invalidateQueries({
+					queryKey: ["user", user.id, "accounts"],
+				}),
+			]);
 
-			setTimeout(() => {
-				window.location.reload();
-			}, 500);
+			toast.success("Profil mis à jour avec succès !");
 		},
 		onError: (error) => {
 			toast.error(error.message);
