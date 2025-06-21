@@ -104,7 +104,6 @@ export const auth = betterAuth({
 			}
 
 			if (!ctx.body.newPassword) {
-				console.groupEnd();
 				return;
 			}
 

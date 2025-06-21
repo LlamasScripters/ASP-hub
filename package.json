@@ -8,5 +8,6 @@
 		"prepare": "husky",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write ."
-	}
+	},
+	"dependencies": {}
 }

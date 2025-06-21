@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
 import {
-	Building2,
+	Building2Icon,
 	HomeIcon,
 	type LucideIcon,
-	Shield,
+	RssIcon,
+	ShieldIcon,
 	UsersIcon,
 } from "lucide-react";
 import type * as React from "react";
@@ -37,12 +38,17 @@ const navigationItems: NavItemProps[] = [
 	{
 		url: "/admin/facilities/complexes",
 		title: "Complexes",
-		IconComponent: Building2,
+		IconComponent: Building2Icon,
 	},
 	{
 		url: "/admin/dashboard/clubs",
 		title: "Clubs",
-		IconComponent: Shield,
+		IconComponent: ShieldIcon,
+	},
+	{
+		url: "/admin/blog",
+		title: "Blog",
+		IconComponent: RssIcon,
 	},
 ];
 

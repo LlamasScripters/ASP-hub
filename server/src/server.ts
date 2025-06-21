@@ -3,6 +3,10 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import articlesRouter from "./features/blog/article.controller.js";
+import commentsRouter from "./features/blog/comments.controller.js";
+import reactionsRouter from "./features/blog/reactions.controller.js";
+import tagsRouter from "./features/blog/tags.controller.js";
 import clubsRouter from "./features/clubs/clubs.controller.js";
 import complexesRouter from "./features/room-booking/complexes.controller.js";
 import reservationsRouter from "./features/room-booking/reservations.controller.js";
@@ -28,6 +32,10 @@ server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
 server.use("/api/reservations", reservationsRouter);
 server.use("/api/clubs", clubsRouter);
+server.use("/api/articles", articlesRouter);
+server.use("/api/tags", tagsRouter);
+server.use("/api/comments", commentsRouter);
+server.use("/api/reactions", reactionsRouter);
 
 server.get("/api/health", (_req, res) => {
 	res.sendStatus(200);

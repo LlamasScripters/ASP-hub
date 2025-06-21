@@ -7,7 +7,14 @@ import {
 	SidebarMenu,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import { Calendar, Home, Settings, Shield, Users } from "lucide-react";
+import {
+	CalendarIcon,
+	HomeIcon,
+	RssIcon,
+	SettingsIcon,
+	ShieldIcon,
+	UsersIcon,
+} from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "../sidebar/NavUser";
 import type { NavItemProps } from "./NavItem";
@@ -18,27 +25,32 @@ const navigationItems: NavItemProps[] = [
 	{
 		url: "/dashboard",
 		title: "Tableau de bord",
-		IconComponent: Home,
+		IconComponent: HomeIcon,
 	},
 	{
 		url: "/dashboard/members",
 		title: "Adhérents",
-		IconComponent: Users,
+		IconComponent: UsersIcon,
 	},
 	{
 		url: "/dashboard/activities",
 		title: "Activités",
-		IconComponent: Calendar,
+		IconComponent: CalendarIcon,
 	},
 	{
 		url: "/dashboard/social",
 		title: "Projets sociaux",
-		IconComponent: Shield,
+		IconComponent: ShieldIcon,
+	},
+	{
+		url: "/dashboard/blog",
+		title: "Blog",
+		IconComponent: RssIcon,
 	},
 	{
 		url: "/user/settings",
 		title: "Paramètres",
-		IconComponent: Settings,
+		IconComponent: SettingsIcon,
 	},
 ];
 

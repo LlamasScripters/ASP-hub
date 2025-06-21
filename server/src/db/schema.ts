@@ -5,6 +5,7 @@ import {
 	jsonb,
 	pgEnum,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	uuid,
@@ -290,6 +291,137 @@ export const sectionResponsibilities = pgTable("section_responsibilities", {
 	isActive: boolean("is_active").notNull().default(true),
 });
 
+export const etatArticle = pgEnum("etat_article", [
+	"brouillon",
+	"publié",
+	"archivé",
+	"suppression logique",
+]);
+
+// Enumerations for states
+export const articleStateEnum = pgEnum("article_state", [
+	"draft",
+	"published",
+	"archived",
+]);
+
+export const commentStateEnum = pgEnum("comment_state", [
+	"published",
+	"archived",
+]);
+
+// Reactions table (reaction types available)
+export const reactions = pgTable("reactions", {
+	id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+	logoLink: text("logo_link").notNull(),
+});
+
+// Tags table
+export const tags = pgTable("tags", {
+	id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+	name: varchar("name", { length: 50 }).notNull().unique(),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.$onUpdate(() => new Date())
+		.notNull()
+		.defaultNow(),
+	deletedAt: timestamp("deleted_at"),
+});
+
+// Articles table
+export const articles = pgTable("articles", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	title: varchar("title", { length: 255 }).notNull(),
+	headerImage: text("header_image"), // URL or path to header image
+	content: text("content").notNull(), // HTML/JSON content from Tiptap
+	state: articleStateEnum("state").notNull().default("draft"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.$onUpdate(() => new Date())
+		.notNull()
+		.defaultNow(),
+	publishedAt: timestamp("published_at"),
+	authorId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	// Option to enable/disable comments
+	commentsEnabled: boolean("comments_enabled").notNull().default(true),
+	deletedAt: timestamp("deleted_at"),
+});
+
+// Article tags junction table (many-to-many)
+export const articleTags = pgTable(
+	"article_tags",
+	{
+		articleId: uuid("article_id")
+			.notNull()
+			.references(() => articles.id, { onDelete: "cascade" }),
+		tagId: integer("tag_id")
+			.notNull()
+			.references(() => tags.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		primaryKey: primaryKey({ columns: [table.articleId, table.tagId] }),
+	}),
+);
+
+// Comments table
+export const comments = pgTable("comments", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	articleId: uuid("article_id")
+		.notNull()
+		.references(() => articles.id, { onDelete: "cascade" }),
+	authorId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	content: text("content").notNull(),
+	state: commentStateEnum("state").notNull().default("published"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.$onUpdate(() => new Date())
+		.notNull()
+		.defaultNow(),
+	deletedAt: timestamp("deleted_at"),
+});
+
+// Article reactions table
+export const articleReactions = pgTable("article_reactions", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	articleId: uuid("article_id")
+		.notNull()
+		.references(() => articles.id, { onDelete: "cascade" }),
+	authorId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	reactionId: integer("reaction_id")
+		.notNull()
+		.references(() => reactions.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Comment reactions table
+export const commentReactions = pgTable("comment_reactions", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	commentId: uuid("comment_id")
+		.notNull()
+		.references(() => comments.id, { onDelete: "cascade" }),
+	authorId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	reactionId: integer("reaction_id")
+		.notNull()
+		.references(() => reactions.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Types for enumerations
+export const articleStateValues = ["draft", "published", "archived"] as const;
+export type ArticleState = (typeof articleStateValues)[number];
+
+export const commentStateValues = ["published", "archived"] as const;
+export type CommentState = (typeof commentStateValues)[number];
+
 export type InsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertSession = typeof sessions.$inferInsert;
@@ -333,3 +465,13 @@ export type InsertSectionResponsibility =
 	typeof sectionResponsibilities.$inferInsert;
 export type SelectSectionResponsibility =
 	typeof sectionResponsibilities.$inferSelect;
+
+// Blog types
+export type InsertTag = typeof tags.$inferInsert;
+export type SelectTag = typeof tags.$inferSelect;
+export type InsertArticle = typeof articles.$inferInsert;
+export type SelectArticle = typeof articles.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;
+export type SelectComment = typeof comments.$inferSelect;
+export type InsertReaction = typeof reactions.$inferInsert;
+export type SelectReaction = typeof reactions.$inferSelect;
