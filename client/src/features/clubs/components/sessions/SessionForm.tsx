@@ -29,7 +29,7 @@ import {
 	MapPin,
 	Save,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { Category, SessionSport } from "../../types";
@@ -127,6 +127,76 @@ export function SessionForm({
 		categoryId: categoryId,
 	});
 
+	const validateDates = useCallback((startDate: string, endDate: string) => {
+		if (!startDate && !endDate) {
+			setDateValidation({ isValid: true, message: "", type: null });
+			return;
+		}
+
+		if (!startDate && endDate) {
+			setDateValidation({
+				isValid: false,
+				message: "Veuillez renseigner la date de début",
+				type: "warning",
+			});
+			return;
+		}
+
+		if (startDate && !endDate) {
+			setDateValidation({
+				isValid: false,
+				message: "Veuillez renseigner la date de fin",
+				type: "warning",
+			});
+			return;
+		}
+
+		if (startDate && endDate) {
+			const start = new Date(startDate);
+			const end = new Date(endDate);
+
+			if (start > end) {
+				setDateValidation({
+					isValid: false,
+					message:
+						"⚠️ La date de début ne peut pas être postérieure à la date de fin !",
+					type: "error",
+				});
+				return;
+			}
+
+			if (start.getTime() === end.getTime()) {
+				setDateValidation({
+					isValid: false,
+					message:
+						"⚠️ Les dates de début et fin ne peuvent pas être identiques ! Une session doit avoir une durée minimale.",
+					type: "error",
+				});
+				return;
+			}
+
+			// calcul des durées
+			const durationMs = end.getTime() - start.getTime();
+			const durationMinutes = Math.floor(durationMs / (1000 * 60));
+			const hours = Math.floor(durationMinutes / 60);
+			const minutes = durationMinutes % 60;
+
+			let durationText = "";
+			if (hours > 0) {
+				durationText += `${hours}h`;
+				if (minutes > 0) durationText += ` ${minutes}min`;
+			} else {
+				durationText = `${minutes}min`;
+			}
+
+			setDateValidation({
+				isValid: true,
+				message: `Durée de la session : ${durationText}`,
+				type: "info",
+			});
+		}
+	}, []);
+
 	// récupération des sessions existantes au chargement
 	useEffect(() => {
 		const fetchExistingSessions = async () => {
@@ -222,14 +292,7 @@ export function SessionForm({
 		};
 
 		fetchData();
-	}, [
-		mode,
-		sessionId,
-		clubId,
-		sectionId,
-
-		isLoadingExistingSessions,
-	]);
+	}, [mode, sessionId, clubId, sectionId, isLoadingExistingSessions]);
 
 	// validation pour les titres dupliqués
 	const validateDuplicateTitle = (
@@ -275,76 +338,6 @@ export function SessionForm({
 			: null;
 	};
 
-	const validateDates = (startDate: string, endDate: string) => {
-		if (!startDate && !endDate) {
-			setDateValidation({ isValid: true, message: "", type: null });
-			return;
-		}
-
-		if (!startDate && endDate) {
-			setDateValidation({
-				isValid: false,
-				message: "Veuillez renseigner la date de début",
-				type: "warning",
-			});
-			return;
-		}
-
-		if (startDate && !endDate) {
-			setDateValidation({
-				isValid: false,
-				message: "Veuillez renseigner la date de fin",
-				type: "warning",
-			});
-			return;
-		}
-
-		if (startDate && endDate) {
-			const start = new Date(startDate);
-			const end = new Date(endDate);
-
-			if (start > end) {
-				setDateValidation({
-					isValid: false,
-					message:
-						"⚠️ La date de début ne peut pas être postérieure à la date de fin !",
-					type: "error",
-				});
-				return;
-			}
-
-			if (start.getTime() === end.getTime()) {
-				setDateValidation({
-					isValid: false,
-					message:
-						"⚠️ Les dates de début et fin ne peuvent pas être identiques ! Une session doit avoir une durée minimale.",
-					type: "error",
-				});
-				return;
-			}
-
-			// calcul des durées
-			const durationMs = end.getTime() - start.getTime();
-			const durationMinutes = Math.floor(durationMs / (1000 * 60));
-			const hours = Math.floor(durationMinutes / 60);
-			const minutes = durationMinutes % 60;
-
-			let durationText = "";
-			if (hours > 0) {
-				durationText += `${hours}h`;
-				if (minutes > 0) durationText += ` ${minutes}min`;
-			} else {
-				durationText = `${minutes}min`;
-			}
-
-			setDateValidation({
-				isValid: true,
-				message: `Durée de la session : ${durationText}`,
-				type: "info",
-			});
-		}
-	};
-
 	// validation en temps réel pour les titres et catégories
 	const duplicateTitleError = validateDuplicateTitle(
 		form.title || "",
@@ -369,8 +362,6 @@ export function SessionForm({
 	// effect pour valider les dates quand elles changent
 	useEffect(() => {
 		validateDates(form.startDate || "", form.endDate || "");
-
-		// biome-ignore lint/correctness/useExhaustiveDependencies: react-compiler is able to handle this
 	}, [form.startDate, form.endDate, validateDates]);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
