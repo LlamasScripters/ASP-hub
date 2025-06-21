@@ -8,7 +8,7 @@ import {
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { type UserLoggedIn, authClient } from "@/lib/auth/auth-client";
 import { queryClient } from "@/lib/react-query";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -17,8 +17,13 @@ interface ThemeToggleProps {
 	user?: UserLoggedIn;
 }
 
-export function ThemeToggle({ user }: ThemeToggleProps) {
+export function ThemeToggle({ user: userProp }: ThemeToggleProps) {
 	const { theme, setTheme } = useTheme();
+
+	const { data: user } = useQuery({
+		...getLoggedInUserQueryOptions(),
+		initialData: userProp,
+	});
 
 	const updateThemeMutation = useMutation({
 		mutationFn: async (newTheme: "light" | "dark" | "auto") => {
@@ -45,10 +50,9 @@ export function ThemeToggle({ user }: ThemeToggleProps) {
 				throw new Error("Échec de la mise à jour du thème");
 			}
 
-			return newTheme;
+			return { newTheme, updatedPreferences };
 		},
 		onSuccess: () => {
-			// Invalidate user query to refresh preferences
 			queryClient.invalidateQueries(getLoggedInUserQueryOptions());
 		},
 		onError: (error) => {
@@ -59,24 +63,16 @@ export function ThemeToggle({ user }: ThemeToggleProps) {
 
 	const handleThemeChange = (newTheme: "light" | "dark" | "auto") => {
 		const themeValue = newTheme === "auto" ? "system" : newTheme;
+
 		setTheme(themeValue);
 
 		updateThemeMutation.mutate(newTheme);
 	};
 
 	const getCurrentTheme = () => {
-		if (user?.preferences) {
-			try {
-				const preferences =
-					typeof user.preferences === "string"
-						? JSON.parse(user.preferences)
-						: user.preferences;
-				return preferences?.accessibility?.theme || "auto";
-			} catch {
-				return "auto";
-			}
-		}
-		return theme === "system" ? "auto" : theme;
+		const localTheme = theme === "system" ? "auto" : theme;
+		console.log("Using local theme for selection:", localTheme);
+		return localTheme;
 	};
 
 	const currentTheme = getCurrentTheme();

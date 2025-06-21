@@ -8,7 +8,8 @@ interface UseThemeSyncProps {
 
 export function useThemeSync({ user }: UseThemeSyncProps) {
 	const { setTheme, theme } = useTheme();
-	const lastAppliedTheme = useRef<string | null>(null);
+	const hasInitialized = useRef(false);
+	const lastUserPreference = useRef<string | null>(null);
 
 	useEffect(() => {
 		if (user?.preferences) {
@@ -19,12 +20,19 @@ export function useThemeSync({ user }: UseThemeSyncProps) {
 						: user.preferences;
 
 				const userTheme = preferences?.accessibility?.theme;
+
 				if (userTheme && ["light", "dark", "auto"].includes(userTheme)) {
 					const themeValue = userTheme === "auto" ? "system" : userTheme;
 
-					if (lastAppliedTheme.current !== userTheme && theme !== themeValue) {
+					if (!hasInitialized.current) {
 						setTheme(themeValue);
-						lastAppliedTheme.current = userTheme;
+						hasInitialized.current = true;
+						lastUserPreference.current = userTheme;
+					} else if (lastUserPreference.current !== userTheme) {
+						if (theme !== themeValue) {
+							setTheme(themeValue);
+						}
+						lastUserPreference.current = userTheme;
 					}
 				}
 			} catch (error) {
