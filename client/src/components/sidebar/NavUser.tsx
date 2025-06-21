@@ -11,6 +11,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -90,13 +93,15 @@ function NavUserContent({ user }: { user: UserLoggedIn }) {
 									Compte
 								</Link>
 							</DropdownMenuItem>
-							<div className="flex items-center justify-between px-2 py-1.5">
-								<div className="flex items-center gap-2">
-									<Palette className="h-4 w-4" />
-									<span className="text-sm">Thème</span>
-								</div>
-								<ThemeToggle user={user} />
-							</div>
+							<DropdownMenuSub>
+								<DropdownMenuSubTrigger>
+									<Palette className="h-4 w-4 mr-2" />
+									<span>Thème</span>
+								</DropdownMenuSubTrigger>
+								<DropdownMenuSubContent>
+									<ThemeToggle user={user} variant="submenu" />
+								</DropdownMenuSubContent>
+							</DropdownMenuSub>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem

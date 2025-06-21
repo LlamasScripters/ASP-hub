@@ -15,9 +15,13 @@ import { toast } from "sonner";
 
 interface ThemeToggleProps {
 	user?: UserLoggedIn;
+	variant?: "default" | "submenu";
 }
 
-export function ThemeToggle({ user: userProp }: ThemeToggleProps) {
+export function ThemeToggle({
+	user: userProp,
+	variant = "default",
+}: ThemeToggleProps) {
 	const { theme, setTheme } = useTheme();
 
 	const { data: user } = useQuery({
@@ -76,6 +80,34 @@ export function ThemeToggle({ user: userProp }: ThemeToggleProps) {
 	};
 
 	const currentTheme = getCurrentTheme();
+
+	if (variant === "submenu") {
+		return (
+			<>
+				<DropdownMenuItem
+					onClick={() => handleThemeChange("light")}
+					className={currentTheme === "light" ? "bg-accent" : ""}
+				>
+					<SunIcon className="mr-2 h-4 w-4" />
+					<span>Clair</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => handleThemeChange("dark")}
+					className={currentTheme === "dark" ? "bg-accent" : ""}
+				>
+					<MoonIcon className="mr-2 h-4 w-4" />
+					<span>Sombre</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => handleThemeChange("auto")}
+					className={currentTheme === "auto" ? "bg-accent" : ""}
+				>
+					<LaptopIcon className="mr-2 h-4 w-4" />
+					<span>Automatique</span>
+				</DropdownMenuItem>
+			</>
+		);
+	}
 
 	return (
 		<DropdownMenu>
