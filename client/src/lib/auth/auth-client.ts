@@ -88,6 +88,30 @@ export const authClient = createAuthClient({
 					type: "date",
 					required: false,
 				},
+				civility: {
+					type: "string",
+					required: false,
+				},
+				phone: {
+					type: "string",
+					required: false,
+				},
+				height: {
+					type: "number",
+					required: false,
+				},
+				weight: {
+					type: "number",
+					required: false,
+				},
+				licenseNumber: {
+					type: "string",
+					required: false,
+				},
+				preferences: {
+					type: "string",
+					required: false,
+				},
 				deletedAt: {
 					type: "date",
 				},

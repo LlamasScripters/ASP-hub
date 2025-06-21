@@ -1,8 +1,32 @@
 import { type SelectSessionSport, Session } from "@/db/schema.js";
+import { auth } from "@/lib/auth.js";
+import { fromNodeHeaders } from "better-auth/node";
 import { type Request, type Response, Router } from "express";
 import { clubsService } from "./clubs.service.js";
 
 const clubsRouter = Router();
+
+// Middleware d'authentification pour toutes les routes clubs
+clubsRouter.use(async (req: Request, res: Response, next) => {
+	try {
+		const authHeaders = fromNodeHeaders(req.headers);
+		const session = await auth.api.getSession({
+			headers: authHeaders,
+		});
+
+		if (!session) {
+			res.status(401).json({ error: "Authentication required" });
+			return;
+		}
+
+		// @ts-ignore - Express Request augmentation
+		req.session = session;
+		next();
+	} catch (error) {
+		console.error("Authentication middleware error:", error);
+		res.status(401).json({ error: "Authentication failed" });
+	}
+});
 
 // ========== ROUTES GLOBALES ==========
 // toutes les sections du club

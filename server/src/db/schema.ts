@@ -28,6 +28,13 @@ export const sessionStatusEnum = pgEnum("session_status", [
 	"annule",
 ]);
 
+export const civilityEnum = pgEnum("civility", [
+	"monsieur",
+	"madame",
+	"mademoiselle",
+	"autre",
+]);
+
 export const users = pgTable("users", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	firstName: varchar("first_name", { length: 255 }).notNull(),
@@ -39,6 +46,12 @@ export const users = pgTable("users", {
 	acceptTerms: boolean("accept_terms").notNull(),
 	emailVerified: boolean("email_verified").notNull().default(false),
 	image: text("image"),
+	civility: civilityEnum("civility"),
+	phone: varchar("phone", { length: 20 }),
+	height: integer("height"),
+	weight: integer("weight"),
+	licenseNumber: varchar("license_number", { length: 50 }),
+	preferences: jsonb("preferences").default({}),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	twoFactorEnabled: boolean("two_factor_enabled"),
 	updatedAt: timestamp("updated_at")
@@ -416,11 +429,36 @@ export const commentReactions = pgTable("comment_reactions", {
 });
 
 // Types for enumerations
+export const civilityValues = ["monsieur", "madame", "mademoiselle", "autre"] as const;
+export type Civility = (typeof civilityValues)[number];
+
 export const articleStateValues = ["draft", "published", "archived"] as const;
 export type ArticleState = (typeof articleStateValues)[number];
 
 export const commentStateValues = ["published", "archived"] as const;
 export type CommentState = (typeof commentStateValues)[number];
+
+// Type for user preferences
+export type UserPreferences = {
+	newsletter?: {
+		enabled: boolean;
+		frequency?: "daily" | "weekly" | "monthly";
+	};
+	notifications?: {
+		email: boolean;
+		push: boolean;
+		sms: boolean;
+	};
+	privacy?: {
+		profileVisibility: "public" | "members" | "private";
+		showContact: boolean;
+	};
+	accessibility?: {
+		theme: "light" | "dark" | "auto";
+		fontSize: "small" | "normal" | "large";
+		highContrast: boolean;
+	};
+};
 
 export type InsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;

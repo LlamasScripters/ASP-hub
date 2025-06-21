@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronsUpDown, LogOut, UserIcon } from "lucide-react";
+import { ChevronsUpDown, LogOut, Palette, UserIcon } from "lucide-react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -89,6 +90,13 @@ function NavUserContent({ user }: { user: UserLoggedIn }) {
 									Compte
 								</Link>
 							</DropdownMenuItem>
+							<div className="flex items-center justify-between px-2 py-1.5">
+								<div className="flex items-center gap-2">
+									<Palette className="h-4 w-4" />
+									<span className="text-sm">Thème</span>
+								</div>
+								<ThemeToggle user={user} />
+							</div>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
