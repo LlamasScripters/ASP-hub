@@ -31,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 import { TZDate } from "react-day-picker";
 import { type FieldErrors, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -72,6 +72,7 @@ const formSchema = z.object({
 		.or(z.literal("")),
 	licenseNumber: z.string().optional(),
 	newsletterSubscription: z.boolean().optional(),
+	theme: z.enum(["light", "dark", "auto"]).optional(),
 	image: z.union([z.string(), z.instanceof(File)]).optional(),
 });
 
@@ -94,6 +95,12 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		newsletterSubscription:
 			(user.preferences as { newsletter?: { enabled: boolean } } | null)
 				?.newsletter?.enabled ?? false,
+		theme:
+			(
+				user.preferences as {
+					accessibility?: { theme: "light" | "dark" | "auto" };
+				} | null
+			)?.accessibility?.theme ?? "auto",
 		image: user.image ?? undefined,
 	};
 
@@ -129,11 +136,26 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 				height: values.height ? Number(values.height) : undefined,
 				weight: values.weight ? Number(values.weight) : undefined,
 				licenseNumber: values.licenseNumber ?? undefined,
-				preferences: JSON.stringify({
-					newsletter: {
-						enabled: values.newsletterSubscription ?? false,
-					},
-				}),
+				preferences: JSON.stringify(
+					(() => {
+						const currentPrefs = user.preferences
+							? typeof user.preferences === "string"
+								? JSON.parse(user.preferences)
+								: user.preferences
+							: {};
+
+						return {
+							...currentPrefs,
+							newsletter: {
+								enabled: values.newsletterSubscription ?? false,
+							},
+							accessibility: {
+								...(currentPrefs.accessibility || {}),
+								theme: values.theme ?? "auto",
+							},
+						};
+					})(),
+				),
 				image: imageUrl,
 			});
 
@@ -146,6 +168,10 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		onSuccess: () => {
 			queryClient.invalidateQueries(getLoggedInUserQueryOptions());
 			toast.success("Profil mis à jour avec succès !");
+
+			setTimeout(() => {
+				window.location.reload();
+			}, 500);
 		},
 		onError: (error) => {
 			toast.error(error.message);
@@ -395,6 +421,48 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 									email
 								</FormDescription>
 							</div>
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="theme"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Thème d'affichage</FormLabel>
+							<Select onValueChange={field.onChange} value={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Sélectionner un thème" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									<SelectItem value="light">
+										<div className="flex items-center gap-2">
+											<SunIcon className="h-4 w-4" />
+											<span>Clair</span>
+										</div>
+									</SelectItem>
+									<SelectItem value="dark">
+										<div className="flex items-center gap-2">
+											<MoonIcon className="h-4 w-4" />
+											<span>Sombre</span>
+										</div>
+									</SelectItem>
+									<SelectItem value="auto">
+										<div className="flex items-center gap-2">
+											<LaptopIcon className="h-4 w-4" />
+											<span>Automatique</span>
+										</div>
+									</SelectItem>
+								</SelectContent>
+							</Select>
+							<FormDescription>
+								Choisissez votre thème préféré. Le thème automatique s'adapte
+								aux paramètres de votre système.
+							</FormDescription>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
