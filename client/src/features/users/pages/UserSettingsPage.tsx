@@ -9,15 +9,34 @@ import {
 
 import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 import { Route as UserRoute } from "@/routes/_authenticated/(nonadmin)/_nonadmin/user/_user";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { UserPasswordAskResetForm } from "../components/UserPasswordAskResetForm";
 import { UserPasswordUpdateForm } from "../components/UserPasswordUpdateForm";
 import UserUpdateForm from "../components/UserUpdateForm";
+import {
+	getLoggedInUserQueryOptions,
+	listAccountsQueryOptions,
+} from "../users.config";
 
 export default function UserSettingsPage() {
-	const { user } = AuthenticatedRoute.useLoaderData();
-	const { accounts } = UserRoute.useLoaderData();
+	const initialUser = AuthenticatedRoute.useLoaderData().user;
+	const initialAccounts = UserRoute.useLoaderData().accounts;
+
+	const { data: user } = useQuery({
+		...getLoggedInUserQueryOptions(),
+		initialData: initialUser,
+	});
+
+	const { data: accounts } = useQuery({
+		...listAccountsQueryOptions(initialUser.id),
+		initialData: initialAccounts,
+	});
+
+	if (!user || !accounts) {
+		return <div>Chargement...</div>;
+	}
 
 	const hasPassword = accounts.some(
 		(account) => account.provider === "credential",

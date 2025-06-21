@@ -429,7 +429,12 @@ export const commentReactions = pgTable("comment_reactions", {
 });
 
 // Types for enumerations
-export const civilityValues = ["monsieur", "madame", "mademoiselle", "autre"] as const;
+export const civilityValues = [
+	"monsieur",
+	"madame",
+	"mademoiselle",
+	"autre",
+] as const;
 export type Civility = (typeof civilityValues)[number];
 
 export const articleStateValues = ["draft", "published", "archived"] as const;
