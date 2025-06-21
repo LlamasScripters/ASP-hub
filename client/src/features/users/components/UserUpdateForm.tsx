@@ -1,9 +1,11 @@
 import { ImageUploadButton } from "@/components/ImageUploadButton";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -15,6 +17,13 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { type UserLoggedIn, authClient } from "@/lib/auth/auth-client";
 import { queryClient } from "@/lib/react-query";
 import { cn } from "@/lib/utils";
@@ -40,6 +49,29 @@ const formSchema = z.object({
 		.min(2, "Le nom doit contenir au moins 2 caractères")
 		.optional(),
 	dateOfBirth: z.coerce.date().optional(),
+	civility: z.enum(["monsieur", "madame", "mademoiselle", "autre"]).optional(),
+	phone: z
+		.string()
+		.regex(
+			/^(\d{10}|)$/,
+			"Le numéro de téléphone doit contenir exactement 10 chiffres",
+		)
+		.optional()
+		.or(z.literal("")),
+	height: z.coerce
+		.number()
+		.min(50, "La taille doit être supérieure à 50 cm")
+		.max(250, "La taille doit être inférieure à 250 cm")
+		.optional()
+		.or(z.literal("")),
+	weight: z.coerce
+		.number()
+		.min(20, "Le poids doit être supérieur à 20 kg")
+		.max(300, "Le poids doit être inférieur à 300 kg")
+		.optional()
+		.or(z.literal("")),
+	licenseNumber: z.string().optional(),
+	newsletterSubscription: z.boolean().optional(),
 	image: z.union([z.string(), z.instanceof(File)]).optional(),
 });
 
@@ -54,6 +86,14 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		firstName: user.firstName ?? undefined,
 		lastName: user.lastName ?? undefined,
 		dateOfBirth: user.dateOfBirth ?? undefined,
+		civility: user.civility as "monsieur" | "madame" | "mademoiselle" | "autre",
+		phone: user.phone ?? undefined,
+		height: user.height ?? undefined,
+		weight: user.weight ?? undefined,
+		licenseNumber: user.licenseNumber ?? undefined,
+		newsletterSubscription:
+			(user.preferences as { newsletter?: { enabled: boolean } } | null)
+				?.newsletter?.enabled ?? false,
 		image: user.image ?? undefined,
 	};
 
@@ -84,6 +124,16 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 				dateOfBirth: values.dateOfBirth
 					? new Date(values.dateOfBirth)
 					: undefined,
+				civility: values.civility ?? undefined,
+				phone: values.phone ?? undefined,
+				height: values.height ? Number(values.height) : undefined,
+				weight: values.weight ? Number(values.weight) : undefined,
+				licenseNumber: values.licenseNumber ?? undefined,
+				preferences: JSON.stringify({
+					newsletter: {
+						enabled: values.newsletterSubscription ?? false,
+					},
+				}),
 				image: imageUrl,
 			});
 
@@ -95,6 +145,7 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(getLoggedInUserQueryOptions());
+			toast.success("Profil mis à jour avec succès !");
 		},
 		onError: (error) => {
 			toast.error(error.message);
@@ -199,6 +250,151 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 								</PopoverContent>
 							</Popover>
 							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="civility"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Civilité</FormLabel>
+							<Select onValueChange={field.onChange} value={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Sélectionner une civilité" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									<SelectItem value="monsieur">Monsieur</SelectItem>
+									<SelectItem value="madame">Madame</SelectItem>
+									<SelectItem value="mademoiselle">Mademoiselle</SelectItem>
+									<SelectItem value="autre">Autre</SelectItem>
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="phone"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Téléphone</FormLabel>
+							<FormControl>
+								<Input
+									placeholder="Ex: 0123456789"
+									{...field}
+									maxLength={10}
+									onChange={(e) => {
+										const value = e.target.value.replace(/\D/g, "");
+										field.onChange(value);
+									}}
+									onKeyDown={(e) => {
+										if (
+											!/\d/.test(e.key) &&
+											![
+												"Backspace",
+												"Delete",
+												"Tab",
+												"Enter",
+												"ArrowLeft",
+												"ArrowRight",
+											].includes(e.key)
+										) {
+											e.preventDefault();
+										}
+									}}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<FormField
+						control={form.control}
+						name="height"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Taille (cm)</FormLabel>
+								<FormControl>
+									<Input
+										type="number"
+										placeholder="Ex: 175"
+										{...field}
+										onChange={(e) =>
+											field.onChange(
+												e.target.value ? Number(e.target.value) : "",
+											)
+										}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="weight"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Poids (kg)</FormLabel>
+								<FormControl>
+									<Input
+										type="number"
+										placeholder="Ex: 70"
+										{...field}
+										onChange={(e) =>
+											field.onChange(
+												e.target.value ? Number(e.target.value) : "",
+											)
+										}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
+				<FormField
+					control={form.control}
+					name="licenseNumber"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Numéro de licence</FormLabel>
+							<FormControl>
+								<Input placeholder="Ex: ABC123456" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="newsletterSubscription"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+							<FormControl>
+								<Checkbox
+									checked={field.value}
+									onCheckedChange={field.onChange}
+								/>
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>S'abonner à la newsletter</FormLabel>
+								<FormDescription>
+									Recevoir les actualités et informations de l'association par
+									email
+								</FormDescription>
+							</div>
 						</FormItem>
 					)}
 				/>
