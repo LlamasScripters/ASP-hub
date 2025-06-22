@@ -66,6 +66,8 @@ function RouteComponent() {
 							<p className="text-sm text-muted-foreground">
 								Vérifiez votre dossier spam ou{" "}
 								<Button variant="link" asChild className="text-sm h-auto p-0">
+									{/* TODO: implement support page */}
+									{/* @ts-ignore need to implement support page */}
 									<Link to="/support">contactez le support</Link>
 								</Button>
 							</p>

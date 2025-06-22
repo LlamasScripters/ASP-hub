@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
@@ -128,11 +128,11 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
 		}
 	};
 
-	const getAuthorDisplayName = (author: any) => {
+	const getAuthorDisplayName = (author: NonNullable<Blog["author"]>) => {
 		return `${author.firstName} ${author.lastName}`.trim() || author.name;
 	};
 
-	const getAuthorInitials = (author: any) => {
+	const getAuthorInitials = (author: NonNullable<Blog["author"]>) => {
 		const firstName = author.firstName || "";
 		const lastName = author.lastName || "";
 		if (firstName && lastName) {
@@ -273,6 +273,7 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
                           prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20
                           prose-code:text-blue-600 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/20
                           prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: need to show content coming from tiptap
 								dangerouslySetInnerHTML={{ __html: blog.content }}
 							/>
 						</CardContent>

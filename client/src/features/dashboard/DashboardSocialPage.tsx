@@ -221,7 +221,7 @@ export default function SocialProjectsPage() {
 			</div>
 
 			<Tabs
-				defaultValue="overview"
+				value={activeTab}
 				className="space-y-4"
 				onValueChange={setActiveTab}
 			>

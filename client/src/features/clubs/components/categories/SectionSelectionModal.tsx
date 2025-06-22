@@ -9,7 +9,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Users } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Section } from "../../types";
 

@@ -55,8 +55,8 @@ export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
 	});
 
 	const {
-		stats,
-		loading: statsLoading,
+		// stats,
+		// loading: statsLoading,
 		refresh: refreshStats,
 	} = useComplexStats();
 

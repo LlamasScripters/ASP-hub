@@ -180,10 +180,6 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		},
 	});
 
-	const handleUploadSuccess = (file: File) => {
-		uploadUserAvatarMutation.mutate(file);
-	};
-
 	const onSubmit = (values: FormValues) => {
 		updateUserMutation.mutate(values);
 	};

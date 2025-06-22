@@ -67,7 +67,7 @@ export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 		rooms: fetchedRooms,
 		loading,
 		error,
-		updateFilters,
+		// updateFilters,
 		deleteRoom,
 	} = useRooms({
 		complexId,
