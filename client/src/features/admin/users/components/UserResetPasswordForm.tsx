@@ -17,11 +17,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { api } from "@/lib/api";
-import {
-	type UserLoggedIn,
-	authClient,
-	getAuthErrorMessage,
-} from "@/lib/auth/auth-client";
+import type { UserLoggedIn } from "@/lib/auth/auth-client";
 import { authConfig } from "@/lib/auth/auth-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

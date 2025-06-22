@@ -65,10 +65,8 @@ export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 
 	const {
 		complexes: fetchedComplexes,
-		pagination,
 		loading,
 		error,
-		updateFilters,
 		deleteComplex,
 	} = useComplexes({
 		page: 1,

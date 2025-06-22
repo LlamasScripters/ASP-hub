@@ -68,7 +68,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 		onSuccess: () => {
 			navigate({
 				to: "/auth/login",
-				search: { success: "password-reset" },
+				//@ts-ignore need implementation of auth/login?from=reset-password-success
+				//TODO: implement auth/login?from=reset-password-success
+				search: { from: "reset-password-success" },
 				mask: {
 					to: "/auth/login",
 				},

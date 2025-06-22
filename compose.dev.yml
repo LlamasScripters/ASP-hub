@@ -9,6 +9,8 @@ services:
     depends_on:
       - client
       - server
+    networks:
+      - proxy
 
   client:
     image: node:22.15.0-alpine
@@ -65,3 +67,7 @@ volumes:
   postgres-data:
   minio-data:
   client_node_modules:
+
+networks:
+  proxy:
+    external: true
