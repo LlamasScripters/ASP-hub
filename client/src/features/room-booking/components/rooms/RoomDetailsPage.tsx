@@ -121,18 +121,14 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 				<CardContent>
 					<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-7">
 						{Object.entries(frenchDays).map(([dayKey, dayLabel]) => {
-							const dayData =
-								room.openingHours[dayKey as keyof typeof room.openingHours];
-
+							const dayData = room.openingHours[dayKey as keyof typeof room.openingHours];
+							
 							return (
 								<div key={dayKey} className="p-3 border rounded-lg text-center">
 									<h4 className="text-sm font-medium">{dayLabel}</h4>
 									{!dayData?.closed ? (
 										<div className="mt-1 space-y-1">
-											<Badge
-												variant="default"
-												className="text-xs bg-green-100 text-green-800"
-											>
+											<Badge variant="default" className="text-xs bg-green-100 text-green-800">
 												Ouvert
 											</Badge>
 											{dayData?.open && dayData?.close && (
@@ -142,10 +138,7 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 											)}
 										</div>
 									) : (
-										<Badge
-											variant="secondary"
-											className="text-xs bg-gray-100 text-gray-600 mt-1"
-										>
+										<Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 mt-1">
 											Fermé
 										</Badge>
 									)}
