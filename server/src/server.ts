@@ -32,7 +32,10 @@ server.use("/api/users", usersRouter);
 server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
 server.use("/api/roomReservations", roomReservationsRouter);
+<<<<<<< HEAD
 server.use("/api/minibuses", minibusesRouter);
+=======
+>>>>>>> 98acb45 (Update 'reservations' by 'roomReservations' on the backend (#30))
 server.use("/api/clubs", clubsRouter);
 server.use("/api/articles", articlesRouter);
 server.use("/api/tags", tagsRouter);
