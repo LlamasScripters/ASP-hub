@@ -88,7 +88,7 @@ roomsRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-roomsRouter.get("/:id/reservations", async (req: Request, res: Response) => {
+roomsRouter.get("/:id/roomReservations", async (req: Request, res: Response) => {
 	const query = reservationQuerySchema.safeParse(req.query);
 	if (!query.success) {
 		return res.status(400).json({ error: query.error.flatten() });
