@@ -28,6 +28,8 @@ services:
       - 3000
     volumes:
       - ./server:/app
+    environment:
+      - NODE_ENV=development
     env_file:
       - ./server/.env
     depends_on:

@@ -158,11 +158,9 @@ export default function DashboardHomePage({ user }: { user: UserLoggedIn }) {
 								<CardTitle>Statistiques des adhésions</CardTitle>
 							</CardHeader>
 							<CardContent className="pl-2">
-								<div className="h-[300px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-									<BarChart3 className="w-12 h-12 text-gray-400" />
-									<span className="ml-2 text-gray-500">
-										Graphique des adhésions
-									</span>
+								<div className="h-[300px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+									<BarChart3 className="w-12 h-12" />
+									<span className="ml-2">Graphique des adhésions</span>
 								</div>
 							</CardContent>
 						</Card>
@@ -366,11 +364,9 @@ export default function DashboardHomePage({ user }: { user: UserLoggedIn }) {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<Calendar className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
-									Contenu des activités à venir
-								</span>
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<Calendar className="w-12 h-12" />
+								<span className="ml-2">Contenu des activités à venir</span>
 							</div>
 						</CardContent>
 					</Card>
@@ -384,11 +380,9 @@ export default function DashboardHomePage({ user }: { user: UserLoggedIn }) {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<Users className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
-									Tableau des adhérents à venir
-								</span>
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<Users className="w-12 h-12" />
+								<span className="ml-2">Tableau des adhérents à venir</span>
 							</div>
 						</CardContent>
 					</Card>
@@ -402,11 +396,9 @@ export default function DashboardHomePage({ user }: { user: UserLoggedIn }) {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<TrendingUp className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
-									Suivi des projets à venir
-								</span>
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<TrendingUp className="w-12 h-12" />
+								<span className="ml-2">Suivi des projets à venir</span>
 							</div>
 						</CardContent>
 					</Card>

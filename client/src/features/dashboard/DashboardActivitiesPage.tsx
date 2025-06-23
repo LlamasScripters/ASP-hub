@@ -34,6 +34,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fr } from "date-fns/locale";
 import {
 	CalendarDays,
 	Clock,
@@ -253,6 +254,7 @@ export default function DashboardActivitiesPage() {
 										selected={date}
 										onSelect={setDate}
 										className="rounded-md border"
+										locale={fr}
 									/>
 								</div>
 								<div className="mt-6 space-y-4">

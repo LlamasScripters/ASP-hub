@@ -114,6 +114,7 @@ export const authClient = createAuthClient({
 				},
 				deletedAt: {
 					type: "date",
+					required: false,
 				},
 			},
 		}),

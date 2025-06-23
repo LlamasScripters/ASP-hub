@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import Divider from "@/components/Divider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -203,17 +204,11 @@ export function RegisterForm() {
 					</Button>
 				</form>
 			</Form>
-
-			<div className="relative">
-				<div className="absolute inset-0 flex items-center">
-					<span className="w-full border-t" />
-				</div>
-				<div className="relative flex justify-center text-xs uppercase">
-					<span className="bg-background px-2 text-muted-foreground">
-						Ou continuer avec
-					</span>
-				</div>
-			</div>
+			<Divider>
+				<span className="bg-card px-2 text-muted-foreground">
+					Ou continuer avec
+				</span>
+			</Divider>
 
 			<LoginWithGoogleButton />
 		</div>
