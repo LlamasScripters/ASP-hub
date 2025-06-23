@@ -1,11 +1,11 @@
 import {
-	type CreateReservationData,
-	type Reservation,
-	type ReservationsPaginatedResponse,
-	type UpdateReservationData,
-	reservationSchema,
-	reservationsPaginatedResponseSchema,
-} from "@/features/room-booking/hooks/useReservations";
+	type CreateRoomReservationData,
+	type RoomReservation,
+	type RoomReservationsPaginatedResponse,
+	type UpdateRoomReservationData,
+	roomReservationSchema,
+	roomReservationsPaginatedResponseSchema,
+} from "@/features/room-booking/hooks/useRoomReservations";
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -106,7 +106,7 @@ export interface ApiOptions {
 	signal?: AbortSignal;
 }
 
-export class ReservationsApiClient {
+export class RoomReservationsApiClient {
 	private baseUrl: string;
 	private defaultStartDate: Date;
 	private defaultEndDate: Date;
@@ -128,16 +128,16 @@ export class ReservationsApiClient {
 	}
 
 	/**
-	 * Get all reservations (generic).
+	 * Get all room reservations (generic).
 	 * @param filters : { status?, startDate?, endDate? }
 	 * @param startDate, endDate : if provided, they override defaultStartDate/defaultEndDate
 	 */
-	async getReservations(
+	async getRoomReservations(
 		filters?: Partial<{ status: string; startDate: Date; endDate: Date }>,
 		startDate?: Date,
 		endDate?: Date,
 		options?: ApiOptions,
-	): Promise<ReservationsPaginatedResponse> {
+	): Promise<RoomReservationsPaginatedResponse> {
 		const sd = startDate ?? this.defaultStartDate;
 		const ed = endDate ?? this.defaultEndDate;
 
@@ -151,7 +151,7 @@ export class ReservationsApiClient {
 		}
 
 		const response = await fetch(
-			`${this.baseUrl}/reservations?${queryParams.toString()}`,
+			`${this.baseUrl}/roomReservations?${queryParams.toString()}`,
 			{
 				signal: options?.signal,
 			},
@@ -162,20 +162,20 @@ export class ReservationsApiClient {
 		}
 
 		const raw = await response.json();
-		return reservationsPaginatedResponseSchema.parse(raw);
+		return roomReservationsPaginatedResponseSchema.parse(raw);
 	}
 
 	/**
-	 * Get reservations for a given room within a [startDate, endDate] interval.
+	 * Get room reservations for a given room within a [startDate, endDate] interval.
 	 * @param roomId : Room ID
 	 * @param startDate, endDate : desired interval (otherwise, current week by default)
 	 */
-	async getReservationsByRoomId(
+	async getRoomReservationsByRoomId(
 		roomId: string,
 		startDate?: Date,
 		endDate?: Date,
 		options?: ApiOptions,
-	): Promise<ReservationsPaginatedResponse> {
+	): Promise<RoomReservationsPaginatedResponse> {
 		const sd = startDate ?? this.defaultStartDate;
 		const ed = endDate ?? this.defaultEndDate;
 
@@ -185,7 +185,7 @@ export class ReservationsApiClient {
 		});
 
 		const response = await fetch(
-			`${this.baseUrl}/rooms/${roomId}/reservations?${queryParams.toString()}`,
+			`${this.baseUrl}/rooms/${roomId}/roomReservations?${queryParams.toString()}`,
 			{
 				signal: options?.signal,
 			},
@@ -199,18 +199,18 @@ export class ReservationsApiClient {
 		}
 
 		const raw = await response.json();
-		return reservationsPaginatedResponseSchema.parse(raw);
+		return roomReservationsPaginatedResponseSchema.parse(raw);
 	}
 
 	/**
-	 * Get a single reservation by its ID.
+	 * Get a single room reservation by its ID.
 	 */
-	async getReservationById(
-		reservationId: string,
+	async getRoomReservationById(
+		roomReservationId: string,
 		options?: ApiOptions,
-	): Promise<Reservation> {
+	): Promise<RoomReservation> {
 		const response = await fetch(
-			`${this.baseUrl}/reservations/${reservationId}`,
+			`${this.baseUrl}/roomReservations/${roomReservationId}`,
 			{
 				signal: options?.signal,
 			},
@@ -224,18 +224,18 @@ export class ReservationsApiClient {
 		}
 
 		const raw = await response.json();
-		return reservationSchema.parse(raw);
+		return roomReservationSchema.parse(raw);
 	}
 
 	/**
-	 * Creates a new reservation.
-	 * Returns the complete Reservation object if successful, otherwise throws an error.
+	 * Creates a new room reservation.
+	 * Returns the complete RoomReservation object if successful, otherwise throws an error.
 	 */
-	async createReservation(
-		data: CreateReservationData,
+	async createRoomReservation(
+		data: CreateRoomReservationData,
 		options?: ApiOptions,
-	): Promise<Reservation> {
-		const response = await fetch(`${this.baseUrl}/reservations`, {
+	): Promise<RoomReservation> {
+		const response = await fetch(`${this.baseUrl}/roomReservations`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -252,20 +252,20 @@ export class ReservationsApiClient {
 		}
 
 		const raw = await response.json();
-		return reservationSchema.parse(raw);
+		return roomReservationSchema.parse(raw);
 	}
 
 	/**
-	 * Updates an existing reservation (PUT /reservations/:id).
-	 * Returns the updated Reservation object if successful, otherwise throws an error.
+	 * Updates an existing room reservation (PUT /roomReservations/:id).
+	 * Returns the updated RoomReservation object if successful, otherwise throws an error.
 	 */
-	async updateReservation(
-		reservationId: string,
-		data: UpdateReservationData,
+	async updateRoomReservation(
+		roomReservationId: string,
+		data: UpdateRoomReservationData,
 		options?: ApiOptions,
-	): Promise<Reservation> {
+	): Promise<RoomReservation> {
 		const response = await fetch(
-			`${this.baseUrl}/reservations/${reservationId}`,
+			`${this.baseUrl}/roomReservations/${roomReservationId}`,
 			{
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
@@ -276,30 +276,30 @@ export class ReservationsApiClient {
 
 		if (!response.ok) {
 			if (response.status === 404) {
-				throw new Error("Réservation non trouvée (404).");
+				throw new Error("Réservation de salle non trouvée (404).");
 			}
 			if (response.status === 409) {
 				throw new Error(
-					"Le créneau mis à jour entre en conflit avec une autre réservation (409).",
+					"Le créneau mis à jour entre en conflit avec une autre réservation de salle (409).",
 				);
 			}
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 
 		const raw = await response.json();
-		return reservationSchema.parse(raw);
+		return roomReservationSchema.parse(raw);
 	}
 
 	/**
-	 * Deletes a reservation by its ID.
+	 * Deletes a room reservation by its ID.
 	 * Returns `true` if successful, otherwise throws an error.
 	 */
-	async deleteReservation(
-		reservationId: string,
+	async deleteRoomReservation(
+		roomReservationId: string,
 		options?: ApiOptions,
 	): Promise<boolean> {
 		const response = await fetch(
-			`${this.baseUrl}/reservations/${reservationId}`,
+			`${this.baseUrl}/roomReservations/${roomReservationId}`,
 			{
 				method: "DELETE",
 				signal: options?.signal,
@@ -308,7 +308,7 @@ export class ReservationsApiClient {
 
 		if (!response.ok) {
 			if (response.status === 404) {
-				throw new Error("Réservation non trouvée (404).");
+				throw new Error("Réservation de salle non trouvée (404).");
 			}
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
@@ -317,4 +317,4 @@ export class ReservationsApiClient {
 	}
 }
 
-export const reservationsApi = new ReservationsApiClient();
+export const roomReservationsApi = new RoomReservationsApiClient();
