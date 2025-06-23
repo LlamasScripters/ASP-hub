@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	complexes,
-	reservations,
+	roomReservations,
 	rooms,
 	//   sessionParticipants,
 	//   sessionsSport,
@@ -19,8 +19,8 @@ export async function resetAllTables(db: NodePgDatabase) {
 
 	try {
 		// Ordre inverse des dépendances pour éviter les erreurs de clés étrangères
-		await db.delete(reservations);
-		console.log("Reservations deleted");
+		await db.delete(roomReservations);
+		console.log("Room Reservations deleted");
 
 		// await db.delete(sessionParticipants);
 		// console.log("Session participants deleted");
@@ -54,7 +54,7 @@ export async function resetAllTables(db: NodePgDatabase) {
 			sql`SELECT setval(pg_get_serial_sequence('rooms', 'id'), 1, false)`,
 		);
 		await db.execute(
-			sql`SELECT setval(pg_get_serial_sequence('reservations', 'id'), 1, false)`,
+			sql`SELECT setval(pg_get_serial_sequence('room_reservations', 'id'), 1, false)`,
 		);
 	} catch (error) {
 		console.error("Error during the reset:", error);

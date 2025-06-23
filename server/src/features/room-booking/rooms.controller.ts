@@ -1,7 +1,7 @@
 import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { complexesService } from "./complexes.service.js";
-import { reservationsService } from "./reservations.service.js";
+import { roomReservationsService } from "./roomReservations.service.js";
 import { roomsService } from "./rooms.service.js";
 
 const roomsRouter = Router();
@@ -104,12 +104,12 @@ roomsRouter.get("/:id/reservations", async (req: Request, res: Response) => {
 	const room = await roomsService.getById(req.params.id);
 	if (!room) return res.status(404).json({ error: "Room not found" });
 
-	const reservations = await reservationsService.getPaginatedByRoomAndDateRange(
+	const roomReservations = await roomReservationsService.getPaginatedByRoomAndDateRange(
 		req.params.id,
 		startDate,
 		endDate,
 	);
-	return res.json(reservations);
+	return res.json(roomReservations);
 });
 
 //@ts-ignore

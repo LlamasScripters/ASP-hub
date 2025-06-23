@@ -9,7 +9,7 @@ import reactionsRouter from "./features/blog/reactions.controller.js";
 import tagsRouter from "./features/blog/tags.controller.js";
 import clubsRouter from "./features/clubs/clubs.controller.js";
 import complexesRouter from "./features/room-booking/complexes.controller.js";
-import reservationsRouter from "./features/room-booking/reservations.controller.js";
+import roomReservationsRouter from "./features/room-booking/roomReservations.controller.js";
 import roomsRouter from "./features/room-booking/rooms.controller.js";
 import usersRouter from "./features/users/users.controller.js";
 
@@ -30,7 +30,7 @@ server.use(express.urlencoded({ extended: true }));
 server.use("/api/users", usersRouter);
 server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
-server.use("/api/reservations", reservationsRouter);
+server.use("/api/roomReservations", roomReservationsRouter);
 server.use("/api/clubs", clubsRouter);
 server.use("/api/articles", articlesRouter);
 server.use("/api/tags", tagsRouter);
