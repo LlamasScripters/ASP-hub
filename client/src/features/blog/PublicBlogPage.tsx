@@ -287,7 +287,10 @@ export function PublicBlogPage({ blogs }: PublicBlogPageProps) {
 								<CardFooter className="pt-3 border-t">
 									<div className="flex items-center justify-between w-full">
 										<div className="flex items-center gap-4 text-gray-500 dark:text-gray-400">
-											<button className="flex items-center gap-1 hover:text-blue-500 transition-colors">
+											<button
+												type="button"
+												className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+											>
 												<MessageCircle className="h-4 w-4" />
 												<span className="text-xs">
 													{blog.commentsCount || 0}

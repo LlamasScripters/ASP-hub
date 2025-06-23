@@ -69,9 +69,9 @@ export function CommentReactionsBar({
 	if (typesLoading || reactionsLoading) {
 		return (
 			<div className={cn("flex items-center gap-1", className)}>
-				{Array.from({ length: 3 }).map((_, i) => (
+				{Array.from({ length: 3 }, () => (
 					<div
-						key={i}
+						key={`comment-skeleton-${Math.random()}`}
 						className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
 					/>
 				))}

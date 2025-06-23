@@ -128,11 +128,19 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
 		}
 	};
 
-	const getAuthorDisplayName = (author: any) => {
+	const getAuthorDisplayName = (author: {
+		firstName?: string;
+		lastName?: string;
+		name?: string;
+	}) => {
 		return `${author.firstName} ${author.lastName}`.trim() || author.name;
 	};
 
-	const getAuthorInitials = (author: any) => {
+	const getAuthorInitials = (author: {
+		firstName?: string;
+		lastName?: string;
+		name?: string;
+	}) => {
 		const firstName = author.firstName || "";
 		const lastName = author.lastName || "";
 		if (firstName && lastName) {
@@ -273,6 +281,7 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
                           prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20
                           prose-code:text-blue-600 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/20
                           prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+								/* biome-ignore lint/security/noDangerouslySetInnerHtml: Blog content needs to render HTML */
 								dangerouslySetInnerHTML={{ __html: blog.content }}
 							/>
 						</CardContent>
@@ -429,7 +438,10 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
 
 													<div className="flex items-center gap-4">
 														<CommentReactionsBar commentId={comment.id} />
-														<button className="text-sm text-gray-500 hover:text-blue-600 transition-colors">
+														<button
+															type="button"
+															className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+														>
 															Répondre
 														</button>
 													</div>

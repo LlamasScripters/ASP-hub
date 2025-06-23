@@ -56,7 +56,7 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 					</Button>
 				</Link>
 				<div className="flex gap-2">
-					<Link to={`/admin/blog/${blog.id}/edit` as any}>
+					<Link to={`/admin/blog/${blog.id}/edit`}>
 						<Button className="gap-2">
 							<Edit className="h-4 w-4" />
 							Modifier
@@ -129,6 +129,7 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
                          prose-blockquote:border-primary
                          prose-code:text-foreground prose-code:bg-muted
                          prose-pre:bg-muted prose-pre:text-foreground"
+							/* biome-ignore lint/security/noDangerouslySetInnerHtml: Blog content needs to render HTML */
 							dangerouslySetInnerHTML={{ __html: blog.content }}
 						/>
 					</CardContent>
@@ -214,7 +215,7 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 
 				{/* Actions rapides */}
 				<div className="flex flex-col sm:flex-row gap-4">
-					<Link to={`/admin/blog/${blog.id}/edit` as any} className="flex-1">
+					<Link to={`/admin/blog/${blog.id}/edit`} className="flex-1">
 						<Button className="w-full gap-2">
 							<Edit className="h-4 w-4" />
 							Modifier cet article
