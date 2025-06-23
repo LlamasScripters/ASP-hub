@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ReservationForm } from "@room-booking/components/reservations/ReservationForm";
+import { RoomReservationForm } from "@/features/room-booking/components/RoomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
@@ -8,15 +8,15 @@ import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 
-interface ReservationCreatePageProps {
+interface RoomReservationCreatePageProps {
 	complex: Complex;
 	room: Room;
 }
 
-export function ReservationCreatePage({
+export function RoomReservationCreatePage({
 	complex,
 	room,
-}: ReservationCreatePageProps) {
+}: RoomReservationCreatePageProps) {
 	const navigate = useNavigate();
 
 	const router = useRouter();
@@ -67,7 +67,7 @@ export function ReservationCreatePage({
 			</Alert>
 
 			{/* Formulaire de réservation */}
-			<ReservationForm
+			<RoomReservationForm
 				roomId={room.id}
 				roomOpeningHours={room.openingHours}
 				onSuccess={handleSuccess}

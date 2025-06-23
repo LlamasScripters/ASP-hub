@@ -1,9 +1,9 @@
-import { reservationsApi } from "@room-booking/lib/api/reservations";
+import { roomReservationsApi } from "@/features/room-booking/lib/api/roomReservations";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-export const reservationStatusEnumTranslated = {
+export const roomReservationStatusEnumTranslated = {
 	pending: "En attente",
 	confirmed: "Confirmée",
 	cancelled: "Annulée",
@@ -12,7 +12,7 @@ export const reservationStatusEnumTranslated = {
 	rescheduled: "Reportée",
 };
 
-export const reservationStatusEnum = z.enum([
+export const roomReservationStatusEnum = z.enum([
 	"pending",
 	"confirmed",
 	"cancelled",
@@ -21,19 +21,19 @@ export const reservationStatusEnum = z.enum([
 	"rescheduled",
 ]);
 
-export const reservationSchema = z.object({
+export const roomReservationSchema = z.object({
 	id: z.string().uuid(),
 	title: z.string().min(1, "Le titre est requis"),
 	startAt: z.coerce.date(),
 	endAt: z.coerce.date(),
 	roomId: z.string().uuid(),
 	bookerId: z.string().uuid(),
-	status: reservationStatusEnum,
+	status: roomReservationStatusEnum,
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 });
 
-export const createReservationSchema = z
+export const createRoomReservationSchema = z
 	.object({
 		title: z
 			.string()
@@ -45,26 +45,26 @@ export const createReservationSchema = z
 		endAt: z.coerce.date(),
 		roomId: z.string().uuid("L'ID de la salle doit être un UUID valide"),
 		bookerId: z.string().uuid("L'ID du réservateur doit être un UUID valide"),
-		status: reservationStatusEnum.default("pending"),
+		status: roomReservationStatusEnum.default("pending"),
 	})
 	.refine((data) => data.endAt > data.startAt, {
 		message: "La date de fin doit être postérieure à la date de début",
 		path: ["endAt"],
 	});
 
-export const updateReservationSchema = createReservationSchema
+export const updateRoomReservationSchema = createRoomReservationSchema
 	.innerType()
 	.partial()
 	.omit({ bookerId: true, roomId: true });
 
-export const reservationFiltersSchema = z.object({
-	status: reservationStatusEnum.optional(),
+export const roomReservationFiltersSchema = z.object({
+	status: roomReservationStatusEnum.optional(),
 	startDate: z.coerce.date(),
 	endDate: z.coerce.date(),
 });
 
-export const reservationsPaginatedResponseSchema = z.object({
-	data: z.array(reservationSchema),
+export const roomReservationsPaginatedResponseSchema = z.object({
+	data: z.array(roomReservationSchema),
 	total: z
 		.union([z.number(), z.string()])
 		.transform((val) =>
@@ -72,28 +72,28 @@ export const reservationsPaginatedResponseSchema = z.object({
 		),
 });
 
-export type Reservation = z.infer<typeof reservationSchema>;
-export type CreateReservationData = z.infer<typeof createReservationSchema>;
-export type UpdateReservationData = z.infer<typeof updateReservationSchema>;
-export type ReservationFilters = z.infer<typeof reservationFiltersSchema>;
-export type ReservationsPaginatedResponse = z.infer<
-	typeof reservationsPaginatedResponseSchema
+export type RoomReservation = z.infer<typeof roomReservationSchema>;
+export type CreateRoomReservationData = z.infer<typeof createRoomReservationSchema>;
+export type UpdateRoomReservationData = z.infer<typeof updateRoomReservationSchema>;
+export type RoomReservationFilters = z.infer<typeof roomReservationFiltersSchema>;
+export type RoomReservationsPaginatedResponse = z.infer<
+	typeof roomReservationsPaginatedResponseSchema
 >;
 
-interface UseReservationsOptions {
+interface UseRoomReservationsOptions {
 	roomId: string;
-	initialData?: Reservation[];
+	initialData?: RoomReservation[];
 }
 
-export function useReservations({
+export function useRoomReservations({
 	roomId,
 	initialData = [],
-}: UseReservationsOptions) {
-	const [reservations, setReservations] = useState<Reservation[]>(initialData);
+}: UseRoomReservationsOptions) {
+	const [roomReservations, setRoomReservations] = useState<RoomReservation[]>(initialData);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const [filters, setFilters] = useState<ReservationFilters>({
+	const [filters, setFilters] = useState<RoomReservationFilters>({
 		status: undefined,
 		startDate: new Date(new Date().setDate(1)), // First day of current month
 		endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
@@ -102,9 +102,9 @@ export function useReservations({
 	const [totalCount, setTotalCount] = useState<number>(0);
 
 	/**
-	 * Calls reservationsApi.getReservationsByRoomId
+	 * Calls roomReservationsApi.getRoomReservationsByRoomId
 	 */
-	const fetchReservations = useCallback(async () => {
+	const fetchRoomReservations = useCallback(async () => {
 		setLoading(true);
 		setError(null);
 
@@ -117,12 +117,12 @@ export function useReservations({
 			const ed =
 				filters.endDate !== undefined ? new Date(filters.endDate) : undefined;
 
-			const response = await reservationsApi.getReservationsByRoomId(
+			const response = await roomReservationsApi.getRoomReservationsByRoomId(
 				roomId,
 				sd,
 				ed,
 			);
-			setReservations(response.data);
+			setRoomReservations(response.data);
 			setTotalCount(response.total);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "Unexpected error";
@@ -134,20 +134,20 @@ export function useReservations({
 	}, [roomId, filters]);
 
 	/**
-	 * Creates a reservation
+	 * Creates a room reservation
 	 */
-	const createReservation = useCallback(
-		async (data: CreateReservationData): Promise<Reservation | null> => {
+	const createRoomReservation = useCallback(
+		async (data: CreateRoomReservationData): Promise<RoomReservation | null> => {
 			setLoading(true);
 			setError(null);
 
 			try {
-				createReservationSchema.parse(data);
+				createRoomReservationSchema.parse(data);
 
-				const result = await reservationsApi.createReservation(data);
-				toast.success("Réservation créée avec succès");
+				const result = await roomReservationsApi.createRoomReservation(data);
+				toast.success("Réservation de salle créée avec succès");
 
-				setReservations((prev) => [result, ...prev]);
+				setRoomReservations((prev) => [result, ...prev]);
 				setTotalCount((prev) => prev + 1);
 				return result;
 			} catch (err) {
@@ -170,22 +170,22 @@ export function useReservations({
 	);
 
 	/**
-	 * Updates a reservation
+	 * Updates a room reservation
 	 */
-	const updateReservation = useCallback(
+	const updateRoomReservation = useCallback(
 		async (
 			id: string,
-			data: UpdateReservationData,
-		): Promise<Reservation | null> => {
+			data: UpdateRoomReservationData,
+		): Promise<RoomReservation | null> => {
 			setLoading(true);
 			setError(null);
 
 			try {
-				updateReservationSchema.parse(data);
+				updateRoomReservationSchema.parse(data);
 
-				const result = await reservationsApi.updateReservation(id, data);
-				toast.success("Réservation mise à jour avec succès");
-				setReservations((prev) => prev.map((r) => (r.id === id ? result : r)));
+				const result = await roomReservationsApi.updateRoomReservation(id, data);
+				toast.success("Réservation de salle mise à jour avec succès");
+				setRoomReservations((prev) => prev.map((r) => (r.id === id ? result : r)));
 				return result;
 			} catch (err) {
 				let message = "Unexpected error";
@@ -205,18 +205,18 @@ export function useReservations({
 	);
 
 	/**
-	 * Deletes a reservation
+	 * Deletes a room reservation
 	 */
-	const deleteReservation = useCallback(
+	const deleteRoomReservation = useCallback(
 		async (id: string): Promise<boolean> => {
 			setLoading(true);
 			setError(null);
 
 			try {
-				const success = await reservationsApi.deleteReservation(id);
+				const success = await roomReservationsApi.deleteRoomReservation(id);
 				if (success) {
-					toast.success("Réservation supprimée avec succès");
-					setReservations((prev) => prev.filter((r) => r.id !== id));
+					toast.success("Réservation de salle supprimée avec succès");
+					setRoomReservations((prev) => prev.filter((r) => r.id !== id));
 					setTotalCount((prev) => (prev > 0 ? prev - 1 : 0));
 					return true;
 				}
@@ -234,15 +234,15 @@ export function useReservations({
 	);
 
 	/**
-	 * Gets a single reservation by ID
+	 * Gets a single room reservation by ID
 	 */
-	const getReservationById = useCallback(
-		async (id: string): Promise<Reservation | null> => {
+	const getRoomReservationById = useCallback(
+		async (id: string): Promise<RoomReservation | null> => {
 			setLoading(true);
 			setError(null);
 
 			try {
-				const result = await reservationsApi.getReservationById(id);
+				const result = await roomReservationsApi.getRoomReservationById(id);
 				return result;
 			} catch (err) {
 				const message = err instanceof Error ? err.message : "Unexpected error";
@@ -257,19 +257,19 @@ export function useReservations({
 	);
 
 	const updateFilters = useCallback(
-		(newFilters: Partial<ReservationFilters>) => {
+		(newFilters: Partial<RoomReservationFilters>) => {
 			setFilters((prev) => ({ ...prev, ...newFilters }));
 		},
 		[],
 	);
 
 	useEffect(() => {
-		fetchReservations();
-	}, [fetchReservations]);
+		fetchRoomReservations();
+	}, [fetchRoomReservations]);
 
 	return {
 		// Data
-		reservations,
+		roomReservations,
 		totalCount,
 		filters,
 
@@ -278,14 +278,14 @@ export function useReservations({
 		error,
 
 		// Actions
-		fetchReservations,
+		fetchRoomReservations,
 		updateFilters,
-		createReservation,
-		updateReservation,
-		deleteReservation,
-		getReservationById,
+		createRoomReservation,
+		updateRoomReservation,
+		deleteRoomReservation,
+		getRoomReservationById,
 
 		// Refresh function
-		refresh: fetchReservations,
+		refresh: fetchRoomReservations,
 	};
 }
