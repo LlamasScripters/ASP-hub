@@ -76,7 +76,12 @@ tagsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
 		res.status(201).json(tag);
 	} catch (error) {
 		console.error("Erreur lors de la création du tag:", error);
-		if ((error as any)?.code === "23505") {
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			error.code === "23505"
+		) {
 			res.status(409).json({ error: "Ce nom de tag existe déjà" });
 			return;
 		}
@@ -115,7 +120,12 @@ tagsRouter.put("/:id", async (req: Request, res: Response): Promise<void> => {
 		res.json(tag);
 	} catch (error) {
 		console.error("Erreur lors de la mise à jour du tag:", error);
-		if ((error as any)?.code === "23505") {
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			error.code === "23505"
+		) {
 			res.status(409).json({ error: "Ce nom de tag existe déjà" });
 			return;
 		}

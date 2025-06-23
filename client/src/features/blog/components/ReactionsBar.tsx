@@ -67,9 +67,9 @@ export function ReactionsBar({ articleId, className }: ReactionsBarProps) {
 		return (
 			<div className={cn("flex items-center gap-2", className)}>
 				<div className="flex gap-1">
-					{Array.from({ length: 5 }).map((_, i) => (
+					{Array.from({ length: 5 }, () => (
 						<div
-							key={i}
+							key={`reaction-skeleton-${Math.random()}`}
 							className="w-10 h-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"
 						/>
 					))}

@@ -11,7 +11,7 @@ import {
 	MessageCircle,
 	Shield,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Comment {
@@ -43,7 +43,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 		new Set(),
 	);
 
-	const fetchComments = async () => {
+	const fetchComments = useCallback(async () => {
 		try {
 			setLoading(true);
 			const response = await fetch(`/api/comments/admin/article/${blogId}`);
@@ -58,7 +58,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [blogId]);
 
 	const toggleCommentVisibility = async (
 		commentId: string,
@@ -113,7 +113,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 
 	useEffect(() => {
 		fetchComments();
-	}, [blogId]);
+	}, [fetchComments]);
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {

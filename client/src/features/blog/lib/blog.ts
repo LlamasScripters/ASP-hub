@@ -433,7 +433,7 @@ export class ReactionsApi {
 
 	async toggleArticleReaction(
 		data: ToggleArticleReactionData,
-	): Promise<{ data: any }> {
+	): Promise<{ data: unknown }> {
 		const response = await fetch(`${this.baseUrl}/articles`, {
 			method: "POST",
 			headers: {
@@ -453,7 +453,7 @@ export class ReactionsApi {
 
 	async toggleCommentReaction(
 		data: ToggleCommentReactionData,
-	): Promise<{ data: any }> {
+	): Promise<{ data: unknown }> {
 		const response = await fetch(`${this.baseUrl}/comments`, {
 			method: "POST",
 			headers: {

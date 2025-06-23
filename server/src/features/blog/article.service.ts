@@ -97,7 +97,8 @@ export const articleService = {
 					),
 				);
 
-			(article as any).commentsCount = commentsCount.length;
+			// @ts-ignore - Adding commentsCount property dynamically
+			article.commentsCount = commentsCount.length;
 		}
 
 		return articlesArray;
@@ -160,8 +161,8 @@ export const articleService = {
 			tags: articleWithTags
 				.filter((row) => row.tagId !== null)
 				.map((row) => ({
-					id: row.tagId!,
-					name: row.tagName!,
+					id: row.tagId as string,
+					name: row.tagName as string,
 				})),
 		};
 
@@ -177,7 +178,8 @@ export const articleService = {
 				),
 			);
 
-		(result as any).commentsCount = commentsCount.length;
+		// @ts-ignore - Adding commentsCount property dynamically
+		result.commentsCount = commentsCount.length;
 
 		return result;
 	},
