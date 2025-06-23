@@ -143,7 +143,7 @@ export const defaultDisponibility = {
 	friday: { open: null, close: null, available: false },
 	saturday: { open: "06:00", close: "20:00", available: true },
 	sunday: { open: "06:00", close: "20:00", available: true },
-};	
+};
 
 export const complexes = pgTable("complexes", {
 	id: uuid("id").primaryKey().defaultRandom(),
@@ -204,19 +204,21 @@ export const roomReservations = pgTable("room_reservations", {
 });
 
 export const minibuses = pgTable("minibuses", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: text("description").notNull(),
-    licensePlate: varchar("license_plate", { length: 9 }).notNull().unique(),
-    capacity: integer("capacity").notNull(),
-	disabledPersonCapacity: integer("disabled_person_capacity").notNull().default(0),
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: varchar("name", { length: 255 }).notNull(),
+	description: text("description").notNull(),
+	licensePlate: varchar("license_plate", { length: 9 }).notNull().unique(),
+	capacity: integer("capacity").notNull(),
+	disabledPersonCapacity: integer("disabled_person_capacity")
+		.notNull()
+		.default(0),
 	disponibility: jsonb("disponibility").notNull().default(defaultDisponibility),
 	isAvailable: boolean("is_available").notNull().default(true),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at")
-        .notNull()
-        .defaultNow()
-        .$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
 });
 
 export const minibusReservations = pgTable("minibus_reservations", {
