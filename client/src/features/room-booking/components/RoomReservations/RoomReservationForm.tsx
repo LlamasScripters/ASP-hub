@@ -26,31 +26,31 @@ import {
 } from "@/components/ui/select";
 import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useReservations } from "@room-booking/hooks/useReservations";
+import { useRoomReservations } from "@/features/room-booking/hooks/useRoomReservations";
 import {
-	type CreateReservationData,
-	type Reservation,
-	type UpdateReservationData,
-	createReservationSchema,
-	reservationStatusEnumTranslated,
-	updateReservationSchema,
-} from "@room-booking/hooks/useReservations";
+	type CreateRoomReservationData,
+	type RoomReservation,
+	type UpdateRoomReservationData,
+	createRoomReservationSchema,
+	roomReservationStatusEnumTranslated,
+	updateRoomReservationSchema,
+} from "@/features/room-booking/hooks/useRoomReservations";
 import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import {
 	parseLocalInputDateTime,
 	toLocalInputDateTime,
-} from "@room-booking/lib/api/reservations";
+} from "@/features/room-booking/lib/api/roomReservations";
 import { Link } from "@tanstack/react-router";
 // @ts-ignore
 import { Calendar as CalendarIcon, Clock, Info, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-interface ReservationFormProps {
+interface RoomReservationFormProps {
 	roomId: string;
 	roomOpeningHours: RoomOpeningHours;
-	reservation?: Reservation;
-	onSuccess?: (r: Reservation) => void;
+	roomReservation?: RoomReservation;
+	onSuccess?: (r: RoomReservation) => void;
 	onCancelLink?: string;
 }
 
@@ -64,16 +64,16 @@ const daysOfWeek = [
 	{ key: "sunday", label: "Dimanche" },
 ];
 
-export function ReservationForm({
+export function RoomReservationForm({
 	roomId,
 	roomOpeningHours,
-	reservation,
+	roomReservation,
 	onSuccess,
 	onCancelLink,
-}: ReservationFormProps) {
+}: RoomReservationFormProps) {
 	const { user } = AuthenticatedRoute.useLoaderData();
-	const { createReservation, updateReservation } = useReservations({ roomId });
-	const isEditing = Boolean(reservation);
+	const { createRoomReservation, updateRoomReservation } = useRoomReservations({ roomId });
+	const isEditing = Boolean(roomReservation);
 
 	const [formMode, setFormMode] = useState<"create" | "edit">(
 		isEditing ? "edit" : "create",
@@ -86,19 +86,19 @@ export function ReservationForm({
 
 	const defaultValues = useMemo(
 		() => ({
-			title: reservation?.title ?? "",
-			startAt: reservation ? reservation.startAt : new Date(),
-			endAt: reservation
-				? reservation.endAt
+			title: roomReservation?.title ?? "",
+			startAt: roomReservation ? roomReservation.startAt : new Date(),
+			endAt: roomReservation
+				? roomReservation.endAt
 				: new Date(Date.now() + 60 * 60 * 1000), // default +1h
-			status: reservation?.status ?? "pending",
+			status: roomReservation?.status ?? "pending",
 		}),
-		[reservation],
+		[roomReservation],
 	);
 
-	const form = useForm<CreateReservationData | UpdateReservationData>({
+	const form = useForm<CreateRoomReservationData | UpdateRoomReservationData>({
 		resolver: zodResolver(
-			isEditing ? updateReservationSchema : createReservationSchema,
+			isEditing ? updateRoomReservationSchema : createRoomReservationSchema,
 		),
 		defaultValues: defaultValues,
 	});
@@ -243,23 +243,23 @@ export function ReservationForm({
 							setValidationError(null);
 
 							try {
-								let result: Reservation | null = null;
+								let result: RoomReservation | null = null;
 
-								if (isEditing && reservation) {
-									const payload: UpdateReservationData = {
+								if (isEditing && roomReservation) {
+									const payload: UpdateRoomReservationData = {
 										title: form.getValues("title") ?? "",
 										startAt: form.getValues("startAt") ?? new Date(),
 										endAt: form.getValues("endAt") ?? new Date(),
 										status: form.getValues("status") ?? "pending",
 									};
 
-									result = await updateReservation(reservation.id, payload);
+									result = await updateRoomReservation(roomReservation.id, payload);
 								} else {
 									if (!user?.id) {
 										throw new Error("Utilisateur non authentifié");
 									}
 
-									const payload: CreateReservationData = {
+									const payload: CreateRoomReservationData = {
 										title: form.getValues("title") ?? "",
 										startAt: form.getValues("startAt") ?? new Date(),
 										endAt:
@@ -270,7 +270,7 @@ export function ReservationForm({
 										status: form.getValues("status") ?? "pending",
 									};
 
-									result = await createReservation(payload);
+									result = await createRoomReservation(payload);
 								}
 
 								if (result) {
@@ -384,7 +384,7 @@ export function ReservationForm({
 												<SelectValue placeholder="Sélectionner un statut" />
 											</SelectTrigger>
 											<SelectContent>
-												{Object.entries(reservationStatusEnumTranslated).map(
+												{Object.entries(roomReservationStatusEnumTranslated).map(
 													([value, label]) => (
 														<SelectItem key={value} value={value}>
 															{label}

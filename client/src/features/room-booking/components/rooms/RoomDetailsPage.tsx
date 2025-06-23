@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ReservationList } from "@room-booking/components/reservations/ReservationList";
+import { RoomReservationList } from "@/features/room-booking/components/RoomReservations/RoomReservationList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { frenchDays } from "@room-booking/hooks/useRooms";
@@ -156,10 +156,10 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 			</Card>
 
 			{/* Planification des réservations */}
-			<ReservationList
+			<RoomReservationList
 				roomId={room.id}
 				roomOpeningHours={room.openingHours}
-				initialReservations={[]}
+				initialRoomReservations={[]}
 			/>
 		</div>
 	);

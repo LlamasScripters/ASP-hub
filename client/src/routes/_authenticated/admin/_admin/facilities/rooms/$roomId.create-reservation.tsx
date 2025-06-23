@@ -1,4 +1,4 @@
-import { ReservationCreatePage } from "@/features/room-booking/pages/ReservationCreatePage";
+import { RoomReservationCreatePage } from "@/features/room-booking/pages/RoomReservationCreatePage";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { complexesApi } from "@room-booking/lib/api/complexes";
@@ -65,5 +65,5 @@ export const Route = createFileRoute(
 
 function ReservationCreateRoute() {
 	const { room, complex } = Route.useLoaderData();
-	return <ReservationCreatePage room={room} complex={complex} />;
+	return <RoomReservationCreatePage room={room} complex={complex} />;
 }

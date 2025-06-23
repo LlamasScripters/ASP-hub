@@ -1,8 +1,8 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ReservationForm } from "@room-booking/components/reservations/ReservationForm";
+import { RoomReservationForm } from "@/features/room-booking/components/RoomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import type { Reservation } from "@room-booking/hooks/useReservations";
+import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -12,13 +12,13 @@ import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 interface ReservationEditPageProps {
 	complex: Complex;
 	room: Room;
-	reservation: Reservation;
+	roomReservation: RoomReservation;
 }
 
-export function ReservationEditPage({
+export function RoomReservationEditPage({
 	complex,
 	room,
-	reservation,
+	roomReservation,
 }: ReservationEditPageProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
@@ -44,7 +44,7 @@ export function ReservationEditPage({
 					</h1>
 					<p className="text-muted-foreground">
 						Modifier la réservation{" "}
-						<span className="font-medium">{reservation.title}</span> de la salle{" "}
+						<span className="font-medium">{roomReservation.title}</span> de la salle{" "}
 						<span className="font-medium">{room.name}</span> du complexe{" "}
 						<span className="font-medium">{complex.name}</span>
 					</p>
@@ -71,10 +71,10 @@ export function ReservationEditPage({
 			</Alert>
 
 			{/* Formulaire d’édition */}
-			<ReservationForm
+			<RoomReservationForm
 				roomId={room.id}
 				roomOpeningHours={room.openingHours}
-				reservation={reservation}
+				roomReservation={roomReservation}
 				onSuccess={handleSuccess}
 				onCancelLink={previousPageHref}
 			/>

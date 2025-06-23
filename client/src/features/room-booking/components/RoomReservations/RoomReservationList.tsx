@@ -10,16 +10,16 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-	type Reservation,
-	reservationStatusEnumTranslated,
-	useReservations,
-} from "@room-booking/hooks/useReservations";
+	type RoomReservation,
+	roomReservationStatusEnumTranslated,
+	useRoomReservations,
+} from "@/features/room-booking/hooks/useRoomReservations";
 import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import {
 	formatDateShort,
 	getMonthBounds,
 	getWeekBounds,
-} from "@room-booking/lib/api/reservations";
+} from "@/features/room-booking/lib/api/roomReservations";
 import { Link } from "@tanstack/react-router";
 import {
 	Calendar as CalendarIcon,
@@ -28,15 +28,16 @@ import {
 	Clock,
 	Edit2,
 	Loader2,
+	//@ts-ignore
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ViewMode = "week" | "month";
 
-interface ReservationListProps {
+interface RoomReservationListProps {
 	roomId: string;
 	roomOpeningHours: RoomOpeningHours;
-	initialReservations?: Reservation[];
+	initialRoomReservations?: RoomReservation[];
 }
 
 const getDayOfWeekKey = (date: Date): keyof RoomOpeningHours => {
@@ -96,13 +97,13 @@ const getStatusColor = (status: string) => {
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
 
-export function ReservationList({
+export function RoomReservationList({
 	roomId,
 	roomOpeningHours,
-	initialReservations = [],
-}: ReservationListProps) {
-	const { reservations, totalCount, loading, error, updateFilters } =
-		useReservations({ roomId, initialData: initialReservations });
+	initialRoomReservations = [],
+}: RoomReservationListProps) {
+	const { roomReservations, totalCount, loading, error, updateFilters } =
+		useRoomReservations({ roomId, initialData: initialRoomReservations });
 
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
@@ -145,9 +146,9 @@ export function ReservationList({
 		});
 	}, [viewMode]);
 
-	const reservationsByDay = useMemo(() => {
-		const map: Record<string, Reservation[]> = {};
-		for (const r of reservations) {
+	const roomReservationsByDay = useMemo(() => {
+		const map: Record<string, RoomReservation[]> = {};
+		for (const r of roomReservations) {
 			const d = new Date(r.startAt);
 			const key = d.toLocaleDateString("fr-FR");
 			if (!map[key]) map[key] = [];
@@ -159,7 +160,7 @@ export function ReservationList({
 			);
 		}
 		return map;
-	}, [reservations]);
+	}, [roomReservations]);
 
 	const dateGrid = useMemo(() => {
 		if (viewMode === "week") {
@@ -204,16 +205,18 @@ export function ReservationList({
 		return slots;
 	}, []);
 
-	const organizeOverlappingReservations = (reservations: Reservation[]) => {
-		const sortedReservations = [...reservations].sort(
+	const organizeOverlappingRoomReservations = (
+		roomReservations: RoomReservation[],
+	) => {
+		const sortedRoomReservations = [...roomReservations].sort(
 			(a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
 		);
 
-		const columns: Reservation[][] = [];
+		const columns: RoomReservation[][] = [];
 
-		for (const reservation of sortedReservations) {
-			const startTime = new Date(reservation.startAt).getTime();
-			// const endTime = new Date(reservation.endAt).getTime();
+		for (const roomReservation of sortedRoomReservations) {
+			const startTime = new Date(roomReservation.startAt).getTime();
+			const endTime = new Date(roomReservation.endAt).getTime();
 
 			let placed = false;
 			for (let i = 0; i < columns.length; i++) {
@@ -222,14 +225,14 @@ export function ReservationList({
 				const lastEndTime = new Date(lastReservation.endAt).getTime();
 
 				if (lastEndTime <= startTime) {
-					column.push(reservation);
+					column.push(roomReservation);
 					placed = true;
 					break;
 				}
 			}
 
 			if (!placed) {
-				columns.push([reservation]);
+				columns.push([roomReservation]);
 			}
 		}
 
@@ -318,14 +321,14 @@ export function ReservationList({
 
 							const d = cell.date;
 							const key = d.toLocaleDateString("fr-FR");
-							const dayReservations = reservationsByDay[key] || [];
+							const dayRoomReservations = roomReservationsByDay[key] || [];
 							const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
 							const roomHours = getRoomHoursForDay(d, roomOpeningHours);
 							const isToday = d.toDateString() === new Date().toDateString();
 
-							const reservationColumns =
-								organizeOverlappingReservations(dayReservations);
-							const totalColumns = reservationColumns.length;
+							const roomReservationColumns =
+								organizeOverlappingRoomReservations(dayRoomReservations);
+							const totalColumns = roomReservationColumns.length;
 
 							return (
 								<div
@@ -367,10 +370,10 @@ export function ReservationList({
 
 									{/* Réservations positionnées absolument */}
 									{isOpen &&
-										reservationColumns.map((column, columnIndex) =>
-											column.map((reservation) => {
-												const startTime = new Date(reservation.startAt);
-												const endTime = new Date(reservation.endAt);
+										roomReservationColumns.map((column, columnIndex) =>
+											column.map((roomReservation) => {
+												const startTime = new Date(roomReservation.startAt);
+												const endTime = new Date(roomReservation.endAt);
 
 												const startMinutes =
 													startTime.getHours() * 60 + startTime.getMinutes();
@@ -397,11 +400,13 @@ export function ReservationList({
 														? `${(columnIndex / totalColumns) * 100 + 2.5}%`
 														: "2.5%";
 
-												const statusColors = getStatusColor(reservation.status);
+												const statusColors = getStatusColor(
+													roomReservation.status,
+												);
 
 												return (
 													<div
-														key={`${reservation.id}-${columnIndex}`}
+														key={`${roomReservation.id}-${columnIndex}`}
 														className={`absolute rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group border-l-4 ${statusColors} hover:scale-[1.02] z-10`}
 														style={{
 															top: `${topOffset}px`,
@@ -413,7 +418,7 @@ export function ReservationList({
 														<div className="h-full flex flex-col justify-between">
 															<div className="min-h-0">
 																<div className="text-xs font-semibold truncate mb-1 group-hover:text-wrap group-hover:whitespace-normal">
-																	{reservation.title}
+																	{roomReservation.title}
 																</div>
 																<div className="text-[10px] opacity-80">
 																	{startTime.toLocaleTimeString("fr-FR", {
@@ -433,9 +438,9 @@ export function ReservationList({
 																	variant="secondary"
 																	className="text-[8px] px-1 py-0 bg-white/50 dark:bg-gray-800/50"
 																>
-																	{reservationStatusEnumTranslated[
-																		reservation.status
-																	] || reservation.status}
+																	{roomReservationStatusEnumTranslated[
+																		roomReservation.status
+																	] || roomReservation.status}
 																</Badge>
 																<Button
 																	size="icon"
@@ -445,8 +450,10 @@ export function ReservationList({
 																	className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800"
 																>
 																	<Link
-																		to="/admin/facilities/reservations/$reservationId/edit"
-																		params={{ reservationId: reservation.id }}
+																		to="/admin/facilities/roomReservations/$roomReservationId/edit"
+																		params={{
+																			roomReservationId: roomReservation.id,
+																		}}
 																	>
 																		<Edit2 className="w-3 h-3" />
 																	</Link>
@@ -502,7 +509,7 @@ export function ReservationList({
 
 					const d = cell.date;
 					const key = d.toLocaleDateString("fr-FR");
-					const dayReservations = reservationsByDay[key] || [];
+					const dayRoomReservations = roomReservationsByDay[key] || [];
 					const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
 					const roomHours = getRoomHoursForDay(d, roomOpeningHours);
 
@@ -538,9 +545,9 @@ export function ReservationList({
 								)}
 							</div>
 
-							{dayReservations.length > 0 ? (
+							{dayRoomReservations.length > 0 ? (
 								<div className="space-y-2 overflow-y-auto flex-1 pr-1">
-									{dayReservations.map((r) => (
+									{dayRoomReservations.map((r) => (
 										<div
 											key={r.id}
 											className={`rounded-md p-2 transition-colors flex justify-between items-start ${
@@ -558,7 +565,7 @@ export function ReservationList({
 														variant="outline"
 														className="text-[9px] px-1 py-[1px] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
 													>
-														{reservationStatusEnumTranslated[r.status] ||
+														{roomReservationStatusEnumTranslated[r.status] ||
 															r.status}
 													</Badge>
 												</div>
@@ -583,8 +590,8 @@ export function ReservationList({
 												disabled={!isOpen}
 											>
 												<Link
-													to="/admin/facilities/reservations/$reservationId/edit"
-													params={{ reservationId: r.id }}
+													to="/admin/facilities/roomReservations/$roomReservationId/edit"
+													params={{ roomReservationId: r.id }}
 												>
 													<Edit2 className="w-4 h-4" />
 												</Link>

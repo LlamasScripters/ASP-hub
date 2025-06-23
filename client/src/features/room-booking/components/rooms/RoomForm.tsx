@@ -248,6 +248,7 @@ export function RoomForm({
 										if (!dayValue.closed) {
 											//@ts-ignore
 											form.setValue(
+												//@ts-ignore
 												`openingHours.${key}.closed` as const,
 												true,
 											);
