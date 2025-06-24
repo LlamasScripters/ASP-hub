@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { RoomReservationForm } from "@/features/room-booking/components/RoomReservations/RoomReservationForm";
+import { RoomReservationForm } from "@room-booking/components/roomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
 import type { Room } from "@room-booking/hooks/useRooms";

@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { RoomReservationForm } from "@/features/room-booking/components/RoomReservations/RoomReservationForm";
+import { RoomReservationForm } from "@room-booking/components/roomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
