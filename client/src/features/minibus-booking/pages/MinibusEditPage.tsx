@@ -45,7 +45,8 @@ export function MinibusEditPage({ minibus }: MinibusEditPageProps) {
 							<ArrowLeft className="w-4 h-4 mr-2" />
 							Retour à la liste
 						</Link>
-					</Button>					<Button asChild>
+					</Button>					
+					<Button asChild>
 						<Link
 							to="/admin/assets/minibuses/$minibusId"
 							params={{ minibusId: minibus.id }}

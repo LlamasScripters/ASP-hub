@@ -30,6 +30,8 @@ interface MinibusFormProps {
 	minibus?: Minibus;
 	onSuccess?: (minibus: Minibus) => void;
 	onCancelLink?: string;
+	searchParams?: Record<string, unknown>;
+	navigate?: (options: { search: Record<string, unknown> }) => void;
 }
 
 const defaultDisponibility: Disponibility = {
@@ -42,8 +44,8 @@ const defaultDisponibility: Disponibility = {
 	sunday: { open: "06:00", close: "20:00", available: true },
 };
 
-export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormProps) {
-	const { createMinibus, updateMinibus } = useMinibuses();
+export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, navigate }: MinibusFormProps) {
+	const { createMinibus, updateMinibus } = useMinibuses({ searchParams, navigate });
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const isEditing = !!minibus;

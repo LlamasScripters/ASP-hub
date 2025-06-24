@@ -175,10 +175,6 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 						<RefreshCw className="w-4 h-4 mr-2" />
 						Actualiser
 					</Button>
-					<Button onClick={handleCreate}>
-						<Plus className="w-4 h-4 mr-2" />
-						Nouveau minibus
-					</Button>
 				</div>
 			</div>
 
@@ -299,9 +295,9 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 								<CardDescription>Taux d'occupation par mois</CardDescription>
 							</CardHeader>
 							<CardContent className="pl-2">
-								<div className="h-[300px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-									<BarChart3 className="w-12 h-12 text-gray-400" />
-									<span className="ml-2 text-gray-500">
+								<div className="h-[300px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+									<BarChart3 className="w-12 h-12" />
+									<span className="ml-2">
 										Graphique d'utilisation
 									</span>
 								</div>
@@ -488,9 +484,9 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<Calendar className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<Calendar className="w-12 h-12 text-muted-foreground" />
+								<span className="ml-2 text-muted-foreground">
 									Calendrier de planning
 								</span>
 							</div>

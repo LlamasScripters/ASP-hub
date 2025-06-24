@@ -418,9 +418,9 @@ export function ComplexDetailsPage({
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<Calendar className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<Calendar className="w-12 h-12" />
+								<span className="ml-2">
 									Planning à implémenter
 								</span>
 							</div>
@@ -437,9 +437,9 @@ export function ComplexDetailsPage({
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
-								<BarChart3 className="w-12 h-12 text-gray-400" />
-								<span className="ml-2 text-gray-500">
+							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
+								<BarChart3 className="w-12 h-12" />
+								<span className="ml-2">
 									Statistiques à implémenter
 								</span>
 							</div>

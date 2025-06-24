@@ -63,19 +63,19 @@ const formatDateKey = (date: Date): string => {
 const getStatusColor = (status: string) => {
 	switch (status.toLowerCase()) {
 		case "pending":
-			return "bg-yellow-100 text-yellow-800 border-yellow-200";
+			return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800";
 		case "confirmed":
-			return "bg-green-100 text-green-800 border-green-200";
+			return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800";
 		case "cancelled":
-			return "bg-red-100 text-red-800 border-red-200";
+			return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800";
 		case "completed":
-			return "bg-blue-100 text-blue-800 border-blue-200";
+			return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800";
 		case "no_show":
-			return "bg-gray-100 text-gray-800 border-gray-200";
+			return "bg-muted dark:bg-muted text-muted-foreground border-border";
 		case "rescheduled":
-			return "bg-purple-100 text-purple-800 border-purple-200";
+			return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800";
 		default:
-			return "bg-gray-100 text-gray-800 border-gray-200";
+			return "bg-muted dark:bg-muted text-muted-foreground border-border";
 	}
 };
 
@@ -258,22 +258,22 @@ export function MinibusReservationList({
 								return (
 									<div
 										key={`day-header-${dateKey}`}
-										className={`p-2 text-center border-b ${
-											isAvailable ? "bg-green-50" : "bg-gray-50"
-										} ${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
+										className={`p-2 text-center border-b border-border ${
+											isAvailable ? "bg-green-50 dark:bg-green-950/30" : "bg-muted"
+										} ${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 									>
-										<div className={`text-xs font-medium ${isToday ? "text-blue-700" : ""}`}>
+										<div className={`text-xs font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
 											{date.toLocaleDateString("fr-FR", { weekday: "short" })}
 											{isToday && " (Aujourd'hui)"}
 										</div>
-										<div className={`text-sm ${isToday ? "text-blue-800 font-bold" : ""}`}>
+										<div className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}>
 											{date.toLocaleDateString("fr-FR", { 
 												day: "numeric", 
 												month: "short" 
 											})}
 										</div>
 										{isAvailable && (
-											<div className={`text-xs mt-1 ${isToday ? "text-blue-600" : "text-muted-foreground"}`}>
+											<div className={`text-xs mt-1 ${isToday ? "text-primary" : "text-muted-foreground"}`}>
 												{(() => {
 													const hours = getMinibusHoursForDay(date, minibusDisponibility);
 													return hours.openTime && hours.closeTime 
@@ -295,8 +295,8 @@ export function MinibusReservationList({
 								return (
 									<div key={`hour-${hour}`} className="contents">
 										{/* Colonne des heures */}
-										<div className={`p-2 text-xs border-r ${
-											isCurrentHour ? "bg-blue-100 text-blue-800 font-bold" : "text-muted-foreground"
+										<div className={`p-2 text-xs border-r border-border ${
+											isCurrentHour ? "bg-primary/20 text-primary font-bold" : "text-muted-foreground"
 										}`}>
 											{hourStr}
 										</div>
@@ -324,31 +324,31 @@ export function MinibusReservationList({
 												return hour >= startHour && hour < endHour;
 											});
 											
-											let cellBackground = "bg-white";
+											let cellBackground = "bg-background";
 											if (!isAvailable) {
 												// Jour complètement indisponible
-												cellBackground = "bg-gray-100";
+												cellBackground = "bg-muted";
 											} else if (isAvailable && !isHourInAvailableRange) {
 												// Jour disponible mais heure en dehors des créneaux
-												cellBackground = "bg-gray-100";
+												cellBackground = "bg-muted";
 											} else if (isAvailable && isHourInAvailableRange) {
 												// Jour disponible et heure dans les créneaux
-												cellBackground = "bg-green-50";
+												cellBackground = "bg-green-50 dark:bg-green-950/20";
 											}
 											
 											if (isCurrentTimeSlot) {
-												cellBackground = "bg-blue-200";
+												cellBackground = "bg-primary/30";
 											}
 											
 											return (
 												<div
 													key={`day-${dayIndex}-hour-${hour}`}
-													className={`relative border border-gray-200 ${cellBackground}`}
+													className={`relative border border-border ${cellBackground}`}
 													style={{ minHeight: `${HOUR_HEIGHT}px` }}
 												>
 													{/* Indicateur de l'heure actuelle */}
 													{isCurrentTimeSlot && (
-														<div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 z-20" />
+														<div className="absolute top-0 left-0 right-0 h-1 bg-primary z-20" />
 													)}
 													
 													{hourReservations.map((reservation) => (
@@ -385,7 +385,7 @@ export function MinibusReservationList({
 																	variant="ghost"
 																	asChild
 																	title="Modifier"
-																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/10"
+																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background/80 dark:hover:bg-background/60"
 																>
 																	<Link
 																		to="/admin/assets/minibusReservations/$minibusReservationId/edit"
@@ -433,17 +433,17 @@ export function MinibusReservationList({
 							return (
 								<div
 									key={`month-day-${dateKey}`}
-									className={`p-2 border min-h-[80px] ${
-										!isCurrentMonth ? "bg-gray-50 text-gray-400" : ""
-									} ${!isAvailable && isCurrentMonth ? "bg-gray-100" : ""}
-									${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
+									className={`p-2 border border-border min-h-[80px] ${
+										!isCurrentMonth ? "bg-muted/50 text-muted-foreground" : ""
+									} ${!isAvailable && isCurrentMonth ? "bg-muted" : ""}
+									${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 								>
 									<div className={`text-sm font-medium mb-1 ${
-										isToday ? "text-blue-800" : ""
+										isToday ? "text-primary" : "text-foreground"
 									}`}>
 										{date.getDate()}
 										{isToday && (
-											<span className="ml-1 text-xs text-blue-600">(Auj.)</span>
+											<span className="ml-1 text-xs text-primary">(Auj.)</span>
 										)}
 									</div>
 									<div className="space-y-1">
@@ -460,7 +460,7 @@ export function MinibusReservationList({
 													variant="ghost"
 													asChild
 													title="Modifier"
-													className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+													className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background"
 												>
 													<Link
 														to="/admin/assets/minibusReservations/$minibusReservationId/edit"
@@ -488,21 +488,21 @@ export function MinibusReservationList({
 					{/* Légende des statuts */}
 					<div className="flex items-center justify-between text-sm text-muted-foreground">
 						<div className="flex items-center gap-4">
-							<span className="font-medium text-gray-700">Statuts :</span>
+							<span className="font-medium text-foreground">Statuts :</span>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-200" />
+								<div className="w-3 h-3 rounded bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800" />
 								<span>En attente</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-green-100 border border-green-200" />
+								<div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800" />
 								<span>Confirmée</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-red-100 border border-red-200" />
+								<div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800" />
 								<span>Annulée</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-blue-100 border border-blue-200" />
+								<div className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800" />
 								<span>Terminée</span>
 							</div>
 						</div>
@@ -511,17 +511,17 @@ export function MinibusReservationList({
 					{/* Légende des disponibilités */}
 					<div className="flex items-center justify-between text-sm text-muted-foreground">
 						<div className="flex items-center gap-4">
-							<span className="font-medium text-gray-700">Disponibilités :</span>
+							<span className="font-medium text-foreground">Disponibilités :</span>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-green-50 border border-green-200" />
-								<span>Heures d'ouverture</span>
+								<div className="w-3 h-3 rounded bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800" />
+								<span>Heures de disponibilité</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" />
+								<div className="w-3 h-3 rounded bg-muted border border-border" />
 								<span>Indisponible</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-blue-200 border border-blue-500" />
+								<div className="w-3 h-3 rounded bg-primary/30 border border-primary" />
 								<span>Maintenant</span>
 							</div>
 						</div>

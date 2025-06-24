@@ -34,6 +34,8 @@ export type {
 
 interface UseMinibusReservationsOptions {
 	minibusId?: string;
+	searchParams?: Record<string, unknown>;
+	routeParams?: Record<string, unknown>;
 }
 
 export const filteredQueryOptions = ({
@@ -54,10 +56,21 @@ export const filteredQueryOptions = ({
 });
 
 export function useMinibusReservations(options?: UseMinibusReservationsOptions) {
-  const searchParams = MinibusReservationsRoute.useSearch();
-  const routeParams = MinibusReservationsRoute.useParams();
+  const fallbackSearchParams = options?.searchParams;
+  const fallbackRouteParams = options?.routeParams;
+  
+  let searchParams: Record<string, unknown>;
+  let routeParams: Record<string, unknown>;
+  
+  try {
+    searchParams = fallbackSearchParams || MinibusReservationsRoute.useSearch();
+    routeParams = fallbackRouteParams || MinibusReservationsRoute.useParams();
+  } catch (error) {
+    searchParams = fallbackSearchParams || {};
+    routeParams = fallbackRouteParams || {};
+  }
 
-  const minibusId = options?.minibusId || routeParams.minibusId;
+  const minibusId = options?.minibusId || (routeParams.minibusId as string);
 
   const queryClient = useQueryClient();
 

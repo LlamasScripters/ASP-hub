@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { RoomReservationList } from "@room-booking/components/roomReservations/RoomReservationList";
+import { RoomReservationList } from "@room-booking/components/RoomReservations/RoomReservationList";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { frenchDays } from "@room-booking/hooks/useRooms";

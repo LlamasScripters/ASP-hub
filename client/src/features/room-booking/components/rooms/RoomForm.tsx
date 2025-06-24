@@ -226,12 +226,7 @@ export function RoomForm({
 								Horaires d'ouverture
 							</div>
 							{openingHours &&
-								(
-									Object.entries(frenchDays) as [
-										keyof typeof frenchDays,
-										string,
-									][]
-								).map(([key, label]) => {
+								Object.entries(frenchDays).map(([key, label]) => {
 									const dayValue =
 										openingHours[key as keyof typeof openingHours];
 									if (!dayValue) return null;

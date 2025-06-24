@@ -34,6 +34,8 @@ interface MinibusReservationFormProps {
 	minibusReservation?: MinibusReservation;
 	onSuccess?: (reservation: MinibusReservation) => void;
 	onCancelLink?: string;
+	searchParams?: Record<string, unknown>;
+	routeParams?: Record<string, unknown>;
 }
 
 const daysOfWeek = [
@@ -52,9 +54,15 @@ export function MinibusReservationForm({
 	minibusReservation,
 	onSuccess,
 	onCancelLink,
+	searchParams,
+	routeParams,
 }: MinibusReservationFormProps) {
 	const { user } = AuthenticatedRoute.useLoaderData();
-	const { createMinibusReservation, updateMinibusReservation } = useMinibusReservations({ minibusId });
+	const { createMinibusReservation, updateMinibusReservation } = useMinibusReservations({ 
+		minibusId,
+		searchParams,
+		routeParams 
+	});
 	const isEditing = Boolean(minibusReservation);
 
 	const [formMode, setFormMode] = useState<"create" | "edit">(
@@ -151,47 +159,6 @@ export function MinibusReservationForm({
 			form.reset(defaultValues);
 		}
 	}, [isEditing, formMode, form, defaultValues]);
-
-	// const onSubmit = async (data: CreateMinibusReservationData | UpdateMinibusReservationData) => {
-	// 	if (validationError) {
-	// 		setGlobalError(validationError);
-	// 		return;
-	// 	}
-
-	// 	setIsSubmitting(true);
-	// 	setGlobalError(null);
-
-	// 	try {
-	// 		let result: MinibusReservation | null = null;
-
-	// 		if (isEditing && minibusReservation) {
-	// 			result = await updateMinibusReservation(
-	// 				minibusReservation.id,
-	// 				data as UpdateMinibusReservationData,
-	// 			);
-	// 		} else {
-	// 			result = await createMinibusReservation({
-	// 				...data,
-	// 				minibusId,
-	// 				bookerId: user.id,
-	// 			} as CreateMinibusReservationData);
-	// 		}
-
-	// 		if (result) {
-	// 			onSuccess?.(result);
-	// 			if (!isEditing) {
-	// 				form.reset();
-	// 			}
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Form submission error:", error);
-	// 		setGlobalError(
-	// 			error instanceof Error ? error.message : "Une erreur est survenue",
-	// 		);
-	// 	} finally {
-	// 		setIsSubmitting(false);
-	// 	}
-	// };
 
 	const formatDateTimeLocal = (date: Date | string): string => {
 		if (!date) return "";

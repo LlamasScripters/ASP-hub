@@ -47,9 +47,25 @@ export const filteredQueryOptions = ({
   enabled: Object.keys(filters).length > 0,
 });
 
-export function useMinibuses() {
-  const searchParams = MinibusesRoute.useSearch();
-  const navigate = MinibusesRoute.useNavigate();
+interface UseMinibusesOptions {
+  searchParams?: Record<string, unknown>;
+  navigate?: (options: { search: Record<string, unknown> }) => void;
+}
+
+export function useMinibuses(options?: UseMinibusesOptions) {
+  const fallbackSearchParams = options?.searchParams;
+  const fallbackNavigate = options?.navigate;
+  
+  let searchParams: Record<string, unknown>;
+  let navigate: (options: { search: Record<string, unknown> }) => void;
+  
+  try {
+    searchParams = fallbackSearchParams || MinibusesRoute.useSearch();
+    navigate = fallbackNavigate || MinibusesRoute.useNavigate();
+  } catch (error) {
+    searchParams = fallbackSearchParams || {};
+    navigate = fallbackNavigate || (() => {});
+  }
 
   const queryClient = useQueryClient();
 
@@ -57,11 +73,11 @@ export function useMinibuses() {
   const { data: fetchedData, refetch } = useSuspenseQuery(
     filteredQueryOptions({
       filters: {
-        search: searchParams.search,
-        isAvailable: searchParams.isAvailable,
+        search: searchParams.search as string,
+        isAvailable: searchParams.isAvailable as boolean,
       },
-      page: searchParams.page,
-      limit: searchParams.limit,
+      page: searchParams.page as number,
+      limit: searchParams.limit as number,
     })
   );
 
@@ -95,7 +111,7 @@ export function useMinibuses() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => minibusesApi.deleteMinibus(id),
-    onSuccess: (_, deletedId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["minibuses"] });
       toast.success("Minibus supprimé avec succès");
     },

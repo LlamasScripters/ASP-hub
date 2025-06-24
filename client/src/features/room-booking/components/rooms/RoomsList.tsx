@@ -67,7 +67,6 @@ export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 		rooms: fetchedRooms,
 		loading,
 		error,
-		// updateFilters,
 		deleteRoom,
 	} = useRooms({
 		complexId,
@@ -178,7 +177,7 @@ export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 			Danse: "bg-pink-100 text-pink-800",
 			Fitness: "bg-emerald-100 text-emerald-800",
 		};
-		return colors[sportType] || "bg-gray-100 text-gray-800";
+		return colors[sportType] || "bg-muted/50 text-muted-foreground border-muted";
 	};
 
 	const goToPage = (page: number) => {
@@ -387,7 +386,7 @@ export function RoomsList({ complexId, initialRooms }: RoomsListProps) {
 											</div>
 										</TableCell>
 										<TableCell>
-											<Badge className={getSportTypeBadgeColor(room.sportType)}>
+											<Badge variant="outline" className={getSportTypeBadgeColor(room.sportType)}>
 												{room.sportType}
 											</Badge>
 										</TableCell>
