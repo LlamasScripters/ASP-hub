@@ -19,11 +19,11 @@ export function MinibusEditPage({ minibus }: MinibusEditPageProps) {
 	const previousPageHref =
 		router.__store.prevState?.resolvedLocation?.href || undefined;
 
-	const handleSuccess = () => {
+	const handleSuccess = (updatedMinibus: Minibus) => {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: "/admin/assets/minibuses",
+				to: `/admin/assets/minibuses/${updatedMinibus.id}`,
 			});
 		}, 1500);
 	};

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { minibusesApi } from "../lib/api/minibuses";
 import type {
 	Minibus,
@@ -63,9 +64,12 @@ export function useMinibuses(options: UseMinibusesOptions = {}) {
 		onSuccess: (newMinibus) => {
 			setMinibuses(prev => [newMinibus, ...prev]);
 			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+			toast.success("Minibus créé avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la création: ${error.message}`);
+			const errorMessage = `Erreur lors de la création: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
@@ -78,9 +82,12 @@ export function useMinibuses(options: UseMinibusesOptions = {}) {
 				prev.map(minibus => minibus.id === updatedMinibus.id ? updatedMinibus : minibus)
 			);
 			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+			toast.success("Minibus mis à jour avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la mise à jour: ${error.message}`);
+			const errorMessage = `Erreur lors de la mise à jour: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
@@ -90,9 +97,12 @@ export function useMinibuses(options: UseMinibusesOptions = {}) {
 		onSuccess: (_, deletedId) => {
 			setMinibuses(prev => prev.filter(minibus => minibus.id !== deletedId));
 			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+			toast.success("Minibus supprimé avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la suppression: ${error.message}`);
+			const errorMessage = `Erreur lors de la suppression: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
@@ -112,7 +122,9 @@ export function useMinibuses(options: UseMinibusesOptions = {}) {
 	// Update error state
 	useEffect(() => {
 		if (queryError) {
-			setError(`Erreur lors du chargement: ${queryError.message}`);
+			const errorMessage = `Erreur lors du chargement: ${queryError.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		} else {
 			setError(null);
 		}

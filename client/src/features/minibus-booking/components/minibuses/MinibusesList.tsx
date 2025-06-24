@@ -3,25 +3,42 @@ import { Link } from "@tanstack/react-router";
 import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
 import { useMinibuses } from "@/features/minibus-booking/hooks/useMinibuses";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
 	DropdownMenu, 
 	DropdownMenuContent, 
 	DropdownMenuItem, 
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import {
 	Bus,
 	Calendar,
 	ChevronLeft,
 	ChevronRight,
-	CircleOff,
 	Filter,
 	Loader2,
 	MoreHorizontal,
-	Plus,	Search,
+	Plus,
+	Search,
 	Users,
 	UserCheck,
 	// @ts-ignore
@@ -35,13 +52,13 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
+	const [capacityFilter, setCapacityFilter] = useState<string>("all");
 	const itemsPerPage = 10;
 
 	const {
 		minibuses: fetchedMinibuses,
 		loading,
 		error,
-		updateFilters,
 		deleteMinibus,
 	} = useMinibuses({
 		initialData: initialMinibuses,
@@ -53,10 +70,11 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 		let filtered = allMinibuses;
 
 		if (searchTerm) {
+			const lowerSearchTerm = searchTerm.toLowerCase();
 			filtered = filtered.filter(
 				(minibus) =>
-					minibus.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					minibus.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())
+					minibus.name.toLowerCase().includes(lowerSearchTerm) ||
+					minibus.licensePlate.toLowerCase().includes(lowerSearchTerm)
 			);
 		}
 
@@ -68,8 +86,18 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 			});
 		}
 
+		if (capacityFilter !== "all") {
+			filtered = filtered.filter((minibus) => {
+				if (capacityFilter === "small") return minibus.capacity <= 15;
+				if (capacityFilter === "medium") return minibus.capacity > 15 && minibus.capacity <= 30;
+				if (capacityFilter === "large") return minibus.capacity > 30;
+				if (capacityFilter === "pmr") return minibus.disabledPersonCapacity > 0;
+				return true;
+			});
+		}
+
 		return filtered;
-	}, [allMinibuses, searchTerm, availabilityFilter]);
+	}, [allMinibuses, searchTerm, availabilityFilter, capacityFilter]);
 
 	const totalPages = Math.ceil(filteredMinibuses.length / itemsPerPage);
 	const startIndex = (currentPage - 1) * itemsPerPage;
@@ -102,292 +130,340 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 		});
 	};
 
-	const getAvailabilityBadge = (isAvailable: boolean) => {
-		return isAvailable ? (
-			<Badge variant="default" className="bg-green-100 text-green-800">
-				Disponible
-			</Badge>
-		) : (
-			<Badge variant="secondary" className="bg-red-100 text-red-800">
-				Indisponible
-			</Badge>
-		);
-	};
-
 	const goToPage = (page: number) => {
-		setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+		setCurrentPage(page);
 	};
 
 	const nextPage = () => {
-		if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+		if (currentPage < totalPages) {
+			setCurrentPage(currentPage + 1);
+		}
 	};
 
 	const prevPage = () => {
-		if (currentPage > 1) setCurrentPage(currentPage - 1);
+		if (currentPage > 1) {
+			setCurrentPage(currentPage - 1);
+		}
 	};
 
-	// Générer les numéros de page à afficher
 	const getPageNumbers = () => {
-		const delta = 2;
-		const range = [];
-		const rangeWithDots = [];
+		const pages = [];
+		const maxVisible = 5;
 
-		for (
-			let i = Math.max(2, currentPage - delta);
-			i <= Math.min(totalPages - 1, currentPage + delta);
-			i++
-		) {
-			range.push(i);
-		}
-
-		if (currentPage - delta > 2) {
-			rangeWithDots.push(1, "...");
+		if (totalPages <= maxVisible) {
+			for (let i = 1; i <= totalPages; i++) {
+				pages.push(i);
+			}
 		} else {
-			rangeWithDots.push(1);
+			const start = Math.max(1, currentPage - 2);
+			const end = Math.min(totalPages, start + maxVisible - 1);
+
+			for (let i = start; i <= end; i++) {
+				pages.push(i);
+			}
 		}
 
-		rangeWithDots.push(...range);
-
-		if (currentPage + delta < totalPages - 1) {
-			rangeWithDots.push("...", totalPages);
-		} else if (totalPages > 1) {
-			rangeWithDots.push(totalPages);
-		}
-
-		return rangeWithDots;
+		return pages;
 	};
 
 	return (
 		<div className="space-y-6">
-			{/* En-tête et recherche */}
-			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-				<div>
-					<h2 className="text-2xl font-bold tracking-tight">Liste des minibus</h2>
-					<p className="text-muted-foreground">
-						Gérez les minibus disponibles pour les réservations
-					</p>
-				</div>
-				<Button asChild>
-					<Link to="/admin/assets/minibuses/create">
-						<Plus className="w-4 h-4 mr-2" />
-						Nouveau minibus
-					</Link>
-				</Button>
-			</div>
-
-			{/* Filtres */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Filter className="w-4 h-4" />
-						Filtres
-					</CardTitle>
+					<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+						<div>
+							<CardTitle>Liste des minibus</CardTitle>
+							<CardDescription>
+								{filteredMinibuses.length} minibus trouvé
+								{filteredMinibuses.length > 1 ? "s" : ""}
+								{filteredMinibuses.length !== allMinibuses.length &&
+									` sur ${allMinibuses.length} au total`}
+							</CardDescription>
+						</div>
+						<Button asChild>
+							<Link to="/admin/assets/minibuses/create">
+								<Plus className="w-4 h-4 mr-2" />
+								Nouveau minibus
+							</Link>
+						</Button>
+					</div>
 				</CardHeader>
-				<CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<label htmlFor="search-input" className="text-sm font-medium">Recherche</label>
-						<div className="relative">
-							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input
-								id="search-input"
-								placeholder="Nom ou plaque..."
-								value={searchTerm}
-								onChange={(e) => handleSearch(e.target.value)}
-								className="pl-8"
-							/>
+				<CardContent>
+					{/* Barre de recherche et filtres */}
+					<div className="flex flex-col gap-4 mb-6">
+						<div className="flex flex-col gap-4 md:flex-row">
+							<div className="relative flex-1">
+								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+								<Input
+									placeholder="Rechercher un minibus par nom ou plaque d'immatriculation..."
+									className="pl-8"
+									value={searchTerm}
+									onChange={(e) => handleSearch(e.target.value)}
+								/>
+							</div>
+							<div className="flex gap-2">
+								<Select
+									value={availabilityFilter}
+									onValueChange={setAvailabilityFilter}
+								>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Disponibilité" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Tous</SelectItem>
+										<SelectItem value="available">Disponibles</SelectItem>
+										<SelectItem value="unavailable">Indisponibles</SelectItem>
+									</SelectContent>
+								</Select>
+								<Select value={capacityFilter} onValueChange={setCapacityFilter}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Capacité" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Toutes</SelectItem>
+										<SelectItem value="small">Petit (≤15)</SelectItem>
+										<SelectItem value="medium">Moyen (16-30)</SelectItem>
+										<SelectItem value="large">Grand (&gt;30)</SelectItem>
+										<SelectItem value="pmr">Avec PMR</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="text-sm font-medium">Disponibilité</div>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="w-full justify-between">
-									{availabilityFilter === "all" && "Tous"}
-									{availabilityFilter === "available" && "Disponibles"}
-									{availabilityFilter === "unavailable" && "Indisponibles"}
-									<ChevronRight className="h-4 w-4" />
+						{(searchTerm ||
+							availabilityFilter !== "all" ||
+							capacityFilter !== "all") && (
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Filter className="w-4 h-4" />
+								<span>Filtres actifs:</span>
+								{searchTerm && (
+									<Badge variant="secondary">Recherche: {searchTerm}</Badge>
+								)}
+								{availabilityFilter !== "all" && (
+									<Badge variant="secondary">
+										Disponibilité:{" "}
+										{availabilityFilter === "available" ? "Disponibles" : "Indisponibles"}
+									</Badge>
+								)}
+								{capacityFilter !== "all" && (
+									<Badge variant="secondary">
+										Capacité:{" "}
+										{capacityFilter === "small" ? "Petit" : 
+										 capacityFilter === "medium" ? "Moyen" : 
+										 capacityFilter === "large" ? "Grand" : "Avec PMR"}
+									</Badge>
+								)}
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => {
+										setSearchTerm("");
+										setAvailabilityFilter("all");
+										setCapacityFilter("all");
+									}}
+								>
+									Effacer
 								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-40">
-								<DropdownMenuItem onClick={() => setAvailabilityFilter("all")}>
-									Tous
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setAvailabilityFilter("available")}>
-									Disponibles
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setAvailabilityFilter("unavailable")}>
-									Indisponibles
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+							</div>
+						)}
 					</div>
-				</CardContent>
-			</Card>
 
-			{/* Loading state */}
-			{loading && (
-				<div className="flex items-center justify-center py-8">
-					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-				</div>
-			)}
+					{/* Table */}
+					<div className="border rounded-md">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Minibus</TableHead>
+									<TableHead>Plaque</TableHead>
+									<TableHead>Capacité</TableHead>
+									<TableHead>Disponibilité</TableHead>
+									<TableHead>Créé le</TableHead>
+									<TableHead className="w-[80px]">Actions</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{loading ? (
+									<TableRow>
+										<TableCell colSpan={6} className="h-24 text-center">
+											<div className="flex items-center justify-center">
+												<Loader2 className="w-6 h-6 animate-spin mr-2" />
+												Chargement...
+											</div>
+										</TableCell>
+									</TableRow>
+								) : error ? (
+									<TableRow>
+										<TableCell
+											colSpan={6}
+											className="h-24 text-center text-red-500"
+										>
+											{error}
+										</TableCell>
+									</TableRow>
+								) : currentMinibuses.length > 0 ? (
+									currentMinibuses.map((minibus) => (
+										<TableRow key={minibus.id}>
+											<TableCell>
+												<div className="flex items-center">
+													<Bus className="w-4 h-4 mr-3 text-muted-foreground" />
+													<div>
+														<div className="font-medium">{minibus.name}</div>
+														{minibus.description && (
+															<div className="text-sm text-muted-foreground line-clamp-1">
+																{minibus.description}
+															</div>
+														)}
+													</div>
+												</div>
+											</TableCell>
+											<TableCell>
+												<div className="font-mono text-sm">
+													{minibus.licensePlate}
+												</div>
+											</TableCell>
+											<TableCell>
+												<div className="space-y-1">
+													<div className="flex items-center text-sm">
+														<Users className="w-3 h-3 mr-1 text-muted-foreground" />
+														<span className="font-medium">{minibus.capacity} places</span>
+													</div>
+													{minibus.disabledPersonCapacity > 0 && (
+														<div className="flex items-center text-xs text-muted-foreground">
+															<UserCheck className="w-3 h-3 mr-1" />
+															<span>
+																{minibus.disabledPersonCapacity} PMR
+															</span>
+														</div>
+													)}
+												</div>
+											</TableCell>
+											<TableCell>
+												<Badge
+													variant={minibus.isAvailable ? "default" : "secondary"}
+													className={
+														minibus.isAvailable
+															? "bg-green-100 text-green-800 border-green-200"
+															: "bg-red-100 text-red-800 border-red-200"
+													}
+												>
+													{minibus.isAvailable ? "Disponible" : "Indisponible"}
+												</Badge>
+											</TableCell>
+											<TableCell>
+												<div className="flex items-center text-sm text-muted-foreground">
+													<Calendar className="w-3 h-3 mr-1" />
+													{formatDate(minibus.createdAt)}
+												</div>
+											</TableCell>
+											<TableCell>
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button variant="ghost" size="icon">
+															<MoreHorizontal className="h-4 w-4" />
+															<span className="sr-only">Menu</span>
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent align="end">
+														<DropdownMenuLabel>Actions</DropdownMenuLabel>
+														<DropdownMenuSeparator />
+														<DropdownMenuItem asChild>
+															<Link
+																to="/admin/assets/minibuses/$minibusId"
+																params={{ minibusId: minibus.id }}
+																className="w-full cursor-pointer"
+															>
+																Voir les détails
+															</Link>
+														</DropdownMenuItem>
+														<DropdownMenuItem asChild>
+															<Link
+																to="/admin/assets/minibuses/$minibusId/edit"
+																params={{ minibusId: minibus.id }}
+																className="w-full cursor-pointer"
+															>
+																Modifier
+															</Link>
+														</DropdownMenuItem>
+														<DropdownMenuSeparator />
+														<DropdownMenuItem
+															className="text-red-600"
+															onClick={() => handleDelete(minibus)}
+														>
+															Supprimer
+														</DropdownMenuItem>
+													</DropdownMenuContent>
+												</DropdownMenu>
+											</TableCell>
+										</TableRow>
+									))
+								) : (
+									<TableRow>
+										<TableCell colSpan={6} className="h-24 text-center">
+											<div className="text-center">
+												<Bus className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+												<h3 className="text-lg font-medium text-gray-900 mb-2">
+													Aucun minibus trouvé
+												</h3>
+												<p className="text-gray-500 mb-4">
+													{searchTerm ||
+													availabilityFilter !== "all" ||
+													capacityFilter !== "all"
+														? "Aucun minibus ne correspond à vos critères de recherche."
+														: "Commencez par créer votre premier minibus."}
+												</p>
+											</div>
+										</TableCell>
+									</TableRow>
+								)}
+							</TableBody>
+						</Table>
+					</div>
 
-			{/* Error state */}
-			{error && (
-				<Card className="border-red-200 bg-red-50">
-					<CardContent className="pt-6">
-						<div className="flex items-center gap-2 text-red-800">
-							<CircleOff className="h-4 w-4" />
-							<span>{error}</span>
-						</div>
-					</CardContent>
-				</Card>
-			)}
+					{/* Pagination */}
+					{totalPages > 1 && (
+						<div className="flex items-center justify-between mt-4">
+							<div className="text-sm text-muted-foreground">
+								Affichage de {startIndex + 1} à{" "}
+								{Math.min(endIndex, filteredMinibuses.length)} sur{" "}
+								{filteredMinibuses.length} minibus
+							</div>
+							<div className="flex items-center space-x-2">
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={prevPage}
+									disabled={currentPage === 1}
+								>
+									<ChevronLeft className="h-4 w-4" />
+									<span className="sr-only">Page précédente</span>
+								</Button>
 
-			{/* Liste des minibus */}
-			{!loading && !error && (
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{currentMinibuses.length === 0 && (
-						<div className="col-span-full text-center py-12">
-							<Bus className="mx-auto h-12 w-12 text-muted-foreground" />
-							<h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-								Aucun minibus trouvé
-							</h3>
-							<p className="mt-1 text-sm text-muted-foreground">
-								{searchTerm || availabilityFilter !== "all"
-									? "Essayez de modifier vos filtres."
-									: "Commencez par créer un nouveau minibus."}
-							</p>
+								<div className="flex items-center space-x-1">
+									{getPageNumbers().map((page) => (
+										<Button
+											key={page}
+											variant={currentPage === page ? "default" : "outline"}
+											size="sm"
+											onClick={() => goToPage(page)}
+										>
+											{page}
+										</Button>
+									))}
+								</div>
+
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={nextPage}
+									disabled={currentPage === totalPages}
+								>
+									<ChevronRight className="h-4 w-4" />
+									<span className="sr-only">Page suivante</span>
+								</Button>
+							</div>
 						</div>
 					)}
-
-					{currentMinibuses.map((minibus) => (
-						<Card key={minibus.id} className="hover:shadow-md transition-shadow">
-							<CardHeader className="pb-3">
-								<div className="flex items-start justify-between">
-									<div className="space-y-1">
-										<CardTitle className="text-lg">{minibus.name}</CardTitle>
-										<p className="text-sm text-muted-foreground">
-											{minibus.licensePlate}
-										</p>
-									</div>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" size="sm">
-												<MoreHorizontal className="h-4 w-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuItem asChild>
-												<Link 
-													to="/admin/assets/minibuses/$minibusId"
-													params={{ minibusId: minibus.id }}
-												>
-													Voir détails
-												</Link>
-											</DropdownMenuItem>
-											<DropdownMenuItem asChild>
-												<Link 
-													to="/admin/assets/minibuses/$minibusId/edit"
-													params={{ minibusId: minibus.id }}
-												>
-													Modifier
-												</Link>
-											</DropdownMenuItem>
-											<DropdownMenuItem
-												onClick={() => handleDelete(minibus)}
-												className="text-red-600"
-											>
-												Supprimer
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								<div className="flex items-center justify-between">
-									{getAvailabilityBadge(minibus.isAvailable)}
-									<div className="flex items-center gap-4 text-sm text-muted-foreground">
-										<div className="flex items-center gap-1">
-											<Users className="h-3 w-3" />
-											{minibus.capacity}
-										</div>										{minibus.disabledPersonCapacity > 0 && (
-											<div className="flex items-center gap-1">
-												<UserCheck className="h-3 w-3" />
-												{minibus.disabledPersonCapacity} PMR
-											</div>
-										)}
-									</div>
-								</div>
-
-								{minibus.description && (
-									<p className="text-sm text-muted-foreground line-clamp-2">
-										{minibus.description}
-									</p>
-								)}
-
-								<div className="flex items-center justify-between pt-2 border-t">
-									<div className="text-xs text-muted-foreground">
-										Créé le {formatDate(minibus.createdAt)}
-									</div>
-									<Button asChild size="sm" variant="outline">
-										<Link 
-											to="/admin/assets/minibuses/$minibusId"
-											params={{ minibusId: minibus.id }}
-										>
-											<Calendar className="w-3 h-3 mr-1" />
-											Voir planning
-										</Link>
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
-			)}
-
-			{/* Pagination */}
-			{totalPages > 1 && (
-				<div className="flex items-center justify-between">
-					<p className="text-sm text-muted-foreground">
-						Affichage de {startIndex + 1} à {Math.min(endIndex, filteredMinibuses.length)} sur{" "}
-						{filteredMinibuses.length} résultats
-					</p>
-					<div className="flex items-center space-x-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={prevPage}
-							disabled={currentPage === 1}
-						>
-							<ChevronLeft className="h-4 w-4" />
-							Précédent
-						</Button>
-						<div className="flex items-center space-x-1">
-							{getPageNumbers().map((page) => (
-								<Button
-									key={`page-${page}`}
-									variant={page === currentPage ? "default" : "outline"}
-									size="sm"
-									onClick={() => typeof page === "number" && goToPage(page)}
-									disabled={page === "..."}
-									className="w-8"
-								>
-									{page}
-								</Button>
-							))}
-						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={nextPage}
-							disabled={currentPage === totalPages}
-						>
-							Suivant
-							<ChevronRight className="h-4 w-4" />
-						</Button>
-					</div>
-				</div>
-			)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }

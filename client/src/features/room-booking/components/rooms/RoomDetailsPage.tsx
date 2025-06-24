@@ -20,6 +20,7 @@ import {
 	Timer,
 	// @ts-ignore
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface RoomDetailsPageProps {
 	room: Room;
@@ -119,30 +120,28 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-7">
-						{[
-							"monday",
-							"tuesday",
-							"wednesday",
-							"thursday",
-							"friday",
-							"saturday",
-							"sunday",
-						].map((dayKey) => {
-							const dayData =
-								room.openingHours[dayKey as keyof typeof room.openingHours];
+						{Object.entries(frenchDays).map(([dayKey, dayLabel]) => {
+							const dayData = room.openingHours[dayKey as keyof typeof room.openingHours];
+							
 							return (
-								<div
-									key={dayKey}
-									className="flex flex-col items-center p-3 border rounded-lg"
-								>
-									<span className="text-sm font-medium mb-1">
-										{frenchDays[dayKey as keyof typeof frenchDays]}
-									</span>
-									<span className="text-sm text-muted-foreground text-center">
-										{dayData?.closed
-											? "Fermé"
-											: `${dayData?.open} - ${dayData?.close}`}
-									</span>
+								<div key={dayKey} className="p-3 border rounded-lg text-center">
+									<h4 className="text-sm font-medium">{dayLabel}</h4>
+									{!dayData?.closed ? (
+										<div className="mt-1 space-y-1">
+											<Badge variant="default" className="text-xs bg-green-100 text-green-800">
+												Ouvert
+											</Badge>
+											{dayData?.open && dayData?.close && (
+												<p className="text-xs text-muted-foreground">
+													{dayData.open} - {dayData.close}
+												</p>
+											)}
+										</div>
+									) : (
+										<Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 mt-1">
+											Fermé
+										</Badge>
+									)}
 								</div>
 							);
 						})}

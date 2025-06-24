@@ -26,6 +26,7 @@ import {
 	// @ts-ignore
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 
 interface MinibusReservationFormProps {
 	minibusId: string;
@@ -52,9 +53,7 @@ export function MinibusReservationForm({
 	onSuccess,
 	onCancelLink,
 }: MinibusReservationFormProps) {
-	// Pour simuler un utilisateur, nous utiliserons un ID fixe pour le moment
-	// Dans une vraie application, ceci viendrait du contexte d'authentification
-	const userId = "00000000-0000-0000-0000-000000000000"; // ID utilisateur temporaire
+	const { user } = AuthenticatedRoute.useLoaderData();
 	const { createMinibusReservation, updateMinibusReservation } = useMinibusReservations({ minibusId });
 	const isEditing = Boolean(minibusReservation);
 
@@ -168,7 +167,7 @@ export function MinibusReservationForm({
 				result = await createMinibusReservation({
 					...data,
 					minibusId,
-					bookerId: userId,
+					bookerId: user.id,
 				} as CreateMinibusReservationData);
 			}
 
@@ -329,7 +328,7 @@ export function MinibusReservationForm({
 								{isSubmitting && (
 									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
 								)}
-								{isEditing ? "Modifier" : "Créer"}
+								{isEditing ? "Modifier la réservation" : "Créer la réservation"}
 							</Button>
 						</div>
 					</form>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { minibusReservationsApi } from "../lib/api/minibusReservations";
 import type {
 	MinibusReservation,
@@ -69,9 +70,12 @@ export function useMinibusReservations(options: UseMinibusReservationsOptions) {
 		onSuccess: (newReservation) => {
 			setMinibusReservations(prev => [newReservation, ...prev]);
 			queryClient.invalidateQueries({ queryKey: ["minibusReservations", minibusId] });
+			toast.success("Réservation de minibus créée avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la création: ${error.message}`);
+			const errorMessage = `Erreur lors de la création: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
@@ -86,9 +90,12 @@ export function useMinibusReservations(options: UseMinibusReservationsOptions) {
 				)
 			);
 			queryClient.invalidateQueries({ queryKey: ["minibusReservations", minibusId] });
+			toast.success("Réservation de minibus mise à jour avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la mise à jour: ${error.message}`);
+			const errorMessage = `Erreur lors de la mise à jour: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
@@ -98,9 +105,12 @@ export function useMinibusReservations(options: UseMinibusReservationsOptions) {
 		onSuccess: (_, deletedId) => {
 			setMinibusReservations(prev => prev.filter(reservation => reservation.id !== deletedId));
 			queryClient.invalidateQueries({ queryKey: ["minibusReservations", minibusId] });
+			toast.success("Réservation de minibus supprimée avec succès");
 		},
 		onError: (error) => {
-			setError(`Erreur lors de la suppression: ${error.message}`);
+			const errorMessage = `Erreur lors de la suppression: ${error.message}`;
+			setError(errorMessage);
+			toast.error("Erreur", { description: errorMessage });
 		},
 	});
 
