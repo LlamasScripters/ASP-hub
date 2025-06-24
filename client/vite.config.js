@@ -28,6 +28,7 @@ export default defineConfig({
 		alias: {
 			"@": resolve(__dirname, "./src"),
 			"@room-booking": resolve(__dirname, "./src/features/room-booking"),
+			"@minibus-booking": resolve(__dirname, "./src/features/minibus-booking"),
 		},
 	},
 });
