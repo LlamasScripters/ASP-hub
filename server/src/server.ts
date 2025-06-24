@@ -12,6 +12,7 @@ import complexesRouter from "./features/room-booking/complexes.controller.js";
 import roomReservationsRouter from "./features/room-booking/roomReservations.controller.js";
 import roomsRouter from "./features/room-booking/rooms.controller.js";
 import minibusesRouter from "./features/minibus-booking/minibuses.controller.js";
+import minibusReservationsRouter from "./features/minibus-booking/minibusReservations.controller.js";
 import usersRouter from "./features/users/users.controller.js";
 
 const server = express();
@@ -33,6 +34,7 @@ server.use("/api/complexes", complexesRouter);
 server.use("/api/rooms", roomsRouter);
 server.use("/api/roomReservations", roomReservationsRouter);
 server.use("/api/minibuses", minibusesRouter);
+server.use("/api/minibusReservations", minibusReservationsRouter);
 server.use("/api/clubs", clubsRouter);
 server.use("/api/articles", articlesRouter);
 server.use("/api/tags", tagsRouter);
