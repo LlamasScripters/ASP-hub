@@ -5,21 +5,17 @@ import {
 	SidebarGroup,
 	SidebarHeader,
 	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
 import {
 	Building2Icon,
 	HomeIcon,
-	type LucideIcon,
 	RssIcon,
 	ShieldIcon,
 	UsersIcon,
 } from "lucide-react";
 import type * as React from "react";
-import NavItem, { type NavItemProps } from "./NavItem";
+import type { NavItemProps } from "./NavItem";
 import NavItems from "./NavItems";
 import { NavUser } from "./NavUser";
 import { SidebarHeaderContent } from "./SidebarHeaderContent";

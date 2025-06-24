@@ -112,7 +112,7 @@ export function ComplexForm({
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						{/* Informations générales */}
 						<div className="space-y-4">
-							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+							<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 								<Info className="w-4 h-4" />
 								Informations générales
 							</div>
@@ -159,7 +159,7 @@ export function ComplexForm({
 
 						{/* Localisation */}
 						<div className="space-y-4">
-							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+							<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 								<MapPin className="w-4 h-4" />
 								Localisation
 							</div>
@@ -286,7 +286,7 @@ export function ComplexForm({
 
 						{/* Services et accessibilité */}
 						<div className="space-y-4">
-							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+							<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 								<Users className="w-4 h-4" />
 								Services et accessibilité
 							</div>
@@ -300,7 +300,7 @@ export function ComplexForm({
 											<FormLabel>Nombre d'ascenseurs</FormLabel>
 											<FormControl>
 												<div className="relative">
-													<Accessibility className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+													<Accessibility className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
 													<Input
 														type="number"
 														placeholder="Ex: 2"
@@ -332,7 +332,7 @@ export function ComplexForm({
 											<FormLabel>Capacité du parking</FormLabel>
 											<FormControl>
 												<div className="relative">
-													<Car className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+													<Car className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
 													<Input
 														type="number"
 														placeholder="Ex: 100"

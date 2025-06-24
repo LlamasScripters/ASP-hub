@@ -180,10 +180,6 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 		},
 	});
 
-	const handleUploadSuccess = (file: File) => {
-		uploadUserAvatarMutation.mutate(file);
-	};
-
 	const onSubmit = (values: FormValues) => {
 		updateUserMutation.mutate(values);
 	};
@@ -239,7 +235,7 @@ export default function UserUpdateForm({ user }: UserUpdateFormProps) {
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button
-										variant={"outline"}
+										variant="outline"
 										className={cn(
 											"w-[240px]",
 											!field.value && "text-muted-foreground",
