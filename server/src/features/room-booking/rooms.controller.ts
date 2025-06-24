@@ -48,7 +48,7 @@ const roomQuerySchema = z
 		limit: Number.parseInt(data.limit || "20", 10),
 	}));
 
-const reservationQuerySchema = z
+const roomReservationQuerySchema = z
 	.object({
 		startDate: z.string().optional(),
 		endDate: z.string().optional(),
@@ -89,7 +89,7 @@ roomsRouter.get("/:id", async (req: Request, res: Response) => {
 
 //@ts-ignore
 roomsRouter.get("/:id/roomReservations", async (req: Request, res: Response) => {
-	const query = reservationQuerySchema.safeParse(req.query);
+	const query = roomReservationQuerySchema.safeParse(req.query);
 	if (!query.success) {
 		return res.status(400).json({ error: query.error.flatten() });
 	}

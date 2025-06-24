@@ -9,7 +9,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 
-interface ReservationEditPageProps {
+interface RoomReservationEditPageProps {
 	complex: Complex;
 	room: Room;
 	roomReservation: RoomReservation;
@@ -19,7 +19,7 @@ export function RoomReservationEditPage({
 	complex,
 	room,
 	roomReservation,
-}: ReservationEditPageProps) {
+}: RoomReservationEditPageProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
 
