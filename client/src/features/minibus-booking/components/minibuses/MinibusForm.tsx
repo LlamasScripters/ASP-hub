@@ -92,8 +92,7 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormPro
 		<Card className="w-full max-w-2xl mx-auto">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<Bus className="w-5 h-5" />
-					{isEditing ? "Modifier le minibus" : "Créer un minibus"}
+					{isEditing ? "Formulaire d'édition" : "Formulaire de création"}
 				</CardTitle>
 			</CardHeader>
 			<CardContent>

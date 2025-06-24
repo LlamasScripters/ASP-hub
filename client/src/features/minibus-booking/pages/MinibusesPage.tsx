@@ -1,239 +1,503 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
 import { MinibusesList } from "@/features/minibus-booking/components/minibuses/MinibusesList";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+	Activity,
+	AlertCircle,
+	BarChart3,
 	Bus,
-	CalendarDays,
-	Filter,
-	LayoutList,
+	Calendar,
+	CheckCircle,
+	Clock,
 	Plus,
-	Search,
+	RefreshCw,
 	UserCheck,
-	XCircle,
+	Users,
 	// @ts-ignore
 } from "lucide-react";
+
+type ViewMode = "overview" | "minibuses" | "planning";
 
 interface MinibusesPageProps {
 	initialMinibuses?: Minibus[];
 }
 
 export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
+	const search = useSearch({ strict: false });
 	const navigate = useNavigate();
-	const [search, setSearch] = useState("");
-	const [filterType, setFilterType] = useState<string>("all");
+	// @ts-ignore
+	const initialViewFromUrl = (search.view as ViewMode) ?? "overview";
 
-	const filteredMinibuses = useMemo(() => {
-		return initialMinibuses.filter((minibus) => {
-			const matchesSearch = minibus.name
-				.toLowerCase()
-				.includes(search.toLowerCase()) ||
-				minibus.licensePlate
-				.toLowerCase()
-				.includes(search.toLowerCase());
-			const matchesType =
-				filterType === "all" ||
-				(filterType === "available" && minibus.isAvailable) ||
-				(filterType === "unavailable" && !minibus.isAvailable);
-			return matchesSearch && matchesType;
-		});
-	}, [search, filterType, initialMinibuses]);
-	const handleView = (minibusId: string) => {
-		navigate({
-			to: "/admin/assets/minibuses/$minibusId",
-			params: { minibusId },
-		});
+	const [currentView, setCurrentView] = useState<ViewMode>(initialViewFromUrl);
+
+	useEffect(() => {
+		setCurrentView(initialViewFromUrl);
+	}, [initialViewFromUrl]);
+
+	// Mock data for recent activities - à remplacer par de vraies données
+	const recentActivities = [
+		{
+			id: "1",
+			action: "Nouveau minibus ajouté",
+			minibus: "Minibus Sportif A",
+			date: "Il y a 1 heure",
+			type: "create",
+		},
+		{
+			id: "2",
+			action: "Maintenance programmée",
+			minibus: "Bus Équipe Pro",
+			date: "Il y a 3 heures",
+			type: "maintenance",
+		},
+		{
+			id: "3",
+			action: "Réservation confirmée",
+			minibus: "Minibus Jeunes",
+			date: "Il y a 5 heures",
+			type: "booking",
+		},
+		{
+			id: "4",
+			action: "Contrôle technique effectué",
+			minibus: "Bus Transport",
+			date: "Hier",
+			type: "update",
+		},
+	];
+
+	const upcomingEvents = [
+		{
+			id: "1",
+			title: "Révision générale",
+			minibus: "Minibus Sportif A",
+			date: "28 juin 2025",
+			type: "maintenance",
+		},
+		{
+			id: "2",
+			title: "Déplacement championnat",
+			minibus: "Bus Équipe Pro",
+			date: "2 juillet 2025",
+			type: "event",
+		},
+		{
+			id: "3",
+			title: "Contrôle technique",
+			minibus: "Minibus Jeunes",
+			date: "8 juillet 2025",
+			type: "inspection",
+		},
+	];
+
+	const handleRefresh = async () => {
+		// Implement refresh logic or remove if not needed
+		window.location.reload();
 	};
 
 	const handleCreate = () => {
 		navigate({ to: "/admin/assets/minibuses/create" });
 	};
 
+	const getActionIcon = (type: string) => {
+		switch (type) {
+			case "create":
+				return <Plus className="w-4 h-4 text-green-600" />;
+			case "maintenance":
+				return <AlertCircle className="w-4 h-4 text-orange-600" />;
+			case "booking":
+				return <CheckCircle className="w-4 h-4 text-blue-600" />;
+			case "update":
+				return <RefreshCw className="w-4 h-4 text-purple-600" />;
+			default:
+				return <Activity className="w-4 h-4 text-gray-600" />;
+		}
+	};
+
+	const getEventBadge = (type: string) => {
+		switch (type) {
+			case "maintenance":
+				return (
+					<Badge
+						variant="outline"
+						className="text-orange-600 border-orange-600"
+					>
+						Maintenance
+					</Badge>
+				);
+			case "event":
+				return <Badge className="bg-blue-600">Événement</Badge>;
+			case "inspection":
+				return (
+					<Badge
+						variant="outline"
+						className="text-purple-600 border-purple-600"
+					>
+						Inspection
+					</Badge>
+				);
+			default:
+				return <Badge variant="outline">Autre</Badge>;
+		}
+	};
+
+	// Calculer les stats à partir des données initiales
 	const totalMinibuses = initialMinibuses.length;
 	const totalAvailable = initialMinibuses.filter((m) => m.isAvailable).length;
 	const totalUnavailable = totalMinibuses - totalAvailable;
 	const totalCapacity = initialMinibuses.reduce((sum, m) => sum + m.capacity, 0);
+	const totalDisabledCapacity = initialMinibuses.reduce((sum, m) => sum + m.disabledPersonCapacity, 0);
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						Tous les minibus
+						Flotte de minibus
 					</h1>
 					<p className="text-muted-foreground">
-						Liste de tous les minibus de la flotte
+						Gérez les minibus de l'association
 					</p>
 				</div>
-				<Button onClick={handleCreate} className="w-full md:w-auto">
-					<Plus className="w-4 h-4 mr-2" /> Nouveau minibus
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						className="h-9"
+						onClick={handleRefresh}
+					>
+						<RefreshCw className="w-4 h-4 mr-2" />
+						Actualiser
+					</Button>
+					<Button onClick={handleCreate}>
+						<Plus className="w-4 h-4 mr-2" />
+						Nouveau minibus
+					</Button>
+				</div>
 			</div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Filtres</CardTitle>
-					<CardDescription>
-						Recherchez et filtrez les minibus par statut ou nom
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<label htmlFor="search" className="text-sm font-medium">Recherche</label>
-						<div className="relative">
-							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input
-								id="search"
-								placeholder="Nom ou plaque..."
-								value={search}
-								onChange={(e) => setSearch(e.target.value)}
-								className="pl-8"
+			{/* Statistiques principales */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+						<CardTitle className="text-sm font-medium">
+							Total Minibus
+						</CardTitle>
+						<Bus className="w-4 h-4 text-muted-foreground" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{totalMinibuses}</div>
+						<p className="text-xs text-muted-foreground">
+							{totalAvailable} disponibles
+						</p>
+						<div className="mt-4">
+							<Progress
+								value={
+									totalMinibuses > 0
+										? (totalAvailable / totalMinibuses) * 100
+										: 0
+								}
+								className="h-2"
 							/>
 						</div>
-					</div>
-					<div className="space-y-2">
-						<label htmlFor="type-filter" className="text-sm font-medium">Statut</label>
-						<select
-							id="type-filter"
-							value={filterType}
-							onChange={(e) => setFilterType(e.target.value)}
-							className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							<option value="all">Tous</option>
-							<option value="available">Disponibles</option>
-							<option value="unavailable">Indisponibles</option>
-						</select>
-					</div>
-				</CardContent>
-			</Card>
+					</CardContent>
+				</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<LayoutList className="w-4 h-4" />
-						Statistiques
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-						<Bus className="w-8 h-8 text-blue-600" />
-						<div>
-							<p className="text-sm text-muted-foreground">Total minibus</p>
-							<p className="text-2xl font-bold text-blue-600">{totalMinibuses}</p>
-						</div>
-					</div>
-					<div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
-						<CalendarDays className="w-8 h-8 text-green-600" />
-						<div>
-							<p className="text-sm text-muted-foreground">Disponibles</p>
-							<p className="text-2xl font-bold text-green-600">{totalAvailable}</p>
-						</div>
-					</div>
-					<div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg">
-						<XCircle className="w-8 h-8 text-red-600" />
-						<div>
-							<p className="text-sm text-muted-foreground">Indisponibles</p>
-							<p className="text-2xl font-bold text-red-600">{totalUnavailable}</p>
-						</div>
-					</div>
-					<div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
-						<UserCheck className="w-8 h-8 text-orange-600" />
-						<div>
-							<p className="text-sm text-muted-foreground">Capacité totale</p>
-							<p className="text-2xl font-bold text-orange-600">{totalCapacity}</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-
-			<Separator />
-
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{filteredMinibuses.length === 0 && (
-					<div className="col-span-full text-center py-12">
-						<Bus className="mx-auto h-12 w-12 text-muted-foreground" />
-						<h3 className="mt-2 text-sm font-semibold text-muted-foreground">
-							Aucun minibus trouvé
-						</h3>
-						<p className="mt-1 text-sm text-muted-foreground">
-							{search || filterType !== "all"
-								? "Essayez de modifier vos filtres."
-								: "Commencez par créer un nouveau minibus."}
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+						<CardTitle className="text-sm font-medium">
+							Capacité Totale
+						</CardTitle>
+						<Users className="w-4 h-4 text-muted-foreground" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{totalCapacity}</div>
+						<p className="text-xs text-muted-foreground">
+							places passagers
 						</p>
-						{!search && filterType === "all" && (
-							<Button onClick={handleCreate} className="mt-4">
-								<Plus className="w-4 h-4 mr-2" />
-								Créer un minibus
-							</Button>
-						)}
-					</div>
-				)}
+						<div className="mt-4">
+							<Progress value={
+								totalCapacity > 0
+									? (totalAvailable / totalCapacity) * 100
+									: 0
+							} className="h-2" />
+						</div>
+					</CardContent>
+				</Card>
 
-				{filteredMinibuses.map((minibus) => (
-					<Card 
-						key={minibus.id} 
-						className="hover:shadow-md transition-shadow cursor-pointer"
-						onClick={() => handleView(minibus.id)}
-					>
-						<CardHeader className="pb-3">
-							<div className="flex items-start justify-between">
-								<div className="space-y-1">
-									<CardTitle className="text-lg">{minibus.name}</CardTitle>
-									<p className="text-sm text-muted-foreground font-mono">
-										{minibus.licensePlate}
-									</p>
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+						<CardTitle className="text-sm font-medium">Places PMR</CardTitle>
+						<UserCheck className="w-4 h-4 text-muted-foreground" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{totalDisabledCapacity}</div>
+						<p className="text-xs text-muted-foreground">
+							personnes à mobilité réduite
+						</p>
+						<div className="mt-4">
+							<Progress value={
+								totalDisabledCapacity > 0
+									? (totalDisabledCapacity / totalCapacity) * 100
+									: 0
+							} className="h-2" />
+						</div>
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+						<CardTitle className="text-sm font-medium">
+							Événements à venir
+						</CardTitle>
+						<Calendar className="w-4 h-4 text-muted-foreground" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{upcomingEvents.length}</div>
+						<p className="text-xs text-muted-foreground">
+							Prochain événement dans 4 jours
+						</p>
+						<div className="mt-4">
+							<Progress value={
+								upcomingEvents.length > 0
+									? (upcomingEvents.length / 10) * 100 // Juste un exemple de calcul
+									: 0
+							} className="h-2" />
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Onglets principaux */}
+			<Tabs
+				value={currentView}
+				onValueChange={(value) => {
+					setCurrentView(value as ViewMode);
+					// @ts-ignore
+					navigate({ search: (prev) => ({ ...prev, view: value }) });
+				}}
+				className="space-y-4"
+			>
+				<TabsList>
+					<TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+					<TabsTrigger value="minibuses">Tous les minibus</TabsTrigger>
+					<TabsTrigger value="planning">Planning</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="overview" className="space-y-4">
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+						{/* Graphique d'utilisation */}
+						<Card className="lg:col-span-4">
+							<CardHeader>
+								<CardTitle>Utilisation des minibus</CardTitle>
+								<CardDescription>Taux d'occupation par mois</CardDescription>
+							</CardHeader>
+							<CardContent className="pl-2">
+								<div className="h-[300px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
+									<BarChart3 className="w-12 h-12 text-gray-400" />
+									<span className="ml-2 text-gray-500">
+										Graphique d'utilisation
+									</span>
 								</div>
-								<div className="text-right">
-									{minibus.isAvailable ? (
-										<span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-											Disponible
-										</span>
-									) : (
-										<span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
-											Indisponible
-										</span>
-									)}
-								</div>
-							</div>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<div className="flex items-center justify-between text-sm">
-								<div className="flex items-center gap-4">
-									<div className="flex items-center gap-1 text-muted-foreground">
-										<Bus className="h-3 w-3" />
-										{minibus.capacity} places
-									</div>
-									{minibus.disabledPersonCapacity > 0 && (
-										<div className="flex items-center gap-1 text-muted-foreground">
-											<UserCheck className="h-3 w-3" />
-											{minibus.disabledPersonCapacity} PMR
+							</CardContent>
+						</Card>
+
+						{/* Événements à venir */}
+						<Card className="lg:col-span-3">
+							<CardHeader>
+								<CardTitle>Événements à venir</CardTitle>
+								<CardDescription>
+									Prochains événements pour les minibus
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									{upcomingEvents.map((event) => (
+										<div key={event.id} className="flex items-center">
+											<div className="w-2 h-2 mr-2 rounded-full bg-emerald-500" />
+											<div className="flex-1 space-y-1">
+												<p className="text-sm font-medium leading-none">
+													{event.title}
+												</p>
+												<p className="text-sm text-muted-foreground">
+													{event.date} - {event.minibus}
+												</p>
+											</div>
+											{getEventBadge(event.type)}
 										</div>
-									)}
+									))}
 								</div>
-							</div>
+							</CardContent>
+						</Card>
+					</div>
 
-							{minibus.description && (
-								<p className="text-sm text-muted-foreground line-clamp-2">
-									{minibus.description}
-								</p>
-							)}
-
-							<div className="pt-2 border-t">
-								<div className="text-xs text-muted-foreground">
-									Créé le {new Date(minibus.createdAt).toLocaleDateString("fr-FR")}
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+						{/* Activité récente */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Activité récente</CardTitle>
+								<CardDescription>
+									Dernières actions sur les minibus
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									{recentActivities.map((activity) => (
+										<div key={activity.id} className="flex items-center">
+											<div className="mr-3">{getActionIcon(activity.type)}</div>
+											<div className="flex-1 space-y-1">
+												<p className="text-sm font-medium leading-none">
+													{activity.action}
+												</p>
+												<p className="text-sm text-muted-foreground">
+													{activity.minibus}
+												</p>
+											</div>
+											<div className="text-sm text-muted-foreground">
+												{activity.date}
+											</div>
+										</div>
+									))}
 								</div>
+							</CardContent>
+						</Card>
+
+						{/* État de la flotte */}
+						<Card>
+							<CardHeader>
+								<CardTitle>État de la flotte</CardTitle>
+								<CardDescription>
+									Statut opérationnel des véhicules
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									<div className="space-y-2">
+										<div className="flex items-center justify-between">
+											<div className="text-sm font-medium">Disponibles</div>
+											<div className="text-sm text-muted-foreground">
+												{totalAvailable}
+											</div>
+										</div>
+										<Progress
+											value={
+												totalMinibuses > 0
+													? (totalAvailable / totalMinibuses) * 100
+													: 0
+											}
+											className="h-2"
+										/>
+									</div>
+									<div className="space-y-2">
+										<div className="flex items-center justify-between">
+											<div className="text-sm font-medium">Indisponibles</div>
+											<div className="text-sm text-muted-foreground">
+												{totalUnavailable}
+											</div>
+										</div>
+										<Progress
+											value={
+												totalMinibuses > 0
+													? (totalUnavailable / totalMinibuses) * 100
+													: 0
+											}
+											className="h-2"
+										/>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Maintenance et alertes */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Maintenance et alertes</CardTitle>
+								<CardDescription>
+									État de maintenance des minibus
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									<div className="flex items-center justify-between">
+										<div className="space-y-1">
+											<p className="text-sm font-medium leading-none">
+												Maintenance préventive
+											</p>
+											<p className="text-sm text-muted-foreground">
+												2 minibus programmés
+											</p>
+										</div>
+										<Badge
+											variant="outline"
+											className="text-orange-600 border-orange-600"
+										>
+											<Clock className="w-3 h-3 mr-1" />
+											En attente
+										</Badge>
+									</div>
+									<div className="flex items-center justify-between">
+										<div className="space-y-1">
+											<p className="text-sm font-medium leading-none">
+												Contrôles techniques
+											</p>
+											<p className="text-sm text-muted-foreground">
+												Tous à jour
+											</p>
+										</div>
+										<Badge className="bg-green-600">
+											<CheckCircle className="w-3 h-3 mr-1" />
+											OK
+										</Badge>
+									</div>
+									<div className="flex items-center justify-between">
+										<div className="space-y-1">
+											<p className="text-sm font-medium leading-none">
+												Réparations urgentes
+											</p>
+											<p className="text-sm text-muted-foreground">
+												Aucune
+											</p>
+										</div>
+										<Badge className="bg-green-600">
+											<CheckCircle className="w-3 h-3 mr-1" />
+											OK
+										</Badge>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="minibuses" className="space-y-4">
+					<MinibusesList initialMinibuses={initialMinibuses} />
+				</TabsContent>
+
+				<TabsContent value="planning" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Planning des minibus</CardTitle>
+							<CardDescription>
+								Calendrier de réservation et maintenance
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md">
+								<Calendar className="w-12 h-12 text-gray-400" />
+								<span className="ml-2 text-gray-500">
+									Calendrier de planning
+								</span>
 							</div>
 						</CardContent>
 					</Card>
-				))}
-			</div>
-
-			{/* Composant Liste détaillée - Alternative */}
-			{/* <MinibusesList initialMinibuses={initialMinibuses} /> */}
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }

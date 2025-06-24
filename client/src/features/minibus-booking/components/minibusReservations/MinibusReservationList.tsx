@@ -5,7 +5,7 @@ import type { MinibusReservation } from "@/features/minibus-booking/hooks/useMin
 import { useMinibusReservations } from "@/features/minibus-booking/hooks/useMinibusReservations";
 import { getWeekBounds, getMonthBounds } from "@/features/minibus-booking/lib/api/minibusReservations";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 type ViewMode = "week" | "month";
@@ -82,6 +82,8 @@ const getStatusColor = (status: string) => {
 
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
+const START_HOUR = 5; // 5h du matin
+const END_HOUR = 24; // Minuit
 
 export function MinibusReservationList({
 	minibusId,
@@ -93,6 +95,11 @@ export function MinibusReservationList({
 
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+	
+	// Obtenir l'heure actuelle pour l'indicateur visuel
+	const now = new Date();
+	const currentHour = now.getHours();
+	const currentDate = now.toISOString().split("T")[0];
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -204,10 +211,15 @@ export function MinibusReservationList({
 		<Card>
 			<CardHeader>
 				<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-					<CardTitle className="flex items-center gap-2">
-						<CalendarIcon className="w-4 h-4" />
-						Planning des réservations
-					</CardTitle>
+					<div>
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<CalendarIcon className="w-6 h-6 text-muted-foreground" />
+							Planning des réservations
+						</CardTitle>
+						<CardDescription className="text-sm text-muted-foreground">
+							Total : {totalCount} réservation{totalCount > 1 ? "s" : ""}
+						</CardDescription>
+					</div>
 					<div className="flex items-center gap-2">
 						{/* Sélecteur de vue */}
 						<div className="flex rounded-md border">
@@ -257,25 +269,28 @@ export function MinibusReservationList({
 								const date = new Date(startDate);
 								date.setDate(startDate.getDate() + i);
 								const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+								const dateKey = date.toISOString().split("T")[0];
+								const isToday = dateKey === currentDate;
 								
 								return (
 									<div
-										key={i}
+										key={`day-header-${i}`}
 										className={`p-2 text-center border-b ${
 											isAvailable ? "bg-green-50" : "bg-gray-50"
-										}`}
+										} ${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
 									>
-										<div className="text-xs font-medium">
+										<div className={`text-xs font-medium ${isToday ? "text-blue-700" : ""}`}>
 											{date.toLocaleDateString("fr-FR", { weekday: "short" })}
+											{isToday && " (Aujourd'hui)"}
 										</div>
-										<div className="text-sm">
+										<div className={`text-sm ${isToday ? "text-blue-800 font-bold" : ""}`}>
 											{date.toLocaleDateString("fr-FR", { 
 												day: "numeric", 
 												month: "short" 
 											})}
 										</div>
 										{isAvailable && (
-											<div className="text-xs text-muted-foreground mt-1">
+											<div className={`text-xs mt-1 ${isToday ? "text-blue-600" : "text-muted-foreground"}`}>
 												{(() => {
 													const hours = getMinibusHoursForDay(date, minibusDisponibility);
 													return hours.openTime && hours.closeTime 
@@ -289,13 +304,17 @@ export function MinibusReservationList({
 							})}
 
 							{/* Grille horaire */}
-							{Array.from({ length: 24 }, (_, hour) => {
+							{Array.from({ length: END_HOUR - START_HOUR }, (_, index) => {
+								const hour = START_HOUR + index;
 								const hourStr = `${hour.toString().padStart(2, "0")}:00`;
+								const isCurrentHour = hour === currentHour;
 								
 								return (
-									<div key={hour} className="contents">
+									<div key={`hour-${hour}`} className="contents">
 										{/* Colonne des heures */}
-										<div className="p-2 text-xs text-muted-foreground border-r">
+										<div className={`p-2 text-xs border-r ${
+											isCurrentHour ? "bg-blue-100 text-blue-800 font-bold" : "text-muted-foreground"
+										}`}>
 											{hourStr}
 										</div>
 										
@@ -306,6 +325,14 @@ export function MinibusReservationList({
 											const dateKey = date.toISOString().split("T")[0];
 											const dayReservations = minibusReservationsByDay[dateKey] || [];
 											const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+											const isCurrentDay = dateKey === currentDate;
+											const isCurrentTimeSlot = isCurrentDay && isCurrentHour;
+											
+											// Vérifier si le minibus est disponible à cette heure
+											const dayHours = getMinibusHoursForDay(date, minibusDisponibility);
+											const isHourInAvailableRange = dayHours.openTime && dayHours.closeTime 
+												? hour >= Math.floor(timeToMinutes(dayHours.openTime) / 60) && hour < Math.ceil(timeToMinutes(dayHours.closeTime) / 60)
+												: false;
 											
 											// Filtrer les réservations pour cette heure
 											const hourReservations = dayReservations.filter((reservation) => {
@@ -314,14 +341,33 @@ export function MinibusReservationList({
 												return hour >= startHour && hour < endHour;
 											});
 											
+											let cellBackground = "bg-white";
+											if (!isAvailable) {
+												// Jour complètement indisponible
+												cellBackground = "bg-gray-100";
+											} else if (isAvailable && !isHourInAvailableRange) {
+												// Jour disponible mais heure en dehors des créneaux
+												cellBackground = "bg-gray-100";
+											} else if (isAvailable && isHourInAvailableRange) {
+												// Jour disponible et heure dans les créneaux
+												cellBackground = "bg-green-50";
+											}
+											
+											if (isCurrentTimeSlot) {
+												cellBackground = "bg-blue-200";
+											}
+											
 											return (
 												<div
-													key={dayIndex}
-													className={`relative border border-gray-200 min-h-[${HOUR_HEIGHT}px] ${
-														!isAvailable ? "bg-gray-100" : ""
-													}`}
+													key={`day-${dayIndex}-hour-${hour}`}
+													className={`relative border border-gray-200 ${cellBackground}`}
 													style={{ minHeight: `${HOUR_HEIGHT}px` }}
 												>
+													{/* Indicateur de l'heure actuelle */}
+													{isCurrentTimeSlot && (
+														<div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 z-20" />
+													)}
+													
 													{hourReservations.map((reservation) => (
 														<div
 															key={reservation.id}
@@ -377,15 +423,24 @@ export function MinibusReservationList({
 							const dayReservations = minibusReservationsByDay[dateKey] || [];
 							const isCurrentMonth = date.getMonth() === startDate.getMonth();
 							const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+							const isToday = dateKey === currentDate;
 							
 							return (
 								<div
-									key={i}
+									key={`month-day-${dateKey}`}
 									className={`p-2 border min-h-[80px] ${
 										!isCurrentMonth ? "bg-gray-50 text-gray-400" : ""
-									} ${!isAvailable && isCurrentMonth ? "bg-gray-100" : ""}`}
+									} ${!isAvailable && isCurrentMonth ? "bg-gray-100" : ""}
+									${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
 								>
-									<div className="text-sm font-medium mb-1">{date.getDate()}</div>
+									<div className={`text-sm font-medium mb-1 ${
+										isToday ? "text-blue-800" : ""
+									}`}>
+										{date.getDate()}
+										{isToday && (
+											<span className="ml-1 text-xs text-blue-600">(Auj.)</span>
+										)}
+									</div>
 									<div className="space-y-1">
 										{dayReservations.slice(0, 2).map((reservation) => (
 											<div
@@ -410,12 +465,11 @@ export function MinibusReservationList({
 				)}
 
 				{/* Résumé */}
-				<div className="mt-4 pt-4 border-t">
+				<div className="mt-4 pt-4 border-t space-y-3">
+					{/* Légende des statuts */}
 					<div className="flex items-center justify-between text-sm text-muted-foreground">
-						<div>
-							Total des réservations : {totalCount}
-						</div>
 						<div className="flex items-center gap-4">
+							<span className="font-medium text-gray-700">Statuts :</span>
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-200" />
 								<span>En attente</span>
@@ -427,6 +481,29 @@ export function MinibusReservationList({
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-red-100 border border-red-200" />
 								<span>Annulée</span>
+							</div>
+							<div className="flex items-center gap-1">
+								<div className="w-3 h-3 rounded bg-blue-100 border border-blue-200" />
+								<span>Terminée</span>
+							</div>
+						</div>
+					</div>
+					
+					{/* Légende des disponibilités */}
+					<div className="flex items-center justify-between text-sm text-muted-foreground">
+						<div className="flex items-center gap-4">
+							<span className="font-medium text-gray-700">Disponibilités :</span>
+							<div className="flex items-center gap-1">
+								<div className="w-3 h-3 rounded bg-green-50 border border-green-200" />
+								<span>Heures d'ouverture</span>
+							</div>
+							<div className="flex items-center gap-1">
+								<div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" />
+								<span>Fermé</span>
+							</div>
+							<div className="flex items-center gap-1">
+								<div className="w-3 h-3 rounded bg-blue-200 border border-blue-500" />
+								<span>Maintenant</span>
 							</div>
 						</div>
 					</div>

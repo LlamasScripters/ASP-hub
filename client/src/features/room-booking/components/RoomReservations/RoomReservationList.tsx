@@ -16,7 +16,6 @@ import {
 } from "@/features/room-booking/hooks/useRoomReservations";
 import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import {
-	formatDateShort,
 	getMonthBounds,
 	getWeekBounds,
 } from "@/features/room-booking/lib/api/roomReservations";
@@ -96,6 +95,8 @@ const getStatusColor = (status: string) => {
 
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
+const START_HOUR = 5; // 5h du matin
+const END_HOUR = 24; // Minuit
 
 export function RoomReservationList({
 	roomId,
@@ -107,6 +108,10 @@ export function RoomReservationList({
 
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+	
+	const now = new Date();
+	const currentHour = now.getHours();
+	const currentDate = now.toISOString().split("T")[0];
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -199,7 +204,7 @@ export function RoomReservationList({
 
 	const timeSlots = useMemo(() => {
 		const slots = [];
-		for (let hour = 6; hour < 24; hour++) {
+		for (let hour = START_HOUR; hour < END_HOUR; hour++) {
 			slots.push(`${hour.toString().padStart(2, "0")}:00`);
 		}
 		return slots;
@@ -257,23 +262,30 @@ export function RoomReservationList({
 							const key = d.toLocaleDateString("fr-FR");
 							const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
 							const roomHours = getRoomHoursForDay(d, roomOpeningHours);
-							const isToday = d.toDateString() === new Date().toDateString();
+							const dateKey = d.toISOString().split("T")[0];
+							const isToday = dateKey === currentDate;
 
 							return (
 								<div
 									key={key}
-									className={`p-3 border-r ${isToday ? "bg-blue-50 dark:bg-blue-900/30" : "bg-gray-50 dark:bg-gray-800"} ${!isOpen ? "bg-gray-200 dark:bg-gray-700" : ""}`}
+									className={`p-3 border-r ${
+										isOpen ? "bg-green-50" : "bg-gray-50"
+									} ${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
 								>
 									<div className="text-center">
-										<div
-											className={`text-sm font-semibold ${isToday ? "text-blue-600 dark:text-blue-400" : "text-gray-900 dark:text-gray-100"} ${!isOpen ? "text-gray-500 dark:text-gray-400" : ""}`}
-										>
+										<div className={`text-sm font-semibold ${
+											isToday ? "text-blue-700" : isOpen ? "text-gray-900 dark:text-gray-100" : "text-red-500 dark:text-red-400"
+										}`}>
 											{d.toLocaleDateString("fr-FR", { weekday: "short" })}
+											{isToday && " (Aujourd'hui)"}
 										</div>
-										<div
-											className={`text-xs ${isToday ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"} ${!isOpen ? "text-gray-500 dark:text-gray-400" : ""}`}
-										>
-											{d.getDate()}/{d.getMonth() + 1}
+										<div className={`text-xs ${
+											isToday ? "text-blue-800 font-bold" : isOpen ? "text-gray-600 dark:text-gray-300" : "text-red-500 dark:text-red-400"
+										}`}>
+											{d.toLocaleDateString("fr-FR", { 
+												day: "numeric", 
+												month: "short" 
+											})}
 										</div>
 										{!isOpen ? (
 											<div className="flex items-center justify-center gap-1 text-red-500 dark:text-red-400 mt-1">
@@ -282,7 +294,9 @@ export function RoomReservationList({
 											</div>
 										) : (
 											roomHours && (
-												<div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+												<div className={`text-[10px] mt-1 ${
+													isToday ? "text-blue-600" : "text-gray-500 dark:text-gray-400"
+												}`}>
 													{roomHours.openTime} - {roomHours.closeTime}
 												</div>
 											)
@@ -297,22 +311,24 @@ export function RoomReservationList({
 					<div className="grid grid-cols-8 relative">
 						{/* Colonne des heures */}
 						<div className="border-r bg-gray-50 dark:bg-gray-800">
-							{timeSlots.map((time, idx) => (
-								<div
-									key={time}
-									className="border-b flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800"
-									style={{ height: `${HOUR_HEIGHT}px` }}
-								>
-									<div className="text-center">
-										<div className="font-medium">{time}</div>
-										{idx < timeSlots.length - 1 && (
-											<div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-												{timeSlots[idx + 1]?.substring(0, 2)}h
-											</div>
-										)}
+							{timeSlots.map((time) => {
+								const hour = Number.parseInt(time.split(':')[0]);
+								const isCurrentHour = hour === currentHour;
+								
+								return (
+									<div
+										key={time}
+										className={`border-b flex items-center justify-center text-xs bg-gray-50 dark:bg-gray-800 ${
+											isCurrentHour ? "bg-blue-100 text-blue-800 font-bold" : "text-gray-500 dark:text-gray-400"
+										}`}
+										style={{ height: `${HOUR_HEIGHT}px` }}
+									>
+										<div className="text-center">
+											<div className="font-medium">{time}</div>
+										</div>
 									</div>
-								</div>
-							))}
+								);
+							})}
 						</div>
 
 						{/* Colonnes des jours */}
@@ -324,7 +340,8 @@ export function RoomReservationList({
 							const dayRoomReservations = roomReservationsByDay[key] || [];
 							const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
 							const roomHours = getRoomHoursForDay(d, roomOpeningHours);
-							const isToday = d.toDateString() === new Date().toDateString();
+							const dateKey = d.toISOString().split("T")[0];
+							const isToday = dateKey === currentDate;
 
 							const roomReservationColumns =
 								organizeOverlappingRoomReservations(dayRoomReservations);
@@ -336,34 +353,45 @@ export function RoomReservationList({
 									className={`relative border-r ${isToday ? "bg-blue-50/30 dark:bg-blue-900/20" : "bg-white dark:bg-gray-900"}`}
 								>
 									{/* Grille horaire de fond */}
-									{timeSlots.map((time, idx) => {
-										const timeMinutes = timeToMinutes(time);
-										const isClosedTime =
-											!isOpen ||
-											(roomHours?.openTime &&
-												roomHours?.closeTime &&
-												(timeMinutes < timeToMinutes(roomHours.openTime) ||
-													timeMinutes >= timeToMinutes(roomHours.closeTime)));
+									{timeSlots.map((time) => {
+										const hour = Number.parseInt(time.split(':')[0]);
+										const isCurrentHour = hour === currentHour;
+										const isCurrentTimeSlot = isToday && isCurrentHour;
+										
+										// Vérifier si la salle est ouverte à cette heure
+										const isHourInAvailableRange = roomHours?.openTime && roomHours?.closeTime 
+											? hour >= Math.floor(timeToMinutes(roomHours.openTime) / 60) && hour < Math.ceil(timeToMinutes(roomHours.closeTime) / 60)
+											: false;
+
+										let cellBackground = "bg-white dark:bg-gray-900";
+										if (!isOpen) {
+											// Jour complètement fermé
+											cellBackground = "bg-gray-100 dark:bg-gray-800";
+										} else if (isOpen && !isHourInAvailableRange) {
+											// Jour ouvert mais heure en dehors des créneaux
+											cellBackground = "bg-gray-100 dark:bg-gray-800";
+										} else if (isOpen && isHourInAvailableRange) {
+											// Jour ouvert et heure dans les créneaux
+											cellBackground = "bg-green-50 dark:bg-green-900/20";
+										}
+										
+										if (isCurrentTimeSlot) {
+											cellBackground = "bg-blue-200 dark:bg-blue-800";
+										}
 
 										return (
 											<div
 												key={time}
-												className={`border-b border-gray-200 dark:border-gray-700 relative ${
-													isClosedTime
-														? "bg-gray-100 dark:bg-gray-800 bg-opacity-80"
-														: idx % 2 === 0
-															? "bg-white dark:bg-gray-900"
-															: "bg-gray-50/30 dark:bg-gray-800/30"
-												}`}
+												className={`border-b border-gray-200 dark:border-gray-700 relative ${cellBackground}`}
 												style={{ height: `${HOUR_HEIGHT}px` }}
 											>
+												{/* Indicateur de l'heure actuelle */}
+												{isCurrentTimeSlot && (
+													<div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 z-20" />
+												)}
+												
 												{/* Ligne médiane pour les demi-heures */}
 												<div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200/50 dark:bg-gray-600/50" />
-
-												{/* Indicateur d'heure fermée */}
-												{isClosedTime && (
-													<div className="absolute inset-0 flex items-center justify-center" />
-												)}
 											</div>
 										);
 									})}
@@ -382,13 +410,13 @@ export function RoomReservationList({
 												const duration = endMinutes - startMinutes;
 
 												const topOffset =
-													Math.max(0, (startMinutes - 360) / 60) * HOUR_HEIGHT;
+													Math.max(0, (startMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
 												const height = Math.max(
 													(duration / 60) * HOUR_HEIGHT,
 													MIN_RESERVATION_HEIGHT,
 												);
 
-												if (startMinutes >= 1440 || endMinutes <= 360)
+												if (startMinutes >= END_HOUR * 60 || endMinutes <= START_HOUR * 60)
 													return null;
 
 												const width =
@@ -471,9 +499,9 @@ export function RoomReservationList({
 											const now = new Date();
 											const currentMinutes =
 												now.getHours() * 60 + now.getMinutes();
-											if (currentMinutes >= 360 && currentMinutes < 1440) {
+											if (currentMinutes >= START_HOUR * 60 && currentMinutes < END_HOUR * 60) {
 												const currentOffset =
-													((currentMinutes - 360) / 60) * HOUR_HEIGHT;
+													((currentMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
 												return (
 													<div
 														className="absolute left-0 right-0 h-0.5 bg-red-500 dark:bg-red-400 z-30"
@@ -512,6 +540,8 @@ export function RoomReservationList({
 					const dayRoomReservations = roomReservationsByDay[key] || [];
 					const isOpen = isRoomOpenOnDay(d, roomOpeningHours);
 					const roomHours = getRoomHoursForDay(d, roomOpeningHours);
+					const dateKey = d.toISOString().split("T")[0];
+					const isToday = dateKey === currentDate;
 
 					return (
 						<div
@@ -520,17 +550,21 @@ export function RoomReservationList({
 								!isOpen
 									? "bg-gray-100 dark:bg-gray-800"
 									: "bg-white dark:bg-gray-900"
-							}`}
+							} ${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
 						>
 							<div className="border-b border-gray-200 dark:border-gray-700 pb-1 mb-1 text-xs font-semibold flex items-center justify-between">
-								<span
-									className={
-										isOpen
-											? "text-muted-foreground dark:text-gray-400"
-											: "text-red-500 dark:text-red-400"
-									}
-								>
-									{formatDateShort(d)}
+								<span className={
+									isToday ? "text-blue-800" : isOpen
+										? "text-muted-foreground dark:text-gray-400"
+										: "text-red-500 dark:text-red-400"
+								}>
+									{d.toLocaleDateString("fr-FR", { 
+										day: "numeric", 
+										month: "short" 
+									})}
+									{isToday && (
+										<span className="ml-1 text-xs text-blue-600">(Auj.)</span>
+									)}
 								</span>
 								{!isOpen && (
 									<div className="flex items-center gap-1 text-red-500 dark:text-red-400">
@@ -677,7 +711,50 @@ export function RoomReservationList({
 				) : error ? (
 					<div className="text-center text-destructive py-12">{error}</div>
 				) : (
-					<>{viewMode === "week" ? renderWeekView() : renderMonthView()}</>
+					<>
+						{viewMode === "week" ? renderWeekView() : renderMonthView()}
+						
+						{/* Légende */}
+						<div className="mt-4 pt-4 border-t space-y-3">
+							{/* Légende des statuts */}
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-4">
+									<span className="font-medium text-gray-700">Statuts :</span>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-300" />
+										<span>En attente</span>
+									</div>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-green-100 border border-green-300" />
+										<span>Confirmée</span>
+									</div>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-red-100 border border-red-300" />
+										<span>Annulée</span>
+									</div>
+								</div>
+							</div>
+							
+							{/* Légende des disponibilités */}
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-4">
+									<span className="font-medium text-gray-700">Disponibilités :</span>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-green-50 border border-green-200" />
+										<span>Heures d'ouverture</span>
+									</div>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" />
+										<span>Fermé</span>
+									</div>
+									<div className="flex items-center gap-1">
+										<div className="w-3 h-3 rounded bg-blue-200 border border-blue-500" />
+										<span>Maintenant</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</>
 				)}
 			</CardContent>
 		</Card>

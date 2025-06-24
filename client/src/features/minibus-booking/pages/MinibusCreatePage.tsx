@@ -10,11 +10,11 @@ export function MinibusCreatePage() {
 	const navigate = useNavigate();
 	const [showSuccess, setShowSuccess] = useState(false);
 
-	const handleSuccess = () => {
+	const handleSuccess = (newMinibus: { id: string }) => {
 		setShowSuccess(true);
 		setTimeout(() => {
 			navigate({
-				to: "/admin/assets/minibuses",
+				to: `/admin/assets/minibuses/${newMinibus.id}`,
 			});
 		}, 1500);
 	};

@@ -8,7 +8,7 @@ interface LoaderData {
 }
 
 export const Route = createFileRoute(
-	"/_authenticated/admin/_admin/assets/minibuses/$minibusId",
+	"/_authenticated/admin/_admin/assets/minibuses/$minibusId/",
 )({
 	loader: async ({ params }): Promise<LoaderData> => {
 		const minibus = await minibusesApi.getMinibusById(params.minibusId);
