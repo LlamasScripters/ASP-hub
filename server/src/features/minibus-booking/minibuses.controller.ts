@@ -2,7 +2,6 @@ import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { minibusesService } from "./minibuses.service.js";
 import { minibusReservationsService } from "./minibusReservations.service.js";
-import { min } from "drizzle-orm";
 
 const minibusesRouter = Router();
 
