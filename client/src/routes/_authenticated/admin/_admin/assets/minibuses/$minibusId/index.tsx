@@ -20,9 +20,7 @@ export const Route = createFileRoute(
 	component: MinibusDetailsRoute,
 	validateSearch: zodValidator(minibusesSearchParamsSchema),
 	loaderDeps: ({ search }) => ({ ...search }),
-	loader: async ({ 
-		params: { minibusId },
-	 }): Promise<LoaderData> => {
+	loader: async ({ params: { minibusId } }): Promise<LoaderData> => {
 		try {
 			const minibus = await minibusesApi.getMinibusById(minibusId);
 			if (!minibus) {
