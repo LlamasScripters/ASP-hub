@@ -6,6 +6,7 @@ import { minibusReservations } from "@/db/schema.js";
 import { minibusesService } from "./minibuses.service.js";
 import { and, eq, gt, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
+import { isWithinAvailability, type Schedule } from "../../lib/schedule-utils.js";
 
 export const minibusReservationsService = {
   create: async (
@@ -17,6 +18,16 @@ export const minibusReservationsService = {
     }
     if (!minibus.isAvailable) {
       throw new Error("Minibus is not available for reservation");
+    }
+
+    const availabilityCheck = isWithinAvailability(
+      data.startAt,
+      data.endAt,
+      minibus.disponibility as Schedule
+    );
+    
+    if (!availabilityCheck.isValid) {
+      throw new Error(`Réservation impossible: ${availabilityCheck.reason}`);
     }
 
     const conflicting = await db
@@ -152,6 +163,16 @@ export const minibusReservationsService = {
     }
     if (!minibus.isAvailable) {
       throw new Error("Minibus is not available for reservation");
+    }
+
+    const availabilityCheck = isWithinAvailability(
+      startAt,
+      endAt,
+      minibus.disponibility as Schedule
+    );
+    
+    if (!availabilityCheck.isValid) {
+      throw new Error(`Mise à jour impossible: ${availabilityCheck.reason}`);
     }
 
     const conflicting = await db

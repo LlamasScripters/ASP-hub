@@ -2,11 +2,29 @@ import type { InsertRoomReservation, SelectRoomReservation } from "@/db/schema.j
 import { roomReservations } from "@/db/schema.js";
 import { and, eq, gt, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
+import { isWithinOpeningHours, type Schedule } from "../../lib/schedule-utils.js";
+import { roomsService } from "./rooms.service.js";
 
 export const roomReservationsService = {
 	create: async (
 		data: InsertRoomReservation,
 	): Promise<SelectRoomReservation | null> => {
+
+		const room = await roomsService.getById(data.roomId);
+		if (!room) {
+			throw new Error("Room not found");
+		}
+
+		const openingHoursCheck = isWithinOpeningHours(
+			data.startAt,
+			data.endAt,
+			room.openingHours as Schedule
+		);
+		
+		if (!openingHoursCheck.isValid) {
+			throw new Error(`Réservation impossible: ${openingHoursCheck.reason}`);
+		}
+
 		const conflicting = await db
 			.select()
 			.from(roomReservations)
@@ -126,6 +144,21 @@ export const roomReservationsService = {
 		const startAt = data.startAt ?? current.startAt;
 		const endAt = data.endAt ?? current.endAt;
 		const roomId = data.roomId ?? current.roomId;
+
+		const room = await roomsService.getById(roomId);
+		if (!room) {
+			throw new Error("Room not found");
+		}
+
+		const openingHoursCheck = isWithinOpeningHours(
+			startAt,
+			endAt,
+			room.openingHours as Schedule
+		);
+		
+		if (!openingHoursCheck.isValid) {
+			throw new Error(`Mise à jour impossible: ${openingHoursCheck.reason}`);
+		}
 
 		const conflicting = await db
 			.select()
