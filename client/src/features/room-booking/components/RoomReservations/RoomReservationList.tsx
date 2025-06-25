@@ -71,6 +71,13 @@ const timeToMinutes = (time: string): number => {
 	return hours * 60 + minutes;
 };
 
+const formatDateKey = (date: Date): string => {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+};
+
 const getStatusColor = (status: string) => {
 	switch (status.toLowerCase()) {
 		case "confirmed":
@@ -105,7 +112,11 @@ export function RoomReservationList({
 
 	const now = new Date();
 	const currentHour = now.getHours();
-	const currentDate = now.toISOString().split("T")[0];
+	// Utiliser le fuseau horaire local pour la date actuelle
+	const currentYear = now.getFullYear();
+	const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+	const currentDay = String(now.getDate()).padStart(2, "0");
+	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -150,7 +161,8 @@ export function RoomReservationList({
 
 		for (const reservation of roomReservations) {
 			const date = new Date(reservation.startAt);
-			const dateKey = date.toISOString().split("T")[0];
+			// Utiliser le fuseau horaire local au lieu d'UTC
+			const dateKey = formatDateKey(date);
 
 			if (!reservationsByDay[dateKey]) {
 				reservationsByDay[dateKey] = [];
@@ -275,7 +287,7 @@ export function RoomReservationList({
 								const date = new Date(startDate);
 								date.setDate(startDate.getDate() + i);
 								const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
-								const dateKey = date.toISOString().split("T")[0];
+								const dateKey = formatDateKey(date);
 								const isToday = dateKey === currentDate;
 
 								return (
@@ -341,7 +353,7 @@ export function RoomReservationList({
 										{Array.from({ length: 7 }, (_, dayIndex) => {
 											const date = new Date(startDate);
 											date.setDate(startDate.getDate() + dayIndex);
-											const dateKey = date.toISOString().split("T")[0];
+											const dateKey = formatDateKey(date);
 											const dayRoomReservations =
 												roomReservationsByDay[dateKey] || [];
 											const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
@@ -475,12 +487,21 @@ export function RoomReservationList({
 
 						{/* Grille mensuelle */}
 						{Array.from({ length: 42 }, (_, i) => {
-							const date = new Date(
+							// Calculer la date en commençant par lundi (au lieu de dimanche)
+							const firstOfMonth = new Date(
 								startDate.getFullYear(),
 								startDate.getMonth(),
-								i - startDate.getDay() + 1,
+								1,
 							);
-							const dateKey = date.toISOString().split("T")[0];
+							const firstDayOfWeek = firstOfMonth.getDay(); // 0 = dimanche, 1 = lundi, etc.
+							const mondayOffset =
+								firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
+							const date = new Date(
+								firstOfMonth.getFullYear(),
+								firstOfMonth.getMonth(),
+								mondayOffset + i,
+							);
+							const dateKey = formatDateKey(date);
 							const dayRoomReservations = roomReservationsByDay[dateKey] || [];
 							const isCurrentMonth = date.getMonth() === startDate.getMonth();
 							const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
