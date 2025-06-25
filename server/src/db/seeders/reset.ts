@@ -4,6 +4,8 @@ import {
 	complexes,
 	roomReservations,
 	rooms,
+	minibuses,
+	minibusReservations,
 	//   sessionParticipants,
 	//   sessionsSport,
 	//   categories,
@@ -22,6 +24,9 @@ export async function resetAllTables(db: NodePgDatabase) {
 		await db.delete(roomReservations);
 		console.log("Room Reservations deleted");
 
+		await db.delete(minibusReservations);
+		console.log("Minibus Reservations deleted");
+
 		// await db.delete(sessionParticipants);
 		// console.log("Session participants deleted");
 
@@ -36,6 +41,9 @@ export async function resetAllTables(db: NodePgDatabase) {
 
 		// await db.delete(clubs);
 		// console.log("Clubs deleted");
+
+		await db.delete(minibuses);
+		console.log("Minibuses deleted");
 
 		await db.delete(rooms);
 		console.log("Rooms deleted");
