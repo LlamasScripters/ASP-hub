@@ -7,6 +7,29 @@ import { minibusesService } from "./minibuses.service.js";
 import { and, eq, gt, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { isWithinAvailability, type Schedule } from "../../lib/schedule-utils.js";
+import type { WeekSchedule } from "../../db/seeders/utils/openingHours.js";
+
+/**
+ * Safely converts minibus disponibility to WeekSchedule type
+ */
+function validateMinibusDisponibility(disponibility: unknown): WeekSchedule {
+  const schedule = disponibility as WeekSchedule;
+  
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+  
+  for (const day of days) {
+    if (!schedule[day]) {
+      throw new Error(`Missing day schedule for ${day}`);
+    }
+    
+    const daySchedule = schedule[day];
+    if (typeof daySchedule.available !== 'boolean') {
+      throw new Error(`Invalid 'available' property for ${day}`);
+    }
+  }
+  
+  return schedule;
+}
 
 export const minibusReservationsService = {
   create: async (
@@ -23,7 +46,7 @@ export const minibusReservationsService = {
     const availabilityCheck = isWithinAvailability(
       data.startAt,
       data.endAt,
-      minibus.disponibility as Schedule
+      validateMinibusDisponibility(minibus.disponibility)
     );
     
     if (!availabilityCheck.isValid) {
@@ -168,7 +191,7 @@ export const minibusReservationsService = {
     const availabilityCheck = isWithinAvailability(
       startAt,
       endAt,
-      minibus.disponibility as Schedule
+      validateMinibusDisponibility(minibus.disponibility)
     );
     
     if (!availabilityCheck.isValid) {

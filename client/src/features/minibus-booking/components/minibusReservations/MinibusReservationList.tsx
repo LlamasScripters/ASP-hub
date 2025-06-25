@@ -55,6 +55,13 @@ const timeToMinutes = (time: string): number => {
 	return hours * 60 + minutes;
 };
 
+const formatDateKey = (date: Date): string => {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
 const getStatusColor = (status: string) => {
 	switch (status.toLowerCase()) {
 		case "pending":
@@ -93,7 +100,11 @@ export function MinibusReservationList({
 	// Obtenir l'heure actuelle pour l'indicateur visuel
 	const now = new Date();
 	const currentHour = now.getHours();
-	const currentDate = now.toISOString().split("T")[0];
+	// Utiliser le fuseau horaire local pour la date actuelle
+	const currentYear = now.getFullYear();
+	const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+	const currentDay = String(now.getDate()).padStart(2, '0');
+	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -138,7 +149,7 @@ export function MinibusReservationList({
 		
 		for (const reservation of minibusReservations) {
 			const date = new Date(reservation.startAt);
-			const dateKey = date.toISOString().split("T")[0];
+			const dateKey = formatDateKey(date);
 			
 			if (!reservationsByDay[dateKey]) {
 				reservationsByDay[dateKey] = [];
@@ -263,7 +274,7 @@ export function MinibusReservationList({
 								const date = new Date(startDate);
 								date.setDate(startDate.getDate() + i);
 								const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
-								const dateKey = date.toISOString().split("T")[0];
+								const dateKey = formatDateKey(date);
 								const isToday = dateKey === currentDate;
 								
 								return (
@@ -316,7 +327,7 @@ export function MinibusReservationList({
 										{Array.from({ length: 7 }, (_, dayIndex) => {
 											const date = new Date(startDate);
 											date.setDate(startDate.getDate() + dayIndex);
-											const dateKey = date.toISOString().split("T")[0];
+											const dateKey = formatDateKey(date);
 											const dayReservations = minibusReservationsByDay[dateKey] || [];
 											const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
 											const isCurrentDay = dateKey === currentDate;
@@ -430,8 +441,12 @@ export function MinibusReservationList({
 						
 						{/* Grille mensuelle */}
 						{Array.from({ length: 42 }, (_, i) => {
-							const date = new Date(startDate.getFullYear(), startDate.getMonth(), i - startDate.getDay() + 1);
-							const dateKey = date.toISOString().split("T")[0];
+							// Calculer la date en commençant par lundi (au lieu de dimanche)
+							const firstOfMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+							const firstDayOfWeek = firstOfMonth.getDay(); // 0 = dimanche, 1 = lundi, etc.
+							const mondayOffset = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
+							const date = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth(), mondayOffset + i);
+							const dateKey = formatDateKey(date);
 							const dayReservations = minibusReservationsByDay[dateKey] || [];
 							const isCurrentMonth = date.getMonth() === startDate.getMonth();
 							const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
