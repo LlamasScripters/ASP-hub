@@ -69,9 +69,15 @@ export function MinibusReservationForm({
 	const defaultValues = useMemo(
 		() => ({
 			title: minibusReservation?.title ?? "",
-			startAt: minibusReservation ? minibusReservation.startAt : new Date(),
+			startAt: minibusReservation 
+				? minibusReservation.startAt instanceof Date 
+					? minibusReservation.startAt 
+					: new Date(minibusReservation.startAt)
+				: new Date(),
 			endAt: minibusReservation
-				? minibusReservation.endAt
+				? minibusReservation.endAt instanceof Date
+					? minibusReservation.endAt
+					: new Date(minibusReservation.endAt)
 				: new Date(Date.now() + 60 * 60 * 1000), // default +1h
 			status: minibusReservation?.status ?? "pending",
 		}),
@@ -146,53 +152,58 @@ export function MinibusReservationForm({
 		}
 	}, [isEditing, formMode, form, defaultValues]);
 
-	const onSubmit = async (data: CreateMinibusReservationData | UpdateMinibusReservationData) => {
-		if (validationError) {
-			setGlobalError(validationError);
-			return;
-		}
+	// const onSubmit = async (data: CreateMinibusReservationData | UpdateMinibusReservationData) => {
+	// 	if (validationError) {
+	// 		setGlobalError(validationError);
+	// 		return;
+	// 	}
 
-		setIsSubmitting(true);
-		setGlobalError(null);
+	// 	setIsSubmitting(true);
+	// 	setGlobalError(null);
 
-		try {
-			let result: MinibusReservation | null = null;
+	// 	try {
+	// 		let result: MinibusReservation | null = null;
 
-			if (isEditing && minibusReservation) {
-				result = await updateMinibusReservation(
-					minibusReservation.id,
-					data as UpdateMinibusReservationData,
-				);
-			} else {
-				result = await createMinibusReservation({
-					...data,
-					minibusId,
-					bookerId: user.id,
-				} as CreateMinibusReservationData);
-			}
+	// 		if (isEditing && minibusReservation) {
+	// 			result = await updateMinibusReservation(
+	// 				minibusReservation.id,
+	// 				data as UpdateMinibusReservationData,
+	// 			);
+	// 		} else {
+	// 			result = await createMinibusReservation({
+	// 				...data,
+	// 				minibusId,
+	// 				bookerId: user.id,
+	// 			} as CreateMinibusReservationData);
+	// 		}
 
-			if (result) {
-				onSuccess?.(result);
-				if (!isEditing) {
-					form.reset();
-				}
-			}
-		} catch (error) {
-			console.error("Form submission error:", error);
-			setGlobalError(
-				error instanceof Error ? error.message : "Une erreur est survenue",
-			);
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
+	// 		if (result) {
+	// 			onSuccess?.(result);
+	// 			if (!isEditing) {
+	// 				form.reset();
+	// 			}
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Form submission error:", error);
+	// 		setGlobalError(
+	// 			error instanceof Error ? error.message : "Une erreur est survenue",
+	// 		);
+	// 	} finally {
+	// 		setIsSubmitting(false);
+	// 	}
+	// };
 
-	const formatDateTimeLocal = (date: Date): string => {
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		const hours = String(date.getHours()).padStart(2, "0");
-		const minutes = String(date.getMinutes()).padStart(2, "0");
+	const formatDateTimeLocal = (date: Date | string): string => {
+		if (!date) return "";
+		const dateObj = date instanceof Date ? date : new Date(date);
+		
+		if (Number.isNaN(dateObj.getTime())) return "";
+		
+		const year = dateObj.getFullYear();
+		const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+		const day = String(dateObj.getDate()).padStart(2, "0");
+		const hours = String(dateObj.getHours()).padStart(2, "0");
+		const minutes = String(dateObj.getMinutes()).padStart(2, "0");
 		return `${year}-${month}-${day}T${hours}:${minutes}`;
 	};
 
@@ -210,7 +221,51 @@ export function MinibusReservationForm({
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+					<form onSubmit={
+						async (e) => {
+							e.preventDefault();
+
+							if (validationError) {
+								setGlobalError(validationError);
+								return;
+							}
+
+							setIsSubmitting(true);
+							setGlobalError(null);
+
+							try {
+								const data = form.getValues();
+								let result: MinibusReservation | null = null;
+
+								if (isEditing && minibusReservation) {
+									result = await updateMinibusReservation(
+										minibusReservation.id,
+										data as UpdateMinibusReservationData,
+									);
+								} else {
+									result = await createMinibusReservation({
+										...data,
+										minibusId,
+										bookerId: user.id,
+									} as CreateMinibusReservationData);
+								}
+
+								if (result) {
+									onSuccess?.(result);
+									if (!isEditing) {
+										form.reset();
+									}
+								}
+							} catch (error) {
+								console.error("Form submission error:", error);
+								setGlobalError(
+									error instanceof Error ? error.message : "Une erreur est survenue",
+								);
+							} finally {
+								setIsSubmitting(false);
+							}
+						}
+					} className="space-y-6">
 						{globalError && (
 							<div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
 								{globalError}
@@ -281,33 +336,30 @@ export function MinibusReservationForm({
 									)}
 								/>
 							</div>
-
-							{isEditing && (
-								<FormField
-									control={form.control}
-									name="status"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Statut</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Sélectionnez un statut" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{Object.entries(minibusReservationStatusEnumTranslated).map(([key, label]) => (
-														<SelectItem key={key} value={key}>
-															{label}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							)}
+							<FormField
+								control={form.control}
+								name="status"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Statut</FormLabel>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Sélectionnez un statut" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{Object.entries(minibusReservationStatusEnumTranslated).map(([key, label]) => (
+													<SelectItem key={key} value={key}>
+														{label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</div>
 
 						<Separator />
