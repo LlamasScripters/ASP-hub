@@ -407,7 +407,7 @@ export function MinibusReservationList({
 																	variant="ghost"
 																	asChild
 																	title="Modifier"
-																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/10"
 																>
 																	<Link
 																		to="/admin/assets/minibusReservations/$minibusReservationId/edit"
