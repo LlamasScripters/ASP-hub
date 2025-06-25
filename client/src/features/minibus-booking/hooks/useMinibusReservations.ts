@@ -52,7 +52,8 @@ export function useMinibusReservations(options: UseMinibusReservationsOptions) {
 		error: queryError,
 		refetch
 	} = useQuery({
-		queryKey: ["minibusReservations", minibusId, filters],		queryFn: () => {
+		queryKey: ["minibusReservations", minibusId, filters],
+		queryFn: () => {
 			if (!filters.startDate || !filters.endDate) return Promise.resolve({ data: [], total: 0 });
 			return minibusReservationsApi.getMinibusReservationsByMinibusId(
 				minibusId,
