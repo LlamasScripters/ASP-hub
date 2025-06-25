@@ -2,6 +2,8 @@ import { db } from "../index.js";
 import { seedComplexes } from "./data/complexes.js";
 import { seedRoomReservations } from "./data/roomReservations.js";
 import { seedRooms } from "./data/rooms.js";
+import { seedMinibuses } from "./data/minibuses.js";
+import { seedMinibusReservations } from "./data/minibusReservations.js";
 import { resetAllTables } from "./reset.js";
 
 export async function seedDatabase() {
@@ -17,6 +19,12 @@ export async function seedDatabase() {
 
 		console.log("Seeding Room Reservations...");
 		await seedRoomReservations(db, rooms);
+
+		console.log("Seeding Minibuses...");
+		const minibuses = await seedMinibuses(db);
+
+		console.log("Seeding Minibus Reservations...");
+		await seedMinibusReservations(db, minibuses);
 
 		console.log("All seeders have been executed successfully!");
 	} catch (error) {
