@@ -52,21 +52,21 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 
 					<Button asChild variant="default" size="sm">
 						<Link 
-							to="/admin/assets/minibuses/$minibusId/edit"
+							to="/admin/assets/minibuses/$minibusId/create-reservation"
 							params={{ minibusId: minibus.id }}
 						>
-							<Edit className="w-4 h-4 mr-2" />
-							Modifier
+							<Plus className="w-4 h-4 mr-2" />
+							Réserver le minibus
 						</Link>
 					</Button>
 
 					<Button asChild variant="default" size="sm">
 						<Link 
-							to="/admin/assets/minibuses/$minibusId/create-reservation"
+							to="/admin/assets/minibuses/$minibusId/edit"
 							params={{ minibusId: minibus.id }}
 						>
-							<Plus className="w-4 h-4 mr-2" />
-							Nouvelle réservation
+							<Edit className="w-4 h-4 mr-2" />
+							Modifier
 						</Link>
 					</Button>
 				</div>
@@ -156,7 +156,7 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 										</div>
 									) : (
 										<Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 mt-1">
-											Fermé
+											Indisponible
 										</Badge>
 									)}
 								</div>

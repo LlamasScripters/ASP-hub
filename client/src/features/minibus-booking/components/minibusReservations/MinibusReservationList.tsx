@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Edit2, Loader2 } from "lucide-react";
-import type { Minibus, Disponibility } from "@/features/minibus-booking/hooks/useMinibuses";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit2, Loader2 } from "lucide-react";
+import type { Disponibility } from "@/features/minibus-booking/hooks/useMinibuses";
 import type { MinibusReservation } from "@/features/minibus-booking/hooks/useMinibusReservations";
 import { useMinibusReservations } from "@/features/minibus-booking/hooks/useMinibusReservations";
 import { getWeekBounds, getMonthBounds } from "@/features/minibus-booking/lib/api/minibusReservations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "@tanstack/react-router";
 
 type ViewMode = "week" | "month";
 
@@ -53,12 +53,6 @@ const getMinibusHoursForDay = (date: Date, disponibility: Disponibility) => {
 const timeToMinutes = (time: string): number => {
 	const [hours, minutes] = time.split(":").map(Number);
 	return hours * 60 + minutes;
-};
-
-const minutesToTime = (minutes: number): string => {
-	const hours = Math.floor(minutes / 60);
-	const mins = minutes % 60;
-	return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
 };
 
 const getStatusColor = (status: string) => {
@@ -274,7 +268,7 @@ export function MinibusReservationList({
 								
 								return (
 									<div
-										key={`day-header-${i}`}
+										key={`day-header-${dateKey}`}
 										className={`p-2 text-center border-b ${
 											isAvailable ? "bg-green-50" : "bg-gray-50"
 										} ${isToday ? "ring-2 ring-blue-500 bg-blue-50" : ""}`}
@@ -371,7 +365,7 @@ export function MinibusReservationList({
 													{hourReservations.map((reservation) => (
 														<div
 															key={reservation.id}
-															className={`absolute inset-x-1 rounded text-xs p-1 border ${getStatusColor(
+															className={`absolute inset-x-1 rounded text-xs p-1 border group ${getStatusColor(
 																reservation.status
 															)}`}
 															style={{
@@ -380,19 +374,37 @@ export function MinibusReservationList({
 																zIndex: 10,
 															}}
 														>
-															<div className="font-medium truncate">
-																{reservation.title}
-															</div>
-															<div className="text-xs opacity-75">
-																{new Date(reservation.startAt).toLocaleTimeString("fr-FR", {
-																	hour: "2-digit",
-																	minute: "2-digit",
-																})}
-																-
-																{new Date(reservation.endAt).toLocaleTimeString("fr-FR", {
-																	hour: "2-digit",
-																	minute: "2-digit",
-																})}
+															<div className="flex justify-between items-start h-full">
+																<div className="flex-1 min-w-0">
+																	<div className="font-medium truncate">
+																		{reservation.title}
+																	</div>
+																	<div className="text-xs opacity-75">
+																		{new Date(reservation.startAt).toLocaleTimeString("fr-FR", {
+																			hour: "2-digit",
+																			minute: "2-digit",
+																		})}
+																		-
+																		{new Date(reservation.endAt).toLocaleTimeString("fr-FR", {
+																			hour: "2-digit",
+																			minute: "2-digit",
+																		})}
+																	</div>
+																</div>
+																<Button
+																	size="icon"
+																	variant="ghost"
+																	asChild
+																	title="Modifier"
+																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+																>
+																	<Link
+																		to="/admin/assets/minibusReservations/$minibusReservationId/edit"
+																		params={{ minibusReservationId: reservation.id }}
+																	>
+																		<Edit2 className="w-3 h-3" />
+																	</Link>
+																</Button>
 															</div>
 														</div>
 													))}
@@ -445,11 +457,25 @@ export function MinibusReservationList({
 										{dayReservations.slice(0, 2).map((reservation) => (
 											<div
 												key={reservation.id}
-												className={`text-xs p-1 rounded truncate ${getStatusColor(
+												className={`text-xs p-1 rounded truncate group flex justify-between items-center ${getStatusColor(
 													reservation.status
 												)}`}
 											>
-												{reservation.title}
+												<span className="truncate flex-1 mr-1">{reservation.title}</span>
+												<Button
+													size="icon"
+													variant="ghost"
+													asChild
+													title="Modifier"
+													className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+												>
+													<Link
+														to="/admin/assets/minibusReservations/$minibusReservationId/edit"
+														params={{ minibusReservationId: reservation.id }}
+													>
+														<Edit2 className="w-2 h-2" />
+													</Link>
+												</Button>
 											</div>
 										))}
 										{dayReservations.length > 2 && (
@@ -499,7 +525,7 @@ export function MinibusReservationList({
 							</div>
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" />
-								<span>Fermé</span>
+								<span>Indisponible</span>
 							</div>
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-blue-200 border border-blue-500" />
