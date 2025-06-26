@@ -1,182 +1,165 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback } from "react";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { minibusesApi } from "../lib/api/minibuses";
 import type {
-	Minibus,
-	CreateMinibusData,
-	UpdateMinibusData,
-	MinibusFilters,
-	MinibusesPaginatedResponse,
-	Disponibility,
-	DisponibilityEntry,
+  Minibus,
+  CreateMinibusData,
+  UpdateMinibusData,
+  MinibusFilters,
+  MinibusesPaginatedResponse,
+  Disponibility,
+  DisponibilityEntry,
 } from "../lib/api/minibuses";
+import { Route as MinibusesRoute } from "../../../routes/_authenticated/admin/_admin/assets/minibuses/index";
 
 export const frenchDays: Record<keyof Disponibility, string> = {
-	monday: "Lundi",
-	tuesday: "Mardi", 
-	wednesday: "Mercredi",
-	thursday: "Jeudi",
-	friday: "Vendredi",
-	saturday: "Samedi",
-	sunday: "Dimanche",
+  monday: "Lundi",
+  tuesday: "Mardi",
+  wednesday: "Mercredi",
+  thursday: "Jeudi",
+  friday: "Vendredi",
+  saturday: "Samedi",
+  sunday: "Dimanche",
 };
 
 export type {
-	Minibus,
-	CreateMinibusData,
-	UpdateMinibusData,
-	MinibusFilters,
-	MinibusesPaginatedResponse,
-	Disponibility,
-	DisponibilityEntry,
+  Minibus,
+  CreateMinibusData,
+  UpdateMinibusData,
+  MinibusFilters,
+  MinibusesPaginatedResponse,
+  Disponibility,
+  DisponibilityEntry,
 };
 
-interface UseMinibusesOptions {
-	initialData?: Minibus[];
-}
+export const filteredQueryOptions = ({
+  filters = {},
+  page = 1,
+  limit = 20,
+}) => ({
+  queryKey: ["minibuses", filters, page, limit],
+  queryFn: () => minibusesApi.getMinibuses(filters, page, limit),
+  enabled: Object.keys(filters).length > 0,
+});
 
-export function useMinibuses(options: UseMinibusesOptions = {}) {
-	const queryClient = useQueryClient();
-	const [minibuses, setMinibuses] = useState<Minibus[]>(options.initialData || []);
-	const [totalCount, setTotalCount] = useState(0);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [filters, setFilters] = useState<Partial<MinibusFilters>>({});
-	const [page, setPage] = useState(1);
-	const [limit] = useState(20);
+export function useMinibuses() {
+  const searchParams = MinibusesRoute.useSearch();
+  const navigate = MinibusesRoute.useNavigate();
 
-	// Query for fetching minibuses
-	const { 
-		data: fetchedData,
-		isLoading: queryLoading,
-		error: queryError,
-		refetch
-	} = useQuery({
-		queryKey: ["minibuses", filters, page, limit],
-		queryFn: () => minibusesApi.getMinibuses(filters, page, limit),
-		enabled: Object.keys(filters).length > 0,
-	});
+  const queryClient = useQueryClient();
 
-	// Create mutation
-	const createMutation = useMutation({
-		mutationFn: (data: CreateMinibusData) => minibusesApi.createMinibus(data),
-		onSuccess: (newMinibus) => {
-			setMinibuses(prev => [newMinibus, ...prev]);
-			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
-			toast.success("Minibus créé avec succès");
-		},
-		onError: (error) => {
-			const errorMessage = `Erreur lors de la création: ${error.message}`;
-			setError(errorMessage);
-			toast.error("Erreur", { description: errorMessage });
-		},
-	});
+  // Query for fetching minibuses
+  const { data: fetchedData, refetch } = useSuspenseQuery(
+    filteredQueryOptions({
+      filters: {
+        search: searchParams.search,
+        isAvailable: searchParams.isAvailable,
+      },
+      page: searchParams.page,
+      limit: searchParams.limit,
+    })
+  );
 
-	// Update mutation 
-	const updateMutation = useMutation({
-		mutationFn: ({ id, data }: { id: string; data: UpdateMinibusData }) =>
-			minibusesApi.updateMinibus(id, data),
-		onSuccess: (updatedMinibus) => {
-			setMinibuses(prev => 
-				prev.map(minibus => minibus.id === updatedMinibus.id ? updatedMinibus : minibus)
-			);
-			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
-			toast.success("Minibus mis à jour avec succès");
-		},
-		onError: (error) => {
-			const errorMessage = `Erreur lors de la mise à jour: ${error.message}`;
-			setError(errorMessage);
-			toast.error("Erreur", { description: errorMessage });
-		},
-	});
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: CreateMinibusData) => minibusesApi.createMinibus(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+      toast.success("Minibus créé avec succès");
+    },
+    onError: (error) => {
+      const errorMessage = `Erreur lors de la création: ${error.message}`;
+      toast.error("Erreur", { description: errorMessage });
+    },
+  });
 
-	// Delete mutation
-	const deleteMutation = useMutation({
-		mutationFn: (id: string) => minibusesApi.deleteMinibus(id),
-		onSuccess: (_, deletedId) => {
-			setMinibuses(prev => prev.filter(minibus => minibus.id !== deletedId));
-			queryClient.invalidateQueries({ queryKey: ["minibuses"] });
-			toast.success("Minibus supprimé avec succès");
-		},
-		onError: (error) => {
-			const errorMessage = `Erreur lors de la suppression: ${error.message}`;
-			setError(errorMessage);
-			toast.error("Erreur", { description: errorMessage });
-		},
-	});
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateMinibusData }) =>
+      minibusesApi.updateMinibus(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+      toast.success("Minibus mis à jour avec succès");
+    },
+    onError: (error) => {
+      const errorMessage = `Erreur lors de la mise à jour: ${error.message}`;
+      toast.error("Erreur", { description: errorMessage });
+    },
+  });
 
-	// Update state when query data changes
-	useEffect(() => {
-		if (fetchedData) {
-			setMinibuses(fetchedData.data);
-			setTotalCount(fetchedData.total);
-		}
-	}, [fetchedData]);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => minibusesApi.deleteMinibus(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ["minibuses"] });
+      toast.success("Minibus supprimé avec succès");
+    },
+    onError: (error) => {
+      const errorMessage = `Erreur lors de la suppression: ${error.message}`;
+      toast.error("Erreur", { description: errorMessage });
+    },
+  });
 
-	// Update loading state
-	useEffect(() => {
-		setLoading(queryLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending);
-	}, [queryLoading, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
+  const updateFilters = useCallback(
+    (newFilters: Partial<MinibusFilters> = {}) => {
+      navigate({
+        search: {
+          ...searchParams,
+          ...newFilters,
+        },
+      });
+    },
+    [navigate, searchParams]
+  );
 
-	// Update error state
-	useEffect(() => {
-		if (queryError) {
-			const errorMessage = `Erreur lors du chargement: ${queryError.message}`;
-			setError(errorMessage);
-			toast.error("Erreur", { description: errorMessage });
-		} else {
-			setError(null);
-		}
-	}, [queryError]);
+  const createMinibus = useCallback(
+    async (data: CreateMinibusData): Promise<Minibus | null> => {
+      const result = await createMutation.mutateAsync(data);
+      return result;
+    },
+    [createMutation]
+  );
 
-	const updateFilters = useCallback((newFilters: Partial<MinibusFilters>) => {
-		setFilters(newFilters);
-		setPage(1);
-	}, []);
+  const updateMinibus = useCallback(
+    async (id: string, data: UpdateMinibusData): Promise<Minibus | null> => {
+      try {
+        const result = await updateMutation.mutateAsync({ id, data });
+        return result;
+      } catch (error) {
+        console.error("Error updating minibus:", error);
+        return null;
+      }
+    },
+    [updateMutation]
+  );
 
-	const createMinibus = useCallback(async (data: CreateMinibusData): Promise<Minibus | null> => {
-		try {
-			const result = await createMutation.mutateAsync(data);
-			return result;
-		} catch (error) {
-			console.error("Error creating minibus:", error);
-			return null;
-		}
-	}, [createMutation]);
+  const deleteMinibus = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        return true;
+      } catch (error) {
+        console.error("Error deleting minibus:", error);
+        return false;
+      }
+    },
+    [deleteMutation]
+  );
 
-	const updateMinibus = useCallback(async (id: string, data: UpdateMinibusData): Promise<Minibus | null> => {
-		try {
-			const result = await updateMutation.mutateAsync({ id, data });
-			return result;
-		} catch (error) {
-			console.error("Error updating minibus:", error);
-			return null;
-		}
-	}, [updateMutation]);
-
-	const deleteMinibus = useCallback(async (id: string): Promise<boolean> => {
-		try {
-			await deleteMutation.mutateAsync(id);
-			return true;
-		} catch (error) {
-			console.error("Error deleting minibus:", error);
-			return false;
-		}
-	}, [deleteMutation]);
-
-	return {
-		minibuses,
-		totalCount,
-		loading,
-		error,
-		filters,
-		page,
-		limit,
-		updateFilters,
-		createMinibus,
-		updateMinibus,
-		deleteMinibus,
-		refetch,
-	};
+  return {
+    minibuses: fetchedData.data,
+    totalCount: fetchedData.total,
+    page: fetchedData.page,
+    limit: fetchedData.limit,
+    updateFilters,
+    createMinibus,
+    updateMinibus,
+    deleteMinibus,
+    refetch,
+  };
 }

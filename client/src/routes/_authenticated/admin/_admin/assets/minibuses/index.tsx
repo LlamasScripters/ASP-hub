@@ -1,26 +1,41 @@
 import { MinibusesPage } from "@/features/minibus-booking/pages/MinibusesPage";
 import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
-import { minibusesApi } from "@/features/minibus-booking/lib/api/minibuses";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { filteredQueryOptions } from "@/features/minibus-booking/hooks/useMinibuses";
+import { z } from "zod";
+import { zodValidator } from "@tanstack/zod-adapter";
 
 interface MinibusesLoaderData {
 	minibuses: Minibus[];
 }
 
+const minibusesSearchParamsSchema = z.object({
+	search: z.string().optional(),
+	isAvailable: z.boolean().optional(),
+	page: z.coerce.number().default(1),
+	limit: z.coerce.number().default(20),
+});
+
 export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/assets/minibuses/",
 )({
 	component: MinibusesComponent,
-	loader: async ({ abortController }): Promise<MinibusesLoaderData> => {
+	validateSearch: zodValidator(minibusesSearchParamsSchema),
+	loaderDeps: ({ search }) => ({ ...search }),
+	loader: async ({
+		context: { queryClient },
+		deps: { page, limit, isAvailable, search },
+	}): Promise<MinibusesLoaderData> => {
 		try {
-			const response = await minibusesApi.getMinibuses(
-				{ search: "", isAvailable: undefined },
-				1,
-				50,
-				{ signal: abortController.signal },
+			const { data: minibuses } = await queryClient.ensureQueryData(
+				filteredQueryOptions({
+					filters: { search, isAvailable },
+					page,
+					limit,
+				}),
 			);
 
-			return { minibuses: response.data };
+			return { minibuses };
 		} catch (error) {
 			console.error("Error loading minibuses:", error);
 			throw error;

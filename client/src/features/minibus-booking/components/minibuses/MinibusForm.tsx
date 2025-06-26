@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { 
 	type CreateMinibusData, 
@@ -22,7 +23,6 @@ import {
 	Info, 
 	Loader2, 
 	Timer, 
-	Bus, 
 	// @ts-ignore
 } from "lucide-react";
 
@@ -43,7 +43,7 @@ const defaultDisponibility: Disponibility = {
 };
 
 export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormProps) {
-	const { createMinibus, updateMinibus } = useMinibuses({});
+	const { createMinibus, updateMinibus } = useMinibuses();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const isEditing = !!minibus;
@@ -242,12 +242,12 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormPro
 											
 											<FormField
 												control={form.control}
-												name={`disponibility.${dayKey}.available` as any}
+												name={`disponibility.${dayKey}.available` as Path<CreateMinibusData | UpdateMinibusData>}
 												render={({ field }) => (
 													<FormItem className="flex flex-row items-center space-x-2 space-y-0">
 														<FormControl>
 															<Checkbox
-																checked={field.value}
+																checked={Boolean(field.value)}
 																onCheckedChange={field.onChange}
 															/>
 														</FormControl>
@@ -260,14 +260,14 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormPro
 												<>
 													<FormField
 														control={form.control}
-														name={`disponibility.${dayKey}.open` as any}
+														name={`disponibility.${dayKey}.open` as Path<CreateMinibusData | UpdateMinibusData>}
 														render={({ field }) => (
 															<FormItem>
 																<FormControl>
 																	<Input
 																		type="time"
 																		{...field}
-																		value={field.value || ""}
+																		value={String(field.value || "")}
 																		className="w-32"
 																	/>
 																</FormControl>
@@ -279,14 +279,14 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink }: MinibusFormPro
 													
 													<FormField
 														control={form.control}
-														name={`disponibility.${dayKey}.close` as any}
+														name={`disponibility.${dayKey}.close` as Path<CreateMinibusData | UpdateMinibusData>}
 														render={({ field }) => (
 															<FormItem>
 																<FormControl>
 																	<Input
 																		type="time"
 																		{...field}
-																		value={field.value || ""}
+																		value={String(field.value || "")}
 																		className="w-32"
 																	/>
 																</FormControl>
