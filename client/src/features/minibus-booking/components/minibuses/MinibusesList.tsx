@@ -35,7 +35,6 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Filter,
-	Loader2,
 	MoreHorizontal,
 	Plus,
 	Search,
@@ -57,12 +56,8 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 
 	const {
 		minibuses: fetchedMinibuses,
-		loading,
-		error,
 		deleteMinibus,
-	} = useMinibuses({
-		initialData: initialMinibuses,
-	});
+	} = useMinibuses();
 
 	const allMinibuses = fetchedMinibuses.length > 0 ? fetchedMinibuses : initialMinibuses;
 
@@ -281,25 +276,7 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{loading ? (
-									<TableRow>
-										<TableCell colSpan={6} className="h-24 text-center">
-											<div className="flex items-center justify-center">
-												<Loader2 className="w-6 h-6 animate-spin mr-2" />
-												Chargement...
-											</div>
-										</TableCell>
-									</TableRow>
-								) : error ? (
-									<TableRow>
-										<TableCell
-											colSpan={6}
-											className="h-24 text-center text-red-500"
-										>
-											{error}
-										</TableCell>
-									</TableRow>
-								) : currentMinibuses.length > 0 ? (
+								{currentMinibuses.length > 0 ? (
 									currentMinibuses.map((minibus) => (
 										<TableRow key={minibus.id}>
 											<TableCell>
