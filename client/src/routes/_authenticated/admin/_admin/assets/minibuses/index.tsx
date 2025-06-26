@@ -1,6 +1,6 @@
 import { MinibusesPage } from "@/features/minibus-booking/pages/MinibusesPage";
 import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { filteredQueryOptions } from "@/features/minibus-booking/hooks/useMinibuses";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
@@ -74,8 +74,6 @@ export const Route = createFileRoute(
 });
 
 function MinibusesComponent() {
-	const minibuses = useLoaderData({
-		from: "/_authenticated/admin/_admin/assets/minibuses/",
-	});
-	return <MinibusesPage initialMinibuses={minibuses.minibuses} />;
+	const { minibuses } = Route.useLoaderData();
+	return <MinibusesPage initialMinibuses={minibuses} />;
 }

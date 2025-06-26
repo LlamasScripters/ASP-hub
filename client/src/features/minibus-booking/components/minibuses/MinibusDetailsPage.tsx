@@ -171,9 +171,7 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 
 			{/* Planification des réservations */}
 			<MinibusReservationList
-				minibusId={minibus.id}
 				minibusDisponibility={minibus.disponibility}
-				initialMinibusReservations={[]}
 			/>
 		</div>
 	);

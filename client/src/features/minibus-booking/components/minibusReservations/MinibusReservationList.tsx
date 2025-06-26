@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit2, Loader2 } from "lucide-react";
 import type { Disponibility } from "@/features/minibus-booking/hooks/useMinibuses";
 import type { MinibusReservation } from "@/features/minibus-booking/hooks/useMinibusReservations";
@@ -11,9 +11,7 @@ import { Link } from "@tanstack/react-router";
 type ViewMode = "week" | "month";
 
 interface MinibusReservationListProps {
-	minibusId: string;
 	minibusDisponibility: Disponibility;
-	initialMinibusReservations?: MinibusReservation[];
 }
 
 const getDayOfWeekKey = (date: Date): keyof Disponibility => {
@@ -83,29 +81,15 @@ const getStatusColor = (status: string) => {
 
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
-const START_HOUR = 5; // 5h du matin
-const END_HOUR = 24; // Minuit
+const START_HOUR = 5;
+const END_HOUR = 24; 
 
 export function MinibusReservationList({
-	minibusId,
 	minibusDisponibility,
-	initialMinibusReservations = [],
 }: MinibusReservationListProps) {
-	const { minibusReservations, totalCount, loading, error, updateFilters } =
-		useMinibusReservations({ minibusId, initialData: initialMinibusReservations });
-
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
 	
-	// Obtenir l'heure actuelle pour l'indicateur visuel
-	const now = new Date();
-	const currentHour = now.getHours();
-	// Utiliser le fuseau horaire local pour la date actuelle
-	const currentYear = now.getFullYear();
-	const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-	const currentDay = String(now.getDate()).padStart(2, '0');
-	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
-
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
 			return getWeekBounds(referenceDate);
@@ -113,12 +97,24 @@ export function MinibusReservationList({
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
 
-	useEffect(() => {
-		updateFilters({
-			startDate,
-			endDate,
+	const { minibusReservations, loading } = useMinibusReservations({
+		minibusId: undefined,
+	});
+
+	const filteredReservations = useMemo(() => {
+		return minibusReservations.filter(reservation => {
+			const reservationDate = new Date(reservation.startAt);
+			return reservationDate >= startDate && reservationDate <= endDate;
 		});
-	}, [startDate, endDate, updateFilters]);
+	}, [minibusReservations, startDate, endDate]);
+
+	const now = new Date();
+	const currentHour = now.getHours();
+
+	const currentYear = now.getFullYear();
+	const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+	const currentDay = String(now.getDate()).padStart(2, '0');
+	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const goPrevious = useCallback(() => {
 		if (viewMode === "week") {
@@ -147,7 +143,7 @@ export function MinibusReservationList({
 	const minibusReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, MinibusReservation[]> = {};
 		
-		for (const reservation of minibusReservations) {
+		for (const reservation of filteredReservations) {
 			const date = new Date(reservation.startAt);
 			const dateKey = formatDateKey(date);
 			
@@ -159,7 +155,7 @@ export function MinibusReservationList({
 		}
 		
 		return reservationsByDay;
-	}, [minibusReservations]);
+	}, [filteredReservations]);
 
 	const formatPeriod = () => {
 		if (viewMode === "week") {
@@ -194,24 +190,6 @@ export function MinibusReservationList({
 		);
 	}
 
-	if (error) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<CalendarIcon className="w-4 h-4" />
-						Planning des réservations
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="text-center py-8 text-red-600">
-						Erreur lors du chargement des réservations: {error}
-					</div>
-				</CardContent>
-			</Card>
-		);
-	}
-
 	return (
 		<Card>
 			<CardHeader>
@@ -222,7 +200,7 @@ export function MinibusReservationList({
 							Planning des réservations
 						</CardTitle>
 						<CardDescription className="text-sm text-muted-foreground">
-							Total : {totalCount} réservation{totalCount > 1 ? "s" : ""}
+							Total : {filteredReservations.length} réservation{filteredReservations.length > 1 ? "s" : ""} sur la période
 						</CardDescription>
 					</div>
 					<div className="flex items-center gap-2">

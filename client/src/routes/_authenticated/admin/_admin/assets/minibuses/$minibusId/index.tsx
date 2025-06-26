@@ -2,20 +2,39 @@ import { MinibusDetailsPage } from "@/features/minibus-booking/components/minibu
 import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
 import { minibusesApi } from "@/features/minibus-booking/lib/api/minibuses";
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+import { zodValidator } from "@tanstack/zod-adapter";
 
 interface LoaderData {
 	minibus: Minibus;
 }
 
+const minibusesSearchParamsSchema = z.object({
+	startDate: z.coerce.date().optional(),
+	endDate: z.coerce.date().optional(),
+});
+
 export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/assets/minibuses/$minibusId/",
 )({
-	loader: async ({ params }): Promise<LoaderData> => {
-		const minibus = await minibusesApi.getMinibusById(params.minibusId);
-
-		return { minibus };
-	},
 	component: MinibusDetailsRoute,
+	validateSearch: zodValidator(minibusesSearchParamsSchema),
+	loaderDeps: ({ search }) => ({ ...search }),
+	loader: async ({ 
+		params: { minibusId },
+	 }): Promise<LoaderData> => {
+		try {
+			const minibus = await minibusesApi.getMinibusById(minibusId);
+			if (!minibus) {
+				throw new Error("Minibus not found");
+			}
+
+			return { minibus };
+		} catch (error) {
+			console.error("Error loading minibus:", error);
+			throw error;
+		}
+	},
 	errorComponent: ({ error }) => {
 		console.error("Error loading minibus:", error);
 		return (
