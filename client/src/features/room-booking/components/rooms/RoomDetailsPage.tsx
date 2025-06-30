@@ -158,7 +158,6 @@ export function RoomDetailsPage({ room, complex }: RoomDetailsPageProps) {
 			<RoomReservationList
 				roomId={room.id}
 				roomOpeningHours={room.openingHours}
-				initialRoomReservations={[]}
 			/>
 		</div>
 	);

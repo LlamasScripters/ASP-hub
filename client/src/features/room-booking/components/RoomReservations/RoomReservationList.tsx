@@ -23,14 +23,13 @@ import {
 	Edit2,
 	Loader2,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type ViewMode = "week" | "month";
 
 interface RoomReservationListProps {
 	roomId: string;
 	roomOpeningHours: RoomOpeningHours;
-	initialRoomReservations?: RoomReservation[];
 }
 
 const getDayOfWeekKey = (date: Date): keyof RoomOpeningHours => {
@@ -102,11 +101,7 @@ const END_HOUR = 24; // Minuit
 export function RoomReservationList({
 	roomId,
 	roomOpeningHours,
-	initialRoomReservations = [],
 }: RoomReservationListProps) {
-	const { roomReservations, totalCount, loading, error, updateFilters } =
-		useRoomReservations({ roomId, initialData: initialRoomReservations });
-
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
 
@@ -125,12 +120,8 @@ export function RoomReservationList({
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
 
-	useEffect(() => {
-		updateFilters({
-			startDate,
-			endDate,
-		});
-	}, [startDate, endDate, updateFilters]);
+	const { roomReservations, totalCount, loading, error } =
+		useRoomReservations({ roomId, startDate, endDate });
 
 	const goPrevious = useCallback(() => {
 		setReferenceDate((prev) => {

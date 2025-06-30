@@ -1,5 +1,6 @@
-import { roomReservationsApi } from "@/features/room-booking/lib/api/roomReservations";
-import { useCallback, useEffect, useState } from "react";
+import { roomReservationsApi } from "@room-booking/lib/api/roomReservations";
+import { useCallback } from "react";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -79,213 +80,163 @@ export type RoomReservationFilters = z.infer<typeof roomReservationFiltersSchema
 export type RoomReservationsPaginatedResponse = z.infer<
 	typeof roomReservationsPaginatedResponseSchema
 >;
+export type RoomOpeningHours = Record<string, { open: string | null; close: string | null; closed: boolean }>;
+
+// TanStack Query options
+export const filteredRoomReservationsQueryOptions = ({
+  roomId = "",
+  startDate = new Date(),
+  endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // +30 days
+}) => ({
+  queryKey: ["roomReservations", roomId, startDate, endDate],
+  queryFn: () => {
+    if (!startDate || !endDate) {
+      throw new Error("startDate and endDate are required");
+    }
+    return roomReservationsApi.getRoomReservationsByRoomId(
+      roomId,
+      startDate,
+      endDate
+    );
+  },
+  enabled: !!roomId && !!startDate && !!endDate,
+});
 
 interface UseRoomReservationsOptions {
-	roomId: string;
-	initialData?: RoomReservation[];
+	roomId?: string;
+	startDate?: Date;
+	endDate?: Date;
 }
 
-export function useRoomReservations({
-	roomId,
-	initialData = [],
-}: UseRoomReservationsOptions) {
-	const [roomReservations, setRoomReservations] = useState<RoomReservation[]>(initialData);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+export function useRoomReservations(options?: UseRoomReservationsOptions) {
+  const roomId = options?.roomId;
+  const startDate = options?.startDate || new Date();
+  const endDate = options?.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const queryClient = useQueryClient();
 
-	const [filters, setFilters] = useState<RoomReservationFilters>({
-		status: undefined,
-		startDate: new Date(new Date().setDate(1)), // First day of current month
-		endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Last day of next month
-	});
+  const { data: fetchedData, refetch } = useSuspenseQuery({
+    queryKey: ["roomReservations", roomId, startDate, endDate],
+    queryFn: () => {
+      if (!roomId) {
+        return { data: [], total: 0 };
+      }
+      return roomReservationsApi.getRoomReservationsByRoomId(roomId, startDate, endDate);
+    },
+    initialData: { data: [], total: 0 },
+  });
 
-	const [totalCount, setTotalCount] = useState<number>(0);
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: CreateRoomReservationData) =>
+      roomReservationsApi.createRoomReservation(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+      toast.success("Réservation créée avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error creating room reservation:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la création de la réservation"
+      );
+    },
+  });
 
-	/**
-	 * Calls roomReservationsApi.getRoomReservationsByRoomId
-	 */
-	const fetchRoomReservations = useCallback(async () => {
-		setLoading(true);
-		setError(null);
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateRoomReservationData;
+    }) => roomReservationsApi.updateRoomReservation(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+      toast.success("Réservation modifiée avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error updating room reservation:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la modification de la réservation"
+      );
+    },
+  });
 
-		try {
-			// Convert startDate and endDate to Date if they are ISO strings
-			const sd =
-				filters.startDate !== undefined
-					? new Date(filters.startDate)
-					: undefined;
-			const ed =
-				filters.endDate !== undefined ? new Date(filters.endDate) : undefined;
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      roomReservationsApi.deleteRoomReservation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+      toast.success("Réservation supprimée avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting room reservation:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la suppression de la réservation"
+      );
+    },
+  });
 
-			const response = await roomReservationsApi.getRoomReservationsByRoomId(
-				roomId,
-				sd,
-				ed,
-			);
-			setRoomReservations(response.data);
-			setTotalCount(response.total);
-		} catch (err) {
-			const message = err instanceof Error ? err.message : "Unexpected error";
-			setError(message);
-			toast.error("Error", { description: message });
-		} finally {
-			setLoading(false);
-		}
-	}, [roomId, filters]);
+  const createRoomReservation = useCallback(
+    async (
+      data: CreateRoomReservationData
+    ): Promise<RoomReservation | null> => {
+      try {
+        const result = await createMutation.mutateAsync(data);
+        return result;
+      } catch (error) {
+        console.error("Error in createRoomReservation:", error);
+        return null;
+      }
+    },
+    [createMutation]
+  );
 
-	/**
-	 * Creates a room reservation
-	 */
-	const createRoomReservation = useCallback(
-		async (data: CreateRoomReservationData): Promise<RoomReservation | null> => {
-			setLoading(true);
-			setError(null);
+  const updateRoomReservation = useCallback(
+    async (
+      id: string,
+      data: UpdateRoomReservationData
+    ): Promise<RoomReservation | null> => {
+      try {
+        const result = await updateMutation.mutateAsync({ id, data });
+        return result;
+      } catch (error) {
+        console.error("Error in updateRoomReservation:", error);
+        return null;
+      }
+    },
+    [updateMutation]
+  );
 
-			try {
-				createRoomReservationSchema.parse(data);
+  const deleteRoomReservation = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        return true;
+      } catch (error) {
+        console.error("Error in deleteRoomReservation:", error);
+        return false;
+      }
+    },
+    [deleteMutation]
+  );
 
-				const result = await roomReservationsApi.createRoomReservation(data);
-				toast.success("Réservation de salle créée avec succès");
-
-				setRoomReservations((prev) => [result, ...prev]);
-				setTotalCount((prev) => prev + 1);
-				return result;
-			} catch (err) {
-				let message = "Unexpected error";
-
-				if (err instanceof z.ZodError) {
-					message = err.errors.map((e) => e.message).join(", ");
-				} else if (err instanceof Error) {
-					message = err.message;
-				}
-
-				setError(message);
-				toast.error("Error", { description: message });
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	/**
-	 * Updates a room reservation
-	 */
-	const updateRoomReservation = useCallback(
-		async (
-			id: string,
-			data: UpdateRoomReservationData,
-		): Promise<RoomReservation | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				updateRoomReservationSchema.parse(data);
-
-				const result = await roomReservationsApi.updateRoomReservation(id, data);
-				toast.success("Réservation de salle mise à jour avec succès");
-				setRoomReservations((prev) => prev.map((r) => (r.id === id ? result : r)));
-				return result;
-			} catch (err) {
-				let message = "Unexpected error";
-				if (err instanceof z.ZodError) {
-					message = err.errors.map((e) => e.message).join(", ");
-				} else if (err instanceof Error) {
-					message = err.message;
-				}
-				setError(message);
-				toast.error("Error", { description: message });
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	/**
-	 * Deletes a room reservation
-	 */
-	const deleteRoomReservation = useCallback(
-		async (id: string): Promise<boolean> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				const success = await roomReservationsApi.deleteRoomReservation(id);
-				if (success) {
-					toast.success("Réservation de salle supprimée avec succès");
-					setRoomReservations((prev) => prev.filter((r) => r.id !== id));
-					setTotalCount((prev) => (prev > 0 ? prev - 1 : 0));
-					return true;
-				}
-				return false;
-			} catch (err) {
-				const message = err instanceof Error ? err.message : "Unexpected error";
-				setError(message);
-				toast.error("Error", { description: message });
-				return false;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	/**
-	 * Gets a single room reservation by ID
-	 */
-	const getRoomReservationById = useCallback(
-		async (id: string): Promise<RoomReservation | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				const result = await roomReservationsApi.getRoomReservationById(id);
-				return result;
-			} catch (err) {
-				const message = err instanceof Error ? err.message : "Unexpected error";
-				setError(message);
-				toast.error("Error", { description: message });
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	const updateFilters = useCallback(
-		(newFilters: Partial<RoomReservationFilters>) => {
-			setFilters((prev) => ({ ...prev, ...newFilters }));
-		},
-		[],
-	);
-
-	useEffect(() => {
-		fetchRoomReservations();
-	}, [fetchRoomReservations]);
-
-	return {
-		// Data
-		roomReservations,
-		totalCount,
-		filters,
-
-		// State
-		loading,
-		error,
-
-		// Actions
-		fetchRoomReservations,
-		updateFilters,
-		createRoomReservation,
-		updateRoomReservation,
-		deleteRoomReservation,
-		getRoomReservationById,
-
-		// Refresh function
-		refresh: fetchRoomReservations,
-	};
+  return {
+    roomReservations: fetchedData.data,
+    totalCount: fetchedData.total,
+    loading: false,
+    error: null,
+    createRoomReservation,
+    updateRoomReservation,
+    deleteRoomReservation,
+    updateFilters: () => {}, // Placeholder pour compatibilité
+    refetch,
+  };
 }

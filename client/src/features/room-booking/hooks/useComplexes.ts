@@ -1,5 +1,6 @@
 import { complexesApi } from "@room-booking/lib/api/complexes";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -88,28 +89,20 @@ export const createComplexSchema = z.object({
 	postalCode: z
 		.string()
 		.min(5, "Le code postal doit contenir au moins 5 caractères")
-		.max(20, "Le code postal ne peut pas dépasser 20 caractères"),
+		.max(10, "Le code postal ne peut pas dépasser 10 caractères"),
 	openingHours: openingHoursSchema,
-	numberOfElevators: z
-		.number()
-		.int("Le nombre d'ascenseurs doit être un nombre entier")
-		.nonnegative("Le nombre d'ascenseurs doit être positif ou nul")
-		.default(0),
-	accessibleForReducedMobility: z.boolean().default(false),
-	parkingCapacity: z
-		.number()
-		.int("La capacité de parking doit être un nombre entier")
-		.nonnegative("La capacité de parking doit être positive ou nulle")
-		.default(0),
+	numberOfElevators: z.number().int().nonnegative(),
+	accessibleForReducedMobility: z.boolean().default(true),
+	parkingCapacity: z.number().int().nonnegative(),
 });
 
 export const updateComplexSchema = createComplexSchema.partial();
 
 export const complexFiltersSchema = z.object({
-	page: z.number().int().positive().default(1),
-	limit: z.number().int().positive().max(100).default(20),
 	search: z.string().optional(),
-	city: z.string().optional(),
+	accessibleForReducedMobility: z.boolean().optional(),
+	page: z.coerce.number().default(1),
+	limit: z.coerce.number().default(20),
 });
 
 export const complexesPaginatedResponseSchema = z.object({
@@ -131,468 +124,174 @@ export const complexesPaginatedResponseSchema = z.object({
 		),
 });
 
-export type ComplexesPaginatedResponse = z.infer<
-	typeof complexesPaginatedResponseSchema
->;
-
-export const complexStatsSchema = z.object({
-	totalComplexes: z.number().int().nonnegative(),
-	activeComplexes: z.number().int().nonnegative(),
-	inactiveComplexes: z.number().int().nonnegative(),
-	cityStats: z.record(z.string(), z.number().int().nonnegative()),
-});
-
-export const paginationSchema = z.object({
-	page: z.number().int().positive(),
-	limit: z.number().int().positive(),
-	totalCount: z.number().int().nonnegative(),
-	totalPages: z.number().int().nonnegative(),
-	hasNext: z.boolean(),
-	hasPrev: z.boolean(),
-});
-
+export type OpeningHoursEntry = z.infer<typeof openingHoursEntrySchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 export type Complex = z.infer<typeof complexSchema>;
 export type CreateComplexData = z.infer<typeof createComplexSchema>;
 export type UpdateComplexData = z.infer<typeof updateComplexSchema>;
 export type ComplexFilters = z.infer<typeof complexFiltersSchema>;
-export type ComplexStats = z.infer<typeof complexStatsSchema>;
-export type PaginationInfo = z.infer<typeof paginationSchema>;
-export type OpeningHours = z.infer<typeof openingHoursSchema>;
+export type ComplexesPaginatedResponse = z.infer<typeof complexesPaginatedResponseSchema>;
 
-function formatZodErrors(errors: z.ZodError): string {
-	return errors.errors
-		.map((error) => {
-			const path = error.path.length > 0 ? `${error.path.join(".")} : ` : "";
-			return `${path}${error.message}`;
-		})
-		.join(", ");
-}
+// TanStack Query options
+export const filteredComplexesQueryOptions = ({
+  filters = {},
+  page = 1,
+  limit = 20,
+}) => ({
+  queryKey: ["complexes", filters, page, limit],
+  queryFn: () => complexesApi.getComplexes(filters),
+});
 
-interface UseComplexesOptions extends Partial<ComplexFilters> {
+interface UseComplexesOptions {
 	initialData?: Complex[];
 }
 
-export function useComplexes(options: UseComplexesOptions = {}) {
-	const { initialData = [], ...initialFilters } = options;
+export function useComplexes({ initialData = [] }: UseComplexesOptions = {}) {
+  const queryClient = useQueryClient();
 
-	const [complexes, setComplexes] = useState<Complex[]>(initialData);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  // Query for fetching complexes
+  const { data: fetchedData, refetch } = useSuspenseQuery({
+    queryKey: ["complexes"],
+    queryFn: () => complexesApi.getComplexes(),
+    initialData: { data: initialData, total: initialData.length, page: 1, limit: 20 },
+  });
 
-	// Valider et définir les filtres initiaux
-	const [filters, setFilters] = useState<ComplexFilters>(() => {
-		try {
-			return complexFiltersSchema.parse({
-				page: 1,
-				limit: 20,
-				...initialFilters,
-			});
-		} catch (error) {
-			console.warn("Invalid initial filters, using defaults:", error);
-			return complexFiltersSchema.parse({ page: 1, limit: 20 });
-		}
-	});
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: CreateComplexData) => complexesApi.createComplex(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["complexes"] });
+      toast.success("Complexe créé avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error creating complex:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la création du complexe"
+      );
+    },
+  });
 
-	/**
-	 * Fetch complexes from the API based on current filters.
-	 */
-	const fetchComplexes = useCallback(async () => {
-		if (!filters.search && initialData.length > 0) {
-			return;
-		}
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateComplexData }) =>
+      complexesApi.updateComplex(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["complexes"] });
+      toast.success("Complexe modifié avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error updating complex:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la modification du complexe"
+      );
+    },
+  });
 
-		setLoading(true);
-		setError(null);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => complexesApi.deleteComplex(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["complexes"] });
+      toast.success("Complexe supprimé avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting complex:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Erreur lors de la suppression du complexe"
+      );
+    },
+  });
 
-		try {
-			const validatedFilters = complexFiltersSchema.parse(filters);
-			const response: ComplexesPaginatedResponse =
-				await complexesApi.getComplexes(validatedFilters);
+  const createComplex = useCallback(
+    async (data: CreateComplexData): Promise<Complex | null> => {
+      try {
+        const result = await createMutation.mutateAsync(data);
+        return result;
+      } catch (error) {
+        console.error("Error in createComplex:", error);
+        return null;
+      }
+    },
+    [createMutation]
+  );
 
-			setComplexes(response.data);
+  const updateComplex = useCallback(
+    async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
+      try {
+        const result = await updateMutation.mutateAsync({ id, data });
+        return result;
+      } catch (error) {
+        console.error("Error in updateComplex:", error);
+        return null;
+      }
+    },
+    [updateMutation]
+  );
 
-			// Calculer la pagination à partir de la réponse
-			const calculatedPagination: PaginationInfo = {
-				page: response.page,
-				limit: response.limit,
-				totalCount: response.total,
-				totalPages: Math.ceil(response.total / response.limit),
-				hasNext: response.page < Math.ceil(response.total / response.limit),
-				hasPrev: response.page > 1,
-			};
-			setPagination(calculatedPagination);
-		} catch (err) {
-			let errorMessage = "Une erreur inattendue s'est produite";
+  const deleteComplex = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        return true;
+      } catch (error) {
+        console.error("Error in deleteComplex:", error);
+        return false;
+      }
+    },
+    [deleteMutation]
+  );
 
-			if (err instanceof z.ZodError) {
-				errorMessage = `Erreur de validation : ${formatZodErrors(err)}`;
-			} else if (err instanceof Error) {
-				errorMessage = err.message;
-			}
+  const refresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
-			setError(errorMessage);
-			toast.error("Erreur", {
-				description: errorMessage,
-			});
-		} finally {
-			setLoading(false);
-		}
-	}, [filters, initialData]);
-
-	/**
-	 * Update filters and reset pagination to page 1.
-	 */
-	const updateFilters = useCallback(
-		(newFilters: Partial<ComplexFilters>) => {
-			try {
-				const updatedFilters = complexFiltersSchema.parse({
-					...filters,
-					...newFilters,
-					// Reset to page 1 when filters change (except when changing page)
-					page: newFilters.page !== undefined ? newFilters.page : 1,
-				});
-				setFilters(updatedFilters);
-			} catch (error) {
-				if (error instanceof z.ZodError) {
-					toast.error("Erreur de validation", {
-						description: formatZodErrors(error),
-					});
-				}
-			}
-		},
-		[filters],
-	);
-
-	/**
-	 * Create a new complex.
-	 */
-	const createComplex = useCallback(
-		async (data: CreateComplexData): Promise<Complex | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				const validatedData = createComplexSchema.parse(data);
-				const result = await complexesApi.createComplex(validatedData);
-
-				if (result) {
-					toast.success("Succès", {
-						description: "Complexe créé avec succès",
-					});
-
-					setComplexes((prev) => [result, ...prev]);
-					return result;
-				}
-				throw new Error("Erreur lors de la création du complexe");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof z.ZodError) {
-					errorMessage = `Erreur de validation : ${formatZodErrors(err)}`;
-				} else if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	/**
-	 * Update an existing complex.
-	 */
-	const updateComplex = useCallback(
-		async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				z.string().uuid("ID invalide").parse(id);
-				const validatedData = updateComplexSchema.parse(data);
-				const result = await complexesApi.updateComplex(id, validatedData);
-
-				if (result) {
-					toast.success("Succès", {
-						description: "Complexe mis à jour avec succès",
-					});
-
-					setComplexes((prev) =>
-						prev.map((complex) => (complex.id === id ? result : complex)),
-					);
-					return result;
-				}
-				throw new Error("Erreur lors de la mise à jour du complexe");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof z.ZodError) {
-					errorMessage = `Erreur de validation : ${formatZodErrors(err)}`;
-				} else if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	/**
-	 * Delete a complex by its ID.
-	 */
-	const deleteComplex = useCallback(async (id: string): Promise<boolean> => {
-		setLoading(true);
-		setError(null);
-
-		try {
-			z.string().uuid("ID invalide").parse(id);
-			const success = await complexesApi.deleteComplex(id);
-
-			if (success) {
-				toast.success("Succès", {
-					description: "Complexe supprimé avec succès",
-				});
-
-				setComplexes((prev) => prev.filter((complex) => complex.id !== id));
-				return true;
-			}
-			throw new Error("Erreur lors de la suppression du complexe");
-		} catch (err) {
-			let errorMessage = "Une erreur inattendue s'est produite";
-
-			if (err instanceof z.ZodError) {
-				errorMessage = `Erreur de validation : ${formatZodErrors(err)}`;
-			} else if (err instanceof Error) {
-				errorMessage = err.message;
-			}
-
-			setError(errorMessage);
-			toast.error("Erreur", {
-				description: errorMessage,
-			});
-			return false;
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	/**
-	 * Fetch a complex by its ID.
-	 */
-	const getComplexById = useCallback(
-		async (id: string): Promise<Complex | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				z.string().uuid("ID invalide").parse(id);
-				const result = await complexesApi.getComplexById(id);
-
-				if (result) {
-					return result;
-				}
-				throw new Error("Complexe non trouvé");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof z.ZodError) {
-					errorMessage = `Erreur de validation : ${formatZodErrors(err)}`;
-				} else if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
-				return null;
-			} finally {
-				setLoading(false);
-			}
-		},
-		[],
-	);
-
-	useEffect(() => {
-		if (filters.search) {
-			fetchComplexes();
-		}
-	}, [fetchComplexes, filters.search]);
-
-	/**
-	 * Navigate to a specific page in the pagination.
-	 */
-	const goToPage = useCallback(
-		(page: number) => {
-			try {
-				const validatedPage = z.number().int().positive().parse(page);
-				updateFilters({ page: validatedPage });
-			} catch (error) {
-				toast.error("Erreur", {
-					description: "Numéro de page invalide",
-				});
-			}
-		},
-		[updateFilters],
-	);
-
-	const nextPage = useCallback(() => {
-		if (pagination?.hasNext) {
-			goToPage(pagination.page + 1);
-		}
-	}, [pagination, goToPage]);
-
-	const prevPage = useCallback(() => {
-		if (pagination?.hasPrev) {
-			goToPage(pagination.page - 1);
-		}
-	}, [pagination, goToPage]);
-
-	return {
-		// Data
-		complexes,
-		pagination,
-		filters,
-
-		// State
-		loading,
-		error,
-
-		// Actions
-		fetchComplexes,
-		updateFilters,
-		createComplex,
-		updateComplex,
-		deleteComplex,
-		getComplexById,
-
-		// Pagination
-		goToPage,
-		nextPage,
-		prevPage,
-
-		// Helpers
-		refresh: fetchComplexes,
-	};
+  return {
+    complexes: fetchedData.data,
+    totalCount: fetchedData.total,
+    page: fetchedData.page,
+    limit: fetchedData.limit,
+    createComplex,
+    updateComplex,
+    deleteComplex,
+    refresh,
+    refetch,
+  };
 }
 
-/**
- * Hook to fetch and manage complex statistics.
- */
+// Hook pour les statistiques des complexes
 export function useComplexStats() {
-	const [stats, setStats] = useState<ComplexStats | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+  const { data: stats, refetch } = useSuspenseQuery({
+    queryKey: ["complex-stats"],
+    queryFn: async () => {
+      // Remplacer par un vrai appel API plus tard
+      return {
+        totalComplexes: 0,
+        totalRooms: 0,
+        totalReservations: 0,
+        occupancyRate: 0,
+      };
+    },
+    initialData: {
+      totalComplexes: 0,
+      totalRooms: 0,
+      totalReservations: 0,
+      occupancyRate: 0,
+    },
+  });
 
-	const fetchStats = useCallback(async () => {
-		setLoading(true);
-		setError(null);
+  const refresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
-		try {
-			// Mock stats for now - replace with real API call
-			const mockStats: ComplexStats = {
-				totalComplexes: 0,
-				activeComplexes: 0,
-				inactiveComplexes: 0,
-				cityStats: {},
-			};
-			setStats(mockStats);
-		} catch (err) {
-			let errorMessage = "Une erreur inattendue s'est produite";
-
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			}
-
-			setError(errorMessage);
-			toast.error("Erreur", {
-				description: errorMessage,
-			});
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		fetchStats();
-	}, [fetchStats]);
-
-	return {
-		stats,
-		loading,
-		error,
-		refresh: fetchStats,
-	};
-}
-
-/**
- * Hook to validate complex data for creation and updates.
- */
-export function useComplexValidation() {
-	const validateCreateData = useCallback((data: unknown) => {
-		try {
-			return {
-				success: true,
-				data: createComplexSchema.parse(data),
-				errors: null,
-			};
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				return {
-					success: false,
-					data: null,
-					errors: error.errors,
-				};
-			}
-			return {
-				success: false,
-				data: null,
-				errors: [{ message: "Erreur de validation inconnue", path: [] }],
-			};
-		}
-	}, []);
-
-	const validateUpdateData = useCallback((data: unknown) => {
-		try {
-			return {
-				success: true,
-				data: updateComplexSchema.parse(data),
-				errors: null,
-			};
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				return {
-					success: false,
-					data: null,
-					errors: error.errors,
-				};
-			}
-			return {
-				success: false,
-				data: null,
-				errors: [{ message: "Erreur de validation inconnue", path: [] }],
-			};
-		}
-	}, []);
-
-	return {
-		validateCreateData,
-		validateUpdateData,
-		createComplexSchema,
-		updateComplexSchema,
-	};
+  return {
+    stats,
+    loading: false,
+    refresh,
+  };
 }
