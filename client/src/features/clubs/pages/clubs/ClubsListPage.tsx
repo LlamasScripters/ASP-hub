@@ -79,21 +79,12 @@ export function ClubsListPage() {
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 					<div className="space-y-2">
 						<h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
-							<Building2 className="h-8 w-8 text-primary" />
 							Mon Association
 						</h1>
 						<p className="text-lg text-muted-foreground">
 							Gérez l'Association Sportive de Pierrefitte-sur-Seine
 						</p>
 					</div>
-					{!mainClub && (
-						<Link to="/admin/dashboard/clubs/create">
-							<Button size="lg" className="flex items-center gap-2">
-								<Plus className="h-5 w-5" />
-								Créer l'association
-							</Button>
-						</Link>
-					)}
 				</div>
 
 				{/* Contenu principal */}
