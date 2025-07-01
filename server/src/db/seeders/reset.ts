@@ -6,11 +6,11 @@ import {
 	rooms,
 	minibuses,
 	minibusReservations,
+	sessionsSport,
+	categories,
+	sections,
+	clubs,
 	//   sessionParticipants,
-	//   sessionsSport,
-	//   categories,
-	//   sections,
-	//   clubs,
 	//   users
 } from "../schema.js";
 
@@ -27,20 +27,20 @@ export async function resetAllTables(db: NodePgDatabase) {
 		await db.delete(minibusReservations);
 		console.log("Minibus Reservations deleted");
 
+		await db.delete(sessionsSport);
+		console.log("Sports sessions deleted");
+
+		await db.delete(categories);
+		console.log("Categories deleted");
+
+		await db.delete(sections);
+		console.log("Sections deleted");
+
+		await db.delete(clubs);
+		console.log("Clubs deleted");
+
 		// await db.delete(sessionParticipants);
 		// console.log("Session participants deleted");
-
-		// await db.delete(sessionsSport);
-		// console.log("Sports sessions deleted");
-
-		// await db.delete(categories);
-		// console.log("Categories deleted");
-
-		// await db.delete(sections);
-		// console.log("Sections deleted");
-
-		// await db.delete(clubs);
-		// console.log("Clubs deleted");
 
 		await db.delete(minibuses);
 		console.log("Minibuses deleted");
@@ -63,6 +63,18 @@ export async function resetAllTables(db: NodePgDatabase) {
 		);
 		await db.execute(
 			sql`SELECT setval(pg_get_serial_sequence('room_reservations', 'id'), 1, false)`,
+		);
+		await db.execute(
+			sql`SELECT setval(pg_get_serial_sequence('clubs', 'id'), 1, false)`,
+		);
+		await db.execute(
+			sql`SELECT setval(pg_get_serial_sequence('sections', 'id'), 1, false)`,
+		);
+		await db.execute(
+			sql`SELECT setval(pg_get_serial_sequence('categories', 'id'), 1, false)`,
+		);
+		await db.execute(
+			sql`SELECT setval(pg_get_serial_sequence('sessions_sport', 'id'), 1, false)`,
 		);
 	} catch (error) {
 		console.error("Error during the reset:", error);
