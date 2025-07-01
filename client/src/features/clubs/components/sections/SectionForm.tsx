@@ -224,38 +224,12 @@ export function SectionForm({
 	return (
 		<div className="container mx-auto p-4 sm:p-6 max-w-4xl">
 			<div className="space-y-6">
-				{/* Header */}
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-							<FolderOpen className="h-8 w-8 text-primary" />
-							{mode === "create" ? "Créer une section" : "Modifier la section"}
-						</h1>
-						<p className="text-muted-foreground mt-2">
-							{mode === "create"
-								? "Ajoutez une nouvelle section à votre club pour organiser vos membres"
-								: "Modifiez les informations de cette section"}
-						</p>
-					</div>
-					<Button
-						variant="outline"
-						onClick={handleCancel}
-						className="flex items-center gap-2"
-					>
-						<ArrowLeft className="h-4 w-4" />
-						Retour
-					</Button>
-				</div>
-
 				{/* Form */}
 				<Card className="shadow-lg border">
 					<CardHeader className="space-y-1">
 						<CardTitle className="text-2xl flex items-center gap-2">
-							<div
-								className="w-4 h-4 rounded-full border border-primary/20"
-								style={{ backgroundColor: form.watch("color") || "#3b82f6" }}
-							/>
-							Informations de la section
+							Formulaire d{""}
+							{mode === "create" ? "e création" : "'édition"} d'une section
 						</CardTitle>
 						<CardDescription>
 							Remplissez les informations ci-dessous pour{" "}
@@ -351,7 +325,7 @@ export function SectionForm({
 									<Button
 										type="submit"
 										disabled={isLoading}
-										className="flex items-center gap-2 flex-1 sm:flex-none"
+										className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 									>
 										{isLoading ? (
 											<>
@@ -370,7 +344,7 @@ export function SectionForm({
 										variant="outline"
 										onClick={handleCancel}
 										disabled={isLoading}
-										className="flex items-center gap-2"
+										className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
 									>
 										<ArrowLeft className="h-4 w-4" />
 										Annuler

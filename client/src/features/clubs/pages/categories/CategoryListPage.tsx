@@ -221,13 +221,6 @@ export function CategoriesListPage() {
 	return (
 		<div className="container mx-auto p-6 space-y-8">
 			<div className="flex flex-col gap-4">
-				<Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
-					<Button variant="ghost" className="w-fit">
-						<ArrowLeft className="mr-2 h-4 w-4" />
-						Retour aux sections
-					</Button>
-				</Link>
-
 				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 					<div className="space-y-1">
 						<h1 className="text-3xl font-bold tracking-tight">
@@ -238,15 +231,23 @@ export function CategoriesListPage() {
 							<span className="font-medium">{sectionName}</span>
 						</p>
 					</div>
-					<Link
-						to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
-						params={{ clubId, sectionId }}
-					>
-						<Button className="w-full md:w-auto">
-							<Users className="mr-2 h-4 w-4" />
-							Créer une catégorie
+					<div className="flex items-center gap-2">
+						<Button variant="outline" size="sm" asChild>
+							<Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+								<ArrowLeft className="w-4 h-4 mr-2" />
+								Retour aux sections
+							</Link>
 						</Button>
-					</Link>
+						<Button asChild>
+							<Link
+								to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+								params={{ clubId, sectionId }}
+							>
+								<Users className="mr-2 h-4 w-4" />
+								Créer une catégorie
+							</Link>
+						</Button>
+					</div>
 				</div>
 			</div>
 
@@ -271,7 +272,7 @@ export function CategoriesListPage() {
 								<Search className="h-4 w-4" />
 								Filtres de recherche
 							</h3>
-							<Button variant="outline" size="sm" onClick={clearFilters}>
+							<Button variant="outline" className="hover:cursor-pointer" size="sm" onClick={clearFilters}>
 								Effacer les filtres
 							</Button>
 						</div>
@@ -434,23 +435,23 @@ export function CategoriesListPage() {
 											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
-													<Link
-														to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
-														params={{ clubId, sectionId, categoryId: c.id }}
-													>
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+													<Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary" asChild>
+														<Link
+															to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+															params={{
+																clubId,
+																sectionId,
+																categoryId: c.id,
+															}}
 														>
-															<Edit className="mr-1 h-3 w-3" />
+															<Edit className="h-4 w-4 mr-1" />
 															Modifier
-														</Button>
-													</Link>
+														</Link>
+													</Button>
 													<Button
 														variant="ghost"
 														size="sm"
-														className="h-8 px-3 hover:bg-destructive/10 hover:text-destructive"
+														className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
 														onClick={() => setDeleteCategory(c)}
 													>
 														<Trash2 className="mr-1 h-3 w-3" />

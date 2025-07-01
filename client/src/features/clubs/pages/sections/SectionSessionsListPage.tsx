@@ -40,7 +40,6 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Edit,
-	Filter,
 	Plus,
 	Search,
 	Trash2,
@@ -85,7 +84,8 @@ export function SectionSessionsListPage() {
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	useEffect(() => {
-		const fetchSectionSessions = async () => {
+		const fetchData = async () => {
+			// Fetch categories
 			const categoriesData: Category[] = await fetch(
 				`/api/clubs/${clubId}/sections/${sectionId}/categories`,
 			).then((res) => res.json());
@@ -108,14 +108,14 @@ export function SectionSessionsListPage() {
 
 			setSessions(result);
 
-			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
-				.then((res) => res.json())
-				.then((section: Section) => {
-					setSectionName(section.name);
-				});
+			// Fetch section name for better context
+			const sectionData: Section = await fetch(
+				`/api/clubs/${clubId}/sections/${sectionId}`,
+			).then((res) => res.json());
+			setSectionName(sectionData.name);
 		};
 
-		fetchSectionSessions();
+		fetchData();
 	}, [clubId, sectionId]);
 
 	const handleSort = (field: SortField) => {
@@ -287,59 +287,49 @@ export function SectionSessionsListPage() {
 
 	return (
 		<div className="container mx-auto p-6 space-y-8">
-			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-				<div className="space-y-1">
-					<div className="flex items-center gap-4">
-						<Link
-							to="/admin/dashboard/clubs/$clubId/sections"
-							params={{ clubId }}
-						>
-							<Button
-								variant="outline"
-								size="sm"
-								className="flex items-center gap-2"
-							>
-								<ArrowLeft className="h-4 w-4" />
-								Retour aux sections
-							</Button>
-						</Link>
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div className="space-y-1">
+						<h1 className="text-3xl font-bold tracking-tight">
+							Sessions de la section {sectionName}
+						</h1>
+						<p className="text-muted-foreground">
+							Gérez les sessions de la section{" "}
+							<span className="font-medium">{sectionName}</span>
+						</p>
 					</div>
-					<h1 className="text-3xl font-bold tracking-tight">
-						Sessions de {sectionName}
-					</h1>
-					<p className="text-muted-foreground">
-						Gérez les sessions de la section{" "}
-						<span className="font-medium">{sectionName}</span>
-					</p>
-				</div>
-				<div className="flex flex-col gap-2 w-full md:w-auto">
-					{categories.length > 0 ? (
-						<Link
-							to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
-							params={{ clubId, sectionId, categoryId: categories[0].id }}
-						>
-							<Button className="w-full md:w-auto">
-								<Plus className="mr-2 h-4 w-4" />
-								Créer une session
-							</Button>
-						</Link>
-					) : (
-						<div className="text-center md:text-right">
-							<p className="text-sm text-muted-foreground mb-2">
-								Aucune catégorie trouvée. Créez d'abord une catégorie pour
-								pouvoir ajouter des sessions.
-							</p>
-							<Link
-								to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
-								params={{ clubId, sectionId }}
+					<div className="flex items-center gap-2">
+						<Button variant="outline" size="sm" asChild>
+							<Link 
+								to="/admin/dashboard/clubs/$clubId/sections" 
+								params={{ clubId }}
 							>
-								<Button variant="outline" className="w-full md:w-auto">
+								<ArrowLeft className="w-4 h-4 mr-2" />
+								Retour aux sections
+							</Link>
+						</Button>
+						{categories.length > 0 ? (
+							<Button asChild>
+								<Link
+									to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+									params={{ clubId, sectionId, categoryId: categories[0].id }}
+								>
+									<Plus className="mr-2 h-4 w-4" />
+									Créer une session
+								</Link>
+							</Button>
+						) : (
+							<Button variant="outline" asChild>
+								<Link
+									to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+									params={{ clubId, sectionId }}
+								>
 									<Plus className="mr-2 h-4 w-4" />
 									Créer une catégorie
-								</Button>
-							</Link>
-						</div>
-					)}
+								</Link>
+							</Button>
+						)}
+					</div>
 				</div>
 			</div>
 
@@ -364,8 +354,12 @@ export function SectionSessionsListPage() {
 								<Search className="h-4 w-4" />
 								Filtres de recherche
 							</h3>
-							<Button variant="outline" size="sm" onClick={clearFilters}>
-								<Filter className="mr-2 h-4 w-4" />
+							<Button 
+								variant="outline" 
+								className="hover:cursor-pointer" 
+								size="sm" 
+								onClick={clearFilters}
+							>
 								Effacer les filtres
 							</Button>
 						</div>
@@ -580,28 +574,29 @@ export function SectionSessionsListPage() {
 											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
-													<Link
-														to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
-														params={{
-															clubId,
-															sectionId,
-															categoryId: s.categoryId,
-															sessionId: s.id,
-														}}
-													>
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
-														>
-															<Edit className="mr-1 h-3 w-3" />
-															Modifier
-														</Button>
-													</Link>
 													<Button
 														variant="ghost"
 														size="sm"
-														className="h-8 px-3 hover:bg-destructive/10 hover:text-destructive"
+														className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+														asChild
+													>
+														<Link
+															to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+															params={{
+																clubId,
+																sectionId,
+																categoryId: s.categoryId,
+																sessionId: s.id,
+															}}
+														>
+															<Edit className="h-4 w-4 mr-1" />
+															Modifier
+														</Link>
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
 														onClick={() => setDeleteSession(s)}
 													>
 														<Trash2 className="mr-1 h-3 w-3" />

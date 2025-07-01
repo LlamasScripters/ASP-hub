@@ -489,28 +489,6 @@ export function SessionForm({
 	return (
 		<div className="p-6 max-w-4xl mx-auto">
 			<div className="space-y-6">
-				{/* Header */}
-				<div className="flex items-center gap-4">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={handleBack}
-						className="p-2"
-					>
-						<ArrowLeft className="h-4 w-4" />
-					</Button>
-					<div className="space-y-1">
-						<h1 className="text-3xl font-bold tracking-tight">
-							{mode === "create" ? "Créer une session" : "Modifier la session"}
-						</h1>
-						<p className="text-muted-foreground">
-							{mode === "create"
-								? `Planifiez une nouvelle session pour la section ${sectionName}`
-								: "Modifiez les informations de cette session"}
-						</p>
-					</div>
-				</div>
-
 				{/* Error Alert */}
 				{errors.general && (
 					<Alert variant="destructive">
@@ -523,11 +501,23 @@ export function SessionForm({
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<Calendar className="h-5 w-5" />
-							Informations de la session
+							Formulaire d'{""}
+							{mode === "create" ? "création" : "'édition"} d'une session
+							sportive
 						</CardTitle>
 						<CardDescription>
-							Définissez les détails de votre session sportive
+							{mode === "edit" ? (
+								<p className="text-sm text-muted-foreground">
+									Modifiez les informations de cette session pour mettre à jour
+									ses paramètres.
+								</p>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									Remplissez les informations ci-dessous pour créer une nouvelle
+									session dans la catégorie{" "}
+									<span className="font-medium">{sectionName}</span>
+								</p>
+							)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -849,15 +839,7 @@ export function SessionForm({
 							<Separator />
 
 							{/* Actions */}
-							<div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={handleBack}
-									disabled={isLoading}
-								>
-									Annuler
-								</Button>
+							<div className="flex flex-col sm:flex-row gap-3 pt-6">
 								<Button
 									type="submit"
 									disabled={
@@ -865,16 +847,29 @@ export function SessionForm({
 										!dateValidation.isValid ||
 										!!duplicateTitleError
 									}
-									className="min-w-[120px]"
+									className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
 									{isLoading ? (
-										"Enregistrement..."
+										<>
+											<Loader2 className="h-4 w-4 animate-spin" />
+											{mode === "create" ? "Création..." : "Modification..."}
+										</>
 									) : (
 										<>
-											<Save className="mr-2 h-4 w-4" />
-											{mode === "create" ? "Créer" : "Modifier"}
+											<Save className="h-4 w-4" />
+											{mode === "create" ? "Créer la session" : "Sauvegarder"}
 										</>
 									)}
+								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={handleBack}
+									disabled={isLoading}
+									className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
+								>
+									<ArrowLeft className="h-4 w-4" />
+									Annuler
 								</Button>
 							</div>
 						</form>

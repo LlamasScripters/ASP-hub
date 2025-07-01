@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, AlertCircle } from "lucide-react";
-import { SectionForm } from "../../components/sections/SectionForm_new";
+import { SectionForm } from "../../components/sections/SectionForm";
 
 export function SectionEditPage() {
 	const { clubId, sectionId } = useParams({

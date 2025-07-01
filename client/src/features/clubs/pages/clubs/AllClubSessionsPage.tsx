@@ -480,17 +480,17 @@ export function AllClubSessionsPage() {
 								Les sessions apparaîtront ici une fois qu'elles seront créées
 								dans les catégories.
 							</p>
-							<Link
+							<Button size="lg" asChild>
+								<Link
 								to="/admin/dashboard/clubs/$clubId/sections"
 								params={{ clubId }}
-							>
-								<Button size="lg">
+								>
 									<Users className="mr-2 h-5 w-5" />
 									Voir les sections
-								</Button>
-							</Link>
-						</CardContent>
-					</Card>
+								</Link>
+							</Button>
+					</CardContent>
+				</Card>
 				) : (
 					<Card>
 						<CardHeader>
@@ -513,8 +513,7 @@ export function AllClubSessionsPage() {
 										<Search className="h-4 w-4" />
 										Filtres de recherche
 									</h3>
-									<Button variant="outline" size="sm" onClick={clearFilters}>
-										<Filter className="mr-2 h-4 w-4" />
+									<Button variant="outline" className="hover:cursor-pointer" size="sm" onClick={clearFilters}>
 										Effacer les filtres
 									</Button>
 								</div>
@@ -778,28 +777,24 @@ export function AllClubSessionsPage() {
 													</TableCell>
 													<TableCell className="text-right">
 														<div className="flex items-center justify-end gap-2">
-															<Link
-																to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
-																params={{
-																	clubId,
-																	sectionId: s.sectionId,
-																	categoryId: s.categoryId,
-																	sessionId: s.id,
-																}}
-															>
-																<Button
-																	variant="ghost"
-																	size="sm"
-																	className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+															<Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary" asChild>
+																<Link
+																	to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+																	params={{
+																		clubId,
+																		sectionId: s.sectionId,
+																		categoryId: s.categoryId,
+																		sessionId: s.id,
+																	}}
 																>
-																	<Edit className="mr-1 h-3 w-3" />
+																	<Edit className="h-4 w-4 mr-1" />
 																	Modifier
-																</Button>
-															</Link>
+																</Link>
+															</Button>
 															<Button
 																variant="ghost"
 																size="sm"
-																className="h-8 px-3 hover:bg-destructive/10 hover:text-destructive"
+																className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
 																onClick={() => setDeleteSession(s)}
 															>
 																<Trash2 className="mr-1 h-3 w-3" />
