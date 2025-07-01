@@ -1,25 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
-	AlertCircle,
 	ArrowLeft,
 	Building2,
 	CheckCircle,
 	FileText,
-	Globe,
 	Loader2,
 	Mail,
 	MapPin,
 	Phone,
+	Globe,
 	Save,
+	AlertCircle,
+	Captions,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
+import { toast } from "sonner";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -28,6 +27,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Form,
 	FormControl,
@@ -74,13 +74,9 @@ export function ClubForm({
 	clubId,
 }: { mode: "create" | "edit"; clubId?: string }) {
 	const navigate = useNavigate();
-	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const [initialClub, setInitialClub] = useState<Club | null>(null);
-
-	const previousPageHref =
-		router.__store.prevState?.resolvedLocation?.href || undefined;
 
 	const form = useForm<ClubFormData>({
 		resolver: zodResolver(clubSchema),
@@ -331,8 +327,8 @@ export function ClubForm({
 			<Card className="shadow-lg border">
 				<CardHeader className="space-y-1">
 					<CardTitle className="text-2xl flex items-center gap-2">
-						<Building2 className="w-5 h-5" />
-						Informations du club
+						Formulaire d{""}
+						{mode === "create" ? "e création" : "'édition"} de club
 					</CardTitle>
 					<CardDescription>
 						Remplissez les informations ci-dessous pour{" "}
@@ -352,7 +348,7 @@ export function ClubForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="text-foreground font-medium flex items-center gap-2">
-											<Building2 className="h-4 w-4" />
+											<Captions className="h-4 w-4" />
 											Nom du club *
 										</FormLabel>
 										<FormControl>
@@ -525,7 +521,7 @@ export function ClubForm({
 								<Button
 									type="submit"
 									disabled={isLoading}
-									className="flex items-center gap-2 flex-1 sm:flex-none"
+									className="flex items-center gap-2 flex-1 sm:flex-none hover:bg-primary/90 transition-colors cursor-pointer"
 								>
 									{isLoading ? (
 										<>
@@ -544,7 +540,7 @@ export function ClubForm({
 									variant="outline"
 									onClick={handleCancel}
 									disabled={isLoading}
-									className="flex items-center gap-2"
+									className="flex items-center gap-2 hover:bg-muted transition-colors cursor-pointer"
 								>
 									<ArrowLeft className="h-4 w-4" />
 									Annuler

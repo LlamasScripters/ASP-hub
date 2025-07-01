@@ -1,6 +1,8 @@
-import { useParams } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Link, useParams } from "@tanstack/react-router";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-// client/src/features/clubs/pages/SessionCreatePage.tsx
 import { SessionForm } from "../../components/sessions/SessionForm";
 import type { Section } from "../../types";
 
@@ -17,10 +19,38 @@ export function SessionCreatePage() {
 	}, [clubId, sectionId]);
 
 	return (
-		<div className="p-4">
-			<h1 className="text-2xl font-bold mb-4">
-				Créer une session {section ? `pour la section ${section.name}` : ""}
-			</h1>
+		<div className="space-y-6">
+			{/* En-tête cohérent */}
+			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+				<div>
+					<h1 className="text-3xl font-bold tracking-tight">
+						Créer une session
+					</h1>
+					<p className="text-muted-foreground">
+						Nouvelle session pour la section{" "}
+						<span className="font-medium">{section?.name || "..."}</span>
+					</p>
+				</div>
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+						params={{ clubId, sectionId, categoryId }}
+					>
+						<ArrowLeft className="w-4 h-4 mr-2" />
+						Retour aux sessions
+					</Link>
+				</Button>
+			</div>
+
+			{/* Information importante */}
+			<Alert>
+				<AlertCircle className="h-4 w-4" />
+				<AlertDescription>
+					<strong>Important :</strong> Vérifiez que les dates et horaires 
+					choisis ne sont pas en conflit avec d'autres sessions.
+				</AlertDescription>
+			</Alert>
+
 			<SessionForm
 				mode="create"
 				clubId={clubId}

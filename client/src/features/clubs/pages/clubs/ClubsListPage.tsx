@@ -23,32 +23,13 @@ import {
 	Settings,
 	Users,
 } from "lucide-react";
-// client/src/features/clubs/pages/ClubsListPage.tsx
-import { useEffect, useState } from "react";
-import type { Club } from "../../types";
+import { useClubs } from "../../hooks/useClubs";
 
 export function ClubsListPage() {
-	const [clubs, setClubs] = useState<Club[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		fetch("/api/clubs")
-			.then((res) => {
-				if (!res.ok) throw new Error("Erreur lors du chargement");
-				return res.json();
-			})
-			.then((data) => {
-				setClubs(data);
-			})
-			.catch((error) => {
-				console.error("Erreur:", error);
-			})
-			.finally(() => setIsLoading(false));
-	}, []);
-
+	const { clubs, loading } = useClubs();
 	const mainClub = clubs.length > 0 ? clubs[0] : null;
 
-	if (isLoading) {
+	if (loading) {
 		return (
 			<div className="container mx-auto p-4 sm:p-6 space-y-8 max-w-7xl">
 				<div className="space-y-6">
@@ -102,52 +83,53 @@ export function ClubsListPage() {
 								Commencez par créer votre association sportive pour accéder à
 								tous les outils de gestion.
 							</p>
-							<Link to="/admin/dashboard/clubs/create">
-								<Button size="lg" className="text-lg px-8 py-3">
+							<Button size="lg" className="text-lg px-8 py-3" asChild>
+								<Link to="/admin/dashboard/clubs/create">
 									<Plus className="mr-3 h-6 w-6" />
 									Créer mon association
-								</Button>
-							</Link>
+								</Link>
+							</Button>
 						</CardContent>
 					</Card>
 				) : (
 					// Association existante
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 						{/* Carte principale de l'association */}
-						<Card className="shadow-lg border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-							<CardHeader className="space-y-4">
+						<Card className="shadow-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden">
+							<CardHeader className="space-y-4 pb-6">
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<div className="p-3 bg-primary/20 rounded-lg">
+										<div className="p-3 bg-gradient-to-br from-primary/20 to-primary/30 rounded-xl shadow-sm">
 											<Building2 className="h-8 w-8 text-primary" />
 										</div>
 										<Badge
 											variant="secondary"
-											className="bg-primary/10 text-primary border-primary/20"
+											className="bg-primary/15 text-primary border-primary/30 font-medium px-3 py-1"
 										>
 											Association Principale
 										</Badge>
 									</div>
-									<Link
-										to="/admin/dashboard/clubs/$clubId/edit"
-										params={{ clubId: mainClub.id }}
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+										asChild
 									>
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-muted-foreground hover:text-foreground"
+										<Link
+											to="/admin/dashboard/clubs/$clubId/edit"
+											params={{ clubId: mainClub.id }}
 										>
 											<Edit className="h-4 w-4" />
-										</Button>
-									</Link>
+										</Link>
+									</Button>
 								</div>
 
-								<div>
-									<CardTitle className="text-2xl font-bold mb-2">
+								<div className="space-y-3">
+									<CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
 										{mainClub.name}
 									</CardTitle>
 									{mainClub.description && (
-										<CardDescription className="text-base leading-relaxed">
+										<CardDescription className="text-base leading-relaxed text-muted-foreground/90">
 											{mainClub.description}
 										</CardDescription>
 									)}
@@ -156,36 +138,41 @@ export function ClubsListPage() {
 
 							<CardContent className="space-y-6">
 								{/* Informations de contact */}
-								<div className="space-y-4">
-									<h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-										Informations de contact
-									</h4>
+								<div className="space-y-5">
+									<div className="space-y-2">
+										<div className="h-1 w-8 bg-gradient-to-r from-primary to-primary/60 rounded-full" />
+										<h4 className="font-semibold text-foreground uppercase tracking-wide text-sm">
+											Informations de contact
+										</h4>
+									</div>
 
-									<div className="grid gap-3">
+									<div className="grid gap-4">
 										{mainClub.address && (
-											<div className="flex items-start gap-3">
-												<div className="p-1.5 bg-muted rounded">
-													<MapPin className="h-4 w-4 text-muted-foreground" />
+											<div className="flex items-start gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+												<div className="p-2 bg-background rounded-lg shadow-sm">
+													<MapPin className="h-4 w-4 text-primary" />
 												</div>
-												<div className="flex-1">
-													<p className="text-sm font-medium text-muted-foreground">
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Adresse
 													</p>
-													<p className="text-sm">{mainClub.address}</p>
+													<p className="text-sm font-medium text-foreground leading-relaxed">
+														{mainClub.address}
+													</p>
 												</div>
 											</div>
 										)}
 
 										{mainClub.email && (
-											<div className="flex items-center gap-3">
-												<div className="p-1.5 bg-muted rounded">
-													<Mail className="h-4 w-4 text-muted-foreground" />
+											<div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+												<div className="p-2 bg-background rounded-lg shadow-sm">
+													<Mail className="h-4 w-4 text-primary" />
 												</div>
-												<div className="flex-1">
-													<p className="text-sm font-medium text-muted-foreground">
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Email
 													</p>
-													<Badge variant="outline" className="text-xs">
+													<Badge variant="outline" className="text-xs bg-background border-primary/20 text-primary">
 														{mainClub.email}
 													</Badge>
 												</div>
@@ -193,15 +180,15 @@ export function ClubsListPage() {
 										)}
 
 										{mainClub.phone && (
-											<div className="flex items-center gap-3">
-												<div className="p-1.5 bg-muted rounded">
-													<Phone className="h-4 w-4 text-muted-foreground" />
+											<div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+												<div className="p-2 bg-background rounded-lg shadow-sm">
+													<Phone className="h-4 w-4 text-primary" />
 												</div>
-												<div className="flex-1">
-													<p className="text-sm font-medium text-muted-foreground">
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Téléphone
 													</p>
-													<Badge variant="outline" className="text-xs">
+													<Badge variant="outline" className="text-xs bg-background border-primary/20 text-primary">
 														{mainClub.phone}
 													</Badge>
 												</div>
@@ -209,22 +196,23 @@ export function ClubsListPage() {
 										)}
 
 										{mainClub.website && (
-											<div className="flex items-center gap-3">
-												<div className="p-1.5 bg-muted rounded">
-													<Globe className="h-4 w-4 text-muted-foreground" />
+											<div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+												<div className="p-2 bg-background rounded-lg shadow-sm">
+													<Globe className="h-4 w-4 text-primary" />
 												</div>
-												<div className="flex-1">
-													<p className="text-sm font-medium text-muted-foreground">
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Site web
 													</p>
 													<a
 														href={mainClub.website}
 														target="_blank"
 														rel="noopener noreferrer"
+														className="inline-block"
 													>
 														<Badge
 															variant="outline"
-															className="text-xs hover:bg-primary/10 transition-colors cursor-pointer"
+															className="text-xs bg-background border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/40 transition-all duration-200 cursor-pointer"
 														>
 															{mainClub.website}
 														</Badge>
@@ -236,21 +224,22 @@ export function ClubsListPage() {
 								</div>
 
 								{/* Bouton principal d'accès */}
-								<div className="pt-4 border-t border-primary/20">
-									<Link
-										to="/admin/dashboard/clubs/$clubId"
-										params={{ clubId: mainClub.id }}
-										className="block"
+								<div className="pt-6 border-t border-primary/20">
+									<Button
+										size="lg"
+										className="w-full text-lg py-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/95 hover:via-primary/90 hover:to-primary/85 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+										asChild
 									>
-										<Button
-											size="lg"
-											className="w-full text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+										<Link
+											to="/admin/dashboard/clubs/$clubId"
+											params={{ clubId: mainClub.id }}
+											className="block"
 										>
 											<Building2 className="mr-3 h-6 w-6" />
 											Gérer mon association
-											<ArrowRight className="ml-3 h-6 w-6" />
-										</Button>
-									</Link>
+											<ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+										</Link>
+									</Button>
 								</div>
 							</CardContent>
 						</Card>

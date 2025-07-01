@@ -34,24 +34,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useSections } from "../../hooks/useSections";
 import type { Section } from "../../types";
+
+interface SectionFormProps {
+	mode: "create" | "edit";
+	clubId: string;
+	sectionId?: string;
+	section?: Section;
+	onSuccess?: (section: Section) => void;
+	onCancelLink?: string;
+}
 
 export function SectionForm({
 	mode,
 	clubId,
 	sectionId,
-}: {
-	mode: "create" | "edit";
-	clubId: string;
-	sectionId?: string;
-}) {
+	section,
+}: SectionFormProps) {
 	const navigate = useNavigate();
+	const { sections, createSection, updateSection } = useSections({ clubId });
 	const [isLoading, setIsLoading] = useState(false);
-	const [existingSections, setExistingSections] = useState<Section[]>([]);
-	const [isLoadingExistingSections, setIsLoadingExistingSections] =
-		useState(true);
 
-	// schéma de validation dynamique qui prend en compte les sections existantes
+	const isEditing = mode === "edit";
+
+	// Schéma de validation dynamique qui prend en compte les sections existantes
 	const createSectionSchema = (
 		existingSections: Section[],
 		currentSectionId?: string,
@@ -62,14 +69,14 @@ export function SectionForm({
 				.min(1, "Le nom est requis")
 				.max(100, "Le nom ne peut pas dépasser 100 caractères")
 				.refine((name) => {
-					// normalisation du nom pour la comparaison
+					// Normalisation du nom pour la comparaison
 					const normalizedName = name.trim().toLowerCase();
 
-					// vérifie si une section avec ce nom existe déjà
+					// Vérifie si une section avec ce nom existe déjà
 					const duplicateSection = existingSections.find(
 						(section) =>
 							section.name.trim().toLowerCase() === normalizedName &&
-							section.id !== currentSectionId, // exclusion la section actuelle en mode édition
+							section.id !== currentSectionId, // Exclusion la section actuelle en mode édition
 					);
 
 					return !duplicateSection;
@@ -85,55 +92,49 @@ export function SectionForm({
 		});
 	};
 
-	const sectionSchema = createSectionSchema(existingSections, sectionId);
+	const sectionSchema = createSectionSchema(sections, sectionId);
 	type SectionFormData = z.infer<typeof sectionSchema>;
 
 	const form = useForm<SectionFormData>({
 		resolver: zodResolver(sectionSchema),
 		defaultValues: {
-			name: "",
-			description: "",
-			color: "#3b82f6", // blue-500 par défaut
+			name: section?.name || "",
+			description: section?.description || "",
+			color: section?.color || "#3b82f6", // blue-500 par défaut
 		},
 	});
 
-	// récupération des sections existantes au chargement
+	// Chargement de la section en mode édition
 	useEffect(() => {
-		const fetchExistingSections = async () => {
-			try {
-				setIsLoadingExistingSections(true);
-				const response = await fetch(`/api/clubs/${clubId}/sections`);
-				if (!response.ok)
-					throw new Error("Erreur lors du chargement des sections");
-				const sections: Section[] = await response.json();
-				setExistingSections(sections);
-			} catch (error) {
-				console.error("Erreur lors du chargement des sections:", error);
-				toast.error("Erreur lors du chargement des sections existantes");
-			} finally {
-				setIsLoadingExistingSections(false);
-			}
-		};
-
-		fetchExistingSections();
-	}, [clubId]);
-
-	// mise à jour du resolver du formulaire quand les sections existantes changent
-	useEffect(() => {
-		if (!isLoadingExistingSections) {
-			// récréation du formulaire avec les valeurs actuelles
-			const currentValues = form.getValues();
-			form.reset(currentValues);
+		if (isEditing && sectionId && !section) {
+			setIsLoading(true);
+			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
+				.then((res) => {
+					if (!res.ok) throw new Error("Erreur lors du chargement de la section");
+					return res.json();
+				})
+				.then((section: Section) => {
+					form.reset({
+						name: section.name || "",
+						description: section.description || "",
+						color: section.color || "#3b82f6",
+					});
+				})
+				.catch((error) => {
+					console.error("Erreur:", error);
+					toast.error("Erreur lors du chargement de la section");
+				})
+				.finally(() => setIsLoading(false));
 		}
-	}, [isLoadingExistingSections, form.getValues, form.reset]);
+	}, [isEditing, sectionId, section, clubId, form]);
 
 	// validation en temps réel pour les noms dupliqués
 	useEffect(() => {
 		const subscription = form.watch((value, { name: fieldName }) => {
-			if (fieldName === "name" && value.name && !isLoadingExistingSections) {
+			if (fieldName === "name" && value.name) {
 				const normalizedName = value.name.trim().toLowerCase();
-				const duplicateSection = existingSections.find(
-					(section) =>
+				const duplicateSection = sections.find(
+					(section: Section) =>
 						section.name.trim().toLowerCase() === normalizedName &&
 						section.id !== sectionId,
 				);
@@ -157,37 +158,13 @@ export function SectionForm({
 		});
 
 		return () => subscription.unsubscribe();
-	}, [form, existingSections, sectionId, isLoadingExistingSections]);
-
-	useEffect(() => {
-		if (mode === "edit" && sectionId && !isLoadingExistingSections) {
-			setIsLoading(true);
-			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
-				.then((res) => {
-					if (!res.ok)
-						throw new Error("Erreur lors du chargement de la section");
-					return res.json();
-				})
-				.then((section: Section) => {
-					form.reset({
-						name: section.name || "",
-						description: section.description || "",
-						color: section.color || "#3b82f6",
-					});
-				})
-				.catch((error) => {
-					console.error("Erreur:", error);
-					toast.error("Erreur lors du chargement de la section");
-				})
-				.finally(() => setIsLoading(false));
-		}
-	}, [mode, sectionId, clubId, form, isLoadingExistingSections]);
+	}, [form, sections, sectionId]);
 
 	const onSubmit = async (data: SectionFormData) => {
 		// Validation manuelle supplémentaire pour les noms dupliqués
 		const normalizedName = data.name.trim().toLowerCase();
-		const duplicateSection = existingSections.find(
-			(section) =>
+		const duplicateSection = sections.find(
+			(section: Section) =>
 				section.name.trim().toLowerCase() === normalizedName &&
 				section.id !== sectionId,
 		);
@@ -200,34 +177,11 @@ export function SectionForm({
 			return;
 		}
 
-		setIsLoading(true);
 		try {
-			const url =
-				mode === "create"
-					? `/api/clubs/${clubId}/sections`
-					: `/api/clubs/${clubId}/sections/${sectionId}`;
-
-			const method = mode === "create" ? "POST" : "PUT";
-
-			const response = await fetch(url, {
-				method,
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				if (
-					response.status === 409 ||
-					errorData.message?.includes("existe déjà")
-				) {
-					form.setError("name", {
-						type: "manual",
-						message: "Une section avec ce nom existe déjà",
-					});
-					return;
-				}
-				throw new Error(errorData.message || "Erreur lors de la sauvegarde");
+			if (mode === "create") {
+				await createSection({ ...data, clubId });
+			} else if (sectionId) {
+				await updateSection(sectionId, data);
 			}
 
 			toast.success(
@@ -242,8 +196,6 @@ export function SectionForm({
 		} catch (error) {
 			console.error("Erreur:", error);
 			toast.error("Une erreur est survenue lors de la sauvegarde");
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -262,21 +214,6 @@ export function SectionForm({
 						<div className="flex items-center justify-center space-x-2">
 							<Loader2 className="h-6 w-6 animate-spin" />
 							<span>Chargement de la section...</span>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
-
-	if (isLoadingExistingSections) {
-		return (
-			<div className="container mx-auto p-6 max-w-4xl">
-				<Card>
-					<CardContent className="pt-6">
-						<div className="flex items-center justify-center space-x-2">
-							<Loader2 className="h-6 w-6 animate-spin" />
-							<span>Chargement des données...</span>
 						</div>
 					</CardContent>
 				</Card>

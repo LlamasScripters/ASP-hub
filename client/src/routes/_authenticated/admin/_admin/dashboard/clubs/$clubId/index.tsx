@@ -14,6 +14,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Building2,
+	Info,
 	Calendar,
 	FileText,
 	FolderOpen,
@@ -128,45 +129,44 @@ function ClubOverviewPage() {
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 					<div>
 						<h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
-							<Building2 className="h-8 w-8 text-primary" />
 							{club.name}
 						</h1>
 						<p className="text-lg text-muted-foreground mt-2">
 							Tableau de bord de gestion du club
 						</p>
 					</div>
-					<Link to="/admin/dashboard/clubs">
-						<Button variant="outline" className="flex items-center gap-2">
+					<Button variant="outline" className="flex items-center gap-2" asChild>
+						<Link to="/admin/dashboard/clubs">
 							<ArrowLeft className="h-4 w-4" />
 							Retour à l'association
-						</Button>
-					</Link>
+						</Link>	
+					</Button>
 				</div>
 
 				{/* Informations du club */}
 				<Card className="shadow-sm">
 					<CardHeader>
 						<CardTitle className="text-xl flex items-center gap-2">
-							<Building2 className="h-5 w-5" />
+							<Info className="h-5 w-5" />
 							Informations du club
 						</CardTitle>
 						<CardDescription>
 							Coordonnées et détails de contact du club
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="space-y-6">
 						{/* Description du club */}
 						{club.description && (
-							<div className="mb-6 p-4 bg-muted/30 rounded-lg">
+							<div className="p-4 bg-muted/30 rounded-lg border border-muted">
 								<div className="flex items-start gap-3">
-									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mt-0.5">
-										<FileText className="h-5 w-5 text-primary" />
+									<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+										<FileText className="h-4 w-4 text-primary" />
 									</div>
-									<div className="flex-1">
+									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium text-muted-foreground mb-2">
 											Description
 										</p>
-										<p className="text-sm leading-relaxed">
+										<p className="text-sm leading-relaxed text-foreground">
 											{club.description}
 										</p>
 									</div>
@@ -174,20 +174,25 @@ function ClubOverviewPage() {
 							</div>
 						)}
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<Separator />
+
+						{/* Informations de contact */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							{/* Adresse */}
-							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-									<MapPin className="h-5 w-5 text-primary" />
+							<div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+								<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 shrink-0">
+									<MapPin className="h-4 w-4 text-red-600" />
 								</div>
-								<div className="flex-1">
-									<p className="text-sm font-medium text-muted-foreground">
+								<div className="min-w-0 flex-1">
+									<p className="text-sm font-medium text-muted-foreground mb-1">
 										Adresse
 									</p>
 									{club.address ? (
-										<p className="text-sm mt-1 break-words">{club.address}</p>
+										<p className="text-sm text-foreground leading-relaxed break-words">
+											{club.address}
+										</p>
 									) : (
-										<p className="text-sm text-muted-foreground mt-1">
+										<p className="text-sm text-muted-foreground italic">
 											Non renseignée
 										</p>
 									)}
@@ -195,23 +200,28 @@ function ClubOverviewPage() {
 							</div>
 
 							{/* Email */}
-							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-									<Mail className="h-5 w-5 text-primary" />
+							<div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+								<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 shrink-0">
+									<Mail className="h-4 w-4 text-blue-600" />
 								</div>
-								<div className="flex-1">
-									<p className="text-sm font-medium text-muted-foreground">
+								<div className="min-w-0 flex-1">
+									<p className="text-sm font-medium text-muted-foreground mb-1">
 										Email
 									</p>
 									{club.email ? (
-										<Badge
-											variant="outline"
-											className="mt-1 text-sm font-normal"
+										<a 
+											href={`mailto:${club.email}`}
+											className="inline-block"
 										>
-											{club.email}
-										</Badge>
+											<Badge
+												variant="secondary"
+												className="text-sm font-normal hover:bg-blue-100 transition-colors cursor-pointer"
+											>
+												{club.email}
+											</Badge>
+										</a>
 									) : (
-										<p className="text-sm text-muted-foreground mt-1">
+										<p className="text-sm text-muted-foreground italic">
 											Non renseigné
 										</p>
 									)}
@@ -219,23 +229,28 @@ function ClubOverviewPage() {
 							</div>
 
 							{/* Téléphone */}
-							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-									<Phone className="h-5 w-5 text-primary" />
+							<div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+								<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 shrink-0">
+									<Phone className="h-4 w-4 text-green-600" />
 								</div>
-								<div className="flex-1">
-									<p className="text-sm font-medium text-muted-foreground">
+								<div className="min-w-0 flex-1">
+									<p className="text-sm font-medium text-muted-foreground mb-1">
 										Téléphone
 									</p>
 									{club.phone ? (
-										<Badge
-											variant="outline"
-											className="mt-1 text-sm font-normal"
+										<a 
+											href={`tel:${club.phone}`}
+											className="inline-block"
 										>
-											{club.phone}
-										</Badge>
+											<Badge
+												variant="secondary"
+												className="text-sm font-normal hover:bg-green-100 transition-colors cursor-pointer"
+											>
+												{club.phone}
+											</Badge>
+										</a>
 									) : (
-										<p className="text-sm text-muted-foreground mt-1">
+										<p className="text-sm text-muted-foreground italic">
 											Non renseigné
 										</p>
 									)}
@@ -243,12 +258,12 @@ function ClubOverviewPage() {
 							</div>
 
 							{/* Site web */}
-							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-									<Globe className="h-5 w-5 text-primary" />
+							<div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+								<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 shrink-0">
+									<Globe className="h-4 w-4 text-purple-600" />
 								</div>
-								<div className="flex-1">
-									<p className="text-sm font-medium text-muted-foreground">
+								<div className="min-w-0 flex-1">
+									<p className="text-sm font-medium text-muted-foreground mb-1">
 										Site web
 									</p>
 									{club.website ? (
@@ -256,17 +271,17 @@ function ClubOverviewPage() {
 											href={club.website}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="inline-block mt-1"
+											className="inline-block"
 										>
 											<Badge
-												variant="outline"
-												className="text-sm font-normal hover:bg-primary/10 transition-colors cursor-pointer"
+												variant="secondary"
+												className="text-sm font-normal hover:bg-purple-100 transition-colors cursor-pointer break-all"
 											>
 												{club.website}
 											</Badge>
 										</a>
 									) : (
-										<p className="text-sm text-muted-foreground mt-1">
+										<p className="text-sm text-muted-foreground italic">
 											Non renseigné
 										</p>
 									)}

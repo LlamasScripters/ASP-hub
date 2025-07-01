@@ -208,16 +208,16 @@ export function SectionsListPage() {
 							Gérez et organisez les sections sportives de votre club
 						</p>
 					</div>
-					<Link
+					<Button size="lg" className="flex items-center gap-2" asChild>
+						<Link
 						to="/admin/dashboard/clubs/$clubId/sections/create"
 						params={{ clubId }}
-					>
-						<Button size="lg" className="flex items-center gap-2">
+						>
 							<Plus className="h-5 w-5" />
 							Créer une section
-						</Button>
-					</Link>
-				</div>
+						</Link>
+					</Button>
+			</div>
 
 				{/* Statistiques rapides */}
 				{sections.length > 0 && (
@@ -284,17 +284,17 @@ export function SectionsListPage() {
 								Commencez par créer votre première section pour organiser les
 								activités sportives de votre club.
 							</p>
-							<Link
+							<Button size="lg" asChild>
+								<Link
 								to="/admin/dashboard/clubs/$clubId/sections/create"
 								params={{ clubId }}
-							>
-								<Button size="lg">
+								>
 									<Plus className="mr-2 h-5 w-5" />
 									Créer votre première section
-								</Button>
-							</Link>
-						</CardContent>
-					</Card>
+								</Link>
+							</Button>
+					</CardContent>
+				</Card>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{sections.map((section) => (
@@ -340,47 +340,50 @@ export function SectionsListPage() {
 
 								<CardContent className="space-y-3">
 									<div className="space-y-2">
-										<Link
-											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories"
-											params={{ clubId, sectionId: section.id }}
-											className="block"
-										>
-											<Button
+										<Button
 												variant="outline"
 												className="w-full justify-start hover:bg-primary/5 hover:border-primary/20 hover:text-primary group"
+												asChild
 											>
-												<Eye className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-												Voir les catégories
-											</Button>
-										</Link>
+												<Link
+													to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories"
+													params={{ clubId, sectionId: section.id }}
+													className="block"
+												>
+													<Eye className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
+													Voir les catégories
+												</Link>
+										</Button>
 
-										<Link
-											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions"
-											params={{ clubId, sectionId: section.id }}
-											className="block"
+										<Button
+											variant="outline"
+											className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:hover:bg-blue-950/20 group"
+											asChild
 										>
-											<Button
-												variant="outline"
-												className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:hover:bg-blue-950/20 group"
+											<Link
+												to="/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+												params={{ clubId, sectionId: section.id }}
+												className="block"
 											>
 												<Calendar className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
 												Gérer les sessions
-											</Button>
-										</Link>
+											</Link>
+										</Button>
 
-										<Link
-											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
-											params={{ clubId, sectionId: section.id }}
-											className="block"
+										<Button
+											variant="ghost"
+											className="w-full justify-start hover:bg-muted/50 text-muted-foreground hover:text-foreground group"
+											asChild
 										>
-											<Button
-												variant="ghost"
-												className="w-full justify-start hover:bg-muted/50 text-muted-foreground hover:text-foreground group"
+											<Link
+												to="/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+												params={{ clubId, sectionId: section.id }}
+												className="block"
 											>
 												<Edit className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
 												Modifier la section
-											</Button>
-										</Link>
+											</Link>
+										</Button>
 
 										<Button
 											variant="ghost"
