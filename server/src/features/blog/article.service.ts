@@ -30,7 +30,7 @@ export interface UpdateArticleData {
 }
 
 export const articleService = {
-	// Liste tous les articles avec leurs tags
+	// Liste tous les articles avec leurs tags (pour l'admin)
 	async getAll() {
 		const articlesWithTags = await db
 			.select({
@@ -47,8 +47,13 @@ export const articleService = {
 				deletedAt: articles.deletedAt,
 				tagId: tags.id,
 				tagName: tags.name,
+				authorName: users.name,
+				authorFirstName: users.firstName,
+				authorLastName: users.lastName,
+				authorImage: users.image,
 			})
 			.from(articles)
+			.innerJoin(users, eq(articles.authorId, users.id))
 			.leftJoin(articleTags, eq(articles.id, articleTags.articleId))
 			.leftJoin(tags, eq(articleTags.tagId, tags.id))
 			.orderBy(desc(articles.createdAt));
@@ -70,6 +75,13 @@ export const articleService = {
 					authorId: row.authorId,
 					commentsEnabled: row.commentsEnabled,
 					deletedAt: row.deletedAt,
+					author: {
+						id: row.authorId,
+						name: row.authorName,
+						firstName: row.authorFirstName,
+						lastName: row.authorLastName,
+						image: row.authorImage,
+					},
 					tags: [],
 				});
 			}
@@ -104,7 +116,94 @@ export const articleService = {
 		return articlesArray;
 	},
 
-	// Récupère un article par ID avec ses tags et l'auteur
+	// Liste seulement les articles publiés avec leurs tags (pour le public)
+	async getPublishedArticles() {
+		const articlesWithTags = await db
+			.select({
+				id: articles.id,
+				title: articles.title,
+				headerImage: articles.headerImage,
+				content: articles.content,
+				state: articles.state,
+				createdAt: articles.createdAt,
+				updatedAt: articles.updatedAt,
+				publishedAt: articles.publishedAt,
+				authorId: articles.authorId,
+				commentsEnabled: articles.commentsEnabled,
+				deletedAt: articles.deletedAt,
+				tagId: tags.id,
+				tagName: tags.name,
+				authorName: users.name,
+				authorFirstName: users.firstName,
+				authorLastName: users.lastName,
+				authorImage: users.image,
+			})
+			.from(articles)
+			.innerJoin(users, eq(articles.authorId, users.id))
+			.leftJoin(articleTags, eq(articles.id, articleTags.articleId))
+			.leftJoin(tags, eq(articleTags.tagId, tags.id))
+			.where(eq(articles.state, "published"))
+			.orderBy(desc(articles.createdAt));
+
+		// Regrouper les articles avec leurs tags
+		const articlesMap = new Map();
+
+		for (const row of articlesWithTags) {
+			if (!articlesMap.has(row.id)) {
+				articlesMap.set(row.id, {
+					id: row.id,
+					title: row.title,
+					headerImage: row.headerImage,
+					content: row.content,
+					state: row.state,
+					createdAt: row.createdAt,
+					updatedAt: row.updatedAt,
+					publishedAt: row.publishedAt,
+					authorId: row.authorId,
+					commentsEnabled: row.commentsEnabled,
+					deletedAt: row.deletedAt,
+					author: {
+						id: row.authorId,
+						name: row.authorName,
+						firstName: row.authorFirstName,
+						lastName: row.authorLastName,
+						image: row.authorImage,
+					},
+					tags: [],
+				});
+			}
+
+			if (row.tagId !== null) {
+				articlesMap.get(row.id).tags.push({
+					id: row.tagId,
+					name: row.tagName,
+				});
+			}
+		}
+
+		const articlesArray = Array.from(articlesMap.values());
+
+		// Ajouter le nombre de commentaires pour chaque article
+		for (const article of articlesArray) {
+			const commentsCount = await db
+				.select()
+				.from(comments)
+				.where(
+					and(
+						eq(comments.articleId, article.id),
+						eq(comments.state, "published"),
+						isNull(comments.deletedAt),
+					),
+				);
+
+			// @ts-ignore - Adding commentsCount property dynamically
+			article.commentsCount = commentsCount.length;
+		}
+
+		return articlesArray;
+	},
+
+	// Récupère un article par ID avec ses tags et l'auteur (admin)
 	async getById(id: string) {
 		const article = await db.select().from(articles).where(eq(articles.id, id));
 		if (!article[0]) return null;
@@ -161,7 +260,7 @@ export const articleService = {
 			tags: articleWithTags
 				.filter((row) => row.tagId !== null)
 				.map((row) => ({
-					id: row.tagId as string,
+					id: row.tagId as unknown as string,
 					name: row.tagName as string,
 				})),
 		};
@@ -187,6 +286,7 @@ export const articleService = {
 	// Crée un article avec tags
 	async create(data: CreateArticleData) {
 		const { tags: tagNames = [], ...articleData } = data;
+
 		const [created] = await db
 			.insert(articles)
 			.values({
