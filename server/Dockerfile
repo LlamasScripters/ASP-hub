@@ -1,35 +1,34 @@
-FROM node:22.15.0-alpine as base
-
-RUN adduser -D -u 1001 app
-USER app
+FROM node:22.15.0-alpine AS base
 
 WORKDIR /app
 COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
-COPY --chown=app:app . /app
-
-# Development
-FROM base as development
-
-RUN npm run dev
+COPY . ./
 
 # Builder
-FROM base as builder
-
-RUN npm run build
-
-RUN npm install --only=production
-
-# Production
-FROM base as production
+FROM base AS builder
 
 WORKDIR /app
 
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-COPY --from=builder /app/node_modules /app/node_modules
+RUN npm run db:generate
 
-CMD ["node", "dist/index.js"]
+RUN npm run build
+
+RUN npm prune --omit=dev
+
+# Production
+FROM node:22.15.0-alpine AS production
+
+WORKDIR /app
+
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/drizzle /app/drizzle
+
+EXPOSE 3000
+
+USER node
+
+ENTRYPOINT ["node"]

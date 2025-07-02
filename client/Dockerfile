@@ -1,5 +1,5 @@
 # Build
-FROM node:22.15.0-alpine as build
+FROM node:22.15.0-alpine AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -11,13 +11,13 @@ COPY . /app
 RUN npm run build
 
 # Production
-FROM nginx:1.27.5-alpine
+FROM nginx:1.29.0-alpine AS production
 
 RUN adduser -D -H -u 1001 -s /sbin/nologin webuser
 
 RUN mkdir -p /app/www
 
-COPY nginx/nginx.conf /etc/nginx/templates/default.conf.template
+COPY nginx/prod.conf /etc/nginx/templates/default.conf.template
 
 COPY --from=build /app/dist /app/www
 RUN chown -R webuser:webuser /app/www && \
@@ -34,7 +34,6 @@ EXPOSE 80
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 ENV NGINX_ENVSUBST_TEMPLATE_SUFFIX=.template
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-ENV PORT=80
 
 USER webuser
 

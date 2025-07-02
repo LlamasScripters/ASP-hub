@@ -1,5 +1,7 @@
 // lib/api/blog.ts
-import type { ArticleState } from "../../../../../server/src/db/schema";
+
+type ArticleState = "draft" | "published" | "archived";
+type CommentState = "published" | "archived";
 
 export interface Blog {
 	id: string;
@@ -75,7 +77,7 @@ export interface Comment {
 	articleId: string;
 	authorId: string;
 	content: string;
-	state: "published" | "archived";
+	state: CommentState;
 	createdAt: string;
 	updatedAt: string;
 	deletedAt: string | null;
@@ -96,7 +98,7 @@ export interface CreateCommentData {
 
 export interface UpdateCommentData {
 	content?: string;
-	state?: "published" | "archived";
+	state?: CommentState;
 }
 
 export interface Reaction {

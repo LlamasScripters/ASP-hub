@@ -1,5 +1,3 @@
-import { Readable } from "node:stream";
-import { ReadableStream } from "node:stream/web";
 import { auth, authConfig } from "@/lib/auth.js";
 import { s3Client } from "@/lib/s3.js";
 import { upload } from "@/lib/upload.js";
@@ -110,11 +108,13 @@ usersRouter.post(
 		next();
 		return;
 	},
-	(req, res, next) => {
-		return upload({
+	async (req, res, next) => {
+		const uploader = await upload({
 			key: `users/${req.params.userId}`,
 			validMimeTypes: usersConfig.userAvatarMimeTypes,
-		}).single("image")(req, res, next);
+		});
+
+		return uploader.single("image")(req, res, next);
 	},
 	async (req, res) => {
 		const image = req.file as Express.MulterS3.File | undefined;

@@ -258,10 +258,10 @@ export const articleService = {
 				image: articleWithTags[0].authorImage,
 			},
 			tags: articleWithTags
-				.filter((row) => row.tagId !== null)
+				.filter((row) => typeof row.tagId === "number")
 				.map((row) => ({
-					id: row.tagId as unknown as string,
-					name: row.tagName as string,
+					id: row.tagId,
+					name: row.tagName,
 				})),
 		};
 

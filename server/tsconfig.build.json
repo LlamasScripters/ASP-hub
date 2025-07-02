@@ -2,7 +2,6 @@
 	"compilerOptions": {
 		"target": "ES2024",
 		"module": "NodeNext",
-		"rootDir": "./src",
 		"moduleResolution": "nodenext",
 		"baseUrl": "./",
 		"paths": {
@@ -15,5 +14,10 @@
 		"skipLibCheck": true
 	},
 	"include": ["src/**/*", "env.d.ts"],
-	"exclude": ["node_modules", "dist", "*.config.ts"]
+	"exclude": [
+		"node_modules",
+		"dist",
+		"drizzle.config.ts",
+		"drizzle-dev.config.ts"
+	]
 }

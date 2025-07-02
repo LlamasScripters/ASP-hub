@@ -14,17 +14,29 @@ export const s3Client = new S3Client({
 	forcePathStyle: true,
 });
 
-export async function createBucketIfNotExists(client: S3Client) {
+export async function createBucketIfNotExists({
+	client,
+	bucketName,
+}: {
+	client: S3Client;
+	bucketName: string;
+}) {
 	const buckets = await client.send(new ListBucketsCommand());
-	const isBucketExists =
-		Array.isArray(buckets.Buckets) &&
-		buckets.Buckets.some((bucket) => bucket.Name === process.env.S3_BUCKET);
+	const bucket = buckets.Buckets?.find((bucket) => bucket.Name === bucketName);
 
-	if (!isBucketExists) {
-		await client.send(
-			new CreateBucketCommand({
-				Bucket: process.env.S3_BUCKET,
-			}),
-		);
+	if (bucket) {
+		return {
+			bucketName,
+		};
 	}
+
+	await client.send(
+		new CreateBucketCommand({
+			Bucket: bucketName,
+		}),
+	);
+
+	return {
+		bucketName,
+	};
 }

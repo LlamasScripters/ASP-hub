@@ -69,7 +69,7 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 					</Button>
 				</Link>
 				<div className="flex gap-2">
-					<Link to={`/admin/blog/${blog.id}/edit`}>
+					<Link to={"/admin/blog/$blogId/edit"} params={{ blogId: blog.id }}>
 						<Button className="gap-2">
 							<Edit className="h-4 w-4" />
 							Modifier
@@ -230,7 +230,11 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 
 				{/* Actions rapides */}
 				<div className="flex flex-col sm:flex-row gap-4">
-					<Link to={`/admin/blog/${blog.id}/edit`} className="flex-1">
+					<Link
+						to={"/admin/blog/$blogId/edit"}
+						params={{ blogId: blog.id }}
+						className="flex-1"
+					>
 						<Button className="w-full gap-2">
 							<Edit className="h-4 w-4" />
 							Modifier cet article
