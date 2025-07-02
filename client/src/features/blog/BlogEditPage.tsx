@@ -1,4 +1,3 @@
-import { SimpleEditor } from "@/components/templates/simple/simple-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +34,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SimpleEditor } from "./components/simple-editor";
 import {
 	type Blog,
 	type Tag,

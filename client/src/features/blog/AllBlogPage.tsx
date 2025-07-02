@@ -24,6 +24,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
 import {
 	Calendar,
@@ -32,9 +33,10 @@ import {
 	FileText,
 	MoreHorizontal,
 	Plus,
+	Search,
 	Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { type Blog, useBlogs, useDeleteBlog } from "./hooks/useBlogQueries.ts";
 
 interface AllBlogPageProps {
@@ -43,13 +45,27 @@ interface AllBlogPageProps {
 
 export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 	const [deleteBlog, setDeleteBlog] = useState<Blog | null>(null);
+	const [searchTerm, setSearchTerm] = useState("");
 
 	// Utiliser TanStack Query pour gérer l'état
 	const { data: queryBlogs, isLoading, error } = useBlogs();
 	const deleteBlogMutation = useDeleteBlog();
 
 	// Utiliser les blogs du query si disponibles, sinon les blogs initiaux
-	const blogs = queryBlogs || initialBlogs || [];
+	const allBlogs = queryBlogs || initialBlogs || [];
+
+	// Filtrer les blogs en fonction du terme de recherche
+	const blogs = useMemo(() => {
+		if (!searchTerm.trim()) return allBlogs;
+
+		const term = searchTerm.toLowerCase();
+		return allBlogs.filter(
+			(blog) =>
+				blog.title.toLowerCase().includes(term) ||
+				blog.content.toLowerCase().includes(term) ||
+				blog.tags?.some((tag) => tag.name.toLowerCase().includes(term)),
+		);
+	}, [allBlogs, searchTerm]);
 
 	const handleDelete = async () => {
 		if (!deleteBlog) return;
@@ -141,6 +157,28 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 				</Link>
 			</div>
 
+			{/* Barre de recherche */}
+			<Card>
+				<CardContent className="p-6">
+					<div className="relative w-full">
+						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+						<Input
+							type="text"
+							placeholder="Rechercher un article..."
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.target.value)}
+							className="pl-10 w-full"
+						/>
+					</div>
+					{searchTerm && (
+						<p className="text-sm text-muted-foreground mt-2">
+							{blogs.length} article{blogs.length > 1 ? "s" : ""} trouvé
+							{blogs.length > 1 ? "s" : ""} pour "{searchTerm}"
+						</p>
+					)}
+				</CardContent>
+			</Card>
+
 			{/* Stats rapides */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				<Card>
@@ -150,7 +188,7 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 							<span className="text-sm text-muted-foreground">Publiés</span>
 						</div>
 						<p className="text-2xl font-bold mt-1">
-							{blogs.filter((b) => b.state === "published").length}
+							{allBlogs.filter((b) => b.state === "published").length}
 						</p>
 					</CardContent>
 				</Card>
@@ -161,7 +199,7 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 							<span className="text-sm text-muted-foreground">Brouillons</span>
 						</div>
 						<p className="text-2xl font-bold mt-1">
-							{blogs.filter((b) => b.state === "draft").length}
+							{allBlogs.filter((b) => b.state === "draft").length}
 						</p>
 					</CardContent>
 				</Card>
@@ -172,7 +210,7 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 							<span className="text-sm text-muted-foreground">Archivés</span>
 						</div>
 						<p className="text-2xl font-bold mt-1">
-							{blogs.filter((b) => b.state === "archived").length}
+							{allBlogs.filter((b) => b.state === "archived").length}
 						</p>
 					</CardContent>
 				</Card>
@@ -182,7 +220,7 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 							<FileText className="w-4 h-4 text-muted-foreground" />
 							<span className="text-sm text-muted-foreground">Total</span>
 						</div>
-						<p className="text-2xl font-bold mt-1">{blogs.length}</p>
+						<p className="text-2xl font-bold mt-1">{allBlogs.length}</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -206,88 +244,140 @@ export function AllBlogPage({ blogs: initialBlogs }: AllBlogPageProps) {
 					</CardContent>
 				</Card>
 			) : (
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{blogs.map((blog) => (
-						<Card
-							key={blog.id}
-							className="flex flex-col hover:shadow-lg transition-shadow"
-						>
-							{blog.headerImage && (
-								<div className="aspect-video overflow-hidden rounded-t-lg">
-									<img
-										src={blog.headerImage}
-										alt={blog.title}
-										className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-									/>
-								</div>
-							)}
-
-							<CardHeader className="flex-1">
-								<div className="flex justify-between items-start gap-2">
-									<CardTitle className="line-clamp-2 text-lg leading-tight">
-										{blog.title}
-									</CardTitle>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" size="icon" className="shrink-0">
-												<MoreHorizontal className="h-4 w-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuItem asChild>
-												<Link
-													to="/admin/blog/$blogId"
-													params={{ blogId: blog.id }}
-												>
-													<Eye className="mr-2 h-4 w-4" /> Voir
-												</Link>
-											</DropdownMenuItem>
-											<DropdownMenuItem asChild>
-												<Link
-													to="/admin/blog/$blogId/edit"
-													params={{ blogId: blog.id }}
-												>
-													<Edit className="mr-2 h-4 w-4" /> Éditer
-												</Link>
-											</DropdownMenuItem>
-											<DropdownMenuItem
-												onClick={() => setDeleteBlog(blog)}
-												className="text-destructive focus:text-destructive"
-											>
-												<Trash2 className="mr-2 h-4 w-4" /> Supprimer
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</div>
-
-								<div className="flex items-center gap-2 text-sm text-muted-foreground">
-									<Calendar className="h-3 w-3" />
-									{formatDate(blog.createdAt)}
-								</div>
-							</CardHeader>
-
-							<CardContent className="flex-1">
-								<p className="line-clamp-3 text-sm text-muted-foreground">
-									{stripHtml(blog.content).substring(0, 150)}...
-								</p>
-							</CardContent>
-
-							<CardFooter className="flex justify-between items-center pt-4 border-t">
-								<div className="flex items-center gap-2">
-									{getStateBadge(blog.state)}
-								</div>
-								<div className="flex items-center gap-1 text-xs text-muted-foreground">
-									{blog.commentsEnabled ? "💬" : "🚫"}
-									<span className="hidden sm:inline">
-										{blog.commentsEnabled
-											? "Commentaires"
-											: "Pas de commentaires"}
-									</span>
-								</div>
-							</CardFooter>
-						</Card>
-					))}
-				</div>
+				<Card>
+					<CardContent className="p-0">
+						<div className="overflow-x-auto">
+							<table className="w-full">
+								<thead>
+									<tr className="border-b bg-muted/50">
+										<th className="text-left p-4 font-medium">Titre</th>
+										<th className="text-left p-4 font-medium">Auteur</th>
+										<th className="text-left p-4 font-medium">État</th>
+										<th className="text-left p-4 font-medium">Date</th>
+										<th className="text-left p-4 font-medium">Tags</th>
+										<th className="text-left p-4 font-medium">Commentaires</th>
+										<th className="text-right p-4 font-medium">Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									{blogs.map((blog) => (
+										<tr
+											key={blog.id}
+											className="border-b hover:bg-muted/20 transition-colors"
+										>
+											<td className="p-4">
+												<div>
+													<p className="font-medium line-clamp-1">
+														{blog.title}
+													</p>
+													<p className="text-sm text-muted-foreground line-clamp-1">
+														{stripHtml(blog.content).substring(0, 80)}...
+													</p>
+												</div>
+											</td>
+											<td className="p-4">
+												<div className="flex items-center gap-2">
+													{blog.author?.image && (
+														<img
+															src={blog.author.image}
+															alt={`${blog.author.firstName} ${blog.author.lastName}`}
+															className="w-8 h-8 rounded-full object-cover"
+														/>
+													)}
+													<div>
+														<p className="text-sm font-medium">
+															{blog.author
+																? `${blog.author.firstName} ${blog.author.lastName}`
+																: "Auteur inconnu"}
+														</p>
+														<p className="text-xs text-muted-foreground">
+															{blog.author?.name || ""}
+														</p>
+													</div>
+												</div>
+											</td>
+											<td className="p-4">{getStateBadge(blog.state)}</td>
+											<td className="p-4">
+												<div className="flex items-center gap-1 text-sm text-muted-foreground">
+													<Calendar className="h-3 w-3" />
+													{formatDate(blog.createdAt)}
+												</div>
+											</td>
+											<td className="p-4">
+												<div className="flex flex-wrap gap-1">
+													{blog.tags && blog.tags.length > 0 ? (
+														blog.tags.slice(0, 2).map((tag) => (
+															<Badge
+																key={tag.id}
+																variant="outline"
+																className="text-xs"
+															>
+																#{tag.name}
+															</Badge>
+														))
+													) : (
+														<span className="text-xs text-muted-foreground">
+															Aucun
+														</span>
+													)}
+													{blog.tags && blog.tags.length > 2 && (
+														<Badge variant="outline" className="text-xs">
+															+{blog.tags.length - 2}
+														</Badge>
+													)}
+												</div>
+											</td>
+											<td className="p-4">
+												<div className="flex items-center gap-1 text-sm">
+													{blog.commentsEnabled ? "💬" : "🚫"}
+													<span className="text-muted-foreground">
+														{blog.commentsEnabled ? "Activés" : "Désactivés"}
+													</span>
+												</div>
+											</td>
+											<td className="p-4">
+												<div className="flex items-center gap-1 justify-end">
+													<Link
+														to="/admin/blog/$blogId"
+														params={{ blogId: blog.id }}
+													>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-8 w-8 p-0"
+														>
+															<Eye className="h-4 w-4" />
+														</Button>
+													</Link>
+													<Link
+														to="/admin/blog/$blogId/edit"
+														params={{ blogId: blog.id }}
+													>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-8 w-8 p-0"
+														>
+															<Edit className="h-4 w-4" />
+														</Button>
+													</Link>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+														onClick={() => setDeleteBlog(blog)}
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</div>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</CardContent>
+				</Card>
 			)}
 
 			{/* Dialogue de confirmation de suppression */}

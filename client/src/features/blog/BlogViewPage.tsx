@@ -45,6 +45,19 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 		}
 	};
 
+	const getStateText = (state: string) => {
+		switch (state) {
+			case "published":
+				return "Publié";
+			case "draft":
+				return "Brouillon";
+			case "archived":
+				return "Archivé";
+			default:
+				return state;
+		}
+	};
+
 	return (
 		<div className="container mx-auto p-4 sm:p-6 max-w-4xl">
 			{/* Header avec navigation */}
@@ -88,10 +101,6 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 									Commentaires activés
 								</Badge>
 							)}
-							<Badge variant="outline" className="gap-1">
-								<Eye className="h-3 w-3" />
-								Vue admin
-							</Badge>
 						</div>
 
 						{/* Titre */}
@@ -103,7 +112,11 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 						<div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 							<div className="flex items-center gap-1">
 								<User className="h-4 w-4" />
-								<span>Auteur ID: {blog.authorId}</span>
+								<span>
+									{blog.author
+										? `${blog.author.firstName} ${blog.author.lastName}`
+										: "Auteur inconnu"}
+								</span>
 							</div>
 							<div className="flex items-center gap-1">
 								<Calendar className="h-4 w-4" />
@@ -148,17 +161,19 @@ export default function BlogViewPage({ blog }: BlogViewPageProps) {
 							<div className="space-y-3">
 								<div>
 									<h4 className="text-sm font-medium text-muted-foreground">
-										Identifiant
+										Auteur
 									</h4>
-									<p className="text-sm font-mono bg-muted px-2 py-1 rounded">
-										{blog.id}
+									<p className="text-sm">
+										{blog.author
+											? `${blog.author.firstName} ${blog.author.lastName}`
+											: "Auteur inconnu"}
 									</p>
 								</div>
 								<div>
 									<h4 className="text-sm font-medium text-muted-foreground">
 										État
 									</h4>
-									<p className="text-sm">{blog.state}</p>
+									<p className="text-sm">{getStateText(blog.state)}</p>
 								</div>
 								<div>
 									<h4 className="text-sm font-medium text-muted-foreground">

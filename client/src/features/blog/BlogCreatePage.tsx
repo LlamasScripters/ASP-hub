@@ -1,4 +1,4 @@
-import { SimpleEditor } from "@/components/templates/simple/simple-editor";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -8,8 +8,21 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -20,25 +33,67 @@ import {
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { type CreateBlogData, useCreateBlog } from "./hooks/useBlogQueries.ts";
+import { SimpleEditor } from "./components/simple-editor";
+import {
+	type CreateBlogData,
+	type Tag,
+	useCreateBlog,
+	useTags,
+} from "./hooks/useBlogQueries.ts";
 
 type ArticleState = "draft" | "published" | "archived";
 
 export default function BlogCreatePage() {
 	const [title, setTitle] = useState("");
-	const [tags, setTags] = useState("");
+	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 	const [state, setState] = useState<ArticleState>("draft");
 	const [content, setContent] = useState("");
 	const [commentsEnabled, setCommentsEnabled] = useState(true);
 	const [headerImage, setHeaderImage] = useState("");
+	const [tagSearchOpen, setTagSearchOpen] = useState(false);
+	const [newTagName, setNewTagName] = useState("");
 
 	const navigate = useNavigate();
 	const createBlogMutation = useCreateBlog();
+	const { data: availableTags = [], isLoading: tagsLoading } = useTags();
 
 	// Récupérer l'utilisateur connecté
 	const { data: currentUser } = useQuery(getLoggedInUserQueryOptions());
+
+	const addTag = (tag: Tag) => {
+		if (!selectedTags.find((t) => t.id === tag.id)) {
+			setSelectedTags([...selectedTags, tag]);
+		}
+		setTagSearchOpen(false);
+	};
+
+	const removeTag = (tagId: number) => {
+		setSelectedTags(selectedTags.filter((tag) => tag.id !== tagId));
+	};
+
+	const createNewTag = () => {
+		if (
+			newTagName.trim() &&
+			!availableTags.find(
+				(tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase(),
+			)
+		) {
+			// Créer un tag temporaire avec un ID négatif pour le distinguer des vrais tags
+			const tempTag: Tag = {
+				id: -Date.now(), // ID temporaire négatif
+				name: newTagName.trim(),
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				deletedAt: null,
+			};
+			addTag(tempTag);
+			setNewTagName("");
+			setTagSearchOpen(false);
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -54,11 +109,8 @@ export default function BlogCreatePage() {
 			return;
 		}
 
-		// Convertir les tags en array
-		const tagArray = tags
-			.split(",")
-			.map((tag) => tag.trim())
-			.filter((tag) => tag.length > 0);
+		// Convertir les tags sélectionnés en array de noms
+		const tagArray = selectedTags.map((tag) => tag.name);
 
 		const blogData: CreateBlogData = {
 			title: title.trim(),
@@ -66,7 +118,7 @@ export default function BlogCreatePage() {
 			headerImage: headerImage.trim() || undefined,
 			state,
 			authorId: currentUser.id,
-			tags: tagArray.length > 0 ? tagArray : undefined,
+			tags: tagArray,
 			commentsEnabled,
 		};
 
@@ -115,16 +167,109 @@ export default function BlogCreatePage() {
 								</div>
 
 								<div>
-									<Label htmlFor="tags">Tags (séparés par des virgules)</Label>
-									<Input
-										id="tags"
-										value={tags}
-										onChange={(e) => setTags(e.target.value)}
-										placeholder="ex: sport, club, info"
-										className="mt-1"
-									/>
+									<Label htmlFor="tags">Tags</Label>
+									<div className="mt-1 space-y-2">
+										{/* Tags sélectionnés */}
+										{selectedTags.length > 0 && (
+											<div className="flex flex-wrap gap-1">
+												{selectedTags.map((tag) => (
+													<Badge
+														key={tag.id}
+														variant="secondary"
+														className="text-xs"
+													>
+														#{tag.name}
+														<Button
+															type="button"
+															size="sm"
+															variant="ghost"
+															className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+															onClick={() => removeTag(tag.id)}
+														>
+															<X className="h-3 w-3" />
+														</Button>
+													</Badge>
+												))}
+											</div>
+										)}
+
+										{/* Sélecteur de tags */}
+										<Popover
+											open={tagSearchOpen}
+											onOpenChange={setTagSearchOpen}
+										>
+											<PopoverTrigger asChild>
+												<Button
+													type="button"
+													variant="outline"
+													size="sm"
+													className="h-8 justify-start"
+													disabled={tagsLoading}
+												>
+													<Plus className="h-4 w-4 mr-2" />
+													Ajouter un tag
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-80 p-0" align="start">
+												<Command>
+													<CommandInput
+														placeholder="Rechercher ou créer un tag..."
+														value={newTagName}
+														onValueChange={setNewTagName}
+													/>
+													<CommandList>
+														{availableTags.filter(
+															(tag) =>
+																!selectedTags.find(
+																	(selected) => selected.id === tag.id,
+																) &&
+																tag.name
+																	.toLowerCase()
+																	.includes(newTagName.toLowerCase()),
+														).length === 0 && newTagName.trim() === "" ? (
+															<CommandEmpty>Aucun tag trouvé.</CommandEmpty>
+														) : (
+															<CommandGroup>
+																{availableTags
+																	.filter(
+																		(tag) =>
+																			!selectedTags.find(
+																				(selected) => selected.id === tag.id,
+																			) &&
+																			tag.name
+																				.toLowerCase()
+																				.includes(newTagName.toLowerCase()),
+																	)
+																	.map((tag) => (
+																		<CommandItem
+																			key={tag.id}
+																			onSelect={() => addTag(tag)}
+																		>
+																			<Check className="mr-2 h-4 w-4 opacity-0" />
+																			#{tag.name}
+																		</CommandItem>
+																	))}
+
+																{newTagName.trim() &&
+																	!availableTags.find(
+																		(tag) =>
+																			tag.name.toLowerCase() ===
+																			newTagName.trim().toLowerCase(),
+																	) && (
+																		<CommandItem onSelect={createNewTag}>
+																			<Plus className="mr-2 h-4 w-4" />
+																			Créer "{newTagName.trim()}"
+																		</CommandItem>
+																	)}
+															</CommandGroup>
+														)}
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+									</div>
 									<p className="text-xs text-muted-foreground mt-1">
-										Les tags seront créés automatiquement s'ils n'existent pas
+										Sélectionnez des tags existants ou créez-en de nouveaux
 									</p>
 								</div>
 							</div>
@@ -206,7 +351,11 @@ export default function BlogCreatePage() {
 										</p>
 										<p>
 											Tags:{" "}
-											<span className="font-medium">{tags || "Aucun"}</span>
+											<span className="font-medium">
+												{selectedTags.length > 0
+													? selectedTags.map((tag) => tag.name).join(", ")
+													: "Aucun"}
+											</span>
 										</p>
 									</div>
 								</div>

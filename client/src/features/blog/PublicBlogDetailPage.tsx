@@ -231,10 +231,6 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
 					{/* Header de l'article */}
 					<div className="text-center space-y-6">
 						<div className="space-y-4">
-							<div className="flex justify-center">
-								<Badge className="bg-blue-500">Article publié</Badge>
-							</div>
-
 							<h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
 								{blog.title}
 							</h1>
