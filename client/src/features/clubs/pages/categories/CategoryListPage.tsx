@@ -412,25 +412,29 @@ export function CategoriesListPage() {
 												)}
 											</TableCell>
 											<TableCell>
-												{c.ageMax !== undefined ? (
+												{isValidAge(c.ageMax) ? (
 													<Badge variant="secondary" className="font-mono">
 														{c.ageMax} ans
 													</Badge>
 												) : (
-													<span className="text-muted-foreground text-sm">
+													<Badge variant="outline" className="font-mono">
 														Non défini
-													</span>
+													</Badge>
 												)}
 											</TableCell>
 											<TableCell>
-												{c.ageMin !== undefined && c.ageMax !== undefined ? (
+												{isValidAge(c.ageMin) && isValidAge(c.ageMax) ? (
 													<Badge variant="outline" className="font-mono">
 														{c.ageMin} → {c.ageMax} ans
 													</Badge>
+												) : isValidAge(c.ageMin) && !isValidAge(c.ageMax) ? (
+													<Badge variant="outline" className="font-mono">
+														{c.ageMin} ans et +
+													</Badge>
 												) : (
-													<span className="text-muted-foreground text-sm">
+													<Badge variant="outline" className="font-mono">
 														Non défini
-													</span>
+													</Badge>
 												)}
 											</TableCell>
 											<TableCell className="text-right">
