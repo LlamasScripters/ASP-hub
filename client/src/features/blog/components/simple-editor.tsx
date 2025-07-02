@@ -15,7 +15,19 @@ export interface SimpleEditorProps {
 export function SimpleEditor({ value, onChange }: SimpleEditorProps) {
 	const editor = useEditor({
 		extensions: [
-			StarterKit,
+			StarterKit.configure({
+				heading: {
+					levels: [1, 2, 3],
+				},
+				bulletList: {
+					keepMarks: true,
+					keepAttributes: false,
+				},
+				orderedList: {
+					keepMarks: true,
+					keepAttributes: false,
+				},
+			}),
 			TextAlign.configure({
 				types: ["heading", "paragraph"],
 			}),
