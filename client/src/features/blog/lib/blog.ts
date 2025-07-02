@@ -147,10 +147,28 @@ export class BlogApi {
 		return { data };
 	}
 
+	async getPublicBlogs(): Promise<{ data: Blog[] }> {
+		const response = await fetch(`${this.baseUrl}/public`);
+		if (!response.ok) {
+			throw new Error("Failed to fetch public blogs");
+		}
+		const data = await response.json();
+		return { data };
+	}
+
 	async getBlog(id: string): Promise<{ data: Blog }> {
 		const response = await fetch(`${this.baseUrl}/${id}`);
 		if (!response.ok) {
 			throw new Error("Failed to fetch blog");
+		}
+		const data = await response.json();
+		return { data };
+	}
+
+	async getPublicBlog(id: string): Promise<{ data: Blog }> {
+		const response = await fetch(`${this.baseUrl}/public/${id}`);
+		if (!response.ok) {
+			throw new Error("Failed to fetch public blog");
 		}
 		const data = await response.json();
 		return { data };

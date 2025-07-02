@@ -11,13 +11,7 @@ export const Route = createFileRoute(
 	component: PublicBlogDetailPageWrapper,
 	loader: async ({ params }): Promise<BlogDetailLoaderData> => {
 		try {
-			const response = await blogApi.getBlog(params.blogId);
-
-			// Vérifier que l'article est publié (sécurité côté client)
-			if (response.data.state !== "published") {
-				throw new Error("Article not published");
-			}
-
+			const response = await blogApi.getPublicBlog(params.blogId);
 			return { blog: response.data };
 		} catch (error) {
 			console.error("Error loading blog article:", error);

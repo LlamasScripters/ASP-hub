@@ -11,12 +11,8 @@ export const Route = createFileRoute(
 	component: RouteComponent,
 	loader: async (): Promise<BlogLoaderData> => {
 		try {
-			const response = await blogApi.getBlogs();
-			// Filtrer seulement les articles publiés pour la partie publique
-			const publishedBlogs = response.data.filter(
-				(blog) => blog.state === "published",
-			);
-			return { blogs: publishedBlogs };
+			const response = await blogApi.getPublicBlogs();
+			return { blogs: response.data };
 		} catch (error) {
 			console.error("Error loading public blogs:", error);
 			throw error;
