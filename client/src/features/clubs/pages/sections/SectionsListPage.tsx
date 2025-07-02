@@ -94,9 +94,6 @@ export function SectionsListPage() {
 					}
 				}
 
-				console.log("Toutes les catégories récupérées:", allCategoriesData);
-				console.log("Compteurs par section:", countBySection);
-
 				setAllCategories(allCategoriesData);
 				setCategoriesCountBySection(countBySection);
 			} catch (error) {
