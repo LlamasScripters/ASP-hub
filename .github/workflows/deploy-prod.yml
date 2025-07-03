@@ -14,8 +14,8 @@ on:
 env:
   REGISTRY: ghcr.io
   GITHUB_ORG: llamasscripters
-  CLIENT_IMAGE_NAME: ${{ github.repository }}-client
-  SERVER_IMAGE_NAME: ${{ github.repository }}-server
+  CLIENT_IMAGE_NAME: asphub-client
+  SERVER_IMAGE_NAME: asphub-server
   STACK_NAME: asphub
   NODE_VERSION: "22.15.0"
 
