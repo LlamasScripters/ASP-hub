@@ -4,12 +4,8 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Image tag to deploy"
-        required: false
-        default: "latest"
+    tags:
+      - "v*"
 
 env:
   REGISTRY: ghcr.io
@@ -89,8 +85,8 @@ jobs:
       - name: Generate image metadata
         id: meta
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.tag }}" ]]; then
-            TAG="${{ github.event.inputs.tag }}"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
           else
             TAG="latest"
           fi
