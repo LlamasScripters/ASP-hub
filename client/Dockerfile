@@ -1,16 +1,43 @@
-# Build
-FROM node:22.15.0-alpine AS build
-
+# ===========================================
+# Development Dependencies Stage
+# ===========================================
+FROM node:22.15.0-alpine AS dev-deps
 WORKDIR /app
-COPY package.json package-lock.json ./
 
+# Copy package files for better caching
+COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . /app
+# ===========================================
+# Development Target
+# ===========================================
+FROM dev-deps AS development
+WORKDIR /app
 
+# Copy source code
+COPY . .
+
+# Expose development port
+EXPOSE 5173
+
+# Set development environment
+ENV NODE_ENV=development
+
+# Use Vite dev server with host binding
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# ===========================================
+# Build Stage (Production)
+# ===========================================
+FROM dev-deps AS build
+WORKDIR /app
+
+COPY . .
 RUN npm run build
 
-# Production
+# ===========================================
+# Production Stage
+# ===========================================
 FROM nginx:1.29.0-alpine AS production
 
 RUN adduser -D -H -u 1001 -s /sbin/nologin webuser

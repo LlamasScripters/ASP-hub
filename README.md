@@ -11,18 +11,35 @@
 
 Le projet doit être lancé via **Docker Compose** pour fonctionner correctement en développement (reverse proxy Nginx, BDD, etc.).
 
+### Premier démarrage
+
+1. **Configurer les variables d'environnement :**
+   ```bash
+   cp server/.env.example server/.env
+   # Éditer server/.env avec vos valeurs
+   ```
+
+2. **Démarrer le développement :**
+   ```bash
+   npm run dev
+   ```
+
+3. **Lancer les migrations :**
+   ```bash
+   npm run db:migrate
+   ```
+
+### Démarrages suivants
+
 ```bash
-docker compose up --build
+# Commande principale de développement (avec watch mode)
+npm run dev
 ```
 
-- Accès frontend (via Nginx) : http://localhost:8080
-- Accès backend (API) : http://localhost:8080/api
-
-**Après le premier démarrage, il faut lancer les migrations :**
-
-```bash
-docker compose exec server npm run db:migrate
-```
+**Points d'accès :**
+- Frontend (via Nginx) : http://localhost:8080
+- Backend (API) : http://localhost:8080/api
+- Console MinIO : http://localhost:9001 (admin/password)
 
 ## Installation manuelle (cas particulier)
 
@@ -64,6 +81,30 @@ docker compose exec server npm run db:migrate
 
 ## Scripts utiles
 
+### Développement
+
+- **Démarrer le développement** :
+  ```bash
+  npm run dev
+  ```
+
+- **Logs des services** :
+  ```bash
+  npm run dev:logs
+  ```
+
+- **Redémarrage forcé** :
+  ```bash
+  npm run dev:build
+  ```
+
+- **Arrêter les services** :
+  ```bash
+  npm run dev:down
+  ```
+
+### Code Quality
+
 - **Lint** (racine, client, server) :
   ```bash
   npm run lint
@@ -84,37 +125,36 @@ docker compose exec server npm run db:migrate
   cd client
   npm run test
   ```
-- **Commandes Drizzle (server)** :
+### Base de données
 
-    - Générer des migrations:
-      ```bash
-      docker compose exec server npm run db:generate
-      ```
-    - Lancer les migrations:
-      ```bash
-      docker compose exec server npm run db:migrate
-      ```
+- **Lancer les migrations** :
+  ```bash
+  npm run db:migrate
+  ```
 
-    - Seed la base de données:
-      ```bash
-      docker compose exec server npm run db:seed
-      ```
+- **Seed la base de données** :
+  ```bash
+  npm run db:seed
+  ```
 
-    - Reset la base de données:
-      ```bash
-      docker compose exec server npm run db:reset
-      ```
+- **Reset la base de données** :
+  ```bash
+  npm run db:reset
+  ```
 
-    - Fresh (reset puis seed) la base de données:
-      ```bash
-      docker compose exec server npm run db:fresh
-      ```
+- **Fresh (reset puis seed)** :
+  ```bash
+  npm run db:fresh
+  ```
 
-    - Lancer l'interface Drizzle Studio pour gérer la base de données depuis une UI:
-      ```sh
-      cd server
-      npm run db:studio
-      ```
-      et ouvrir le lien fourni par la commande.
+- **Drizzle Studio** :
+  ```bash
+  npm run db:studio
+  ```
+
+- **Générer des migrations** :
+  ```bash
+  docker compose -f compose.dev.yml exec server npm run db:generate
+  ```
 
   
