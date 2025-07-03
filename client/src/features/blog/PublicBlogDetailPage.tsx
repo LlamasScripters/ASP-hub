@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
@@ -128,19 +128,11 @@ export function PublicBlogDetailPage({ blog }: PublicBlogDetailPageProps) {
 		}
 	};
 
-	const getAuthorDisplayName = (author: {
-		firstName?: string;
-		lastName?: string;
-		name?: string;
-	}) => {
+	const getAuthorDisplayName = (author: NonNullable<Blog["author"]>) => {
 		return `${author.firstName} ${author.lastName}`.trim() || author.name;
 	};
 
-	const getAuthorInitials = (author: {
-		firstName?: string;
-		lastName?: string;
-		name?: string;
-	}) => {
+	const getAuthorInitials = (author: NonNullable<Blog["author"]>) => {
 		const firstName = author.firstName || "";
 		const lastName = author.lastName || "";
 		if (firstName && lastName) {

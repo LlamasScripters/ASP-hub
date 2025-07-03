@@ -1,18 +1,23 @@
 import multer from "multer";
 import multerS3 from "multer-s3";
-import { s3Client } from "./s3.js";
+import { createBucketIfNotExists, s3Client } from "./s3.js";
 
-export const upload = ({
+export const upload = async ({
 	key,
 	validMimeTypes,
 }: {
 	key: string;
 	validMimeTypes: string[];
-}) =>
-	multer({
+}) => {
+	const { bucketName } = await createBucketIfNotExists({
+		client: s3Client,
+		bucketName: process.env.S3_BUCKET,
+	});
+
+	return multer({
 		storage: multerS3({
 			s3: s3Client,
-			bucket: process.env.S3_BUCKET,
+			bucket: bucketName,
 			key: (_req, _file, cb) => {
 				cb(null, key);
 			},
@@ -29,3 +34,4 @@ export const upload = ({
 			},
 		}),
 	});
+};

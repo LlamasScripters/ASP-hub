@@ -19,6 +19,9 @@ export const Route = createFileRoute("/_auth/auth/verify/")({
 		if (error) {
 			return redirect({
 				to: "/auth/verify/error",
+
+				//@ts-ignore need to support /auth/verify/error?code=...
+				//TODO: implement /auth/verify/error?code=...
 				search: { error: error.code },
 			});
 		}

@@ -77,12 +77,6 @@ const timeToMinutes = (time: string): number => {
 	return hours * 60 + minutes;
 };
 
-const minutesToTime = (minutes: number): string => {
-	const hours = Math.floor(minutes / 60);
-	const mins = minutes % 60;
-	return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-};
-
 const getStatusColor = (status: string) => {
 	switch (status.toLowerCase()) {
 		case "confirmed":
@@ -219,7 +213,7 @@ export function ReservationList({
 
 		for (const reservation of sortedReservations) {
 			const startTime = new Date(reservation.startAt).getTime();
-			const endTime = new Date(reservation.endAt).getTime();
+			// const endTime = new Date(reservation.endAt).getTime();
 
 			let placed = false;
 			for (let i = 0; i < columns.length; i++) {

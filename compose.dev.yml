@@ -1,0 +1,123 @@
+services:
+  nginx:
+    image: nginx:1.27.5-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./client/nginx/dev.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - client
+      - server
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: development
+    expose:
+      - 5173
+    environment:
+      - NODE_ENV=development
+    develop:
+      watch:
+        # Watch source files for changes
+        - action: sync
+          path: ./client/src
+          target: /app/src
+          ignore:
+            - node_modules/
+        # Watch package.json for dependency changes
+        - action: rebuild
+          path: ./client/package.json
+        # Watch package-lock.json for dependency changes
+        - action: rebuild
+          path: ./client/package-lock.json
+        # Watch config files for changes
+        - action: sync
+          path: ./client/vite.config.ts
+          target: /app/vite.config.ts
+        - action: sync
+          path: ./client/tsconfig.json
+          target: /app/tsconfig.json
+        - action: sync
+          path: ./client/tsconfig.app.json
+          target: /app/tsconfig.app.json
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: development
+    expose:
+      - 3000
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./server/.env
+    volumes:
+      # Mount .env file for development
+      - ./server/.env:/app/.env:ro
+    depends_on:
+      - postgres
+      - minio
+    develop:
+      watch:
+        # Watch source files for changes
+        - action: sync
+          path: ./server/src
+          target: /app/src
+          ignore:
+            - node_modules/
+        # Watch package.json for dependency changes
+        - action: rebuild
+          path: ./server/package.json
+        # Watch package-lock.json for dependency changes
+        - action: rebuild
+          path: ./server/package-lock.json
+        # Watch config files for changes
+        - action: sync
+          path: ./server/tsconfig.json
+          target: /app/tsconfig.json
+        - action: sync
+          path: ./server/drizzle.config.ts
+          target: /app/drizzle.config.ts
+        - action: sync
+          path: ./server/drizzle-dev.config.ts
+          target: /app/drizzle-dev.config.ts
+        # Watch .env file for changes
+        - action: sync
+          path: ./server/.env
+          target: /app/.env
+
+  minio:
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data/minio
+    command: 'minio server /data/minio --console-address ":9001"'
+    environment:
+      - MINIO_ROOT_USER=admin # access key id
+      - MINIO_ROOT_PASSWORD=password # secret access key
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:17.5-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=asp_db
+
+
+volumes:
+  postgres-data:
+  minio-data:

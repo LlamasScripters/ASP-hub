@@ -59,14 +59,17 @@ export function RegisterForm() {
 		setIsLoading(true);
 
 		try {
-			const { error } = await authClient.signUp.email({
-				email: values.email,
-				password: values.password,
-				name: `${values.firstName} ${values.lastName}`,
-				firstName: values.firstName,
-				lastName: values.lastName,
-				acceptTerms: values.acceptTerms,
-			});
+			const { error } = await authClient.signUp.email(
+				//@ts-ignore wrong type from better-auth
+				{
+					email: values.email,
+					password: values.password,
+					name: `${values.firstName} ${values.lastName}`,
+					firstName: values.firstName,
+					lastName: values.lastName,
+					acceptTerms: values.acceptTerms,
+				},
+			);
 
 			if (!error) {
 				navigate({ to: "/auth/account-created" });
