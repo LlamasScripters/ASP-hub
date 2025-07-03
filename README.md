@@ -158,3 +158,17 @@ npm run dev
   ```
 
   
+### Tests serveur
+
+```bash
+# Lancer tous les tests
+npm test
+
+# Lancer une catégorie spécifique
+node --test tests/unit/
+node --test tests/functional/
+node --test tests/interface/
+
+# Lancer un fichier spécifique
+npx tsx --test tests/unit/password.test.ts
+```
