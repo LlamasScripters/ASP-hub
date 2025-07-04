@@ -1,7 +1,11 @@
 import { type SelectSessionSport, Session } from "@/db/schema.js";
 import { auth } from "@/lib/auth.js";
 import { UserRole } from "@/lib/roles.js";
-import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import {
+	requireAuth,
+	requireOwnershipOrAdmin,
+	requireRole,
+} from "@/middleware/auth.middleware.js";
 import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import {
 	requireCategoryAccess,
@@ -18,7 +22,7 @@ const clubsRouter = Router();
 clubsRouter.use(requireAuth);
 
 // ========== ROUTES GLOBALES ==========
-// toutes les sections du club (accessible à tous les membres)
+// toutes les sections du club (accessible aux utilisateurs authentifiés pour l'adhésion)
 clubsRouter.get("/all/sections", async (req: Request, res: Response) => {
 	try {
 		const allSections = await clubsService.getSections();
@@ -47,7 +51,7 @@ clubsRouter.get("/all/sections", async (req: Request, res: Response) => {
 	}
 });
 
-// toutes les catégories (de toutes sections confondues)
+// toutes les catégories (accessible aux utilisateurs authentifiés pour l'adhésion)
 clubsRouter.get("/all/categories", async (req: Request, res: Response) => {
 	try {
 		const allCategories = await clubsService.getCategories();
@@ -144,57 +148,61 @@ clubsRouter.get(
 );
 
 // ========== ROUTES SESSIONS DIRECTES ==========
-// session individuelle
-clubsRouter.get("/sessions/:sessionId", async (req: Request, res: Response) => {
-	try {
-		const session = await clubsService.getSessionById(req.params.sessionId);
-		if (!session) {
-			res.status(404).json({ error: "Session non trouvée" });
-			return;
+// session individuelle (accessible aux membres pour les détails)
+clubsRouter.get(
+	"/sessions/:sessionId",
+	requireMemberAccess(),
+	async (req: Request, res: Response) => {
+		try {
+			const session = await clubsService.getSessionById(req.params.sessionId);
+			if (!session) {
+				res.status(404).json({ error: "Session non trouvée" });
+				return;
+			}
+			const formatted = {
+				id: session.id,
+				title: session.title,
+				description: session.description,
+				type: session.type,
+				status: session.status,
+				startDate: session.startDate,
+				endDate: session.endDate,
+				location: session.location,
+				maxParticipants: session.maxParticipants,
+				currentParticipants: session.currentParticipants,
+				notes: session.notes,
+				categoryId: session.categoryId,
+				coach: session.coachId
+					? {
+							id: session.coachId,
+							firstName: session.coachFirstName,
+							lastName: session.coachLastName,
+							name: session.coachName,
+						}
+					: null,
+				category: session.categoryId_join
+					? {
+							id: session.categoryId_join,
+							name: session.categoryName,
+							section: session.sectionId
+								? {
+										id: session.sectionId,
+										name: session.sectionName,
+										clubId: session.sectionClubId,
+									}
+								: null,
+						}
+					: null,
+			};
+			res.json(formatted);
+		} catch (error) {
+			console.error("Erreur getSessionById:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la récupération de la session" });
 		}
-		const formatted = {
-			id: session.id,
-			title: session.title,
-			description: session.description,
-			type: session.type,
-			status: session.status,
-			startDate: session.startDate,
-			endDate: session.endDate,
-			location: session.location,
-			maxParticipants: session.maxParticipants,
-			currentParticipants: session.currentParticipants,
-			notes: session.notes,
-			categoryId: session.categoryId,
-			coach: session.coachId
-				? {
-						id: session.coachId,
-						firstName: session.coachFirstName,
-						lastName: session.coachLastName,
-						name: session.coachName,
-					}
-				: null,
-			category: session.categoryId_join
-				? {
-						id: session.categoryId_join,
-						name: session.categoryName,
-						section: session.sectionId
-							? {
-									id: session.sectionId,
-									name: session.sectionName,
-									clubId: session.sectionClubId,
-								}
-							: null,
-					}
-				: null,
-		};
-		res.json(formatted);
-	} catch (error) {
-		console.error("Erreur getSessionById:", error);
-		res
-			.status(500)
-			.json({ error: "Erreur lors de la récupération de la session" });
-	}
-});
+	},
+);
 
 clubsRouter.put(
 	"/sessions/:sessionId",
@@ -263,6 +271,7 @@ clubsRouter.delete(
 // ========== ROUTES PARTICIPANTS ==========
 clubsRouter.get(
 	"/sessions/:sessionId/participants",
+	requireMemberAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const list = await clubsService.getSessionParticipants(
@@ -292,6 +301,7 @@ clubsRouter.get(
 
 clubsRouter.post(
 	"/sessions/:sessionId/participants",
+	requireMemberAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const { userId } = req.body;
@@ -310,6 +320,25 @@ clubsRouter.post(
 clubsRouter.delete(
 	"/sessions/:sessionId/participants/:userId",
 	async (req: Request, res: Response) => {
+		// Check ownership: user can remove themselves, or managers can remove anyone
+		const session = req.session;
+		const targetUserId = req.params.userId;
+		const currentUserId = session?.user.id;
+		const userRole = session?.user.role;
+
+		const isOwn = currentUserId === targetUserId;
+		const isManager = ["admin", "section_manager", "coach"].includes(
+			userRole || "",
+		);
+
+		if (!isOwn && !isManager) {
+			res.status(403).json({
+				error:
+					"Access denied: can only remove own participation or be a manager",
+			});
+			return;
+		}
+
 		try {
 			await clubsService.removeParticipantFromSession(
 				req.params.sessionId,
@@ -328,6 +357,7 @@ clubsRouter.delete(
 // ========== ROUTES RESPONSABILITÉS ==========
 clubsRouter.get(
 	"/users/:userId/responsibilities",
+	requireOwnershipOrAdmin(),
 	async (req: Request, res: Response) => {
 		try {
 			const list = await clubsService.getUserResponsibilities(
@@ -361,17 +391,21 @@ clubsRouter.get(
 	},
 );
 
-clubsRouter.post("/responsibilities", async (req: Request, res: Response) => {
-	try {
-		const created = await clubsService.assignResponsibility(req.body);
-		res.status(201).json(created);
-	} catch (error) {
-		console.error("Erreur assignResponsibility:", error);
-		res
-			.status(500)
-			.json({ error: "Erreur lors de l'attribution de la responsabilité" });
-	}
-});
+clubsRouter.post(
+	"/responsibilities",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const created = await clubsService.assignResponsibility(req.body);
+			res.status(201).json(created);
+		} catch (error) {
+			console.error("Erreur assignResponsibility:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de l'attribution de la responsabilité" });
+		}
+	},
+);
 
 // ========== ROUTES CLUBS ==========
 clubsRouter.get("/", async (req: Request, res: Response) => {
@@ -384,15 +418,19 @@ clubsRouter.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-clubsRouter.post("/", async (req: Request, res: Response) => {
-	try {
-		const newClub = await clubsService.createClub(req.body);
-		res.status(201).json(newClub);
-	} catch (error) {
-		console.error("Erreur createClub:", error);
-		res.status(500).json({ error: "Erreur lors de la création du club" });
-	}
-});
+clubsRouter.post(
+	"/",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const newClub = await clubsService.createClub(req.body);
+			res.status(201).json(newClub);
+		} catch (error) {
+			console.error("Erreur createClub:", error);
+			res.status(500).json({ error: "Erreur lors de la création du club" });
+		}
+	},
+);
 
 // ========== ROUTES AVEC PARAMÈTRES ==========
 clubsRouter.get("/:id", async (req: Request, res: Response) => {
@@ -443,7 +481,7 @@ clubsRouter.delete(
 );
 
 // ========== ROUTES SECTIONS ==========
-// sections d'un club spécifique
+// sections d'un club spécifique (accessible pour l'adhésion)
 clubsRouter.get("/:clubId/sections", async (req: Request, res: Response) => {
 	try {
 		const sections = await clubsService.getSectionsByClub(req.params.clubId);
@@ -471,19 +509,26 @@ clubsRouter.get(
 	},
 );
 
-clubsRouter.post("/:clubId/sections", async (req: Request, res: Response) => {
-	try {
-		const sectionData = { ...req.body, clubId: req.params.clubId };
-		const section = await clubsService.createSection(sectionData);
-		res.status(201).json(section);
-	} catch (error) {
-		console.error("Erreur createSection:", error);
-		res.status(500).json({ error: "Erreur lors de la création de la section" });
-	}
-});
+clubsRouter.post(
+	"/:clubId/sections",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const sectionData = { ...req.body, clubId: req.params.clubId };
+			const section = await clubsService.createSection(sectionData);
+			res.status(201).json(section);
+		} catch (error) {
+			console.error("Erreur createSection:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la création de la section" });
+		}
+	},
+);
 
 clubsRouter.put(
 	"/:clubId/sections/:sectionId",
+	requireSectionAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const section = await clubsService.updateSection(
@@ -502,6 +547,7 @@ clubsRouter.put(
 
 clubsRouter.delete(
 	"/:clubId/sections/:sectionId",
+	requireSectionAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			await clubsService.deleteSection(req.params.sectionId);
@@ -516,7 +562,7 @@ clubsRouter.delete(
 );
 
 // ========== ROUTES CATÉGORIES ==========
-// catégories d'une section spécifique
+// catégories d'une section spécifique (accessible pour l'adhésion)
 clubsRouter.get(
 	"/:clubId/sections/:sectionId/categories",
 	async (req: Request, res: Response) => {
@@ -536,6 +582,7 @@ clubsRouter.get(
 
 clubsRouter.post(
 	"/:clubId/sections/:sectionId/categories",
+	requireSectionAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const categoryData = { ...req.body, sectionId: req.params.sectionId };
@@ -573,6 +620,7 @@ clubsRouter.get(
 
 clubsRouter.put(
 	"/:clubId/sections/:sectionId/categories/:categoryId",
+	requireCategoryAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const category = await clubsService.updateCategory(
@@ -591,6 +639,7 @@ clubsRouter.put(
 
 clubsRouter.delete(
 	"/:clubId/sections/:sectionId/categories/:categoryId",
+	requireCategoryAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			await clubsService.deleteCategory(req.params.categoryId);
@@ -605,9 +654,10 @@ clubsRouter.delete(
 );
 
 // ========== ROUTES SESSIONS ==========
-// sessions d'une catégorie spécifique
+// sessions d'une catégorie spécifique (accessible aux membres pour les détails)
 clubsRouter.get(
 	"/:clubId/sections/:sectionId/categories/:categoryId/sessions",
+	requireMemberAccess(),
 	async (req: Request, res: Response) => {
 		try {
 			const limit = Number.parseInt(req.query.limit as string) || 50;
@@ -648,6 +698,7 @@ clubsRouter.get(
 
 clubsRouter.post(
 	"/:clubId/sections/:sectionId/categories/:categoryId/sessions",
+	requireMemberManagement(),
 	async (req, res) => {
 		try {
 			const {

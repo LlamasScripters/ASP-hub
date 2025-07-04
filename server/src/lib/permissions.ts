@@ -11,6 +11,7 @@ export enum Resource {
 	ROOM_BOOKING = "room_booking",
 	MINIBUS_BOOKING = "minibus_booking",
 	BLOG = "blog",
+	MEMBERSHIP_APPLICATION = "membership_application",
 }
 
 /**
@@ -39,6 +40,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Record<Resource, Action[]>> = {
 		[Resource.ROOM_BOOKING]: [],
 		[Resource.MINIBUS_BOOKING]: [],
 		[Resource.BLOG]: [],
+		[Resource.MEMBERSHIP_APPLICATION]: [Action.CREATE], // Can submit application
 	},
 	[UserRole.MEMBER]: {
 		[Resource.USER]: [Action.READ, Action.UPDATE], // Can update own profile
@@ -48,6 +50,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Record<Resource, Action[]>> = {
 		[Resource.ROOM_BOOKING]: [Action.READ],
 		[Resource.MINIBUS_BOOKING]: [Action.READ],
 		[Resource.BLOG]: [Action.READ],
+		[Resource.MEMBERSHIP_APPLICATION]: [Action.READ], // Can read own application status
 	},
 	[UserRole.COACH]: {
 		[Resource.USER]: [Action.READ, Action.UPDATE], // Can manage assigned members
@@ -62,6 +65,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Record<Resource, Action[]>> = {
 		[Resource.ROOM_BOOKING]: [Action.READ, Action.CREATE, Action.UPDATE],
 		[Resource.MINIBUS_BOOKING]: [Action.READ, Action.CREATE],
 		[Resource.BLOG]: [Action.READ, Action.CREATE],
+		[Resource.MEMBERSHIP_APPLICATION]: [Action.READ], // Can read applications for their sections
 	},
 	[UserRole.SECTION_MANAGER]: {
 		[Resource.USER]: [Action.READ, Action.UPDATE, Action.APPROVE],
@@ -86,6 +90,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Record<Resource, Action[]>> = {
 		],
 		[Resource.MINIBUS_BOOKING]: [Action.READ, Action.CREATE, Action.UPDATE],
 		[Resource.BLOG]: [Action.READ, Action.CREATE, Action.UPDATE],
+		[Resource.MEMBERSHIP_APPLICATION]: [
+			Action.READ,
+			Action.UPDATE,
+			Action.APPROVE,
+		], // Can manage applications for their sections
 	},
 	[UserRole.ADMIN]: {
 		[Resource.USER]: [
@@ -139,6 +148,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, Record<Resource, Action[]>> = {
 			Action.UPDATE,
 			Action.DELETE,
 		],
+		[Resource.MEMBERSHIP_APPLICATION]: [
+			Action.MANAGE,
+			Action.CREATE,
+			Action.READ,
+			Action.UPDATE,
+			Action.DELETE,
+			Action.APPROVE,
+		], // Full control over membership applications
 	},
 };
 
