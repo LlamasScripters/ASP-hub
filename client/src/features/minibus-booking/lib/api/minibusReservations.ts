@@ -74,7 +74,7 @@ export type MinibusReservationsPaginatedResponse = z.infer<
 	typeof minibusReservationsPaginatedResponseSchema
 >;
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "/api";
 
 /**
  * Get the start and end dates of the week containing `refDate` (lundi → dimanche).
