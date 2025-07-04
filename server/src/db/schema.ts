@@ -11,9 +11,16 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { d } from "node_modules/drizzle-kit/index-BAUrj6Ib.mjs";
 
 // énumérations pour les types
+export const userRoleEnum = pgEnum("user_role", [
+	"admin",
+	"section_manager",
+	"coach",
+	"member",
+	"user",
+]);
+
 export const sessionTypeEnum = pgEnum("session_type", [
 	"entrainement",
 	"match",
@@ -60,7 +67,7 @@ export const users = pgTable("users", {
 		.notNull()
 		.defaultNow(),
 	deletedAt: timestamp("deleted_at"),
-	role: text("role").notNull().default("user"),
+	role: userRoleEnum("role").notNull().default("user"),
 	banned: boolean("banned").notNull().default(false),
 	banReason: text("ban_reason"),
 	banExpires: timestamp("ban_expires"),

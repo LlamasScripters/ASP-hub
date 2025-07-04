@@ -2,6 +2,10 @@ import { auth, authConfig } from "@/lib/auth.js";
 import { s3Client } from "@/lib/s3.js";
 import { upload } from "@/lib/upload.js";
 import { formatZodError } from "@/lib/zod.js";
+import {
+	requireOwnershipOrAdmin,
+	requirePermissions,
+} from "@/middleware/auth.middleware.js";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
@@ -17,27 +21,7 @@ const setUserPasswordBodySchema = z.object({
 // allow admin to set password for a user
 usersRouter.post(
 	"/:userId/set-password",
-	async (req, res, next) => {
-		const authHeaders = fromNodeHeaders(req.headers);
-
-		const { success } = await auth.api.userHasPermission({
-			headers: authHeaders,
-			body: {
-				role: "admin",
-				permissions: {
-					user: ["set-password"],
-				},
-			},
-		});
-
-		if (!success) {
-			res.sendStatus(403);
-			return;
-		}
-
-		next();
-		return;
-	},
+	requirePermissions("admin", { user: ["set-password"] }),
 	async (req, res) => {
 		const authHeaders = fromNodeHeaders(req.headers);
 		const { data: body, error } = setUserPasswordBodySchema.safeParse(req.body);
@@ -83,31 +67,7 @@ usersRouter.get("/:userId/avatar", async (req, res) => {
 // upload user avatar
 usersRouter.post(
 	"/:userId/avatar",
-	async (req, res, next) => {
-		const authHeaders = fromNodeHeaders(req.headers);
-		const session = await auth.api.getSession({
-			headers: authHeaders,
-		});
-
-		if (!session) {
-			res.sendStatus(401);
-			return;
-		}
-
-		const sessionUserId = session.user.id;
-		const isAdmin = session.user.role === "admin";
-		const userId = req.params.userId;
-
-		const canUploadAvatar = isAdmin || sessionUserId === userId;
-
-		if (!canUploadAvatar) {
-			res.sendStatus(403);
-			return;
-		}
-
-		next();
-		return;
-	},
+	requireOwnershipOrAdmin(),
 	async (req, res, next) => {
 		const uploader = await upload({
 			key: `users/${req.params.userId}`,
