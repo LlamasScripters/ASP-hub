@@ -254,7 +254,11 @@ export async function seedRoomReservations(
 					endDate.setMinutes(startDate.getMinutes() + durationMinutes);
 
 					// Vérifier qu'il n'y a pas de conflit avec les autres réservations du jour
-					const hasConflict = hasOverlap(startDate, endDate, dayRoomReservations);
+					const hasConflict = hasOverlap(
+						startDate,
+						endDate,
+						dayRoomReservations,
+					);
 
 					if (!hasConflict) {
 						dayRoomReservations.push({ start: startDate, end: endDate });
@@ -280,7 +284,9 @@ export async function seedRoomReservations(
 		}
 	}
 
-	console.log(`Insertion of ${roomReservationsData.length} room reservations...`);
+	console.log(
+		`Insertion of ${roomReservationsData.length} room reservations...`,
+	);
 
 	try {
 		if (roomReservationsData.length > 0) {

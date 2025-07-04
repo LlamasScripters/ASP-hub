@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { SessionForm } from "../../components/sessions/SessionForm";
 
 export function SessionEditPage() {
@@ -38,8 +38,8 @@ export function SessionEditPage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Les modifications peuvent affecter 
-					les participants déjà inscrits à cette session.
+					<strong>Important :</strong> Les modifications peuvent affecter les
+					participants déjà inscrits à cette session.
 				</AlertDescription>
 			</Alert>
 

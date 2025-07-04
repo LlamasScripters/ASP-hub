@@ -1,8 +1,8 @@
-import { MinibusReservationEditPage } from "@/features/minibus-booking/pages/MinibusReservationEditPage";
-import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
 import type { MinibusReservation } from "@/features/minibus-booking/lib/api/minibusReservations";
-import { minibusesApi } from "@/features/minibus-booking/lib/api/minibuses";
 import { minibusReservationsApi } from "@/features/minibus-booking/lib/api/minibusReservations";
+import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
+import { minibusesApi } from "@/features/minibus-booking/lib/api/minibuses";
+import { MinibusReservationEditPage } from "@/features/minibus-booking/pages/MinibusReservationEditPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 interface LoaderData {
@@ -14,8 +14,13 @@ export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit",
 )({
 	loader: async ({ params }): Promise<LoaderData> => {
-		const minibusReservation = await minibusReservationsApi.getMinibusReservationById(params.minibusReservationId);
-		const minibus = await minibusesApi.getMinibusById(minibusReservation.minibusId);
+		const minibusReservation =
+			await minibusReservationsApi.getMinibusReservationById(
+				params.minibusReservationId,
+			);
+		const minibus = await minibusesApi.getMinibusById(
+			minibusReservation.minibusId,
+		);
 
 		return { minibus, minibusReservation };
 	},
@@ -65,5 +70,10 @@ export const Route = createFileRoute(
 
 function MinibusReservationEditRoute() {
 	const { minibus, minibusReservation } = Route.useLoaderData();
-	return <MinibusReservationEditPage minibus={minibus} minibusReservation={minibusReservation} />;
+	return (
+		<MinibusReservationEditPage
+			minibus={minibus}
+			minibusReservation={minibusReservation}
+		/>
+	);
 }

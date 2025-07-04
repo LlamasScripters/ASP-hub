@@ -1,6 +1,6 @@
-import { ComplexDetailsPage } from "@room-booking/components/complexes/ComplexDetailsPage";
 import type { Complex } from "@/features/room-booking/hooks/useComplexes";
 import type { Room } from "@/features/room-booking/hooks/useRooms";
+import { ComplexDetailsPage } from "@room-booking/components/complexes/ComplexDetailsPage";
 import { complexesApi, roomsApi } from "@room-booking/lib/api";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 

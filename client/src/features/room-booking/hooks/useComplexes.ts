@@ -1,6 +1,10 @@
 import { complexesApi } from "@room-booking/lib/api/complexes";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -130,16 +134,18 @@ export type Complex = z.infer<typeof complexSchema>;
 export type CreateComplexData = z.infer<typeof createComplexSchema>;
 export type UpdateComplexData = z.infer<typeof updateComplexSchema>;
 export type ComplexFilters = z.infer<typeof complexFiltersSchema>;
-export type ComplexesPaginatedResponse = z.infer<typeof complexesPaginatedResponseSchema>;
+export type ComplexesPaginatedResponse = z.infer<
+	typeof complexesPaginatedResponseSchema
+>;
 
 // TanStack Query options
 export const filteredComplexesQueryOptions = ({
-  filters = {},
-  page = 1,
-  limit = 20,
+	filters = {},
+	page = 1,
+	limit = 20,
 }) => ({
-  queryKey: ["complexes", filters, page, limit],
-  queryFn: () => complexesApi.getComplexes(filters),
+	queryKey: ["complexes", filters, page, limit],
+	queryFn: () => complexesApi.getComplexes(filters),
 });
 
 interface UseComplexesOptions {
@@ -147,151 +153,156 @@ interface UseComplexesOptions {
 }
 
 export function useComplexes({ initialData = [] }: UseComplexesOptions = {}) {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  // Query for fetching complexes
-  const { data: fetchedData, refetch } = useSuspenseQuery({
-    queryKey: ["complexes"],
-    queryFn: () => complexesApi.getComplexes(),
-    initialData: { data: initialData, total: initialData.length, page: 1, limit: 20 },
-  });
+	// Query for fetching complexes
+	const { data: fetchedData, refetch } = useSuspenseQuery({
+		queryKey: ["complexes"],
+		queryFn: () => complexesApi.getComplexes(),
+		initialData: {
+			data: initialData,
+			total: initialData.length,
+			page: 1,
+			limit: 20,
+		},
+	});
 
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: (data: CreateComplexData) => complexesApi.createComplex(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["complexes"] });
-      toast.success("Complexe créé avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error creating complex:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la création du complexe"
-      );
-    },
-  });
+	// Create mutation
+	const createMutation = useMutation({
+		mutationFn: (data: CreateComplexData) => complexesApi.createComplex(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["complexes"] });
+			toast.success("Complexe créé avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error creating complex:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la création du complexe",
+			);
+		},
+	});
 
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateComplexData }) =>
-      complexesApi.updateComplex(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["complexes"] });
-      toast.success("Complexe modifié avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error updating complex:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la modification du complexe"
-      );
-    },
-  });
+	// Update mutation
+	const updateMutation = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: UpdateComplexData }) =>
+			complexesApi.updateComplex(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["complexes"] });
+			toast.success("Complexe modifié avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error updating complex:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification du complexe",
+			);
+		},
+	});
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => complexesApi.deleteComplex(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["complexes"] });
-      toast.success("Complexe supprimé avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error deleting complex:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la suppression du complexe"
-      );
-    },
-  });
+	// Delete mutation
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => complexesApi.deleteComplex(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["complexes"] });
+			toast.success("Complexe supprimé avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error deleting complex:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression du complexe",
+			);
+		},
+	});
 
-  const createComplex = useCallback(
-    async (data: CreateComplexData): Promise<Complex | null> => {
-      try {
-        const result = await createMutation.mutateAsync(data);
-        return result;
-      } catch (error) {
-        console.error("Error in createComplex:", error);
-        return null;
-      }
-    },
-    [createMutation]
-  );
+	const createComplex = useCallback(
+		async (data: CreateComplexData): Promise<Complex | null> => {
+			try {
+				const result = await createMutation.mutateAsync(data);
+				return result;
+			} catch (error) {
+				console.error("Error in createComplex:", error);
+				return null;
+			}
+		},
+		[createMutation],
+	);
 
-  const updateComplex = useCallback(
-    async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
-      try {
-        const result = await updateMutation.mutateAsync({ id, data });
-        return result;
-      } catch (error) {
-        console.error("Error in updateComplex:", error);
-        return null;
-      }
-    },
-    [updateMutation]
-  );
+	const updateComplex = useCallback(
+		async (id: string, data: UpdateComplexData): Promise<Complex | null> => {
+			try {
+				const result = await updateMutation.mutateAsync({ id, data });
+				return result;
+			} catch (error) {
+				console.error("Error in updateComplex:", error);
+				return null;
+			}
+		},
+		[updateMutation],
+	);
 
-  const deleteComplex = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        await deleteMutation.mutateAsync(id);
-        return true;
-      } catch (error) {
-        console.error("Error in deleteComplex:", error);
-        return false;
-      }
-    },
-    [deleteMutation]
-  );
+	const deleteComplex = useCallback(
+		async (id: string): Promise<boolean> => {
+			try {
+				await deleteMutation.mutateAsync(id);
+				return true;
+			} catch (error) {
+				console.error("Error in deleteComplex:", error);
+				return false;
+			}
+		},
+		[deleteMutation],
+	);
 
-  const refresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
 
-  return {
-    complexes: fetchedData.data,
-    totalCount: fetchedData.total,
-    page: fetchedData.page,
-    limit: fetchedData.limit,
-    createComplex,
-    updateComplex,
-    deleteComplex,
-    refresh,
-    refetch,
-  };
+	return {
+		complexes: fetchedData.data,
+		totalCount: fetchedData.total,
+		page: fetchedData.page,
+		limit: fetchedData.limit,
+		createComplex,
+		updateComplex,
+		deleteComplex,
+		refresh,
+		refetch,
+	};
 }
 
 // Hook pour les statistiques des complexes
 export function useComplexStats() {
-  const { data: stats, refetch } = useSuspenseQuery({
-    queryKey: ["complex-stats"],
-    queryFn: async () => {
-      // Remplacer par un vrai appel API plus tard
-      return {
-        totalComplexes: 0,
-        totalRooms: 0,
-        totalReservations: 0,
-        occupancyRate: 0,
-      };
-    },
-    initialData: {
-      totalComplexes: 0,
-      totalRooms: 0,
-      totalReservations: 0,
-      occupancyRate: 0,
-    },
-  });
+	const { data: stats, refetch } = useSuspenseQuery({
+		queryKey: ["complex-stats"],
+		queryFn: async () => {
+			// Remplacer par un vrai appel API plus tard
+			return {
+				totalComplexes: 0,
+				totalRooms: 0,
+				totalReservations: 0,
+				occupancyRate: 0,
+			};
+		},
+		initialData: {
+			totalComplexes: 0,
+			totalRooms: 0,
+			totalReservations: 0,
+			occupancyRate: 0,
+		},
+	});
 
-  const refresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
 
-  return {
-    stats,
-    loading: false,
-    refresh,
-  };
+	return {
+		stats,
+		loading: false,
+		refresh,
+	};
 }

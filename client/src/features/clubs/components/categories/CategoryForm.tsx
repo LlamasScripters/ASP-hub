@@ -15,10 +15,10 @@ import { useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	AlertTriangle,
+	ArrowLeft,
 	Calendar,
 	Loader2,
 	Save,
-	ArrowLeft
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -336,12 +336,15 @@ export function CategoryForm({
 						<CardDescription>
 							{mode === "edit" ? (
 								<p className="text-sm text-muted-foreground">
-									Modifiez les informations de cette catégorie pour mettre à jour ses paramètres.
+									Modifiez les informations de cette catégorie pour mettre à
+									jour ses paramètres.
 								</p>
 							) : (
 								<p className="text-sm text-muted-foreground">
-									Remplissez les informations ci-dessous pour créer une nouvelle catégorie dans cette section. 
-									Les champs marqués d'un <span className="text-destructive font-medium">*</span> sont obligatoires.
+									Remplissez les informations ci-dessous pour créer une nouvelle
+									catégorie dans cette section. Les champs marqués d'un{" "}
+									<span className="text-destructive font-medium">*</span> sont
+									obligatoires.
 								</p>
 							)}
 						</CardDescription>

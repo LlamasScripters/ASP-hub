@@ -420,9 +420,7 @@ export function ComplexDetailsPage({
 						<CardContent>
 							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 								<Calendar className="w-12 h-12" />
-								<span className="ml-2">
-									Planning à implémenter
-								</span>
+								<span className="ml-2">Planning à implémenter</span>
 							</div>
 						</CardContent>
 					</Card>
@@ -439,9 +437,7 @@ export function ComplexDetailsPage({
 						<CardContent>
 							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 								<BarChart3 className="w-12 h-12" />
-								<span className="ml-2">
-									Statistiques à implémenter
-								</span>
+								<span className="ml-2">Statistiques à implémenter</span>
 							</div>
 						</CardContent>
 					</Card>

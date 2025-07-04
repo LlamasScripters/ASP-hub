@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { SectionForm } from "../../components/sections/SectionForm";
 
 export function SectionEditPage() {
@@ -38,7 +38,7 @@ export function SectionEditPage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Les modifications de cette section 
+					<strong>Important :</strong> Les modifications de cette section
 					affecteront toutes les catégories et sessions associées.
 				</AlertDescription>
 			</Alert>

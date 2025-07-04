@@ -300,8 +300,8 @@ export function SectionSessionsListPage() {
 					</div>
 					<div className="flex items-center gap-2">
 						<Button variant="outline" size="sm" asChild>
-							<Link 
-								to="/admin/dashboard/clubs/$clubId/sections" 
+							<Link
+								to="/admin/dashboard/clubs/$clubId/sections"
 								params={{ clubId }}
 							>
 								<ArrowLeft className="w-4 h-4 mr-2" />
@@ -354,10 +354,10 @@ export function SectionSessionsListPage() {
 								<Search className="h-4 w-4" />
 								Filtres de recherche
 							</h3>
-							<Button 
-								variant="outline" 
-								className="hover:cursor-pointer" 
-								size="sm" 
+							<Button
+								variant="outline"
+								className="hover:cursor-pointer"
+								size="sm"
 								onClick={clearFilters}
 							>
 								Effacer les filtres

@@ -1,8 +1,8 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
 import { RoomReservationForm } from "@room-booking/components/RoomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -43,8 +43,8 @@ export function RoomReservationEditPage({
 					</h1>
 					<p className="text-muted-foreground">
 						Modifier la réservation{" "}
-						<span className="font-medium">{roomReservation.title}</span> de la salle{" "}
-						<span className="font-medium">{room.name}</span> du complexe{" "}
+						<span className="font-medium">{roomReservation.title}</span> de la
+						salle <span className="font-medium">{room.name}</span> du complexe{" "}
 						<span className="font-medium">{complex.name}</span>
 					</p>
 				</div>

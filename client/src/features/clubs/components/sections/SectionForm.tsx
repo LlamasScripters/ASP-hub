@@ -110,7 +110,8 @@ export function SectionForm({
 			setIsLoading(true);
 			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
 				.then((res) => {
-					if (!res.ok) throw new Error("Erreur lors du chargement de la section");
+					if (!res.ok)
+						throw new Error("Erreur lors du chargement de la section");
 					return res.json();
 				})
 				.then((section: Section) => {

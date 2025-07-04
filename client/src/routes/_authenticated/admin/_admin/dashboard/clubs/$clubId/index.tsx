@@ -14,11 +14,11 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Building2,
-	Info,
 	Calendar,
 	FileText,
 	FolderOpen,
 	Globe,
+	Info,
 	Mail,
 	MapPin,
 	Phone,
@@ -139,7 +139,7 @@ function ClubOverviewPage() {
 						<Link to="/admin/dashboard/clubs">
 							<ArrowLeft className="h-4 w-4" />
 							Retour à l'association
-						</Link>	
+						</Link>
 					</Button>
 				</div>
 
@@ -209,10 +209,7 @@ function ClubOverviewPage() {
 										Email
 									</p>
 									{club.email ? (
-										<a 
-											href={`mailto:${club.email}`}
-											className="inline-block"
-										>
+										<a href={`mailto:${club.email}`} className="inline-block">
 											<Badge
 												variant="secondary"
 												className="text-sm font-normal hover:bg-blue-100 transition-colors cursor-pointer"
@@ -238,10 +235,7 @@ function ClubOverviewPage() {
 										Téléphone
 									</p>
 									{club.phone ? (
-										<a 
-											href={`tel:${club.phone}`}
-											className="inline-block"
-										>
+										<a href={`tel:${club.phone}`} className="inline-block">
 											<Badge
 												variant="secondary"
 												className="text-sm font-normal hover:bg-green-100 transition-colors cursor-pointer"

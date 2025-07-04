@@ -88,29 +88,33 @@ roomsRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 //@ts-ignore
-roomsRouter.get("/:id/roomReservations", async (req: Request, res: Response) => {
-	const query = roomReservationQuerySchema.safeParse(req.query);
-	if (!query.success) {
-		return res.status(400).json({ error: query.error.flatten() });
-	}
+roomsRouter.get(
+	"/:id/roomReservations",
+	async (req: Request, res: Response) => {
+		const query = roomReservationQuerySchema.safeParse(req.query);
+		if (!query.success) {
+			return res.status(400).json({ error: query.error.flatten() });
+		}
 
-	const { startDate, endDate } = query.data;
-	if (startDate >= endDate) {
-		return res
-			.status(400)
-			.json({ error: "Start date must be before end date" });
-	}
+		const { startDate, endDate } = query.data;
+		if (startDate >= endDate) {
+			return res
+				.status(400)
+				.json({ error: "Start date must be before end date" });
+		}
 
-	const room = await roomsService.getById(req.params.id);
-	if (!room) return res.status(404).json({ error: "Room not found" });
+		const room = await roomsService.getById(req.params.id);
+		if (!room) return res.status(404).json({ error: "Room not found" });
 
-	const roomReservations = await roomReservationsService.getPaginatedByRoomAndDateRange(
-		req.params.id,
-		startDate,
-		endDate,
-	);
-	return res.json(roomReservations);
-});
+		const roomReservations =
+			await roomReservationsService.getPaginatedByRoomAndDateRange(
+				req.params.id,
+				startDate,
+				endDate,
+			);
+		return res.json(roomReservations);
+	},
+);
 
 //@ts-ignore
 roomsRouter.post("/", async (req: Request, res: Response) => {

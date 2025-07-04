@@ -207,14 +207,14 @@ export function SectionsListPage() {
 					</div>
 					<Button size="lg" className="flex items-center gap-2" asChild>
 						<Link
-						to="/admin/dashboard/clubs/$clubId/sections/create"
-						params={{ clubId }}
+							to="/admin/dashboard/clubs/$clubId/sections/create"
+							params={{ clubId }}
 						>
 							<Plus className="h-5 w-5" />
 							Créer une section
 						</Link>
 					</Button>
-			</div>
+				</div>
 
 				{/* Statistiques rapides */}
 				{sections.length > 0 && (
@@ -283,15 +283,15 @@ export function SectionsListPage() {
 							</p>
 							<Button size="lg" asChild>
 								<Link
-								to="/admin/dashboard/clubs/$clubId/sections/create"
-								params={{ clubId }}
+									to="/admin/dashboard/clubs/$clubId/sections/create"
+									params={{ clubId }}
 								>
 									<Plus className="mr-2 h-5 w-5" />
 									Créer votre première section
 								</Link>
 							</Button>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{sections.map((section) => (
@@ -305,11 +305,15 @@ export function SectionsListPage() {
 											<div className="relative">
 												<div
 													className="w-5 h-5 rounded-full border-2 border-primary/30 shadow-sm ring-2 ring-background"
-													style={{ backgroundColor: section.color || "#3b82f6" }}
+													style={{
+														backgroundColor: section.color || "#3b82f6",
+													}}
 												/>
-												<div 
+												<div
 													className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full opacity-60 animate-pulse"
-													style={{ backgroundColor: section.color || "#3b82f6" }}
+													style={{
+														backgroundColor: section.color || "#3b82f6",
+													}}
 												/>
 											</div>
 											<Badge
@@ -320,17 +324,20 @@ export function SectionsListPage() {
 											</Badge>
 										</div>
 										{(() => {
-											const categoryCount = getCategoriesCountForSection(section.id);
+											const categoryCount = getCategoriesCountForSection(
+												section.id,
+											);
 											return (
-												<Badge 
-													variant="outline" 
+												<Badge
+													variant="outline"
 													className={`text-xs font-medium px-2.5 py-1 transition-colors ${
-														categoryCount > 0 
-															? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400" 
+														categoryCount > 0
+															? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400"
 															: "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400"
 													}`}
 												>
-													{categoryCount} catégorie{categoryCount !== 1 ? "s" : ""}
+													{categoryCount} catégorie
+													{categoryCount !== 1 ? "s" : ""}
 												</Badge>
 											);
 										})()}

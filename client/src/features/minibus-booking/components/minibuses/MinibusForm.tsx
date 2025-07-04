@@ -1,30 +1,41 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { useForm, type Path } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { 
-	type CreateMinibusData, 
-	type UpdateMinibusData, 
-	type Minibus,
-	type Disponibility,
-	frenchDays,
-} from "@/features/minibus-booking/hooks/useMinibuses";
-import { createMinibusSchema, updateMinibusSchema } from "@/features/minibus-booking/lib/api/minibuses";
-import { useMinibuses } from "@/features/minibus-booking/hooks/useMinibuses";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
+import {
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { 
-	Info, 
-	Loader2, 
-	Timer, 
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	type CreateMinibusData,
+	type Disponibility,
+	type Minibus,
+	type UpdateMinibusData,
+	frenchDays,
+} from "@/features/minibus-booking/hooks/useMinibuses";
+import { useMinibuses } from "@/features/minibus-booking/hooks/useMinibuses";
+import {
+	createMinibusSchema,
+	updateMinibusSchema,
+} from "@/features/minibus-booking/lib/api/minibuses";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	Info,
+	Loader2,
+	Timer,
 	// @ts-ignore
 } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { type Path, useForm } from "react-hook-form";
 
 interface MinibusFormProps {
 	minibus?: Minibus;
@@ -44,14 +55,25 @@ const defaultDisponibility: Disponibility = {
 	sunday: { open: "06:00", close: "20:00", available: true },
 };
 
-export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, navigate }: MinibusFormProps) {
-	const { createMinibus, updateMinibus } = useMinibuses({ searchParams, navigate });
+export function MinibusForm({
+	minibus,
+	onSuccess,
+	onCancelLink,
+	searchParams,
+	navigate,
+}: MinibusFormProps) {
+	const { createMinibus, updateMinibus } = useMinibuses({
+		searchParams,
+		navigate,
+	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const isEditing = !!minibus;
 
 	const form = useForm<CreateMinibusData | UpdateMinibusData>({
-		resolver: zodResolver(isEditing ? updateMinibusSchema : createMinibusSchema),
+		resolver: zodResolver(
+			isEditing ? updateMinibusSchema : createMinibusSchema,
+		),
 		defaultValues: {
 			name: minibus?.name || "",
 			description: minibus?.description || "",
@@ -151,7 +173,8 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 											/>
 										</FormControl>
 										<FormDescription>
-											Description optionnelle du minibus (500 caractères maximum)
+											Description optionnelle du minibus (500 caractères
+											maximum)
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -170,7 +193,9 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 													type="number"
 													min="1"
 													{...field}
-													onChange={(e) => field.onChange(Number(e.target.value))}
+													onChange={(e) =>
+														field.onChange(Number(e.target.value))
+													}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -189,7 +214,9 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 													type="number"
 													min="0"
 													{...field}
-													onChange={(e) => field.onChange(Number(e.target.value))}
+													onChange={(e) =>
+														field.onChange(Number(e.target.value))
+													}
 												/>
 											</FormControl>
 											<FormDescription>
@@ -234,17 +261,23 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 
 							<div className="grid gap-4">
 								{Object.entries(frenchDays).map(([dayKey, dayLabel]) => {
-									const dayDisponibility = disponibility?.[dayKey as keyof Disponibility];
-									
+									const dayDisponibility =
+										disponibility?.[dayKey as keyof Disponibility];
+
 									return (
-										<div key={dayKey} className="flex items-center gap-4 p-3 border rounded-lg">
-											<div className="w-20 text-sm font-medium">
-												{dayLabel}
-											</div>
-											
+										<div
+											key={dayKey}
+											className="flex items-center gap-4 p-3 border rounded-lg"
+										>
+											<div className="w-20 text-sm font-medium">{dayLabel}</div>
+
 											<FormField
 												control={form.control}
-												name={`disponibility.${dayKey}.available` as Path<CreateMinibusData | UpdateMinibusData>}
+												name={
+													`disponibility.${dayKey}.available` as Path<
+														CreateMinibusData | UpdateMinibusData
+													>
+												}
 												render={({ field }) => (
 													<FormItem className="flex flex-row items-center space-x-2 space-y-0">
 														<FormControl>
@@ -253,7 +286,9 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 																onCheckedChange={field.onChange}
 															/>
 														</FormControl>
-														<FormLabel className="text-sm">Disponible</FormLabel>
+														<FormLabel className="text-sm">
+															Disponible
+														</FormLabel>
 													</FormItem>
 												)}
 											/>
@@ -262,7 +297,11 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 												<>
 													<FormField
 														control={form.control}
-														name={`disponibility.${dayKey}.open` as Path<CreateMinibusData | UpdateMinibusData>}
+														name={
+															`disponibility.${dayKey}.open` as Path<
+																CreateMinibusData | UpdateMinibusData
+															>
+														}
 														render={({ field }) => (
 															<FormItem>
 																<FormControl>
@@ -276,12 +315,18 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 															</FormItem>
 														)}
 													/>
-													
-													<span className="text-sm text-muted-foreground">à</span>
-													
+
+													<span className="text-sm text-muted-foreground">
+														à
+													</span>
+
 													<FormField
 														control={form.control}
-														name={`disponibility.${dayKey}.close` as Path<CreateMinibusData | UpdateMinibusData>}
+														name={
+															`disponibility.${dayKey}.close` as Path<
+																CreateMinibusData | UpdateMinibusData
+															>
+														}
 														render={({ field }) => (
 															<FormItem>
 																<FormControl>
@@ -312,12 +357,10 @@ export function MinibusForm({ minibus, onSuccess, onCancelLink, searchParams, na
 									<a href={onCancelLink}>Annuler</a>
 								</Button>
 							)}
-							<Button 
-								type="submit" 
-								disabled={isSubmitting}
-								className="flex-1"
-							>
-								{isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+							<Button type="submit" disabled={isSubmitting} className="flex-1">
+								{isSubmitting && (
+									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+								)}
 								{isEditing ? "Modifier" : "Créer"}
 							</Button>
 						</div>

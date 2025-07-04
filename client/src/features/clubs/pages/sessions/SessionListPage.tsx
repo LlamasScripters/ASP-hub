@@ -1,6 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import {
 	Table,
 	TableBody,
@@ -10,7 +16,15 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Link, useParams } from "@tanstack/react-router";
-import { Calendar, Clock, MapPin, Plus, Users, Edit, ArrowLeft } from "lucide-react";
+import {
+	ArrowLeft,
+	Calendar,
+	Clock,
+	Edit,
+	MapPin,
+	Plus,
+	Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import type { SessionSport } from "../../types";
 
@@ -33,7 +47,7 @@ export function SessionsListPage() {
 	const getStatusBadge = (status: string) => {
 		const variants = {
 			planifie: "default",
-			en_cours: "secondary", 
+			en_cours: "secondary",
 			termine: "outline",
 			annule: "destructive",
 		} as const;
@@ -56,7 +70,7 @@ export function SessionsListPage() {
 		const variants = {
 			entrainement: "default",
 			match: "secondary",
-			stage: "outline", 
+			stage: "outline",
 			competition: "destructive",
 			autre: "outline",
 		} as const;
@@ -79,7 +93,7 @@ export function SessionsListPage() {
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("fr-FR", {
 			day: "2-digit",
-			month: "2-digit", 
+			month: "2-digit",
 			year: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
@@ -148,7 +162,7 @@ export function SessionsListPage() {
 							<Clock className="w-4 h-4 text-muted-foreground" />
 							<div>
 								<p className="text-2xl font-bold">
-									{sessions.filter(s => s.status === "planifie").length}
+									{sessions.filter((s) => s.status === "planifie").length}
 								</p>
 								<p className="text-xs text-muted-foreground">À venir</p>
 							</div>
@@ -161,7 +175,7 @@ export function SessionsListPage() {
 							<Users className="w-4 h-4 text-muted-foreground" />
 							<div>
 								<p className="text-2xl font-bold">
-									{sessions.filter(s => s.status === "en_cours").length}
+									{sessions.filter((s) => s.status === "en_cours").length}
 								</p>
 								<p className="text-xs text-muted-foreground">En cours</p>
 							</div>
@@ -174,7 +188,7 @@ export function SessionsListPage() {
 							<MapPin className="w-4 h-4 text-muted-foreground" />
 							<div>
 								<p className="text-2xl font-bold">
-									{sessions.filter(s => s.status === "termine").length}
+									{sessions.filter((s) => s.status === "termine").length}
 								</p>
 								<p className="text-xs text-muted-foreground">Terminées</p>
 							</div>
@@ -195,7 +209,9 @@ export function SessionsListPage() {
 					{sessions.length === 0 ? (
 						<div className="text-center py-8">
 							<Calendar className="mx-auto h-12 w-12 text-gray-400" />
-							<h3 className="mt-2 text-sm font-semibold text-gray-900">Aucune session</h3>
+							<h3 className="mt-2 text-sm font-semibold text-gray-900">
+								Aucune session
+							</h3>
 							<p className="mt-1 text-sm text-gray-500">
 								Commencez par créer une nouvelle session.
 							</p>
@@ -230,30 +246,20 @@ export function SessionsListPage() {
 										<TableCell className="font-medium">
 											{session.title}
 										</TableCell>
-										<TableCell>
-											{getTypeBadge(session.type)}
-										</TableCell>
-										<TableCell>
-											{getStatusBadge(session.status)}
-										</TableCell>
-										<TableCell>
-											{formatDate(session.startDate)}
-										</TableCell>
-										<TableCell>
-											{formatDate(session.endDate)}
-										</TableCell>
-										<TableCell>
-											{session.location || "Non défini"}
-										</TableCell>
+										<TableCell>{getTypeBadge(session.type)}</TableCell>
+										<TableCell>{getStatusBadge(session.status)}</TableCell>
+										<TableCell>{formatDate(session.startDate)}</TableCell>
+										<TableCell>{formatDate(session.endDate)}</TableCell>
+										<TableCell>{session.location || "Non défini"}</TableCell>
 										<TableCell>
 											<Button variant="outline" size="sm" asChild>
 												<Link
 													to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
-													params={{ 
-														clubId, 
-														sectionId, 
-														categoryId, 
-														sessionId: session.id 
+													params={{
+														clubId,
+														sectionId,
+														categoryId,
+														sessionId: session.id,
 													}}
 												>
 													<Edit className="w-4 h-4 mr-2" />

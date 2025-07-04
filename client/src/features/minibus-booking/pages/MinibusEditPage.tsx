@@ -1,12 +1,12 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { MinibusForm } from "../components/minibuses/MinibusForm";
-import type { Minibus } from "../lib/api/minibuses";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { MinibusForm } from "../components/minibuses/MinibusForm";
+import type { Minibus } from "../lib/api/minibuses";
 
 interface MinibusEditPageProps {
 	minibus: Minibus;
@@ -45,7 +45,7 @@ export function MinibusEditPage({ minibus }: MinibusEditPageProps) {
 							<ArrowLeft className="w-4 h-4 mr-2" />
 							Retour à la liste
 						</Link>
-					</Button>					
+					</Button>
 					<Button asChild>
 						<Link
 							to="/admin/assets/minibuses/$minibusId"

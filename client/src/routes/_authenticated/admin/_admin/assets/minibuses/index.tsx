@@ -1,9 +1,9 @@
-import { MinibusesPage } from "@/features/minibus-booking/pages/MinibusesPage";
-import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
-import { createFileRoute } from "@tanstack/react-router";
 import { filteredQueryOptions } from "@/features/minibus-booking/hooks/useMinibuses";
-import { z } from "zod";
+import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
+import { MinibusesPage } from "@/features/minibus-booking/pages/MinibusesPage";
+import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 
 interface MinibusesLoaderData {
 	minibuses: Minibus[];

@@ -306,14 +306,18 @@ export function AllCategoriesPage() {
 								dans les sections.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
-								<Button onClick={() => setShowSectionModal(true)} className="cursor-pointer hover:cursor-pointer" size="lg">
+								<Button
+									onClick={() => setShowSectionModal(true)}
+									className="cursor-pointer hover:cursor-pointer"
+									size="lg"
+								>
 									<Plus className="mr-2 h-5 w-5" />
 									Créer une catégorie
 								</Button>
 								<Button variant="outline" size="lg" asChild>
 									<Link
-									to="/admin/dashboard/clubs/$clubId/sections"
-									params={{ clubId }}
+										to="/admin/dashboard/clubs/$clubId/sections"
+										params={{ clubId }}
 									>
 										<FolderOpen className="mr-2 h-5 w-5" />
 										Voir les sections
@@ -388,7 +392,12 @@ export function AllCategoriesPage() {
 												</TableCell>
 												<TableCell className="text-right">
 													<div className="flex items-center justify-end gap-2">
-														<Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary" asChild>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+															asChild
+														>
 															<Link
 																to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
 																params={{

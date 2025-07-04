@@ -1,5 +1,5 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { eq } from "drizzle-orm";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	type InsertSessionSport,
 	type SelectCategory,
@@ -33,33 +33,21 @@ const sessionTitles = {
 		"Séance tactique",
 		"Condition physique",
 	],
-	"Seniors": [
+	Seniors: [
 		"Entraînement équipe première",
 		"Match championnat senior",
 		"Préparation tactique",
 		"Match amical",
 	],
-	"Vétérans": [
-		"Football loisir",
-		"Match vétérans",
-		"Entraînement convivial",
-	],
-	"Baby Basket": [
-		"Initiation basket",
-		"Jeux avec ballon",
-		"Coordination",
-	],
-	"Poussins": [
-		"Apprentissage dribble",
-		"Tirs au panier",
-		"Mini-match",
-	],
-	"Benjamins": [
+	Vétérans: ["Football loisir", "Match vétérans", "Entraînement convivial"],
+	"Baby Basket": ["Initiation basket", "Jeux avec ballon", "Coordination"],
+	Poussins: ["Apprentissage dribble", "Tirs au panier", "Mini-match"],
+	Benjamins: [
 		"Technique perfectionnement",
 		"Tactique débutant",
 		"Match benjamins",
 	],
-	"Juniors": [
+	Juniors: [
 		"Entraînement compétition",
 		"Match championnat",
 		"Préparation physique",
@@ -94,21 +82,13 @@ const sessionTitles = {
 		"Technique brasse",
 		"Perfectionnement dos",
 	],
-	"Compétition": [
-		"Entraînement natation",
-		"Compétition club",
-		"Stage technique",
-	],
+	Compétition: ["Entraînement natation", "Compétition club", "Stage technique"],
 	"Aqua-Fitness": [
 		"Cours aqua-fitness",
 		"Renforcement musculaire",
 		"Cardio aquatique",
 	],
-	"Mini-Hand": [
-		"Initiation handball",
-		"Jeux de balle",
-		"Coordination",
-	],
+	"Mini-Hand": ["Initiation handball", "Jeux de balle", "Coordination"],
 	"Seniors Masculins": [
 		"Entraînement handball",
 		"Match championnat",
@@ -119,11 +99,7 @@ const sessionTitles = {
 		"Match championnat F",
 		"Séance technique",
 	],
-	"Mini-Volley": [
-		"Découverte volleyball",
-		"Jeux filet bas",
-		"Coordination",
-	],
+	"Mini-Volley": ["Découverte volleyball", "Jeux filet bas", "Coordination"],
 	"Beach Volley": [
 		"Entraînement beach",
 		"Tournoi beach volley",
@@ -144,21 +120,13 @@ const sessionTitles = {
 		"Circuit training",
 		"Entraînement fonctionnel",
 	],
-	"Éveil Danse": [
-		"Découverte danse",
-		"Expression corporelle",
-		"Jeux dansés",
-	],
+	"Éveil Danse": ["Découverte danse", "Expression corporelle", "Jeux dansés"],
 	"Danse Classique": [
 		"Cours ballet",
 		"Technique classique",
 		"Spectacle préparation",
 	],
-	"Hip-Hop": [
-		"Cours hip-hop",
-		"Chorégraphie urbaine",
-		"Battle training",
-	],
+	"Hip-Hop": ["Cours hip-hop", "Chorégraphie urbaine", "Battle training"],
 	"Judo Enfants": [
 		"Cours judo enfants",
 		"Apprentissage chutes",
@@ -179,33 +147,44 @@ const sessionTitles = {
 		"Multi-activités",
 		"Découverte disciplines",
 	],
-	"Course à Pied": [
-		"Entraînement running",
-		"Sortie longue",
-		"Fractionné",
-	],
+	"Course à Pied": ["Entraînement running", "Sortie longue", "Fractionné"],
 };
 
 function generateSessionTitle(categoryName: string): string {
-	const titles = sessionTitles[categoryName as keyof typeof sessionTitles] || ["Entraînement", "Séance", "Cours"];
+	const titles = sessionTitles[categoryName as keyof typeof sessionTitles] || [
+		"Entraînement",
+		"Séance",
+		"Cours",
+	];
 	const randomTitle = titles[Math.floor(Math.random() * titles.length)];
 	return `${randomTitle} - ${categoryName}`;
 }
 
-function generateSessionType(): "entrainement" | "match" | "stage" | "competition" | "autre" {
-	const types = ["entrainement", "match", "stage", "competition", "autre"] as const;
+function generateSessionType():
+	| "entrainement"
+	| "match"
+	| "stage"
+	| "competition"
+	| "autre" {
+	const types = [
+		"entrainement",
+		"match",
+		"stage",
+		"competition",
+		"autre",
+	] as const;
 	const weights = [0.6, 0.2, 0.1, 0.08, 0.02]; // 60% entraînement, 20% match, etc.
-	
+
 	const random = Math.random();
 	let cumulative = 0;
-	
+
 	for (let i = 0; i < types.length; i++) {
 		cumulative += weights[i];
 		if (random <= cumulative) {
 			return types[i];
 		}
 	}
-	
+
 	return "entrainement";
 }
 
@@ -218,27 +197,27 @@ function generateSessionDuration(): number {
 function generateValidStartTime(): Date {
 	const today = new Date();
 	const futureDate = new Date(today);
-	
+
 	// Générer une date entre aujourd'hui et 30 jours dans le futur
 	const daysToAdd = Math.floor(Math.random() * 30);
 	futureDate.setDate(today.getDate() + daysToAdd);
-	
+
 	// Heures possibles: 8h à 20h
 	const possibleHours = [8, 9, 10, 14, 15, 16, 17, 18, 19, 20];
 	const hour = possibleHours[Math.floor(Math.random() * possibleHours.length)];
-	
+
 	// Minutes: 0 ou 30
 	const minute = Math.random() < 0.5 ? 0 : 30;
-	
+
 	futureDate.setHours(hour, minute, 0, 0);
-	
+
 	return futureDate;
 }
 
 function generateLocation(): string {
 	const locations = [
 		"Gymnase Principal",
-		"Salle Polyvalente", 
+		"Salle Polyvalente",
 		"Terrain de Football",
 		"Piscine Olympique",
 		"Salle de Musculation",
@@ -248,7 +227,7 @@ function generateLocation(): string {
 		"Salle de Danse",
 		"Piste d'Athlétisme",
 	];
-	
+
 	return locations[Math.floor(Math.random() * locations.length)];
 }
 
@@ -264,7 +243,9 @@ export async function seedSessionsSport(
 		.limit(5);
 
 	if (availableUsers.length === 0) {
-		console.log("No users found to assign as coaches. Skipping sports sessions creation.");
+		console.log(
+			"No users found to assign as coaches. Skipping sports sessions creation.",
+		);
 		return [];
 	}
 
@@ -273,15 +254,17 @@ export async function seedSessionsSport(
 	// Générer 3-5 sessions par catégorie
 	for (const category of categories) {
 		const numberOfSessions = Math.floor(Math.random() * 3) + 3; // 3 à 5 sessions
-		
+
 		for (let i = 0; i < numberOfSessions; i++) {
 			const startDate = generateValidStartTime();
 			const duration = generateSessionDuration();
 			const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
-			
-			const coach = availableUsers[Math.floor(Math.random() * availableUsers.length)];
-			const responsible = availableUsers[Math.floor(Math.random() * availableUsers.length)];
-			
+
+			const coach =
+				availableUsers[Math.floor(Math.random() * availableUsers.length)];
+			const responsible =
+				availableUsers[Math.floor(Math.random() * availableUsers.length)];
+
 			const sessionType = generateSessionType();
 			const maxParticipants = Math.floor(Math.random() * 15) + 8; // 8 à 22 participants
 			const currentParticipants = Math.floor(Math.random() * maxParticipants);
@@ -312,7 +295,9 @@ export async function seedSessionsSport(
 			.values(sessionsData)
 			.returning();
 
-		console.log(`${insertedSessions.length} sports sessions created successfully`);
+		console.log(
+			`${insertedSessions.length} sports sessions created successfully`,
+		);
 		return insertedSessions;
 	} catch (error) {
 		console.error("Error during the insertion of sports sessions:", error);

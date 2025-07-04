@@ -482,15 +482,15 @@ export function AllClubSessionsPage() {
 							</p>
 							<Button size="lg" asChild>
 								<Link
-								to="/admin/dashboard/clubs/$clubId/sections"
-								params={{ clubId }}
+									to="/admin/dashboard/clubs/$clubId/sections"
+									params={{ clubId }}
 								>
 									<Users className="mr-2 h-5 w-5" />
 									Voir les sections
 								</Link>
 							</Button>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
 				) : (
 					<Card>
 						<CardHeader>
@@ -513,7 +513,12 @@ export function AllClubSessionsPage() {
 										<Search className="h-4 w-4" />
 										Filtres de recherche
 									</h3>
-									<Button variant="outline" className="hover:cursor-pointer" size="sm" onClick={clearFilters}>
+									<Button
+										variant="outline"
+										className="hover:cursor-pointer"
+										size="sm"
+										onClick={clearFilters}
+									>
 										Effacer les filtres
 									</Button>
 								</div>
@@ -777,7 +782,12 @@ export function AllClubSessionsPage() {
 													</TableCell>
 													<TableCell className="text-right">
 														<div className="flex items-center justify-end gap-2">
-															<Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary" asChild>
+															<Button
+																variant="ghost"
+																size="sm"
+																className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+																asChild
+															>
 																<Link
 																	to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
 																	params={{

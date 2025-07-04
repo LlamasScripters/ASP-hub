@@ -63,7 +63,7 @@ export const STANDARD_MINIBUS_HOURS: WeekSchedule = {
 	friday: { open: null, close: null, available: false },
 	saturday: { open: "06:00", close: "23:00", available: true },
 	sunday: { open: "06:00", close: "23:00", available: true },
-};	
+};
 
 export const ALTERNATIVE_MINIBUS_HOURS: WeekSchedule = {
 	monday: { open: "06:00", close: "23:00", available: true },

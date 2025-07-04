@@ -1,6 +1,6 @@
-import { MinibusReservationCreatePage } from "@/features/minibus-booking/pages/MinibusReservationCreatePage";
 import type { Minibus } from "@/features/minibus-booking/lib/api/minibuses";
 import { minibusesApi } from "@/features/minibus-booking/lib/api/minibuses";
+import { MinibusReservationCreatePage } from "@/features/minibus-booking/pages/MinibusReservationCreatePage";
 import { createFileRoute } from "@tanstack/react-router";
 
 interface LoaderData {

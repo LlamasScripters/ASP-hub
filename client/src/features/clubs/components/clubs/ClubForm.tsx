@@ -1,24 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+	AlertCircle,
 	ArrowLeft,
 	Building2,
+	Captions,
 	CheckCircle,
 	FileText,
+	Globe,
 	Loader2,
 	Mail,
 	MapPin,
 	Phone,
-	Globe,
 	Save,
-	AlertCircle,
-	Captions,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
+import { z } from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -27,7 +28,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Form,
 	FormControl,
@@ -337,10 +337,7 @@ export function ClubForm({
 				</CardHeader>
 				<CardContent className="space-y-6">
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(onSubmit)}
-							className="space-y-6"
-						>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							{/* Nom du club */}
 							<FormField
 								control={form.control}
@@ -465,12 +462,8 @@ export function ClubForm({
 													{...field}
 													onPaste={(e) => {
 														e.preventDefault();
-														const pastedText =
-															e.clipboardData.getData("text");
-														const cleanedPhone = pastedText.replace(
-															/\D/g,
-															"",
-														);
+														const pastedText = e.clipboardData.getData("text");
+														const cleanedPhone = pastedText.replace(/\D/g, "");
 														const limitedPhone = cleanedPhone.slice(0, 10);
 														field.onChange(limitedPhone);
 													}}

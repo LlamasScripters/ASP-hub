@@ -157,7 +157,9 @@ export function useCategories(clubId: string, sectionId: string) {
 	});
 
 	// Fonctions wrapper
-	const createCategory = async (data: CreateCategoryData): Promise<Category> => {
+	const createCategory = async (
+		data: CreateCategoryData,
+	): Promise<Category> => {
 		return createCategoryMutation.mutateAsync(data);
 	};
 

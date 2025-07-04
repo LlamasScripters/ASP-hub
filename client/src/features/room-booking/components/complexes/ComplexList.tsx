@@ -62,10 +62,7 @@ export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 	const [parkingFilter, setParkingFilter] = useState<string>("all");
 	const itemsPerPage = 10;
 
-	const {
-		complexes: fetchedComplexes,
-		deleteComplex,
-	} = useComplexes({
+	const { complexes: fetchedComplexes, deleteComplex } = useComplexes({
 		initialData: initialComplexes,
 	});
 

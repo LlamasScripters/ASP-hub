@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SessionForm } from "../../components/sessions/SessionForm";
 import type { Section } from "../../types";
@@ -46,7 +46,7 @@ export function SessionCreatePage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Vérifiez que les dates et horaires 
+					<strong>Important :</strong> Vérifiez que les dates et horaires
 					choisis ne sont pas en conflit avec d'autres sessions.
 				</AlertDescription>
 			</Alert>

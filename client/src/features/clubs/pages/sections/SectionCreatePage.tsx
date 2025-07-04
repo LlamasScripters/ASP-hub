@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { SectionForm } from "../../components/sections/SectionForm";
 
 export function SectionCreatePage() {
@@ -36,7 +36,7 @@ export function SectionCreatePage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Chaque section peut contenir plusieurs 
+					<strong>Important :</strong> Chaque section peut contenir plusieurs
 					catégories d'âge avec leurs propres sessions d'entraînement.
 				</AlertDescription>
 			</Alert>

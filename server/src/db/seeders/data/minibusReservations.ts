@@ -13,7 +13,7 @@ const activityTitles = [
 	"Déplacement tournoi de basketball",
 	"Déplacement tournoi de tennis",
 	"Déplacement tournoi de natation",
-	"Déplacement tournoi de handball",	
+	"Déplacement tournoi de handball",
 	"Déplacement tournoi de volley-ball",
 	"Déplacement tournoi de badminton",
 	"Déplacement tournoi de rugby",
@@ -22,11 +22,11 @@ const activityTitles = [
 	"Déplacement tournoi de boxe",
 	"Déplacement tournoi de judo",
 	"Déplacement tournoi de karaté",
-	"Déplacement tournoi de danse",	
+	"Déplacement tournoi de danse",
 	"Déplacement match de football",
 	"Déplacement match de basketball",
 	"Déplacement match de tennis",
-	"Déplacement match de natation",	
+	"Déplacement match de natation",
 	"Déplacement match de handball",
 ];
 
@@ -91,7 +91,10 @@ function getMinibusDisponibility(
 	};
 }
 
-function generateValidStartTime(minibus: SelectMinibus, date: Date): Date | null {
+function generateValidStartTime(
+	minibus: SelectMinibus,
+	date: Date,
+): Date | null {
 	const disponibility = getMinibusDisponibility(minibus, date);
 	if (!disponibility) {
 		return null;
@@ -130,7 +133,10 @@ function generateValidStartTime(minibus: SelectMinibus, date: Date): Date | null
 	return startDate;
 }
 
-function generateValidDuration(minibus: SelectMinibus, startDate: Date): number {
+function generateValidDuration(
+	minibus: SelectMinibus,
+	startDate: Date,
+): number {
 	const disponibility = getMinibusDisponibility(minibus, startDate);
 	if (!disponibility) {
 		return 60; // 1h par défaut
@@ -192,7 +198,7 @@ export async function seedMinibusReservations(
 			// Vérifier d'abord si le minibus est disponible ce jour-là
 			const dayNames = [
 				"sunday",
-				"monday", 
+				"monday",
 				"tuesday",
 				"wednesday",
 				"thursday",
@@ -231,13 +237,17 @@ export async function seedMinibusReservations(
 
 					const startDate = generateValidStartTime(minibus, currentDate);
 					if (!startDate) {
-						console.log(`Impossible de générer une heure de début valide pour ${minibus.name} le ${currentDate.toDateString()}`);
+						console.log(
+							`Impossible de générer une heure de début valide pour ${minibus.name} le ${currentDate.toDateString()}`,
+						);
 						break; // Minibus indisponible ce jour-là ou pas assez de temps
 					}
 
 					const durationMinutes = generateValidDuration(minibus, startDate);
 					if (durationMinutes <= 0) {
-						console.log(`Durée invalide générée pour ${minibus.name} le ${currentDate.toDateString()}`);
+						console.log(
+							`Durée invalide générée pour ${minibus.name} le ${currentDate.toDateString()}`,
+						);
 						break;
 					}
 
@@ -247,18 +257,26 @@ export async function seedMinibusReservations(
 					// Vérifier que la réservation reste dans les heures d'ouverture
 					const disponibility = getMinibusDisponibility(minibus, currentDate);
 					if (disponibility) {
-						const [closeHour, closeMinute] = disponibility.close.split(":").map(Number);
+						const [closeHour, closeMinute] = disponibility.close
+							.split(":")
+							.map(Number);
 						const closeTime = new Date(currentDate);
 						closeTime.setHours(closeHour, closeMinute, 0, 0);
 
 						if (endDate > closeTime) {
-							console.log(`Réservation se termine après les heures d'ouverture pour ${minibus.name}`);
+							console.log(
+								`Réservation se termine après les heures d'ouverture pour ${minibus.name}`,
+							);
 							continue; // Essayer un autre créneau
 						}
 					}
 
 					// Vérifier qu'il n'y a pas de conflit avec les autres réservations du jour
-					const hasConflict = hasOverlap(startDate, endDate, dayMinibusReservations);
+					const hasConflict = hasOverlap(
+						startDate,
+						endDate,
+						dayMinibusReservations,
+					);
 
 					if (!hasConflict) {
 						dayMinibusReservations.push({ start: startDate, end: endDate });
@@ -282,13 +300,17 @@ export async function seedMinibusReservations(
 				}
 
 				if (!validMinibusReservation && attempts >= 10) {
-					console.log(`Impossible de créer une réservation valide pour ${minibus.name} le ${currentDate.toDateString()} après ${attempts} tentatives`);
+					console.log(
+						`Impossible de créer une réservation valide pour ${minibus.name} le ${currentDate.toDateString()} après ${attempts} tentatives`,
+					);
 				}
 			}
 		}
 	}
 
-	console.log(`Insertion of ${minibusReservationsData.length} minibus reservations...`);
+	console.log(
+		`Insertion of ${minibusReservationsData.length} minibus reservations...`,
+	);
 
 	if (minibusReservationsData.length > 0) {
 		try {
@@ -303,7 +325,8 @@ export async function seedMinibusReservations(
 
 			const statusCounts = insertedMinibusReservations.reduce(
 				(acc, minibusReservation) => {
-					acc[minibusReservation.status] = (acc[minibusReservation.status] || 0) + 1;
+					acc[minibusReservation.status] =
+						(acc[minibusReservation.status] || 0) + 1;
 					return acc;
 				},
 				{} as Record<string, number>,
@@ -311,7 +334,10 @@ export async function seedMinibusReservations(
 
 			console.log("Status distribution:", statusCounts);
 		} catch (error) {
-			console.error("Error during the insertion of minibus reservations:", error);
+			console.error(
+				"Error during the insertion of minibus reservations:",
+				error,
+			);
 		}
 	} else {
 		console.log(

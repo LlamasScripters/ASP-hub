@@ -1,12 +1,27 @@
-import { useState, useMemo, useCallback } from "react";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit2, Loader2 } from "lucide-react";
-import type { Disponibility } from "@/features/minibus-booking/hooks/useMinibuses";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import type { MinibusReservation } from "@/features/minibus-booking/hooks/useMinibusReservations";
 import { useMinibusReservations } from "@/features/minibus-booking/hooks/useMinibusReservations";
-import { getWeekBounds, getMonthBounds } from "@/features/minibus-booking/lib/api/minibusReservations";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import type { Disponibility } from "@/features/minibus-booking/hooks/useMinibuses";
+import {
+	getMonthBounds,
+	getWeekBounds,
+} from "@/features/minibus-booking/lib/api/minibusReservations";
 import { Link } from "@tanstack/react-router";
+import {
+	Calendar as CalendarIcon,
+	ChevronLeft,
+	ChevronRight,
+	Edit2,
+	Loader2,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 
 type ViewMode = "week" | "month";
 
@@ -55,8 +70,8 @@ const timeToMinutes = (time: string): number => {
 
 const formatDateKey = (date: Date): string => {
 	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
 	return `${year}-${month}-${day}`;
 };
 
@@ -82,14 +97,14 @@ const getStatusColor = (status: string) => {
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
 const START_HOUR = 5;
-const END_HOUR = 24; 
+const END_HOUR = 24;
 
 export function MinibusReservationList({
 	minibusDisponibility,
 }: MinibusReservationListProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
-	
+
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
 			return getWeekBounds(referenceDate);
@@ -102,7 +117,7 @@ export function MinibusReservationList({
 	});
 
 	const filteredReservations = useMemo(() => {
-		return minibusReservations.filter(reservation => {
+		return minibusReservations.filter((reservation) => {
 			const reservationDate = new Date(reservation.startAt);
 			return reservationDate >= startDate && reservationDate <= endDate;
 		});
@@ -112,8 +127,8 @@ export function MinibusReservationList({
 	const currentHour = now.getHours();
 
 	const currentYear = now.getFullYear();
-	const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-	const currentDay = String(now.getDate()).padStart(2, '0');
+	const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+	const currentDay = String(now.getDate()).padStart(2, "0");
 	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const goPrevious = useCallback(() => {
@@ -142,33 +157,33 @@ export function MinibusReservationList({
 
 	const minibusReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, MinibusReservation[]> = {};
-		
+
 		for (const reservation of filteredReservations) {
 			const date = new Date(reservation.startAt);
 			const dateKey = formatDateKey(date);
-			
+
 			if (!reservationsByDay[dateKey]) {
 				reservationsByDay[dateKey] = [];
 			}
-			
+
 			reservationsByDay[dateKey].push(reservation);
 		}
-		
+
 		return reservationsByDay;
 	}, [filteredReservations]);
 
 	const formatPeriod = () => {
 		if (viewMode === "week") {
-			const options: Intl.DateTimeFormatOptions = { 
-				day: "numeric", 
-				month: "short", 
-				year: "numeric" 
+			const options: Intl.DateTimeFormatOptions = {
+				day: "numeric",
+				month: "short",
+				year: "numeric",
 			};
 			return `${startDate.toLocaleDateString("fr-FR", options)} - ${endDate.toLocaleDateString("fr-FR", options)}`;
 		}
-		return referenceDate.toLocaleDateString("fr-FR", { 
-			month: "long", 
-			year: "numeric" 
+		return referenceDate.toLocaleDateString("fr-FR", {
+			month: "long",
+			year: "numeric",
 		});
 	};
 
@@ -200,7 +215,8 @@ export function MinibusReservationList({
 							Planning des réservations
 						</CardTitle>
 						<CardDescription className="text-sm text-muted-foreground">
-							Total : {filteredReservations.length} réservation{filteredReservations.length > 1 ? "s" : ""} sur la période
+							Total : {filteredReservations.length} réservation
+							{filteredReservations.length > 1 ? "s" : ""} sur la période
 						</CardDescription>
 					</div>
 					<div className="flex items-center gap-2">
@@ -223,7 +239,7 @@ export function MinibusReservationList({
 								Mois
 							</Button>
 						</div>
-						
+
 						{/* Navigation */}
 						<div className="flex items-center gap-1">
 							<Button variant="outline" size="sm" onClick={goPrevious}>
@@ -251,32 +267,46 @@ export function MinibusReservationList({
 							{Array.from({ length: 7 }, (_, i) => {
 								const date = new Date(startDate);
 								date.setDate(startDate.getDate() + i);
-								const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+								const isAvailable = isMinibusAvailableOnDay(
+									date,
+									minibusDisponibility,
+								);
 								const dateKey = formatDateKey(date);
 								const isToday = dateKey === currentDate;
-								
+
 								return (
 									<div
 										key={`day-header-${dateKey}`}
 										className={`p-2 text-center border-b border-border ${
-											isAvailable ? "bg-green-50 dark:bg-green-950/30" : "bg-muted"
+											isAvailable
+												? "bg-green-50 dark:bg-green-950/30"
+												: "bg-muted"
 										} ${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 									>
-										<div className={`text-xs font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+										<div
+											className={`text-xs font-medium ${isToday ? "text-primary" : "text-foreground"}`}
+										>
 											{date.toLocaleDateString("fr-FR", { weekday: "short" })}
 											{isToday && " (Aujourd'hui)"}
 										</div>
-										<div className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}>
-											{date.toLocaleDateString("fr-FR", { 
-												day: "numeric", 
-												month: "short" 
+										<div
+											className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}
+										>
+											{date.toLocaleDateString("fr-FR", {
+												day: "numeric",
+												month: "short",
 											})}
 										</div>
 										{isAvailable && (
-											<div className={`text-xs mt-1 ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+											<div
+												className={`text-xs mt-1 ${isToday ? "text-primary" : "text-muted-foreground"}`}
+											>
 												{(() => {
-													const hours = getMinibusHoursForDay(date, minibusDisponibility);
-													return hours.openTime && hours.closeTime 
+													const hours = getMinibusHoursForDay(
+														date,
+														minibusDisponibility,
+													);
+													return hours.openTime && hours.closeTime
 														? `${hours.openTime}-${hours.closeTime}`
 														: "Disponible";
 												})()}
@@ -291,39 +321,62 @@ export function MinibusReservationList({
 								const hour = START_HOUR + index;
 								const hourStr = `${hour.toString().padStart(2, "0")}:00`;
 								const isCurrentHour = hour === currentHour;
-								
+
 								return (
 									<div key={`hour-${hour}`} className="contents">
 										{/* Colonne des heures */}
-										<div className={`p-2 text-xs border-r border-border ${
-											isCurrentHour ? "bg-primary/20 text-primary font-bold" : "text-muted-foreground"
-										}`}>
+										<div
+											className={`p-2 text-xs border-r border-border ${
+												isCurrentHour
+													? "bg-primary/20 text-primary font-bold"
+													: "text-muted-foreground"
+											}`}
+										>
 											{hourStr}
 										</div>
-										
+
 										{/* Colonnes des jours */}
 										{Array.from({ length: 7 }, (_, dayIndex) => {
 											const date = new Date(startDate);
 											date.setDate(startDate.getDate() + dayIndex);
 											const dateKey = formatDateKey(date);
-											const dayReservations = minibusReservationsByDay[dateKey] || [];
-											const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+											const dayReservations =
+												minibusReservationsByDay[dateKey] || [];
+											const isAvailable = isMinibusAvailableOnDay(
+												date,
+												minibusDisponibility,
+											);
 											const isCurrentDay = dateKey === currentDate;
 											const isCurrentTimeSlot = isCurrentDay && isCurrentHour;
-											
+
 											// Vérifier si le minibus est disponible à cette heure
-											const dayHours = getMinibusHoursForDay(date, minibusDisponibility);
-											const isHourInAvailableRange = dayHours.openTime && dayHours.closeTime 
-												? hour >= Math.floor(timeToMinutes(dayHours.openTime) / 60) && hour < Math.ceil(timeToMinutes(dayHours.closeTime) / 60)
-												: false;
-											
+											const dayHours = getMinibusHoursForDay(
+												date,
+												minibusDisponibility,
+											);
+											const isHourInAvailableRange =
+												dayHours.openTime && dayHours.closeTime
+													? hour >=
+															Math.floor(
+																timeToMinutes(dayHours.openTime) / 60,
+															) &&
+														hour <
+															Math.ceil(timeToMinutes(dayHours.closeTime) / 60)
+													: false;
+
 											// Filtrer les réservations pour cette heure
-											const hourReservations = dayReservations.filter((reservation) => {
-												const startHour = new Date(reservation.startAt).getHours();
-												const endHour = new Date(reservation.endAt).getHours();
-												return hour >= startHour && hour < endHour;
-											});
-											
+											const hourReservations = dayReservations.filter(
+												(reservation) => {
+													const startHour = new Date(
+														reservation.startAt,
+													).getHours();
+													const endHour = new Date(
+														reservation.endAt,
+													).getHours();
+													return hour >= startHour && hour < endHour;
+												},
+											);
+
 											let cellBackground = "bg-background";
 											if (!isAvailable) {
 												// Jour complètement indisponible
@@ -335,11 +388,11 @@ export function MinibusReservationList({
 												// Jour disponible et heure dans les créneaux
 												cellBackground = "bg-green-50 dark:bg-green-950/20";
 											}
-											
+
 											if (isCurrentTimeSlot) {
 												cellBackground = "bg-primary/30";
 											}
-											
+
 											return (
 												<div
 													key={`day-${dayIndex}-hour-${hour}`}
@@ -350,12 +403,12 @@ export function MinibusReservationList({
 													{isCurrentTimeSlot && (
 														<div className="absolute top-0 left-0 right-0 h-1 bg-primary z-20" />
 													)}
-													
+
 													{hourReservations.map((reservation) => (
 														<div
 															key={reservation.id}
 															className={`absolute inset-x-1 rounded text-xs p-1 border group ${getStatusColor(
-																reservation.status
+																reservation.status,
 															)}`}
 															style={{
 																top: "2px",
@@ -369,12 +422,16 @@ export function MinibusReservationList({
 																		{reservation.title}
 																	</div>
 																	<div className="text-xs opacity-75">
-																		{new Date(reservation.startAt).toLocaleTimeString("fr-FR", {
+																		{new Date(
+																			reservation.startAt,
+																		).toLocaleTimeString("fr-FR", {
 																			hour: "2-digit",
 																			minute: "2-digit",
 																		})}
 																		-
-																		{new Date(reservation.endAt).toLocaleTimeString("fr-FR", {
+																		{new Date(
+																			reservation.endAt,
+																		).toLocaleTimeString("fr-FR", {
 																			hour: "2-digit",
 																			minute: "2-digit",
 																		})}
@@ -389,7 +446,9 @@ export function MinibusReservationList({
 																>
 																	<Link
 																		to="/admin/assets/minibusReservations/$minibusReservationId/edit"
-																		params={{ minibusReservationId: reservation.id }}
+																		params={{
+																			minibusReservationId: reservation.id,
+																		}}
 																	>
 																		<Edit2 className="w-3 h-3" />
 																	</Link>
@@ -412,24 +471,39 @@ export function MinibusReservationList({
 					<div className="grid grid-cols-7 gap-1">
 						{/* En-têtes des jours */}
 						{["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((day) => (
-							<div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
+							<div
+								key={day}
+								className="p-2 text-center text-sm font-medium text-muted-foreground"
+							>
 								{day}
 							</div>
 						))}
-						
+
 						{/* Grille mensuelle */}
 						{Array.from({ length: 42 }, (_, i) => {
 							// Calculer la date en commençant par lundi (au lieu de dimanche)
-							const firstOfMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+							const firstOfMonth = new Date(
+								startDate.getFullYear(),
+								startDate.getMonth(),
+								1,
+							);
 							const firstDayOfWeek = firstOfMonth.getDay(); // 0 = dimanche, 1 = lundi, etc.
-							const mondayOffset = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
-							const date = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth(), mondayOffset + i);
+							const mondayOffset =
+								firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
+							const date = new Date(
+								firstOfMonth.getFullYear(),
+								firstOfMonth.getMonth(),
+								mondayOffset + i,
+							);
 							const dateKey = formatDateKey(date);
 							const dayReservations = minibusReservationsByDay[dateKey] || [];
 							const isCurrentMonth = date.getMonth() === startDate.getMonth();
-							const isAvailable = isMinibusAvailableOnDay(date, minibusDisponibility);
+							const isAvailable = isMinibusAvailableOnDay(
+								date,
+								minibusDisponibility,
+							);
 							const isToday = dateKey === currentDate;
-							
+
 							return (
 								<div
 									key={`month-day-${dateKey}`}
@@ -438,9 +512,11 @@ export function MinibusReservationList({
 									} ${!isAvailable && isCurrentMonth ? "bg-muted" : ""}
 									${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 								>
-									<div className={`text-sm font-medium mb-1 ${
-										isToday ? "text-primary" : "text-foreground"
-									}`}>
+									<div
+										className={`text-sm font-medium mb-1 ${
+											isToday ? "text-primary" : "text-foreground"
+										}`}
+									>
 										{date.getDate()}
 										{isToday && (
 											<span className="ml-1 text-xs text-primary">(Auj.)</span>
@@ -451,10 +527,12 @@ export function MinibusReservationList({
 											<div
 												key={reservation.id}
 												className={`text-xs p-1 rounded truncate group flex justify-between items-center ${getStatusColor(
-													reservation.status
+													reservation.status,
 												)}`}
 											>
-												<span className="truncate flex-1 mr-1">{reservation.title}</span>
+												<span className="truncate flex-1 mr-1">
+													{reservation.title}
+												</span>
 												<Button
 													size="icon"
 													variant="ghost"
@@ -507,11 +585,13 @@ export function MinibusReservationList({
 							</div>
 						</div>
 					</div>
-					
+
 					{/* Légende des disponibilités */}
 					<div className="flex items-center justify-between text-sm text-muted-foreground">
 						<div className="flex items-center gap-4">
-							<span className="font-medium text-foreground">Disponibilités :</span>
+							<span className="font-medium text-foreground">
+								Disponibilités :
+							</span>
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800" />
 								<span>Heures de disponibilité</span>

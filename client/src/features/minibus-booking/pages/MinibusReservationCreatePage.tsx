@@ -1,11 +1,11 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { MinibusReservationForm } from "../components/minibusReservations/MinibusReservationForm";
-import type { Minibus } from "../lib/api/minibuses";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import { MinibusReservationForm } from "../components/minibusReservations/MinibusReservationForm";
+import type { Minibus } from "../lib/api/minibuses";
 
 interface MinibusReservationCreatePageProps {
 	minibus: Minibus;
@@ -40,8 +40,12 @@ export function MinibusReservationCreatePage({
 						Nouvelle réservation pour le minibus{" "}
 						<span className="font-medium">{minibus.name}</span>
 					</p>
-				</div>				<Button variant="outline" size="sm" asChild>
-					<Link to="/admin/assets/minibuses/$minibusId" params={{ minibusId: minibus.id }}>
+				</div>{" "}
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						to="/admin/assets/minibuses/$minibusId"
+						params={{ minibusId: minibus.id }}
+					>
 						<ArrowLeft className="w-4 h-4 mr-2" />
 						Retour au minibus
 					</Link>

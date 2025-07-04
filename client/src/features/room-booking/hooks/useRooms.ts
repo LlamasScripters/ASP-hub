@@ -1,12 +1,16 @@
 import { roomsApi } from "@room-booking/lib/api/rooms";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const days = [
 	"monday",
-	"tuesday", 
+	"tuesday",
 	"wednesday",
 	"thursday",
 	"friday",
@@ -120,27 +124,29 @@ export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
 export type RoomFilters = z.infer<typeof roomFiltersSchema>;
-export type RoomsPaginatedResponse = z.infer<typeof roomsPaginatedResponseSchema>;
+export type RoomsPaginatedResponse = z.infer<
+	typeof roomsPaginatedResponseSchema
+>;
 
 // TanStack Query options
 export const filteredRoomsQueryOptions = ({
-  complexId,
-  filters = {},
-  page = 1,
-  limit = 20,
+	complexId,
+	filters = {},
+	page = 1,
+	limit = 20,
 }: {
-  complexId?: string;
-  filters?: Partial<RoomFilters>;
-  page?: number;
-  limit?: number;
+	complexId?: string;
+	filters?: Partial<RoomFilters>;
+	page?: number;
+	limit?: number;
 }) => ({
-  queryKey: ["rooms", complexId, filters, page, limit],
-  queryFn: () => {
-    if (complexId) {
-      return roomsApi.getRoomsByComplexId(complexId, page, limit);
-    }
-    return roomsApi.getRooms(filters, page, limit);
-  },
+	queryKey: ["rooms", complexId, filters, page, limit],
+	queryFn: () => {
+		if (complexId) {
+			return roomsApi.getRoomsByComplexId(complexId, page, limit);
+		}
+		return roomsApi.getRooms(filters, page, limit);
+	},
 });
 
 interface UseRoomsOptions {
@@ -148,128 +154,136 @@ interface UseRoomsOptions {
 	initialData?: Room[];
 }
 
-export function useRooms({ complexId, initialData = [] }: UseRoomsOptions = {}) {
-  const queryClient = useQueryClient();
+export function useRooms({
+	complexId,
+	initialData = [],
+}: UseRoomsOptions = {}) {
+	const queryClient = useQueryClient();
 
-  // Query for fetching rooms
-  const { data: fetchedData, refetch } = useSuspenseQuery({
-    queryKey: complexId ? ["rooms", "by-complex", complexId] : ["rooms"],
-    queryFn: () => {
-      if (complexId) {
-        return roomsApi.getRoomsByComplexId(complexId, 1, 50);
-      }
-      return roomsApi.getRooms({}, 1, 50);
-    },
-    initialData: { data: initialData, total: initialData.length, page: 1, limit: 50 },
-  });
+	// Query for fetching rooms
+	const { data: fetchedData, refetch } = useSuspenseQuery({
+		queryKey: complexId ? ["rooms", "by-complex", complexId] : ["rooms"],
+		queryFn: () => {
+			if (complexId) {
+				return roomsApi.getRoomsByComplexId(complexId, 1, 50);
+			}
+			return roomsApi.getRooms({}, 1, 50);
+		},
+		initialData: {
+			data: initialData,
+			total: initialData.length,
+			page: 1,
+			limit: 50,
+		},
+	});
 
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: (data: CreateRoomData) => roomsApi.createRoom(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      toast.success("Salle créée avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error creating room:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la création de la salle"
-      );
-    },
-  });
+	// Create mutation
+	const createMutation = useMutation({
+		mutationFn: (data: CreateRoomData) => roomsApi.createRoom(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle créée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error creating room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la création de la salle",
+			);
+		},
+	});
 
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateRoomData }) =>
-      roomsApi.updateRoom(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      toast.success("Salle modifiée avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error updating room:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la modification de la salle"
-      );
-    },
-  });
+	// Update mutation
+	const updateMutation = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: UpdateRoomData }) =>
+			roomsApi.updateRoom(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle modifiée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error updating room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification de la salle",
+			);
+		},
+	});
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => roomsApi.deleteRoom(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      toast.success("Salle supprimée avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error deleting room:", error);
-      toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Erreur lors de la suppression de la salle"
-      );
-    },
-  });
+	// Delete mutation
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => roomsApi.deleteRoom(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle supprimée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error deleting room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression de la salle",
+			);
+		},
+	});
 
-  const createRoom = useCallback(
-    async (data: CreateRoomData): Promise<Room | null> => {
-      try {
-        const result = await createMutation.mutateAsync(data);
-        return result;
-      } catch (error) {
-        console.error("Error in createRoom:", error);
-        return null;
-      }
-    },
-    [createMutation]
-  );
+	const createRoom = useCallback(
+		async (data: CreateRoomData): Promise<Room | null> => {
+			try {
+				const result = await createMutation.mutateAsync(data);
+				return result;
+			} catch (error) {
+				console.error("Error in createRoom:", error);
+				return null;
+			}
+		},
+		[createMutation],
+	);
 
-  const updateRoom = useCallback(
-    async (id: string, data: UpdateRoomData): Promise<Room | null> => {
-      try {
-        const result = await updateMutation.mutateAsync({ id, data });
-        return result;
-      } catch (error) {
-        console.error("Error in updateRoom:", error);
-        return null;
-      }
-    },
-    [updateMutation]
-  );
+	const updateRoom = useCallback(
+		async (id: string, data: UpdateRoomData): Promise<Room | null> => {
+			try {
+				const result = await updateMutation.mutateAsync({ id, data });
+				return result;
+			} catch (error) {
+				console.error("Error in updateRoom:", error);
+				return null;
+			}
+		},
+		[updateMutation],
+	);
 
-  const deleteRoom = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        await deleteMutation.mutateAsync(id);
-        return true;
-      } catch (error) {
-        console.error("Error in deleteRoom:", error);
-        return false;
-      }
-    },
-    [deleteMutation]
-  );
+	const deleteRoom = useCallback(
+		async (id: string): Promise<boolean> => {
+			try {
+				await deleteMutation.mutateAsync(id);
+				return true;
+			} catch (error) {
+				console.error("Error in deleteRoom:", error);
+				return false;
+			}
+		},
+		[deleteMutation],
+	);
 
-  const refresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
 
-  return {
-    rooms: fetchedData.data,
-    totalCount: fetchedData.total,
-    page: fetchedData.page,
-    limit: fetchedData.limit,
-    loading: false,
-    error: null,
-    createRoom,
-    updateRoom,
-    deleteRoom,
-    updateFilters: () => {}, // Placeholder pour compatibilité
-    refresh,
-    refetch,
-  };
+	return {
+		rooms: fetchedData.data,
+		totalCount: fetchedData.total,
+		page: fetchedData.page,
+		limit: fetchedData.limit,
+		loading: false,
+		error: null,
+		createRoom,
+		updateRoom,
+		deleteRoom,
+		updateFilters: () => {}, // Placeholder pour compatibilité
+		refresh,
+		refetch,
+	};
 }

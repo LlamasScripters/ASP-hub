@@ -172,7 +172,10 @@ export function ClubsListPage() {
 													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Email
 													</p>
-													<Badge variant="outline" className="text-xs bg-background border-primary/20 text-primary">
+													<Badge
+														variant="outline"
+														className="text-xs bg-background border-primary/20 text-primary"
+													>
 														{mainClub.email}
 													</Badge>
 												</div>
@@ -188,7 +191,10 @@ export function ClubsListPage() {
 													<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
 														Téléphone
 													</p>
-													<Badge variant="outline" className="text-xs bg-background border-primary/20 text-primary">
+													<Badge
+														variant="outline"
+														className="text-xs bg-background border-primary/20 text-primary"
+													>
 														{mainClub.phone}
 													</Badge>
 												</div>

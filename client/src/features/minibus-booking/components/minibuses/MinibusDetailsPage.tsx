@@ -1,20 +1,26 @@
-import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
 import { frenchDays } from "@/features/minibus-booking/hooks/useMinibuses";
-import { MinibusReservationList } from "../minibusReservations/MinibusReservationList";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Edit,
 	Info,
 	Plus,
 	Timer,
-	Users,
 	UserCheck,
+	Users,
 	// @ts-ignore
 } from "lucide-react";
+import { MinibusReservationList } from "../minibusReservations/MinibusReservationList";
 
 interface MinibusDetailsPageProps {
 	minibus: Minibus;
@@ -42,7 +48,8 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 							</Badge>
 						)}
 					</div>
-				</div>				<div className="flex items-center gap-2">
+				</div>{" "}
+				<div className="flex items-center gap-2">
 					<Button asChild variant="outline" size="sm">
 						<Link to="/admin/assets/minibuses">
 							<ArrowLeft className="w-4 h-4 mr-2" />
@@ -51,7 +58,7 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 					</Button>
 
 					<Button asChild variant="default" size="sm">
-						<Link 
+						<Link
 							to="/admin/assets/minibuses/$minibusId/create-reservation"
 							params={{ minibusId: minibus.id }}
 						>
@@ -61,7 +68,7 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 					</Button>
 
 					<Button asChild variant="default" size="sm">
-						<Link 
+						<Link
 							to="/admin/assets/minibuses/$minibusId/edit"
 							params={{ minibusId: minibus.id }}
 						>
@@ -85,15 +92,23 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 					<div className="grid gap-6 md:grid-cols-2">
 						<div className="space-y-4">
 							<div>
-								<h4 className="text-sm font-medium text-muted-foreground">Nom</h4>
+								<h4 className="text-sm font-medium text-muted-foreground">
+									Nom
+								</h4>
 								<p className="text-sm">{minibus.name}</p>
 							</div>
 							<div>
-								<h4 className="text-sm font-medium text-muted-foreground">Description</h4>
-								<p className="text-sm">{minibus.description || "Aucune description"}</p>
+								<h4 className="text-sm font-medium text-muted-foreground">
+									Description
+								</h4>
+								<p className="text-sm">
+									{minibus.description || "Aucune description"}
+								</p>
 							</div>
 							<div>
-								<h4 className="text-sm font-medium text-muted-foreground">Plaque d'immatriculation</h4>
+								<h4 className="text-sm font-medium text-muted-foreground">
+									Plaque d'immatriculation
+								</h4>
 								<p className="text-sm font-mono">{minibus.licensePlate}</p>
 							</div>
 						</div>
@@ -102,7 +117,9 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 								<div className="flex items-center gap-2">
 									<Users className="w-4 h-4 text-muted-foreground" />
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">Capacité totale</h4>
+										<h4 className="text-sm font-medium text-muted-foreground">
+											Capacité totale
+										</h4>
 										<p className="text-sm">{minibus.capacity} places</p>
 									</div>
 								</div>
@@ -110,16 +127,24 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 									<div className="flex items-center gap-2">
 										<UserCheck className="w-4 h-4 text-muted-foreground" />
 										<div>
-											<h4 className="text-sm font-medium text-muted-foreground">Places PMR</h4>
-											<p className="text-sm">{minibus.disabledPersonCapacity} places</p>
+											<h4 className="text-sm font-medium text-muted-foreground">
+												Places PMR
+											</h4>
+											<p className="text-sm">
+												{minibus.disabledPersonCapacity} places
+											</p>
 										</div>
 									</div>
 								)}
 							</div>
 							<div>
-								<h4 className="text-sm font-medium text-muted-foreground">Statut</h4>
+								<h4 className="text-sm font-medium text-muted-foreground">
+									Statut
+								</h4>
 								<p className="text-sm">
-									{minibus.isAvailable ? "Disponible pour les réservations" : "Indisponible"}
+									{minibus.isAvailable
+										? "Disponible pour les réservations"
+										: "Indisponible"}
 								</p>
 							</div>
 						</div>
@@ -138,14 +163,20 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 				<CardContent>
 					<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-7">
 						{Object.entries(frenchDays).map(([dayKey, dayLabel]) => {
-							const dayDisponibility = minibus.disponibility[dayKey as keyof typeof minibus.disponibility];
-							
+							const dayDisponibility =
+								minibus.disponibility[
+									dayKey as keyof typeof minibus.disponibility
+								];
+
 							return (
 								<div key={dayKey} className="p-3 border rounded-lg text-center">
 									<h4 className="text-sm font-medium">{dayLabel}</h4>
 									{dayDisponibility?.available ? (
 										<div className="mt-1 space-y-1">
-											<Badge variant="default" className="text-xs bg-green-100 text-green-800">
+											<Badge
+												variant="default"
+												className="text-xs bg-green-100 text-green-800"
+											>
 												Disponible
 											</Badge>
 											{dayDisponibility.open && dayDisponibility.close && (
@@ -155,7 +186,10 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 											)}
 										</div>
 									) : (
-										<Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 mt-1">
+										<Badge
+											variant="secondary"
+											className="text-xs bg-gray-100 text-gray-600 mt-1"
+										>
 											Indisponible
 										</Badge>
 									)}
@@ -164,15 +198,14 @@ export function MinibusDetailsPage({ minibus }: MinibusDetailsPageProps) {
 						})}
 					</div>
 					<p className="text-xs text-muted-foreground mt-4 text-center">
-						Les heures indiquées correspondent aux créneaux où le minibus peut être réservé.
+						Les heures indiquées correspondent aux créneaux où le minibus peut
+						être réservé.
 					</p>
 				</CardContent>
 			</Card>
 
 			{/* Planification des réservations */}
-			<MinibusReservationList
-				minibusDisponibility={minibus.disponibility}
-			/>
+			<MinibusReservationList minibusDisponibility={minibus.disponibility} />
 		</div>
 	);
 }

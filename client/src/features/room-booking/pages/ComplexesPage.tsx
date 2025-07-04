@@ -54,9 +54,7 @@ export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
 		initialData: initialComplexes,
 	});
 
-	const {
-		refresh: refreshStats,
-	} = useComplexStats();
+	const { refresh: refreshStats } = useComplexStats();
 
 	// Mock data for recent activities - à remplacer par de vraies données
 	const recentActivities = [
@@ -306,9 +304,7 @@ export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
 							<CardContent className="pl-2">
 								<div className="h-[300px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 									<BarChart3 className="w-12 h-12" />
-									<span className="ml-2">
-										Graphique d'utilisation
-									</span>
+									<span className="ml-2">Graphique d'utilisation</span>
 								</div>
 							</CardContent>
 						</Card>
@@ -489,9 +485,7 @@ export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
 						<CardContent>
 							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 								<BarChart3 className="w-12 h-12" />
-								<span className="ml-2">
-									Graphiques statistiques détaillés
-								</span>
+								<span className="ml-2">Graphiques statistiques détaillés</span>
 							</div>
 						</CardContent>
 					</Card>
@@ -508,9 +502,7 @@ export function ComplexesPage({ initialComplexes = [] }: ComplexesPageProps) {
 						<CardContent>
 							<div className="h-[400px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 								<Calendar className="w-12 h-12" />
-								<span className="ml-2">
-									Calendrier de planning
-								</span>
+								<span className="ml-2">Calendrier de planning</span>
 							</div>
 						</CardContent>
 					</Card>

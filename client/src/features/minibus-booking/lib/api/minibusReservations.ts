@@ -61,9 +61,15 @@ export const minibusReservationsPaginatedResponseSchema = z.object({
 });
 
 export type MinibusReservation = z.infer<typeof minibusReservationSchema>;
-export type CreateMinibusReservationData = z.infer<typeof createMinibusReservationSchema>;
-export type UpdateMinibusReservationData = z.infer<typeof updateMinibusReservationSchema>;
-export type MinibusReservationFilters = z.infer<typeof minibusReservationFiltersSchema>;
+export type CreateMinibusReservationData = z.infer<
+	typeof createMinibusReservationSchema
+>;
+export type UpdateMinibusReservationData = z.infer<
+	typeof updateMinibusReservationSchema
+>;
+export type MinibusReservationFilters = z.infer<
+	typeof minibusReservationFiltersSchema
+>;
 export type MinibusReservationsPaginatedResponse = z.infer<
 	typeof minibusReservationsPaginatedResponseSchema
 >;

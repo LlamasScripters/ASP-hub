@@ -1,32 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "@tanstack/react-router";
+import {
+	ArrowLeft,
+	Info,
+	Loader2,
+	// @ts-ignore
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useMinibusReservations } from "../../hooks/useMinibusReservations";
-import type { 
-	CreateMinibusReservationData, 
+import { minibusReservationStatusEnumTranslated } from "../../hooks/useMinibusReservations";
+import type {
+	CreateMinibusReservationData,
+	MinibusReservation,
 	UpdateMinibusReservationData,
-	MinibusReservation 
 } from "../../lib/api/minibusReservations";
 import {
 	createMinibusReservationSchema,
 	updateMinibusReservationSchema,
 } from "../../lib/api/minibusReservations";
-import { minibusReservationStatusEnumTranslated } from "../../hooks/useMinibusReservations";
 import type { Disponibility } from "../../lib/api/minibuses";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Link } from "@tanstack/react-router";
-import { 
-	ArrowLeft, 
-	Loader2,
-	Info,
-	// @ts-ignore
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 
 interface MinibusReservationFormProps {
 	minibusId: string;
@@ -58,11 +71,12 @@ export function MinibusReservationForm({
 	routeParams,
 }: MinibusReservationFormProps) {
 	const { user } = AuthenticatedRoute.useLoaderData();
-	const { createMinibusReservation, updateMinibusReservation } = useMinibusReservations({ 
-		minibusId,
-		searchParams,
-		routeParams 
-	});
+	const { createMinibusReservation, updateMinibusReservation } =
+		useMinibusReservations({
+			minibusId,
+			searchParams,
+			routeParams,
+		});
 	const isEditing = Boolean(minibusReservation);
 
 	const [formMode, setFormMode] = useState<"create" | "edit">(
@@ -77,9 +91,9 @@ export function MinibusReservationForm({
 	const defaultValues = useMemo(
 		() => ({
 			title: minibusReservation?.title ?? "",
-			startAt: minibusReservation 
-				? minibusReservation.startAt instanceof Date 
-					? minibusReservation.startAt 
+			startAt: minibusReservation
+				? minibusReservation.startAt instanceof Date
+					? minibusReservation.startAt
 					: new Date(minibusReservation.startAt)
 				: new Date(),
 			endAt: minibusReservation
@@ -92,9 +106,13 @@ export function MinibusReservationForm({
 		[minibusReservation],
 	);
 
-	const form = useForm<CreateMinibusReservationData | UpdateMinibusReservationData>({
+	const form = useForm<
+		CreateMinibusReservationData | UpdateMinibusReservationData
+	>({
 		resolver: zodResolver(
-			isEditing ? updateMinibusReservationSchema : createMinibusReservationSchema,
+			isEditing
+				? updateMinibusReservationSchema
+				: createMinibusReservationSchema,
 		),
 		defaultValues: defaultValues,
 	});
@@ -113,9 +131,9 @@ export function MinibusReservationForm({
 			];
 			const dayKey = dayKeys[dayOfWeek] as keyof Disponibility;
 			const dayDisponibility = minibusDisponibility[dayKey];
-			
+
 			if (!dayDisponibility || !dayDisponibility.available) {
-				return `Le minibus n'est pas disponible le ${daysOfWeek.find(d => d.key === dayKey)?.label?.toLowerCase()}`;
+				return `Le minibus n'est pas disponible le ${daysOfWeek.find((d) => d.key === dayKey)?.label?.toLowerCase()}`;
 			}
 
 			const startHour = startAt.getHours();
@@ -127,13 +145,20 @@ export function MinibusReservationForm({
 			const endTimeMinutes = endHour * 60 + endMinutes;
 
 			if (dayDisponibility.open && dayDisponibility.close) {
-				const [openHour, openMin] = dayDisponibility.open.split(":").map(Number);
-				const [closeHour, closeMin] = dayDisponibility.close.split(":").map(Number);
-				
+				const [openHour, openMin] = dayDisponibility.open
+					.split(":")
+					.map(Number);
+				const [closeHour, closeMin] = dayDisponibility.close
+					.split(":")
+					.map(Number);
+
 				const openTimeMinutes = openHour * 60 + openMin;
 				const closeTimeMinutes = closeHour * 60 + closeMin;
 
-				if (startTimeMinutes < openTimeMinutes || endTimeMinutes > closeTimeMinutes) {
+				if (
+					startTimeMinutes < openTimeMinutes ||
+					endTimeMinutes > closeTimeMinutes
+				) {
 					return `Le créneau doit être entre ${dayDisponibility.open} et ${dayDisponibility.close}`;
 				}
 			}
@@ -163,9 +188,9 @@ export function MinibusReservationForm({
 	const formatDateTimeLocal = (date: Date | string): string => {
 		if (!date) return "";
 		const dateObj = date instanceof Date ? date : new Date(date);
-		
+
 		if (Number.isNaN(dateObj.getTime())) return "";
-		
+
 		const year = dateObj.getFullYear();
 		const month = String(dateObj.getMonth() + 1).padStart(2, "0");
 		const day = String(dateObj.getDate()).padStart(2, "0");
@@ -188,8 +213,8 @@ export function MinibusReservationForm({
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
-					<form onSubmit={
-						async (e) => {
+					<form
+						onSubmit={async (e) => {
 							e.preventDefault();
 
 							if (validationError) {
@@ -226,13 +251,16 @@ export function MinibusReservationForm({
 							} catch (error) {
 								console.error("Form submission error:", error);
 								setGlobalError(
-									error instanceof Error ? error.message : "Une erreur est survenue",
+									error instanceof Error
+										? error.message
+										: "Une erreur est survenue",
 								);
 							} finally {
 								setIsSubmitting(false);
 							}
-						}
-					} className="space-y-6">
+						}}
+						className="space-y-6"
+					>
 						{globalError && (
 							<div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
 								{globalError}
@@ -254,9 +282,9 @@ export function MinibusReservationForm({
 									<FormItem>
 										<FormLabel>Titre de la réservation *</FormLabel>
 										<FormControl>
-											<Input 
+											<Input
 												placeholder="Ex: Transport équipe foot"
-												{...field} 
+												{...field}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -275,8 +303,12 @@ export function MinibusReservationForm({
 												<Input
 													type="datetime-local"
 													{...field}
-													value={field.value ? formatDateTimeLocal(field.value) : ""}
-													onChange={(e) => field.onChange(parseStringToDate(e.target.value))}
+													value={
+														field.value ? formatDateTimeLocal(field.value) : ""
+													}
+													onChange={(e) =>
+														field.onChange(parseStringToDate(e.target.value))
+													}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -294,8 +326,12 @@ export function MinibusReservationForm({
 												<Input
 													type="datetime-local"
 													{...field}
-													value={field.value ? formatDateTimeLocal(field.value) : ""}
-													onChange={(e) => field.onChange(parseStringToDate(e.target.value))}
+													value={
+														field.value ? formatDateTimeLocal(field.value) : ""
+													}
+													onChange={(e) =>
+														field.onChange(parseStringToDate(e.target.value))
+													}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -309,14 +345,19 @@ export function MinibusReservationForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Statut</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Sélectionnez un statut" />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{Object.entries(minibusReservationStatusEnumTranslated).map(([key, label]) => (
+												{Object.entries(
+													minibusReservationStatusEnumTranslated,
+												).map(([key, label]) => (
 													<SelectItem key={key} value={key}>
 														{label}
 													</SelectItem>
@@ -339,8 +380,8 @@ export function MinibusReservationForm({
 									Annuler
 								</Link>
 							</Button>
-							<Button 
-								type="submit" 
+							<Button
+								type="submit"
 								disabled={isSubmitting || !!validationError}
 								className="min-w-[120px]"
 							>

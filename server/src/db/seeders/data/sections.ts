@@ -1,8 +1,8 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	type InsertSection,
-	type SelectSection,
 	type SelectClub,
+	type SelectSection,
 	sections,
 } from "../../schema.js";
 

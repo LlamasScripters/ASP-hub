@@ -233,7 +233,10 @@ export function CategoriesListPage() {
 					</div>
 					<div className="flex items-center gap-2">
 						<Button variant="outline" size="sm" asChild>
-							<Link to="/admin/dashboard/clubs/$clubId/sections" params={{ clubId }}>
+							<Link
+								to="/admin/dashboard/clubs/$clubId/sections"
+								params={{ clubId }}
+							>
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Retour aux sections
 							</Link>
@@ -272,7 +275,12 @@ export function CategoriesListPage() {
 								<Search className="h-4 w-4" />
 								Filtres de recherche
 							</h3>
-							<Button variant="outline" className="hover:cursor-pointer" size="sm" onClick={clearFilters}>
+							<Button
+								variant="outline"
+								className="hover:cursor-pointer"
+								size="sm"
+								onClick={clearFilters}
+							>
 								Effacer les filtres
 							</Button>
 						</div>
@@ -439,7 +447,12 @@ export function CategoriesListPage() {
 											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
-													<Button variant="ghost" size="sm" className="h-8 px-3 hover:bg-primary/10 hover:text-primary" asChild>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+														asChild
+													>
 														<Link
 															to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
 															params={{

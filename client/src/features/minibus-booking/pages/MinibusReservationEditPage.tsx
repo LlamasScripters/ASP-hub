@@ -1,12 +1,12 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { MinibusReservationForm } from "../components/minibusReservations/MinibusReservationForm";
-import type { Minibus } from "../lib/api/minibuses";
-import type { MinibusReservation } from "../lib/api/minibusReservations";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import { MinibusReservationForm } from "../components/minibusReservations/MinibusReservationForm";
+import type { MinibusReservation } from "../lib/api/minibusReservations";
+import type { Minibus } from "../lib/api/minibuses";
 
 interface MinibusReservationEditPageProps {
 	minibus: Minibus;
@@ -41,8 +41,8 @@ export function MinibusReservationEditPage({
 					</h1>
 					<p className="text-muted-foreground">
 						Modifier la réservation{" "}
-						<span className="font-medium">{minibusReservation.title}</span> du minibus{" "}
-						<span className="font-medium">{minibus.name}</span>
+						<span className="font-medium">{minibusReservation.title}</span> du
+						minibus <span className="font-medium">{minibus.name}</span>
 					</p>
 				</div>
 				<Button variant="outline" size="sm" asChild>

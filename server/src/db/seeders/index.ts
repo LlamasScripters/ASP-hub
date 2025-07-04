@@ -1,12 +1,12 @@
 import { db } from "../index.js";
+import { seedCategories } from "./data/categories.js";
+import { seedClubs } from "./data/clubs.js";
 import { seedComplexes } from "./data/complexes.js";
+import { seedMinibusReservations } from "./data/minibusReservations.js";
+import { seedMinibuses } from "./data/minibuses.js";
 import { seedRoomReservations } from "./data/roomReservations.js";
 import { seedRooms } from "./data/rooms.js";
-import { seedMinibuses } from "./data/minibuses.js";
-import { seedMinibusReservations } from "./data/minibusReservations.js";
-import { seedClubs } from "./data/clubs.js";
 import { seedSections } from "./data/sections.js";
-import { seedCategories } from "./data/categories.js";
 import { seedSessionsSport } from "./data/sessionsSport.js";
 import { resetAllTables } from "./reset.js";
 

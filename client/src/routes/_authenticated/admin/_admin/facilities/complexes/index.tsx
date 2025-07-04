@@ -1,6 +1,6 @@
-import { ComplexesPage } from "@/features/room-booking/pages/ComplexesPage";
 import type { Complex } from "@/features/room-booking/hooks/useComplexes";
 import { filteredComplexesQueryOptions } from "@/features/room-booking/hooks/useComplexes";
+import { ComplexesPage } from "@/features/room-booking/pages/ComplexesPage";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 interface ComplexesLoaderData {
@@ -11,8 +11,8 @@ export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/facilities/complexes/",
 )({
 	component: ComplexesRoute,
-	loader: async ({ 
-		context: { queryClient }
+	loader: async ({
+		context: { queryClient },
 	}): Promise<ComplexesLoaderData> => {
 		try {
 			const { data: complexes } = await queryClient.ensureQueryData(
@@ -20,7 +20,7 @@ export const Route = createFileRoute(
 					filters: {},
 					page: 1,
 					limit: 50,
-				})
+				}),
 			);
 
 			return { complexes };

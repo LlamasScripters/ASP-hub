@@ -5,7 +5,5 @@ export function ClubEditPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit",
 	});
-	return (
-		<ClubForm mode="edit" clubId={clubId} />
-	);
+	return <ClubForm mode="edit" clubId={clubId} />;
 }

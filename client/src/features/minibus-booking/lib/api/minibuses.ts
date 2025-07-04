@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const days = [
 	"monday",
-	"tuesday", 
+	"tuesday",
 	"wednesday",
 	"thursday",
 	"friday",
@@ -11,8 +11,14 @@ const days = [
 ] as const;
 
 export const disponibilityEntrySchema = z.object({
-	open: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
-	close: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+	open: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
+	close: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.nullable(),
 	available: z.boolean(),
 });
 
@@ -24,10 +30,18 @@ export const disponibilitySchema = z.record(
 export const minibusSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, "Le nom est requis"),
-	description: z.string().max(500, "La description ne peut pas dépasser 500 caractères"),
-	licensePlate: z.string().min(1, "La plaque d'immatriculation est requise").max(9, "La plaque d'immatriculation ne peut pas dépasser 9 caractères"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
+	licensePlate: z
+		.string()
+		.min(1, "La plaque d'immatriculation est requise")
+		.max(9, "La plaque d'immatriculation ne peut pas dépasser 9 caractères"),
 	capacity: z.number().int().min(1, "La capacité doit être d'au moins 1"),
-	disabledPersonCapacity: z.number().int().min(0, "La capacité pour personnes handicapées doit être positive"),
+	disabledPersonCapacity: z
+		.number()
+		.int()
+		.min(0, "La capacité pour personnes handicapées doit être positive"),
 	disponibility: disponibilitySchema,
 	isAvailable: z.boolean(),
 	createdAt: z.string().datetime(),
@@ -35,11 +49,22 @@ export const minibusSchema = z.object({
 });
 
 export const createMinibusSchema = z.object({
-	name: z.string().min(1, "Le nom est requis").max(255, "Le nom ne peut pas dépasser 255 caractères"),
-	description: z.string().max(500, "La description ne peut pas dépasser 500 caractères"),
-	licensePlate: z.string().min(1, "La plaque d'immatriculation est requise").max(9, "La plaque d'immatriculation ne peut pas dépasser 9 caractères"),
+	name: z
+		.string()
+		.min(1, "Le nom est requis")
+		.max(255, "Le nom ne peut pas dépasser 255 caractères"),
+	description: z
+		.string()
+		.max(500, "La description ne peut pas dépasser 500 caractères"),
+	licensePlate: z
+		.string()
+		.min(1, "La plaque d'immatriculation est requise")
+		.max(9, "La plaque d'immatriculation ne peut pas dépasser 9 caractères"),
 	capacity: z.number().int().min(1, "La capacité doit être d'au moins 1"),
-	disabledPersonCapacity: z.number().int().min(0, "La capacité pour personnes handicapées doit être positive"),
+	disabledPersonCapacity: z
+		.number()
+		.int()
+		.min(0, "La capacité pour personnes handicapées doit être positive"),
 	disponibility: disponibilitySchema,
 	isAvailable: z.boolean().default(true),
 });
@@ -53,22 +78,30 @@ export const minibusFiltersSchema = z.object({
 
 export const minibusesPaginatedResponseSchema = z.object({
 	data: z.array(minibusSchema),
-	total: z.union([z.number(), z.string()]).transform((val) =>
-		typeof val === "string" ? Number.parseInt(val, 10) : val,
-	),
-	page: z.union([z.number(), z.string()]).transform((val) =>
-		typeof val === "string" ? Number.parseInt(val, 10) : val,
-	),
-	limit: z.union([z.number(), z.string()]).transform((val) =>
-		typeof val === "string" ? Number.parseInt(val, 10) : val,
-	),
+	total: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	page: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
+	limit: z
+		.union([z.number(), z.string()])
+		.transform((val) =>
+			typeof val === "string" ? Number.parseInt(val, 10) : val,
+		),
 });
 
 export type Minibus = z.infer<typeof minibusSchema>;
 export type CreateMinibusData = z.infer<typeof createMinibusSchema>;
 export type UpdateMinibusData = z.infer<typeof updateMinibusSchema>;
 export type MinibusFilters = z.infer<typeof minibusFiltersSchema>;
-export type MinibusesPaginatedResponse = z.infer<typeof minibusesPaginatedResponseSchema>;
+export type MinibusesPaginatedResponse = z.infer<
+	typeof minibusesPaginatedResponseSchema
+>;
 export type Disponibility = z.infer<typeof disponibilitySchema>;
 export type DisponibilityEntry = z.infer<typeof disponibilityEntrySchema>;
 
@@ -136,7 +169,10 @@ export class MinibusesApiClient {
 	 * @param minibusId - The ID of the minibus to retrieve.
 	 * @param options - Optional API options (e.g., AbortSignal).
 	 */
-	async getMinibusById(minibusId: string, options?: ApiOptions): Promise<Minibus> {
+	async getMinibusById(
+		minibusId: string,
+		options?: ApiOptions,
+	): Promise<Minibus> {
 		const response = await fetch(`${this.baseUrl}/minibuses/${minibusId}`, {
 			method: "GET",
 			headers: {
@@ -158,7 +194,10 @@ export class MinibusesApiClient {
 	 * @param data - The data for the new minibus.
 	 * @param options - Optional API options (e.g., AbortSignal).
 	 */
-	async createMinibus(data: CreateMinibusData, options?: ApiOptions): Promise<Minibus> {
+	async createMinibus(
+		data: CreateMinibusData,
+		options?: ApiOptions,
+	): Promise<Minibus> {
 		const response = await fetch(`${this.baseUrl}/minibuses`, {
 			method: "POST",
 			headers: {
@@ -209,7 +248,10 @@ export class MinibusesApiClient {
 	 * @param minibusId - The ID of the minibus to delete.
 	 * @param options - Optional API options (e.g., AbortSignal).
 	 */
-	async deleteMinibus(minibusId: string, options?: ApiOptions): Promise<boolean> {
+	async deleteMinibus(
+		minibusId: string,
+		options?: ApiOptions,
+	): Promise<boolean> {
 		const response = await fetch(`${this.baseUrl}/minibuses/${minibusId}`, {
 			method: "DELETE",
 			headers: {

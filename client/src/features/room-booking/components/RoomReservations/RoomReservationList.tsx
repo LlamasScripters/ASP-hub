@@ -10,11 +10,11 @@ import {
 	type RoomReservation,
 	useRoomReservations,
 } from "@/features/room-booking/hooks/useRoomReservations";
-import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import {
 	getMonthBounds,
 	getWeekBounds,
 } from "@/features/room-booking/lib/api/roomReservations";
+import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import { Link } from "@tanstack/react-router";
 import {
 	Calendar as CalendarIcon,
@@ -72,8 +72,8 @@ const timeToMinutes = (time: string): number => {
 
 const formatDateKey = (date: Date): string => {
 	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
 	return `${year}-${month}-${day}`;
 };
 
@@ -104,13 +104,13 @@ export function RoomReservationList({
 }: RoomReservationListProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
-	
+
 	const now = new Date();
 	const currentHour = now.getHours();
 	// Utiliser le fuseau horaire local pour la date actuelle
 	const currentYear = now.getFullYear();
-	const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-	const currentDay = String(now.getDate()).padStart(2, '0');
+	const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+	const currentDay = String(now.getDate()).padStart(2, "0");
 	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const { start: startDate, end: endDate } = useMemo(() => {
@@ -120,8 +120,11 @@ export function RoomReservationList({
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
 
-	const { roomReservations, totalCount, loading, error } =
-		useRoomReservations({ roomId, startDate, endDate });
+	const { roomReservations, totalCount, loading, error } = useRoomReservations({
+		roomId,
+		startDate,
+		endDate,
+	});
 
 	const goPrevious = useCallback(() => {
 		setReferenceDate((prev) => {
@@ -149,34 +152,34 @@ export function RoomReservationList({
 
 	const roomReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, RoomReservation[]> = {};
-		
+
 		for (const reservation of roomReservations) {
 			const date = new Date(reservation.startAt);
 			// Utiliser le fuseau horaire local au lieu d'UTC
 			const dateKey = formatDateKey(date);
-			
+
 			if (!reservationsByDay[dateKey]) {
 				reservationsByDay[dateKey] = [];
 			}
-			
+
 			reservationsByDay[dateKey].push(reservation);
 		}
-		
+
 		return reservationsByDay;
 	}, [roomReservations]);
 
 	const formatPeriod = () => {
 		if (viewMode === "week") {
-			const options: Intl.DateTimeFormatOptions = { 
-				day: "numeric", 
-				month: "short", 
-				year: "numeric" 
+			const options: Intl.DateTimeFormatOptions = {
+				day: "numeric",
+				month: "short",
+				year: "numeric",
 			};
 			return `${startDate.toLocaleDateString("fr-FR", options)} - ${endDate.toLocaleDateString("fr-FR", options)}`;
 		}
-		return referenceDate.toLocaleDateString("fr-FR", { 
-			month: "long", 
-			year: "numeric" 
+		return referenceDate.toLocaleDateString("fr-FR", {
+			month: "long",
+			year: "numeric",
 		});
 	};
 
@@ -249,7 +252,7 @@ export function RoomReservationList({
 								Mois
 							</Button>
 						</div>
-						
+
 						{/* Navigation */}
 						<div className="flex items-center gap-1">
 							<Button variant="outline" size="sm" onClick={goPrevious}>
@@ -280,7 +283,7 @@ export function RoomReservationList({
 								const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
 								const dateKey = formatDateKey(date);
 								const isToday = dateKey === currentDate;
-								
+
 								return (
 									<div
 										key={`day-header-${dateKey}`}
@@ -288,21 +291,30 @@ export function RoomReservationList({
 											isOpen ? "bg-green-50 dark:bg-green-950/30" : "bg-muted"
 										} ${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 									>
-										<div className={`text-xs font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+										<div
+											className={`text-xs font-medium ${isToday ? "text-primary" : "text-foreground"}`}
+										>
 											{date.toLocaleDateString("fr-FR", { weekday: "short" })}
 											{isToday && " (Aujourd'hui)"}
 										</div>
-										<div className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}>
-											{date.toLocaleDateString("fr-FR", { 
-												day: "numeric", 
-												month: "short" 
+										<div
+											className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}
+										>
+											{date.toLocaleDateString("fr-FR", {
+												day: "numeric",
+												month: "short",
 											})}
 										</div>
 										{isOpen && (
-											<div className={`text-xs mt-1 ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+											<div
+												className={`text-xs mt-1 ${isToday ? "text-primary" : "text-muted-foreground"}`}
+											>
 												{(() => {
-													const hours = getRoomHoursForDay(date, roomOpeningHours);
-													return hours?.openTime && hours?.closeTime 
+													const hours = getRoomHoursForDay(
+														date,
+														roomOpeningHours,
+													);
+													return hours?.openTime && hours?.closeTime
 														? `${hours.openTime}-${hours.closeTime}`
 														: "Ouvert";
 												})()}
@@ -317,37 +329,57 @@ export function RoomReservationList({
 								const hour = START_HOUR + index;
 								const hourStr = `${hour.toString().padStart(2, "0")}:00`;
 								const isCurrentHour = hour === currentHour;
-								
+
 								return (
 									<div key={`hour-${hour}`} className="contents">
 										{/* Colonne des heures */}
-										<div className={`p-2 text-xs border-r border-border ${
-											isCurrentHour ? "bg-primary/20 text-primary font-bold" : "text-muted-foreground"
-										}`}>
+										<div
+											className={`p-2 text-xs border-r border-border ${
+												isCurrentHour
+													? "bg-primary/20 text-primary font-bold"
+													: "text-muted-foreground"
+											}`}
+										>
 											{hourStr}
 										</div>
-										
+
 										{/* Colonnes des jours */}
 										{Array.from({ length: 7 }, (_, dayIndex) => {
 											const date = new Date(startDate);
 											date.setDate(startDate.getDate() + dayIndex);
 											const dateKey = formatDateKey(date);
-											const dayRoomReservations = roomReservationsByDay[dateKey] || [];
+											const dayRoomReservations =
+												roomReservationsByDay[dateKey] || [];
 											const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
 											const isCurrentDay = dateKey === currentDate;
 											const isCurrentTimeSlot = isCurrentDay && isCurrentHour;
-											
-											const roomHours = getRoomHoursForDay(date, roomOpeningHours);
-											const isHourInAvailableRange = roomHours?.openTime && roomHours?.closeTime 
-												? hour >= Math.floor(timeToMinutes(roomHours.openTime) / 60) && hour < Math.ceil(timeToMinutes(roomHours.closeTime) / 60)
-												: false;
-											
-											const hourReservations = dayRoomReservations.filter((reservation) => {
-												const startHour = new Date(reservation.startAt).getHours();
-												const endHour = new Date(reservation.endAt).getHours();
-												return hour >= startHour && hour < endHour;
-											});
-											
+
+											const roomHours = getRoomHoursForDay(
+												date,
+												roomOpeningHours,
+											);
+											const isHourInAvailableRange =
+												roomHours?.openTime && roomHours?.closeTime
+													? hour >=
+															Math.floor(
+																timeToMinutes(roomHours.openTime) / 60,
+															) &&
+														hour <
+															Math.ceil(timeToMinutes(roomHours.closeTime) / 60)
+													: false;
+
+											const hourReservations = dayRoomReservations.filter(
+												(reservation) => {
+													const startHour = new Date(
+														reservation.startAt,
+													).getHours();
+													const endHour = new Date(
+														reservation.endAt,
+													).getHours();
+													return hour >= startHour && hour < endHour;
+												},
+											);
+
 											let cellBackground = "bg-background";
 											if (!isOpen) {
 												cellBackground = "bg-muted";
@@ -356,11 +388,11 @@ export function RoomReservationList({
 											} else if (isOpen && isHourInAvailableRange) {
 												cellBackground = "bg-green-50 dark:bg-green-950/20";
 											}
-											
+
 											if (isCurrentTimeSlot) {
 												cellBackground = "bg-primary/30";
 											}
-											
+
 											return (
 												<div
 													key={`day-${dayIndex}-hour-${hour}`}
@@ -371,12 +403,12 @@ export function RoomReservationList({
 													{isCurrentTimeSlot && (
 														<div className="absolute top-0 left-0 right-0 h-1 bg-primary z-20" />
 													)}
-													
+
 													{hourReservations.map((reservation) => (
 														<div
 															key={reservation.id}
 															className={`absolute inset-x-1 rounded text-xs p-1 border group ${getStatusColor(
-																reservation.status
+																reservation.status,
 															)}`}
 															style={{
 																top: "2px",
@@ -390,12 +422,16 @@ export function RoomReservationList({
 																		{reservation.title}
 																	</div>
 																	<div className="text-xs opacity-75">
-																		{new Date(reservation.startAt).toLocaleTimeString("fr-FR", {
+																		{new Date(
+																			reservation.startAt,
+																		).toLocaleTimeString("fr-FR", {
 																			hour: "2-digit",
 																			minute: "2-digit",
 																		})}
 																		-
-																		{new Date(reservation.endAt).toLocaleTimeString("fr-FR", {
+																		{new Date(
+																			reservation.endAt,
+																		).toLocaleTimeString("fr-FR", {
 																			hour: "2-digit",
 																			minute: "2-digit",
 																		})}
@@ -410,7 +446,9 @@ export function RoomReservationList({
 																>
 																	<Link
 																		to="/admin/facilities/roomReservations/$roomReservationId/edit"
-																		params={{ roomReservationId: reservation.id }}
+																		params={{
+																			roomReservationId: reservation.id,
+																		}}
 																	>
 																		<Edit2 className="w-3 h-3" />
 																	</Link>
@@ -433,24 +471,36 @@ export function RoomReservationList({
 					<div className="grid grid-cols-7 gap-1">
 						{/* En-têtes des jours */}
 						{["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((day) => (
-							<div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
+							<div
+								key={day}
+								className="p-2 text-center text-sm font-medium text-muted-foreground"
+							>
 								{day}
 							</div>
 						))}
-						
+
 						{/* Grille mensuelle */}
 						{Array.from({ length: 42 }, (_, i) => {
 							// Calculer la date en commençant par lundi (au lieu de dimanche)
-							const firstOfMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+							const firstOfMonth = new Date(
+								startDate.getFullYear(),
+								startDate.getMonth(),
+								1,
+							);
 							const firstDayOfWeek = firstOfMonth.getDay(); // 0 = dimanche, 1 = lundi, etc.
-							const mondayOffset = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
-							const date = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth(), mondayOffset + i);
+							const mondayOffset =
+								firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek; // Ajustement pour commencer par lundi
+							const date = new Date(
+								firstOfMonth.getFullYear(),
+								firstOfMonth.getMonth(),
+								mondayOffset + i,
+							);
 							const dateKey = formatDateKey(date);
 							const dayRoomReservations = roomReservationsByDay[dateKey] || [];
 							const isCurrentMonth = date.getMonth() === startDate.getMonth();
 							const isOpen = isRoomOpenOnDay(date, roomOpeningHours);
 							const isToday = dateKey === currentDate;
-							
+
 							return (
 								<div
 									key={`month-day-${dateKey}`}
@@ -459,9 +509,11 @@ export function RoomReservationList({
 									} ${!isOpen && isCurrentMonth ? "bg-muted" : ""}
 									${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 								>
-									<div className={`text-sm font-medium mb-1 ${
-										isToday ? "text-primary" : "text-foreground"
-									}`}>
+									<div
+										className={`text-sm font-medium mb-1 ${
+											isToday ? "text-primary" : "text-foreground"
+										}`}
+									>
 										{date.getDate()}
 										{isToday && (
 											<span className="ml-1 text-xs text-primary">(Auj.)</span>
@@ -472,10 +524,12 @@ export function RoomReservationList({
 											<div
 												key={reservation.id}
 												className={`text-xs p-1 rounded truncate group flex justify-between items-center ${getStatusColor(
-													reservation.status
+													reservation.status,
 												)}`}
 											>
-												<span className="truncate flex-1 mr-1">{reservation.title}</span>
+												<span className="truncate flex-1 mr-1">
+													{reservation.title}
+												</span>
 												<Button
 													size="icon"
 													variant="ghost"
@@ -524,11 +578,13 @@ export function RoomReservationList({
 							</div>
 						</div>
 					</div>
-					
+
 					{/* Légende des disponibilités */}
 					<div className="flex items-center justify-between text-sm text-muted-foreground">
 						<div className="flex items-center gap-4">
-							<span className="font-medium text-foreground">Disponibilités :</span>
+							<span className="font-medium text-foreground">
+								Disponibilités :
+							</span>
 							<div className="flex items-center gap-1">
 								<div className="w-3 h-3 rounded bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" />
 								<span>Heures d'ouverture</span>

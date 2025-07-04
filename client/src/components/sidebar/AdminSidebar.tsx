@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/sidebar";
 import {
 	Building2Icon,
+	BusIcon,
 	HomeIcon,
 	RssIcon,
 	ShieldIcon,
 	UsersIcon,
-	BusIcon,
 } from "lucide-react";
 import type * as React from "react";
 import type { NavItemProps } from "./NavItem";

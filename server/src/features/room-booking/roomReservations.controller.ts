@@ -74,15 +74,18 @@ roomReservationsRouter.put("/:id", async (req: Request, res: Response) => {
 	if (!parse.success)
 		return res.status(400).json({ error: parse.error.flatten() });
 
-	const result = await roomReservationsService.update(req.params.id, parse.data);
+	const result = await roomReservationsService.update(
+		req.params.id,
+		parse.data,
+	);
 
 	if (result === "not_found") {
 		return res.status(404).json({ error: "Room Reservation not found" });
 	}
 	if (result === "conflict") {
-		return res
-			.status(409)
-			.json({ error: "Updated time slot conflicts with another room reservation" });
+		return res.status(409).json({
+			error: "Updated time slot conflicts with another room reservation",
+		});
 	}
 
 	return res.json(result);
@@ -95,7 +98,9 @@ roomReservationsRouter.delete("/:id", async (req: Request, res: Response) => {
 		return res.status(404).json({ error: "Room Reservation not found" });
 
 	await roomReservationsService.delete(req.params.id);
-	return res.status(200).json({ message: "Room Reservation deleted successfully" });
+	return res
+		.status(200)
+		.json({ message: "Room Reservation deleted successfully" });
 });
 
 export default roomReservationsRouter;

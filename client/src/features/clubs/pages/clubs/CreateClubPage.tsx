@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { ClubForm } from "../../components/clubs/ClubForm";
 
 export function ClubCreatePage() {
@@ -29,8 +29,8 @@ export function ClubCreatePage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Une fois créée, cette association contiendra 
-					toutes vos sections et catégories sportives.
+					<strong>Important :</strong> Une fois créée, cette association
+					contiendra toutes vos sections et catégories sportives.
 				</AlertDescription>
 			</Alert>
 

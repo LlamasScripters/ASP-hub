@@ -8,11 +8,11 @@ import commentsRouter from "./features/blog/comments.controller.js";
 import reactionsRouter from "./features/blog/reactions.controller.js";
 import tagsRouter from "./features/blog/tags.controller.js";
 import clubsRouter from "./features/clubs/clubs.controller.js";
+import minibusReservationsRouter from "./features/minibus-booking/minibusReservations.controller.js";
+import minibusesRouter from "./features/minibus-booking/minibuses.controller.js";
 import complexesRouter from "./features/room-booking/complexes.controller.js";
 import roomReservationsRouter from "./features/room-booking/roomReservations.controller.js";
 import roomsRouter from "./features/room-booking/rooms.controller.js";
-import minibusesRouter from "./features/minibus-booking/minibuses.controller.js";
-import minibusReservationsRouter from "./features/minibus-booking/minibusReservations.controller.js";
 import usersRouter from "./features/users/users.controller.js";
 
 const server = express();

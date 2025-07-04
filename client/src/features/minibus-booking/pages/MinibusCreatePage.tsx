@@ -1,10 +1,10 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { MinibusForm } from "../components/minibuses/MinibusForm";
 import { Link, useNavigate } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { MinibusForm } from "../components/minibuses/MinibusForm";
 
 export function MinibusCreatePage() {
 	const navigate = useNavigate();
@@ -23,7 +23,9 @@ export function MinibusCreatePage() {
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Créer un minibus</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						Créer un minibus
+					</h1>
 					<p className="text-muted-foreground">
 						Ajouter un nouveau minibus à la flotte
 					</p>

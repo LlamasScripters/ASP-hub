@@ -21,9 +21,13 @@ export { minibusesApi } from "./lib/api/minibuses";
 export { minibusReservationsApi } from "./lib/api/minibusReservations";
 
 // Types
-export type { Minibus, CreateMinibusData, UpdateMinibusData } from "./lib/api/minibuses";
-export type { 
-	MinibusReservation, 
-	CreateMinibusReservationData, 
-	UpdateMinibusReservationData 
+export type {
+	Minibus,
+	CreateMinibusData,
+	UpdateMinibusData,
+} from "./lib/api/minibuses";
+export type {
+	MinibusReservation,
+	CreateMinibusReservationData,
+	UpdateMinibusReservationData,
 } from "./lib/api/minibusReservations";

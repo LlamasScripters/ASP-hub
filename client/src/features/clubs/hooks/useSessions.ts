@@ -185,7 +185,9 @@ export function useSessions(
 	});
 
 	// Fonctions wrapper
-	const createSession = async (data: CreateSessionData): Promise<SessionSport> => {
+	const createSession = async (
+		data: CreateSessionData,
+	): Promise<SessionSport> => {
 		return createSessionMutation.mutateAsync(data);
 	};
 
@@ -290,7 +292,9 @@ export function useClubSessions(clubId: string) {
 		},
 	});
 
-	const deleteSessionFromOverview = async (sessionId: string): Promise<void> => {
+	const deleteSessionFromOverview = async (
+		sessionId: string,
+	): Promise<void> => {
 		return deleteSessionMutation.mutateAsync(sessionId);
 	};
 

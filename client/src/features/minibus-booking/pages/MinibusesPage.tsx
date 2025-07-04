@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
-import { MinibusesList } from "@/features/minibus-booking/components/minibuses/MinibusesList";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MinibusesList } from "@/features/minibus-booking/components/minibuses/MinibusesList";
+import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -21,6 +26,7 @@ import {
 	Users,
 	// @ts-ignore
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type ViewMode = "overview" | "minibuses" | "planning";
 
@@ -151,8 +157,14 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 	const totalMinibuses = initialMinibuses.length;
 	const totalAvailable = initialMinibuses.filter((m) => m.isAvailable).length;
 	const totalUnavailable = totalMinibuses - totalAvailable;
-	const totalCapacity = initialMinibuses.reduce((sum, m) => sum + m.capacity, 0);
-	const totalDisabledCapacity = initialMinibuses.reduce((sum, m) => sum + m.disabledPersonCapacity, 0);
+	const totalCapacity = initialMinibuses.reduce(
+		(sum, m) => sum + m.capacity,
+		0,
+	);
+	const totalDisabledCapacity = initialMinibuses.reduce(
+		(sum, m) => sum + m.disabledPersonCapacity,
+		0,
+	);
 
 	return (
 		<div className="space-y-6">
@@ -182,9 +194,7 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-						<CardTitle className="text-sm font-medium">
-							Total Minibus
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Total Minibus</CardTitle>
 						<Bus className="w-4 h-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -214,15 +224,14 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalCapacity}</div>
-						<p className="text-xs text-muted-foreground">
-							places passagers
-						</p>
+						<p className="text-xs text-muted-foreground">places passagers</p>
 						<div className="mt-4">
-							<Progress value={
-								totalCapacity > 0
-									? (totalAvailable / totalCapacity) * 100
-									: 0
-							} className="h-2" />
+							<Progress
+								value={
+									totalCapacity > 0 ? (totalAvailable / totalCapacity) * 100 : 0
+								}
+								className="h-2"
+							/>
 						</div>
 					</CardContent>
 				</Card>
@@ -238,11 +247,14 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 							personnes à mobilité réduite
 						</p>
 						<div className="mt-4">
-							<Progress value={
-								totalDisabledCapacity > 0
-									? (totalDisabledCapacity / totalCapacity) * 100
-									: 0
-							} className="h-2" />
+							<Progress
+								value={
+									totalDisabledCapacity > 0
+										? (totalDisabledCapacity / totalCapacity) * 100
+										: 0
+								}
+								className="h-2"
+							/>
 						</div>
 					</CardContent>
 				</Card>
@@ -260,11 +272,14 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 							Prochain événement dans 4 jours
 						</p>
 						<div className="mt-4">
-							<Progress value={
-								upcomingEvents.length > 0
-									? (upcomingEvents.length / 10) * 100 // Juste un exemple de calcul
-									: 0
-							} className="h-2" />
+							<Progress
+								value={
+									upcomingEvents.length > 0
+										? (upcomingEvents.length / 10) * 100 // Juste un exemple de calcul
+										: 0
+								}
+								className="h-2"
+							/>
 						</div>
 					</CardContent>
 				</Card>
@@ -297,9 +312,7 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 							<CardContent className="pl-2">
 								<div className="h-[300px] flex items-center justify-center bg-muted text-muted-foreground rounded-md">
 									<BarChart3 className="w-12 h-12" />
-									<span className="ml-2">
-										Graphique d'utilisation
-									</span>
+									<span className="ml-2">Graphique d'utilisation</span>
 								</div>
 							</CardContent>
 						</Card>
@@ -456,9 +469,7 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 											<p className="text-sm font-medium leading-none">
 												Réparations urgentes
 											</p>
-											<p className="text-sm text-muted-foreground">
-												Aucune
-											</p>
+											<p className="text-sm text-muted-foreground">Aucune</p>
 										</div>
 										<Badge className="bg-green-600">
 											<CheckCircle className="w-3 h-3 mr-1" />

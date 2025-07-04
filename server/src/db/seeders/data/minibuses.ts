@@ -5,8 +5,8 @@ import {
 	minibuses,
 } from "../../schema.js";
 import {
-	STANDARD_MINIBUS_HOURS,
 	ALTERNATIVE_MINIBUS_HOURS,
+	STANDARD_MINIBUS_HOURS,
 	type WeekSchedule,
 } from "../utils/openingHours.js";
 
@@ -27,13 +27,7 @@ const createMinibus = (
 });
 
 const minibusesData: InsertMinibus[] = [
-	createMinibus(
-		"Minibus Standard",
-		"AB-123-CD",
-		20,
-		2,
-		STANDARD_MINIBUS_HOURS,
-	),
+	createMinibus("Minibus Standard", "AB-123-CD", 20, 2, STANDARD_MINIBUS_HOURS),
 	createMinibus(
 		"Minibus Alternatif",
 		"EF-456-GH",
@@ -44,7 +38,7 @@ const minibusesData: InsertMinibus[] = [
 	createMinibus(
 		"Minibus Accessible",
 		"IJ-789-KL",
-		12,	
+		12,
 		3,
 		ALTERNATIVE_MINIBUS_HOURS,
 	),
@@ -61,7 +55,7 @@ const minibusesData: InsertMinibus[] = [
 		5,
 		0,
 		ALTERNATIVE_MINIBUS_HOURS,
-	)
+	),
 ];
 
 export async function seedMinibuses(

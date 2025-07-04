@@ -24,8 +24,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRoomReservations } from "@/features/room-booking/hooks/useRoomReservations";
 import {
 	type CreateRoomReservationData,
@@ -35,11 +33,13 @@ import {
 	roomReservationStatusEnumTranslated,
 	updateRoomReservationSchema,
 } from "@/features/room-booking/hooks/useRoomReservations";
-import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import {
 	parseLocalInputDateTime,
 	toLocalInputDateTime,
 } from "@/features/room-booking/lib/api/roomReservations";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { OpeningHours as RoomOpeningHours } from "@room-booking/hooks/useRooms";
 import { Link } from "@tanstack/react-router";
 // @ts-ignore
 import { Calendar as CalendarIcon, Clock, Info, Loader2 } from "lucide-react";
@@ -72,7 +72,9 @@ export function RoomReservationForm({
 	onCancelLink,
 }: RoomReservationFormProps) {
 	const { user } = AuthenticatedRoute.useLoaderData();
-	const { createRoomReservation, updateRoomReservation } = useRoomReservations({ roomId });
+	const { createRoomReservation, updateRoomReservation } = useRoomReservations({
+		roomId,
+	});
 	const isEditing = Boolean(roomReservation);
 
 	const [formMode, setFormMode] = useState<"create" | "edit">(
@@ -253,7 +255,10 @@ export function RoomReservationForm({
 										status: form.getValues("status") ?? "pending",
 									};
 
-									result = await updateRoomReservation(roomReservation.id, payload);
+									result = await updateRoomReservation(
+										roomReservation.id,
+										payload,
+									);
 								} else {
 									if (!user?.id) {
 										throw new Error("Utilisateur non authentifié");
@@ -384,13 +389,13 @@ export function RoomReservationForm({
 												<SelectValue placeholder="Sélectionner un statut" />
 											</SelectTrigger>
 											<SelectContent>
-												{Object.entries(roomReservationStatusEnumTranslated).map(
-													([value, label]) => (
-														<SelectItem key={value} value={value}>
-															{label}
-														</SelectItem>
-													),
-												)}
+												{Object.entries(
+													roomReservationStatusEnumTranslated,
+												).map(([value, label]) => (
+													<SelectItem key={value} value={value}>
+														{label}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 									</FormControl>

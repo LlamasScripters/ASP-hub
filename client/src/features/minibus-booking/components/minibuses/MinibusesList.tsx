@@ -1,19 +1,21 @@
-import { useState, useMemo, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
-import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
-import { useMinibuses } from "@/features/minibus-booking/hooks/useMinibuses";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-	DropdownMenu, 
-	DropdownMenuContent, 
-	DropdownMenuItem, 
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuTrigger 
+	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -29,6 +31,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { Minibus } from "@/features/minibus-booking/hooks/useMinibuses";
+import { useMinibuses } from "@/features/minibus-booking/hooks/useMinibuses";
+import { Link } from "@tanstack/react-router";
 import {
 	Bus,
 	Calendar,
@@ -38,10 +43,11 @@ import {
 	MoreHorizontal,
 	Plus,
 	Search,
-	Users,
 	UserCheck,
+	Users,
 	// @ts-ignore
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface MinibusesListProps {
 	initialMinibuses: Minibus[];
@@ -54,12 +60,10 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 	const [capacityFilter, setCapacityFilter] = useState<string>("all");
 	const itemsPerPage = 10;
 
-	const {
-		minibuses: fetchedMinibuses,
-		deleteMinibus,
-	} = useMinibuses();
+	const { minibuses: fetchedMinibuses, deleteMinibus } = useMinibuses();
 
-	const allMinibuses = fetchedMinibuses.length > 0 ? fetchedMinibuses : initialMinibuses;
+	const allMinibuses =
+		fetchedMinibuses.length > 0 ? fetchedMinibuses : initialMinibuses;
 
 	const filteredMinibuses = useMemo(() => {
 		let filtered = allMinibuses;
@@ -69,7 +73,7 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 			filtered = filtered.filter(
 				(minibus) =>
 					minibus.name.toLowerCase().includes(lowerSearchTerm) ||
-					minibus.licensePlate.toLowerCase().includes(lowerSearchTerm)
+					minibus.licensePlate.toLowerCase().includes(lowerSearchTerm),
 			);
 		}
 
@@ -84,7 +88,8 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 		if (capacityFilter !== "all") {
 			filtered = filtered.filter((minibus) => {
 				if (capacityFilter === "small") return minibus.capacity <= 15;
-				if (capacityFilter === "medium") return minibus.capacity > 15 && minibus.capacity <= 30;
+				if (capacityFilter === "medium")
+					return minibus.capacity > 15 && minibus.capacity <= 30;
 				if (capacityFilter === "large") return minibus.capacity > 30;
 				if (capacityFilter === "pmr") return minibus.disabledPersonCapacity > 0;
 				return true;
@@ -210,7 +215,10 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 										<SelectItem value="unavailable">Indisponibles</SelectItem>
 									</SelectContent>
 								</Select>
-								<Select value={capacityFilter} onValueChange={setCapacityFilter}>
+								<Select
+									value={capacityFilter}
+									onValueChange={setCapacityFilter}
+								>
 									<SelectTrigger className="w-[180px]">
 										<SelectValue placeholder="Capacité" />
 									</SelectTrigger>
@@ -236,15 +244,21 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 								{availabilityFilter !== "all" && (
 									<Badge variant="secondary">
 										Disponibilité:{" "}
-										{availabilityFilter === "available" ? "Disponibles" : "Indisponibles"}
+										{availabilityFilter === "available"
+											? "Disponibles"
+											: "Indisponibles"}
 									</Badge>
 								)}
 								{capacityFilter !== "all" && (
 									<Badge variant="secondary">
 										Capacité:{" "}
-										{capacityFilter === "small" ? "Petit" : 
-										 capacityFilter === "medium" ? "Moyen" : 
-										 capacityFilter === "large" ? "Grand" : "Avec PMR"}
+										{capacityFilter === "small"
+											? "Petit"
+											: capacityFilter === "medium"
+												? "Moyen"
+												: capacityFilter === "large"
+													? "Grand"
+													: "Avec PMR"}
 									</Badge>
 								)}
 								<Button
@@ -301,21 +315,23 @@ export function MinibusesList({ initialMinibuses }: MinibusesListProps) {
 												<div className="space-y-1">
 													<div className="flex items-center text-sm">
 														<Users className="w-3 h-3 mr-1 text-muted-foreground" />
-														<span className="font-medium">{minibus.capacity} places</span>
+														<span className="font-medium">
+															{minibus.capacity} places
+														</span>
 													</div>
 													{minibus.disabledPersonCapacity > 0 && (
 														<div className="flex items-center text-xs text-muted-foreground">
 															<UserCheck className="w-3 h-3 mr-1" />
-															<span>
-																{minibus.disabledPersonCapacity} PMR
-															</span>
+															<span>{minibus.disabledPersonCapacity} PMR</span>
 														</div>
 													)}
 												</div>
 											</TableCell>
 											<TableCell>
 												<Badge
-													variant={minibus.isAvailable ? "default" : "secondary"}
+													variant={
+														minibus.isAvailable ? "default" : "secondary"
+													}
 													className={
 														minibus.isAvailable
 															? "bg-green-100 text-green-800 border-green-200"

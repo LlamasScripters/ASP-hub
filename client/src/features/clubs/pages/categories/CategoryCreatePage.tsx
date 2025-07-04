@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { CategoryForm } from "../../components/categories/CategoryForm";
 
 export function CategoryCreatePage() {
@@ -36,16 +36,12 @@ export function CategoryCreatePage() {
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Assurez-vous de définir les tranches d'âge
-					appropriées pour cette catégorie.
+					<strong>Important :</strong> Assurez-vous de définir les tranches
+					d'âge appropriées pour cette catégorie.
 				</AlertDescription>
 			</Alert>
 
-			<CategoryForm 
-				mode="create" 
-				clubId={clubId} 
-				sectionId={sectionId}
-			/>
+			<CategoryForm mode="create" clubId={clubId} sectionId={sectionId} />
 		</div>
 	);
 }
