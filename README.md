@@ -172,3 +172,10 @@ node --test tests/interface/
 # Lancer un fichier spécifique
 npx tsx --test tests/unit/password.test.ts
 ```
+
+### Tests client
+
+```bash
+# Lancer tous les tests
+npx playwright test
+```

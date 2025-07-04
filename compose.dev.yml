@@ -42,6 +42,8 @@ services:
         - action: sync
           path: ./client/tsconfig.app.json
           target: /app/tsconfig.app.json
+    volumes:
+      - ./client:/app
 
   server:
     build:
