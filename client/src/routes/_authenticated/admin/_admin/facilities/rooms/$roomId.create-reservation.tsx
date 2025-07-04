@@ -1,4 +1,4 @@
-import { ReservationCreatePage } from "@/features/room-booking/pages/ReservationCreatePage";
+import { RoomReservationCreatePage } from "@/features/room-booking/pages/RoomReservationCreatePage";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { complexesApi } from "@room-booking/lib/api/complexes";
@@ -19,9 +19,9 @@ export const Route = createFileRoute(
 
 		return { room, complex };
 	},
-	component: ReservationCreateRoute,
+	component: RoomReservationCreateRoute,
 	errorComponent: ({ error }) => {
-		console.error("Error loading data for reservation creation:", error);
+		console.error("Error loading data for room reservation creation:", error);
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="text-center">
@@ -63,7 +63,7 @@ export const Route = createFileRoute(
 	),
 });
 
-function ReservationCreateRoute() {
+function RoomReservationCreateRoute() {
 	const { room, complex } = Route.useLoaderData();
-	return <ReservationCreatePage room={room} complex={complex} />;
+	return <RoomReservationCreatePage room={room} complex={complex} />;
 }

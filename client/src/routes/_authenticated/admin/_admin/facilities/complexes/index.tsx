@@ -1,6 +1,6 @@
+import type { Complex } from "@/features/room-booking/hooks/useComplexes";
+import { filteredComplexesQueryOptions } from "@/features/room-booking/hooks/useComplexes";
 import { ComplexesPage } from "@/features/room-booking/pages/ComplexesPage";
-import type { Complex } from "@room-booking/hooks/useComplexes";
-import { complexesApi } from "@room-booking/lib/api/complexes";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 interface ComplexesLoaderData {
@@ -11,14 +11,19 @@ export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/facilities/complexes/",
 )({
 	component: ComplexesRoute,
-	loader: async ({ abortController }): Promise<ComplexesLoaderData> => {
+	loader: async ({
+		context: { queryClient },
+	}): Promise<ComplexesLoaderData> => {
 		try {
-			const response = await complexesApi.getComplexes(
-				{ page: 1, limit: 50 },
-				{ signal: abortController.signal },
+			const { data: complexes } = await queryClient.ensureQueryData(
+				filteredComplexesQueryOptions({
+					filters: {},
+					page: 1,
+					limit: 50,
+				}),
 			);
 
-			return { complexes: response.data };
+			return { complexes };
 		} catch (error) {
 			console.error("Error loading complexes:", error);
 			throw error;

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
 	Building2Icon,
+	BusIcon,
 	HomeIcon,
 	RssIcon,
 	ShieldIcon,
@@ -35,6 +36,11 @@ const navigationItems: NavItemProps[] = [
 		url: "/admin/facilities/complexes",
 		title: "Complexes",
 		IconComponent: Building2Icon,
+	},
+	{
+		url: "/admin/assets/minibuses",
+		title: "Minibus",
+		IconComponent: BusIcon,
 	},
 	{
 		url: "/admin/dashboard/clubs",

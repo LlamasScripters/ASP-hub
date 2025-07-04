@@ -41,22 +41,28 @@ import { Route as AuthenticatedAdminAdminFacilitiesRoomsIndexImport } from "./ro
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/index"
 import { Route as AuthenticatedAdminAdminBlogBlogIdIndexImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/index"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesIndexImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/index"
 import { Route as AuthenticatednonadminNonadminDashboardBlogIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesCreateImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/create"
 import { Route as AuthenticatedAdminAdminDashboardClubsCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/create"
 import { Route as AuthenticatedAdminAdminBlogBlogIdEditImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesCreateImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/create"
 import { Route as AuthenticatednonadminNonadminUserUserSettingsImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.settings"
 import { Route as AuthenticatednonadminNonadminUserUserProfileImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.profile"
 import { Route as AuthenticatednonadminNonadminDashboardBlogBlogIdImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId/index"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/index"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId/index"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.edit"
 import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.create-reservation"
-import { Route as AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/reservations/$reservationId.edit"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId.edit"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.edit"
 import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.create-room"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId.edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId.create-reservation"
+import { Route as AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditImport } from "./routes/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId.edit"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/index"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdCategoriesIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/index"
@@ -286,6 +292,13 @@ const AuthenticatedAdminAdminBlogBlogIdIndexRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
+const AuthenticatedAdminAdminAssetsMinibusesIndexRoute =
+  AuthenticatedAdminAdminAssetsMinibusesIndexImport.update({
+    id: "/assets/minibuses/",
+    path: "/assets/minibuses/",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
 const AuthenticatednonadminNonadminDashboardBlogIndexRoute =
   AuthenticatednonadminNonadminDashboardBlogIndexImport.update({
     id: "/dashboard/blog/",
@@ -311,6 +324,13 @@ const AuthenticatedAdminAdminBlogBlogIdEditRoute =
   AuthenticatedAdminAdminBlogBlogIdEditImport.update({
     id: "/blog/$blogId/edit",
     path: "/blog/$blogId/edit",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminAssetsMinibusesCreateRoute =
+  AuthenticatedAdminAdminAssetsMinibusesCreateImport.update({
+    id: "/assets/minibuses/create",
+    path: "/assets/minibuses/create",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
@@ -356,6 +376,13 @@ const AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
+const AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute =
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexImport.update({
+    id: "/assets/minibuses/$minibusId/",
+    path: "/assets/minibuses/$minibusId/",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
 const AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute =
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport.update({
     id: "/facilities/rooms/$roomId/edit",
@@ -370,12 +397,14 @@ const AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
-const AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute =
-  AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport.update({
-    id: "/facilities/reservations/$reservationId/edit",
-    path: "/facilities/reservations/$reservationId/edit",
-    getParentRoute: () => AuthenticatedAdminAdminRoute,
-  } as any)
+const AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute =
+  AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditImport.update(
+    {
+      id: "/facilities/roomReservations/$roomReservationId/edit",
+      path: "/facilities/roomReservations/$roomReservationId/edit",
+      getParentRoute: () => AuthenticatedAdminAdminRoute,
+    } as any,
+  )
 
 const AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute =
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport.update({
@@ -397,6 +426,31 @@ const AuthenticatedAdminAdminDashboardClubsClubIdEditRoute =
     path: "/dashboard/clubs/$clubId/edit",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
+
+const AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute =
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditImport.update({
+    id: "/assets/minibuses/$minibusId/edit",
+    path: "/assets/minibuses/$minibusId/edit",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute =
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationImport.update(
+    {
+      id: "/assets/minibuses/$minibusId/create-reservation",
+      path: "/assets/minibuses/$minibusId/create-reservation",
+      getParentRoute: () => AuthenticatedAdminAdminRoute,
+    } as any,
+  )
+
+const AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute =
+  AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditImport.update(
+    {
+      id: "/assets/minibusReservations/$minibusReservationId/edit",
+      path: "/assets/minibusReservations/$minibusReservationId/edit",
+      getParentRoute: () => AuthenticatedAdminAdminRoute,
+    } as any,
+  )
 
 const AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexRoute =
   AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexImport.update({
@@ -728,6 +782,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatednonadminNonadminUserUserSettingsImport
       parentRoute: typeof AuthenticatednonadminNonadminUserUserImport
     }
+    "/_authenticated/admin/_admin/assets/minibuses/create": {
+      id: "/_authenticated/admin/_admin/assets/minibuses/create"
+      path: "/assets/minibuses/create"
+      fullPath: "/admin/assets/minibuses/create"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusesCreateImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
     "/_authenticated/admin/_admin/blog/$blogId/edit": {
       id: "/_authenticated/admin/_admin/blog/$blogId/edit"
       path: "/blog/$blogId/edit"
@@ -755,6 +816,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/dashboard/blog"
       preLoaderRoute: typeof AuthenticatednonadminNonadminDashboardBlogIndexImport
       parentRoute: typeof AuthenticatednonadminNonadminImport
+    }
+    "/_authenticated/admin/_admin/assets/minibuses/": {
+      id: "/_authenticated/admin/_admin/assets/minibuses/"
+      path: "/assets/minibuses"
+      fullPath: "/admin/assets/minibuses"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusesIndexImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/blog/$blogId/": {
       id: "/_authenticated/admin/_admin/blog/$blogId/"
@@ -784,6 +852,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsIndexImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
+    "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit": {
+      id: "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit"
+      path: "/assets/minibusReservations/$minibusReservationId/edit"
+      fullPath: "/admin/assets/minibusReservations/$minibusReservationId/edit"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation": {
+      id: "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation"
+      path: "/assets/minibuses/$minibusId/create-reservation"
+      fullPath: "/admin/assets/minibuses/$minibusId/create-reservation"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit": {
+      id: "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit"
+      path: "/assets/minibuses/$minibusId/edit"
+      fullPath: "/admin/assets/minibuses/$minibusId/edit"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
     "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": {
       id: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
       path: "/dashboard/clubs/$clubId/edit"
@@ -805,11 +894,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
-    "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": {
-      id: "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit"
-      path: "/facilities/reservations/$reservationId/edit"
-      fullPath: "/admin/facilities/reservations/$reservationId/edit"
-      preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditImport
+    "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit": {
+      id: "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit"
+      path: "/facilities/roomReservations/$roomReservationId/edit"
+      fullPath: "/admin/facilities/roomReservations/$roomReservationId/edit"
+      preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": {
@@ -824,6 +913,13 @@ declare module "@tanstack/react-router" {
       path: "/facilities/rooms/$roomId/edit"
       fullPath: "/admin/facilities/rooms/$roomId/edit"
       preLoaderRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
+    }
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/": {
+      id: "/_authenticated/admin/_admin/assets/minibuses/$minibusId/"
+      path: "/assets/minibuses/$minibusId"
+      fullPath: "/admin/assets/minibuses/$minibusId"
+      preLoaderRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexImport
       parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": {
@@ -1077,19 +1173,25 @@ interface AuthenticatedAdminAdminRouteChildren {
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminBlogCreateRoute: typeof AuthenticatedAdminAdminBlogCreateRoute
   AuthenticatedAdminAdminBlogIndexRoute: typeof AuthenticatedAdminAdminBlogIndexRoute
+  AuthenticatedAdminAdminAssetsMinibusesCreateRoute: typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
   AuthenticatedAdminAdminBlogBlogIdEditRoute: typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   AuthenticatedAdminAdminDashboardClubsCreateRoute: typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   AuthenticatedAdminAdminFacilitiesComplexesCreateRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  AuthenticatedAdminAdminAssetsMinibusesIndexRoute: typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
   AuthenticatedAdminAdminBlogBlogIdIndexRoute: typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   AuthenticatedAdminAdminDashboardClubsIndexRoute: typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   AuthenticatedAdminAdminFacilitiesComplexesIndexRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   AuthenticatedAdminAdminFacilitiesRoomsIndexRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute: typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
   AuthenticatedAdminAdminDashboardClubsClubIdEditRoute: typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
-  AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute: typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
   AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute: typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute: typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
   AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute: typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
@@ -1116,12 +1218,16 @@ const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren
       AuthenticatedAdminAdminBlogCreateRoute,
     AuthenticatedAdminAdminBlogIndexRoute:
       AuthenticatedAdminAdminBlogIndexRoute,
+    AuthenticatedAdminAdminAssetsMinibusesCreateRoute:
+      AuthenticatedAdminAdminAssetsMinibusesCreateRoute,
     AuthenticatedAdminAdminBlogBlogIdEditRoute:
       AuthenticatedAdminAdminBlogBlogIdEditRoute,
     AuthenticatedAdminAdminDashboardClubsCreateRoute:
       AuthenticatedAdminAdminDashboardClubsCreateRoute,
     AuthenticatedAdminAdminFacilitiesComplexesCreateRoute:
       AuthenticatedAdminAdminFacilitiesComplexesCreateRoute,
+    AuthenticatedAdminAdminAssetsMinibusesIndexRoute:
+      AuthenticatedAdminAdminAssetsMinibusesIndexRoute,
     AuthenticatedAdminAdminBlogBlogIdIndexRoute:
       AuthenticatedAdminAdminBlogBlogIdIndexRoute,
     AuthenticatedAdminAdminDashboardClubsIndexRoute:
@@ -1130,18 +1236,26 @@ const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren
       AuthenticatedAdminAdminFacilitiesComplexesIndexRoute,
     AuthenticatedAdminAdminFacilitiesRoomsIndexRoute:
       AuthenticatedAdminAdminFacilitiesRoomsIndexRoute,
+    AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute:
+      AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute,
+    AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute:
+      AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute,
+    AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute:
+      AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute,
     AuthenticatedAdminAdminDashboardClubsClubIdEditRoute:
       AuthenticatedAdminAdminDashboardClubsClubIdEditRoute,
     AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute:
       AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute,
     AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute:
       AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute,
-    AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute:
-      AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute,
+    AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute:
+      AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute,
     AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute:
       AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute,
     AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute:
       AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute,
+    AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute:
+      AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute,
     AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute:
       AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute,
     AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute:
@@ -1232,20 +1346,26 @@ export interface FileRoutesByFullPath {
   "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
   "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
   "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/assets/minibuses": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
   "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
   "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
-  "/admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
   "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/admin/assets/minibuses/$minibusId": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
   "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
   "/admin/facilities/rooms/$roomId": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
@@ -1288,20 +1408,26 @@ export interface FileRoutesByTo {
   "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
   "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
   "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/assets/minibuses": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
   "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
   "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
-  "/admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
   "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/admin/assets/minibuses/$minibusId": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
   "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
   "/admin/facilities/rooms/$roomId": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
@@ -1353,20 +1479,26 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/_authenticated/admin/_admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
   "/_authenticated/admin/_admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
   "/_authenticated/admin/_admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
   "/_authenticated/admin/_admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/_authenticated/admin/_admin/assets/minibuses/": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
   "/_authenticated/admin/_admin/blog/$blogId/": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
   "/_authenticated/admin/_admin/dashboard/clubs/": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
   "/_authenticated/admin/_admin/facilities/complexes/": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
   "/_authenticated/admin/_admin/facilities/rooms/": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
   "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
-  "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": typeof AuthenticatedAdminAdminFacilitiesReservationsReservationIdEditRoute
+  "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
   "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
   "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
   "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
   "/_authenticated/admin/_admin/facilities/complexes/$complexId/": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
   "/_authenticated/admin/_admin/facilities/rooms/$roomId/": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
@@ -1413,20 +1545,26 @@ export interface FileRouteTypes {
     | "/dashboard/blog/$blogId"
     | "/user/profile"
     | "/user/settings"
+    | "/admin/assets/minibuses/create"
     | "/admin/blog/$blogId/edit"
     | "/admin/dashboard/clubs/create"
     | "/admin/facilities/complexes/create"
     | "/dashboard/blog"
+    | "/admin/assets/minibuses"
     | "/admin/blog/$blogId"
     | "/admin/dashboard/clubs"
     | "/admin/facilities/complexes"
     | "/admin/facilities/rooms"
+    | "/admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/admin/assets/minibuses/$minibusId/create-reservation"
+    | "/admin/assets/minibuses/$minibusId/edit"
     | "/admin/dashboard/clubs/$clubId/edit"
     | "/admin/facilities/complexes/$complexId/create-room"
     | "/admin/facilities/complexes/$complexId/edit"
-    | "/admin/facilities/reservations/$reservationId/edit"
+    | "/admin/facilities/roomReservations/$roomReservationId/edit"
     | "/admin/facilities/rooms/$roomId/create-reservation"
     | "/admin/facilities/rooms/$roomId/edit"
+    | "/admin/assets/minibuses/$minibusId"
     | "/admin/dashboard/clubs/$clubId"
     | "/admin/facilities/complexes/$complexId"
     | "/admin/facilities/rooms/$roomId"
@@ -1468,20 +1606,26 @@ export interface FileRouteTypes {
     | "/dashboard/blog/$blogId"
     | "/user/profile"
     | "/user/settings"
+    | "/admin/assets/minibuses/create"
     | "/admin/blog/$blogId/edit"
     | "/admin/dashboard/clubs/create"
     | "/admin/facilities/complexes/create"
     | "/dashboard/blog"
+    | "/admin/assets/minibuses"
     | "/admin/blog/$blogId"
     | "/admin/dashboard/clubs"
     | "/admin/facilities/complexes"
     | "/admin/facilities/rooms"
+    | "/admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/admin/assets/minibuses/$minibusId/create-reservation"
+    | "/admin/assets/minibuses/$minibusId/edit"
     | "/admin/dashboard/clubs/$clubId/edit"
     | "/admin/facilities/complexes/$complexId/create-room"
     | "/admin/facilities/complexes/$complexId/edit"
-    | "/admin/facilities/reservations/$reservationId/edit"
+    | "/admin/facilities/roomReservations/$roomReservationId/edit"
     | "/admin/facilities/rooms/$roomId/create-reservation"
     | "/admin/facilities/rooms/$roomId/edit"
+    | "/admin/assets/minibuses/$minibusId"
     | "/admin/dashboard/clubs/$clubId"
     | "/admin/facilities/complexes/$complexId"
     | "/admin/facilities/rooms/$roomId"
@@ -1531,20 +1675,26 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
+    | "/_authenticated/admin/_admin/assets/minibuses/create"
     | "/_authenticated/admin/_admin/blog/$blogId/edit"
     | "/_authenticated/admin/_admin/dashboard/clubs/create"
     | "/_authenticated/admin/_admin/facilities/complexes/create"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
+    | "/_authenticated/admin/_admin/assets/minibuses/"
     | "/_authenticated/admin/_admin/blog/$blogId/"
     | "/_authenticated/admin/_admin/dashboard/clubs/"
     | "/_authenticated/admin/_admin/facilities/complexes/"
     | "/_authenticated/admin/_admin/facilities/rooms/"
+    | "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit"
     | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit"
-    | "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit"
+    | "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit"
     | "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation"
     | "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/"
     | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/"
     | "/_authenticated/admin/_admin/facilities/complexes/$complexId/"
     | "/_authenticated/admin/_admin/facilities/rooms/$roomId/"
@@ -1672,19 +1822,25 @@ export const routeTree = rootRoute
         "/_authenticated/admin/_admin/",
         "/_authenticated/admin/_admin/blog/create",
         "/_authenticated/admin/_admin/blog/",
+        "/_authenticated/admin/_admin/assets/minibuses/create",
         "/_authenticated/admin/_admin/blog/$blogId/edit",
         "/_authenticated/admin/_admin/dashboard/clubs/create",
         "/_authenticated/admin/_admin/facilities/complexes/create",
+        "/_authenticated/admin/_admin/assets/minibuses/",
         "/_authenticated/admin/_admin/blog/$blogId/",
         "/_authenticated/admin/_admin/dashboard/clubs/",
         "/_authenticated/admin/_admin/facilities/complexes/",
         "/_authenticated/admin/_admin/facilities/rooms/",
+        "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit",
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit",
-        "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit",
+        "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit",
         "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation",
         "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/",
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/",
         "/_authenticated/admin/_admin/facilities/complexes/$complexId/",
         "/_authenticated/admin/_admin/facilities/rooms/$roomId/",
@@ -1790,6 +1946,10 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/(nonadmin)/_nonadmin/user/_user.settings.tsx",
       "parent": "/_authenticated/(nonadmin)/_nonadmin/user/_user"
     },
+    "/_authenticated/admin/_admin/assets/minibuses/create": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
     "/_authenticated/admin/_admin/blog/$blogId/edit": {
       "filePath": "_authenticated/admin/_admin/blog/$blogId/edit.tsx",
       "parent": "/_authenticated/admin/_admin"
@@ -1805,6 +1965,10 @@ export const routeTree = rootRoute
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": {
       "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index.tsx",
       "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/blog/$blogId/": {
       "filePath": "_authenticated/admin/_admin/blog/$blogId/index.tsx",
@@ -1822,6 +1986,18 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/admin/_admin/facilities/rooms/index.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
+    "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit": {
+      "filePath": "_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId.create-reservation.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
     "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": {
       "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/edit.tsx",
       "parent": "/_authenticated/admin/_admin"
@@ -1834,8 +2010,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/admin/_admin/facilities/complexes/$complexId.edit.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
-    "/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit": {
-      "filePath": "_authenticated/admin/_admin/facilities/reservations/$reservationId.edit.tsx",
+    "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit": {
+      "filePath": "_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId.edit.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": {
@@ -1844,6 +2020,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": {
       "filePath": "_authenticated/admin/_admin/facilities/rooms/$roomId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId/index.tsx",
       "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": {

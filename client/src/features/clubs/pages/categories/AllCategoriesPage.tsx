@@ -210,7 +210,7 @@ export function AllCategoriesPage() {
 					<Button
 						onClick={() => setShowSectionModal(true)}
 						size="lg"
-						className="w-full sm:w-auto"
+						className="w-full sm:w-auto cursor-pointer hover:cursor-pointer"
 					>
 						<Plus className="mr-2 h-5 w-5" />
 						Ajouter une catégorie
@@ -306,19 +306,23 @@ export function AllCategoriesPage() {
 								dans les sections.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
-								<Button onClick={() => setShowSectionModal(true)} size="lg">
+								<Button
+									onClick={() => setShowSectionModal(true)}
+									className="cursor-pointer hover:cursor-pointer"
+									size="lg"
+								>
 									<Plus className="mr-2 h-5 w-5" />
 									Créer une catégorie
 								</Button>
-								<Link
-									to="/admin/dashboard/clubs/$clubId/sections"
-									params={{ clubId }}
-								>
-									<Button variant="outline" size="lg">
+								<Button variant="outline" size="lg" asChild>
+									<Link
+										to="/admin/dashboard/clubs/$clubId/sections"
+										params={{ clubId }}
+									>
 										<FolderOpen className="mr-2 h-5 w-5" />
 										Voir les sections
-									</Button>
-								</Link>
+									</Link>
+								</Button>
 							</div>
 						</CardContent>
 					</Card>
@@ -388,30 +392,31 @@ export function AllCategoriesPage() {
 												</TableCell>
 												<TableCell className="text-right">
 													<div className="flex items-center justify-end gap-2">
-														<Link
-															to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
-															params={{
-																clubId,
-																sectionId: cat.sectionId,
-																categoryId: cat.id,
-															}}
-														>
-															<Button
-																variant="ghost"
-																size="sm"
-																className="hover:bg-primary/10 hover:text-primary"
-															>
-																<Edit className="h-4 w-4 mr-1" />
-																Modifier
-															</Button>
-														</Link>
 														<Button
 															variant="ghost"
 															size="sm"
-															className="hover:bg-destructive/10 hover:text-destructive"
+															className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+															asChild
+														>
+															<Link
+																to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+																params={{
+																	clubId,
+																	sectionId: cat.sectionId,
+																	categoryId: cat.id,
+																}}
+															>
+																<Edit className="h-4 w-4 mr-1" />
+																Modifier
+															</Link>
+														</Button>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
 															onClick={() => setDeleteCategory(cat)}
 														>
-															<Trash2 className="h-4 w-4 mr-1" />
+															<Trash2 className="mr-1 h-3 w-3" />
 															Supprimer
 														</Button>
 													</div>

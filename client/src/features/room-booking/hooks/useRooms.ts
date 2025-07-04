@@ -1,5 +1,10 @@
 import { roomsApi } from "@room-booking/lib/api/rooms";
-import { useCallback, useEffect, useState } from "react";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -87,8 +92,11 @@ export const updateRoomSchema = createRoomSchema
 
 export const roomFiltersSchema = z.object({
 	search: z.string().optional(),
+	complexId: z.string().uuid().optional(),
 	sportType: z.string().optional(),
 	isIndoor: z.boolean().optional(),
+	page: z.coerce.number().default(1),
+	limit: z.coerce.number().default(20),
 });
 
 export const roomsPaginatedResponseSchema = z.object({
@@ -110,281 +118,172 @@ export const roomsPaginatedResponseSchema = z.object({
 		),
 });
 
+export type OpeningHoursEntry = z.infer<typeof openingHoursEntrySchema>;
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
 export type Room = z.infer<typeof roomSchema>;
 export type CreateRoomData = z.infer<typeof createRoomSchema>;
 export type UpdateRoomData = z.infer<typeof updateRoomSchema>;
+export type RoomFilters = z.infer<typeof roomFiltersSchema>;
 export type RoomsPaginatedResponse = z.infer<
 	typeof roomsPaginatedResponseSchema
 >;
-export type RoomFilters = z.infer<typeof roomFiltersSchema>;
-export type OpeningHours = z.infer<typeof openingHoursSchema>;
+
+// TanStack Query options
+export const filteredRoomsQueryOptions = ({
+	complexId,
+	filters = {},
+	page = 1,
+	limit = 20,
+}: {
+	complexId?: string;
+	filters?: Partial<RoomFilters>;
+	page?: number;
+	limit?: number;
+}) => ({
+	queryKey: ["rooms", complexId, filters, page, limit],
+	queryFn: () => {
+		if (complexId) {
+			return roomsApi.getRoomsByComplexId(complexId, page, limit);
+		}
+		return roomsApi.getRooms(filters, page, limit);
+	},
+});
 
 interface UseRoomsOptions {
-	complexId: string;
+	complexId?: string;
 	initialData?: Room[];
 }
 
-export function useRooms({ complexId, initialData = [] }: UseRoomsOptions) {
-	const [rooms, setRooms] = useState<Room[]>(initialData);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [filters, setFilters] = useState<RoomFilters>({});
-	const [pagination, setPagination] = useState<{
-		total: number;
-		page: number;
-		limit: number;
-		totalPages: number;
-	} | null>(null);
+export function useRooms({
+	complexId,
+	initialData = [],
+}: UseRoomsOptions = {}) {
+	const queryClient = useQueryClient();
 
-	/**
-	 * Fetches rooms based on the current filters and complexId.
-	 */
-	const fetchRooms = useCallback(async () => {
-		if (
-			!filters.search &&
-			!filters.sportType &&
-			filters.isIndoor === undefined &&
-			initialData.length > 0
-		) {
-			return;
-		}
-
-		setLoading(true);
-		setError(null);
-
-		try {
-			const response: RoomsPaginatedResponse =
-				await roomsApi.getRoomsByComplexId(complexId, 1, 50);
-
-			let filteredRooms = response.data;
-
-			if (filters.search) {
-				const searchTerm = filters.search.toLowerCase();
-				filteredRooms = filteredRooms.filter(
-					(room) =>
-						room.name.toLowerCase().includes(searchTerm) ||
-						room.sportType.toLowerCase().includes(searchTerm),
-				);
+	// Query for fetching rooms
+	const { data: fetchedData, refetch } = useSuspenseQuery({
+		queryKey: complexId ? ["rooms", "by-complex", complexId] : ["rooms"],
+		queryFn: () => {
+			if (complexId) {
+				return roomsApi.getRoomsByComplexId(complexId, 1, 50);
 			}
+			return roomsApi.getRooms({}, 1, 50);
+		},
+		initialData: {
+			data: initialData,
+			total: initialData.length,
+			page: 1,
+			limit: 50,
+		},
+	});
 
-			if (filters.sportType) {
-				filteredRooms = filteredRooms.filter(
-					(room) => room.sportType === filters.sportType,
-				);
-			}
+	// Create mutation
+	const createMutation = useMutation({
+		mutationFn: (data: CreateRoomData) => roomsApi.createRoom(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle créée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error creating room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la création de la salle",
+			);
+		},
+	});
 
-			if (filters.isIndoor !== undefined) {
-				filteredRooms = filteredRooms.filter(
-					(room) => room.isIndoor === filters.isIndoor,
-				);
-			}
+	// Update mutation
+	const updateMutation = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: UpdateRoomData }) =>
+			roomsApi.updateRoom(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle modifiée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error updating room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification de la salle",
+			);
+		},
+	});
 
-			setRooms(filteredRooms);
-			setPagination({
-				total: response.total,
-				page: response.page,
-				limit: response.limit,
-				totalPages: Math.ceil(response.total / response.limit),
-			});
-		} catch (err) {
-			let errorMessage = "Une erreur inattendue s'est produite";
+	// Delete mutation
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => roomsApi.deleteRoom(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["rooms"] });
+			toast.success("Salle supprimée avec succès");
+		},
+		onError: (error: Error) => {
+			console.error("Error deleting room:", error);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression de la salle",
+			);
+		},
+	});
 
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			}
-
-			setError(errorMessage);
-			toast.error("Erreur", {
-				description: errorMessage,
-			});
-		} finally {
-			setLoading(false);
-		}
-	}, [complexId, filters, initialData]);
-
-	/**
-	 * Updates the filters for fetching rooms.
-	 * @param newFilters - Partial RoomFilters to update.
-	 */
-	const updateFilters = useCallback((newFilters: Partial<RoomFilters>) => {
-		setFilters((prev) => ({ ...prev, ...newFilters }));
-	}, []);
-
-	/**
-	 * Creates a new room.
-	 */
 	const createRoom = useCallback(
 		async (data: CreateRoomData): Promise<Room | null> => {
-			setLoading(true);
-			setError(null);
-
 			try {
-				const result = await roomsApi.createRoom(data);
-
-				if (result) {
-					toast.success("Succès", {
-						description: "Salle créée avec succès",
-					});
-
-					setRooms((prev) => [result, ...prev]);
-					return result;
-				}
-				throw new Error("Erreur lors de la création de la salle");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
+				const result = await createMutation.mutateAsync(data);
+				return result;
+			} catch (error) {
+				console.error("Error in createRoom:", error);
 				return null;
-			} finally {
-				setLoading(false);
 			}
 		},
-		[],
+		[createMutation],
 	);
 
-	/**
-	 * Updates an existing room.
-	 */
 	const updateRoom = useCallback(
-		async (roomId: string, data: UpdateRoomData): Promise<Room | null> => {
-			setLoading(true);
-			setError(null);
-
+		async (id: string, data: UpdateRoomData): Promise<Room | null> => {
 			try {
-				const result = await roomsApi.updateRoom(roomId, data);
-
-				if (result) {
-					toast.success("Succès", {
-						description: "Salle mise à jour avec succès",
-					});
-
-					setRooms((prev) =>
-						prev.map((room) => (room.id === roomId ? result : room)),
-					);
-					return result;
-				}
-				throw new Error("Erreur lors de la mise à jour de la salle");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
+				const result = await updateMutation.mutateAsync({ id, data });
+				return result;
+			} catch (error) {
+				console.error("Error in updateRoom:", error);
 				return null;
-			} finally {
-				setLoading(false);
 			}
 		},
-		[],
+		[updateMutation],
 	);
 
-	/**
-	 * Deletes a room by its ID.
-	 */
-	const deleteRoom = useCallback(async (roomId: string): Promise<boolean> => {
-		setLoading(true);
-		setError(null);
-
-		try {
-			const success = await roomsApi.deleteRoom(roomId);
-
-			if (success) {
-				toast.success("Succès", {
-					description: "Salle supprimée avec succès",
-				});
-
-				setRooms((prev) => prev.filter((room) => room.id !== roomId));
+	const deleteRoom = useCallback(
+		async (id: string): Promise<boolean> => {
+			try {
+				await deleteMutation.mutateAsync(id);
 				return true;
-			}
-			throw new Error("Erreur lors de la suppression de la salle");
-		} catch (err) {
-			let errorMessage = "Une erreur inattendue s'est produite";
-
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			}
-
-			setError(errorMessage);
-			toast.error("Erreur", {
-				description: errorMessage,
-			});
-			return false;
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	/**
-	 * Gets a room by its ID.
-	 */
-	const getRoomById = useCallback(
-		async (roomId: string): Promise<Room | null> => {
-			setLoading(true);
-			setError(null);
-
-			try {
-				const result = await roomsApi.getRoomById(roomId);
-
-				if (result) {
-					return result;
-				}
-				throw new Error("Salle non trouvée");
-			} catch (err) {
-				let errorMessage = "Une erreur inattendue s'est produite";
-
-				if (err instanceof Error) {
-					errorMessage = err.message;
-				}
-
-				setError(errorMessage);
-				toast.error("Erreur", {
-					description: errorMessage,
-				});
-				return null;
-			} finally {
-				setLoading(false);
+			} catch (error) {
+				console.error("Error in deleteRoom:", error);
+				return false;
 			}
 		},
-		[],
+		[deleteMutation],
 	);
 
-	useEffect(() => {
-		if (filters.search || filters.sportType || filters.isIndoor !== undefined) {
-			fetchRooms();
-		}
-	}, [fetchRooms, filters]);
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
 
 	return {
-		// Data
-		rooms,
-		filters,
-		pagination,
-
-		// State
-		loading,
-		error,
-
-		// Actions
-		fetchRooms,
-		updateFilters,
+		rooms: fetchedData.data,
+		totalCount: fetchedData.total,
+		page: fetchedData.page,
+		limit: fetchedData.limit,
+		loading: false,
+		error: null,
 		createRoom,
 		updateRoom,
 		deleteRoom,
-		getRoomById,
-
-		// Helpers
-		refresh: fetchRooms,
+		updateFilters: () => {}, // Placeholder pour compatibilité
+		refresh,
+		refetch,
 	};
 }

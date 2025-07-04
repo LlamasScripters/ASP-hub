@@ -43,7 +43,6 @@ import {
 	ChevronRight,
 	CircleOff,
 	Filter,
-	Loader2,
 	MapPin,
 	MoreHorizontal,
 	Plus,
@@ -63,14 +62,7 @@ export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 	const [parkingFilter, setParkingFilter] = useState<string>("all");
 	const itemsPerPage = 10;
 
-	const {
-		complexes: fetchedComplexes,
-		loading,
-		error,
-		deleteComplex,
-	} = useComplexes({
-		page: 1,
-		limit: 50,
+	const { complexes: fetchedComplexes, deleteComplex } = useComplexes({
 		initialData: initialComplexes,
 	});
 
@@ -296,25 +288,7 @@ export function ComplexList({ initialComplexes = [] }: ComplexListProps) {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{loading ? (
-									<TableRow>
-										<TableCell colSpan={6} className="h-24 text-center">
-											<div className="flex items-center justify-center">
-												<Loader2 className="w-6 h-6 animate-spin mr-2" />
-												Chargement...
-											</div>
-										</TableCell>
-									</TableRow>
-								) : error ? (
-									<TableRow>
-										<TableCell
-											colSpan={6}
-											className="h-24 text-center text-red-500"
-										>
-											{error}
-										</TableCell>
-									</TableRow>
-								) : currentComplexes.length > 0 ? (
+								{currentComplexes.length > 0 ? (
 									currentComplexes.map((complex) => (
 										<TableRow key={complex.id}>
 											<TableCell>

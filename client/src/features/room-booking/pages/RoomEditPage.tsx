@@ -19,7 +19,6 @@ export function RoomEditPage({ complex, room }: RoomEditPageProps) {
 	const router = useRouter();
 	const previousPageHref =
 		router.__store.prevState?.resolvedLocation?.href || undefined;
-	console.log("previousPageHref", router);
 
 	const handleSuccess = () => {
 		setShowSuccess(true);

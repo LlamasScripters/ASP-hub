@@ -1,25 +1,27 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ReservationForm } from "@room-booking/components/reservations/ReservationForm";
+import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
+import { RoomReservationForm } from "@room-booking/components/RoomReservations/RoomReservationForm";
 import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
-// @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 
-interface ReservationCreatePageProps {
+interface RoomReservationEditPageProps {
 	complex: Complex;
 	room: Room;
+	roomReservation: RoomReservation;
 }
 
-export function ReservationCreatePage({
+export function RoomReservationEditPage({
 	complex,
 	room,
-}: ReservationCreatePageProps) {
+	roomReservation,
+}: RoomReservationEditPageProps) {
 	const navigate = useNavigate();
-
 	const router = useRouter();
+
 	const previousPageHref =
 		router.__store.prevState?.resolvedLocation?.href || undefined;
 
@@ -37,11 +39,12 @@ export function ReservationCreatePage({
 			<div className="flex justify-between items-center">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						Créer une réservation
+						Modifier une réservation
 					</h1>
 					<p className="text-muted-foreground">
-						Nouvelle réservation pour la salle{" "}
-						<span className="font-medium">{room.name}</span> du complexe{" "}
+						Modifier la réservation{" "}
+						<span className="font-medium">{roomReservation.title}</span> de la
+						salle <span className="font-medium">{room.name}</span> du complexe{" "}
 						<span className="font-medium">{complex.name}</span>
 					</p>
 				</div>
@@ -60,16 +63,17 @@ export function ReservationCreatePage({
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					<strong>Important :</strong> Veuillez vérifier que les créneaux
-					choisis ne soient pas déjà réservés. En cas de conflit, un message
-					d’erreur s’affichera.
+					<strong>Important :</strong> En modifiant le créneau, vous pouvez
+					entrer en conflit avec d’autres réservations. Vérifiez bien les
+					nouvelles dates.
 				</AlertDescription>
 			</Alert>
 
-			{/* Formulaire de réservation */}
-			<ReservationForm
+			{/* Formulaire d’édition */}
+			<RoomReservationForm
 				roomId={room.id}
 				roomOpeningHours={room.openingHours}
+				roomReservation={roomReservation}
 				onSuccess={handleSuccess}
 				onCancelLink={previousPageHref}
 			/>

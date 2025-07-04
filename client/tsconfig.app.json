@@ -24,7 +24,8 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
-			"@room-booking/*": ["./src/features/room-booking/*"]
+			"@room-booking/*": ["./src/features/room-booking/*"],
+			"@minibus-booking/*": ["./src/features/minibus-booking/*"]
 		}
 	},
 	"include": ["src"]

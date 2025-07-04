@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
-	type InsertReservation,
+	type InsertRoomReservation,
 	type SelectRoom,
-	reservations,
+	roomReservations,
 	users,
 } from "../../schema.js";
 import type { WeekSchedule } from "../utils/openingHours.js";
@@ -186,7 +186,7 @@ function generateValidDuration(room: SelectRoom, startDate: Date): number {
 	];
 }
 
-function generateReservationTitle(room: SelectRoom): string {
+function generateRoomReservationTitle(room: SelectRoom): string {
 	const sportType = room.sportType.toLowerCase();
 	const titles =
 		activityTitles[sportType as keyof typeof activityTitles] ||
@@ -195,7 +195,7 @@ function generateReservationTitle(room: SelectRoom): string {
 	return `${randomTitle} - ${room.name}`;
 }
 
-export async function seedReservations(
+export async function seedRoomReservations(
 	db: NodePgDatabase,
 	rooms: SelectRoom[],
 ): Promise<void> {
@@ -207,41 +207,41 @@ export async function seedReservations(
 
 	if (existingUsers.length === 0) {
 		console.log(
-			"No users found to assign as bookers. Skipping reservation creation.",
+			"No users found to assign as bookers. Skipping room reservation creation.",
 		);
 		return;
 	}
 
-	const reservationsData: InsertReservation[] = [];
+	const roomReservationsData: InsertRoomReservation[] = [];
 	const today = new Date();
 	const statuses = ["pending", "confirmed", "cancelled"] as const;
 
-	// Générer des réservations pour les 21 prochains jours
+	// Générer des réservations de salle pour les 21 prochains jours
 	for (let dayOffset = 1; dayOffset <= 21; dayOffset++) {
 		const currentDate = new Date(today);
 		currentDate.setDate(today.getDate() + dayOffset);
 
 		// Pour chaque salle, générer 0-3 réservations par jour
 		for (const room of rooms) {
-			const reservationCount = Math.floor(Math.random() * 4); // 0 à 3 réservations
+			const roomReservationCount = Math.floor(Math.random() * 4); // 0 à 3 réservations
 
-			const dayReservations: { start: Date; end: Date }[] = [];
+			const dayRoomReservations: { start: Date; end: Date }[] = [];
 
 			function hasOverlap(
 				startA: Date,
 				endA: Date,
-				reservations: { start: Date; end: Date }[],
+				roomReservations: { start: Date; end: Date }[],
 			): boolean {
-				return reservations.some(
+				return roomReservations.some(
 					(existing) => startA < existing.end && endA > existing.start,
 				);
 			}
 
-			for (let i = 0; i < reservationCount; i++) {
+			for (let i = 0; i < roomReservationCount; i++) {
 				let attempts = 0;
-				let validReservation = false;
+				let validRoomReservation = false;
 
-				while (!validReservation && attempts < 10) {
+				while (!validRoomReservation && attempts < 10) {
 					attempts++;
 
 					const startDate = generateValidStartTime(room, currentDate);
@@ -254,18 +254,22 @@ export async function seedReservations(
 					endDate.setMinutes(startDate.getMinutes() + durationMinutes);
 
 					// Vérifier qu'il n'y a pas de conflit avec les autres réservations du jour
-					const hasConflict = hasOverlap(startDate, endDate, dayReservations);
+					const hasConflict = hasOverlap(
+						startDate,
+						endDate,
+						dayRoomReservations,
+					);
 
 					if (!hasConflict) {
-						dayReservations.push({ start: startDate, end: endDate });
+						dayRoomReservations.push({ start: startDate, end: endDate });
 
 						const randomUser =
 							existingUsers[Math.floor(Math.random() * existingUsers.length)];
 						const randomStatus =
 							statuses[Math.floor(Math.random() * statuses.length)];
 
-						reservationsData.push({
-							title: generateReservationTitle(room),
+						roomReservationsData.push({
+							title: generateRoomReservationTitle(room),
 							startAt: startDate,
 							endAt: endDate,
 							roomId: room.id,
@@ -273,29 +277,31 @@ export async function seedReservations(
 							status: randomStatus,
 						});
 
-						validReservation = true;
+						validRoomReservation = true;
 					}
 				}
 			}
 		}
 	}
 
-	console.log(`Insertion of ${reservationsData.length} reservations...`);
+	console.log(
+		`Insertion of ${roomReservationsData.length} room reservations...`,
+	);
 
 	try {
-		if (reservationsData.length > 0) {
-			const insertedReservations = await db
-				.insert(reservations)
-				.values(reservationsData)
+		if (roomReservationsData.length > 0) {
+			const insertedRoomReservations = await db
+				.insert(roomReservations)
+				.values(roomReservationsData)
 				.returning();
 
 			console.log(
-				`${insertedReservations.length} reservations created successfully`,
+				`${insertedRoomReservations.length} room reservations created successfully`,
 			);
 
-			const statusCounts = insertedReservations.reduce(
-				(acc, reservation) => {
-					acc[reservation.status] = (acc[reservation.status] || 0) + 1;
+			const statusCounts = insertedRoomReservations.reduce(
+				(acc, roomReservation) => {
+					acc[roomReservation.status] = (acc[roomReservation.status] || 0) + 1;
 					return acc;
 				},
 				{} as Record<string, number>,
@@ -304,11 +310,11 @@ export async function seedReservations(
 			console.log("Status distribution:", statusCounts);
 		} else {
 			console.log(
-				"No reservations generated (rooms closed or incompatible schedules)",
+				"No room reservations generated (rooms closed or incompatible schedules)",
 			);
 		}
 	} catch (error) {
-		console.error("Error during the insertion of reservations:", error);
+		console.error("Error during the insertion of room reservations:", error);
 		throw error;
 	}
 }

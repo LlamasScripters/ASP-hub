@@ -1,25 +1,22 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ReservationForm } from "@room-booking/components/reservations/ReservationForm";
-import type { Complex } from "@room-booking/hooks/useComplexes";
-import type { Reservation } from "@room-booking/hooks/useReservations";
-import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
 // @ts-ignore
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import { MinibusReservationForm } from "../components/minibusReservations/MinibusReservationForm";
+import type { MinibusReservation } from "../lib/api/minibusReservations";
+import type { Minibus } from "../lib/api/minibuses";
 
-interface ReservationEditPageProps {
-	complex: Complex;
-	room: Room;
-	reservation: Reservation;
+interface MinibusReservationEditPageProps {
+	minibus: Minibus;
+	minibusReservation: MinibusReservation;
 }
 
-export function ReservationEditPage({
-	complex,
-	room,
-	reservation,
-}: ReservationEditPageProps) {
+export function MinibusReservationEditPage({
+	minibus,
+	minibusReservation,
+}: MinibusReservationEditPageProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
 
@@ -29,7 +26,7 @@ export function ReservationEditPage({
 	const handleSuccess = () => {
 		setTimeout(() => {
 			navigate({
-				to: `/admin/facilities/rooms/${room.id}`,
+				to: `/admin/assets/minibuses/${minibus.id}`,
 			});
 		}, 1500);
 	};
@@ -44,18 +41,14 @@ export function ReservationEditPage({
 					</h1>
 					<p className="text-muted-foreground">
 						Modifier la réservation{" "}
-						<span className="font-medium">{reservation.title}</span> de la salle{" "}
-						<span className="font-medium">{room.name}</span> du complexe{" "}
-						<span className="font-medium">{complex.name}</span>
+						<span className="font-medium">{minibusReservation.title}</span> du
+						minibus <span className="font-medium">{minibus.name}</span>
 					</p>
 				</div>
 				<Button variant="outline" size="sm" asChild>
-					<Link
-						to="/admin/facilities/rooms/$roomId"
-						params={{ roomId: room.id }}
-					>
+					<Link to="/admin/assets/minibuses">
 						<ArrowLeft className="w-4 h-4 mr-2" />
-						Retour à la salle
+						Retour au minibus
 					</Link>
 				</Button>
 			</div>
@@ -65,16 +58,16 @@ export function ReservationEditPage({
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
 					<strong>Important :</strong> En modifiant le créneau, vous pouvez
-					entrer en conflit avec d’autres réservations. Vérifiez bien les
+					entrer en conflit avec d'autres réservations. Vérifiez bien les
 					nouvelles dates.
 				</AlertDescription>
 			</Alert>
 
-			{/* Formulaire d’édition */}
-			<ReservationForm
-				roomId={room.id}
-				roomOpeningHours={room.openingHours}
-				reservation={reservation}
+			{/* Formulaire d'édition */}
+			<MinibusReservationForm
+				minibusId={minibus.id}
+				minibusDisponibility={minibus.disponibility}
+				minibusReservation={minibusReservation}
 				onSuccess={handleSuccess}
 				onCancelLink={previousPageHref}
 			/>

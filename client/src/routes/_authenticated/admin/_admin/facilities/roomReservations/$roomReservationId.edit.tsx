@@ -1,31 +1,31 @@
-import { ReservationEditPage } from "@/features/room-booking/pages/ReservationEditPage";
+import type { RoomReservation } from "@/features/room-booking/hooks/useRoomReservations";
+import { roomReservationsApi } from "@/features/room-booking/lib/api/roomReservations";
+import { RoomReservationEditPage } from "@/features/room-booking/pages/RoomReservationEditPage";
 import type { Complex } from "@room-booking/hooks/useComplexes";
-import type { Reservation } from "@room-booking/hooks/useReservations";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { complexesApi } from "@room-booking/lib/api/complexes";
-import { reservationsApi } from "@room-booking/lib/api/reservations";
 import { roomsApi } from "@room-booking/lib/api/rooms";
 import { createFileRoute } from "@tanstack/react-router";
 
 interface LoaderData {
 	complex: Complex;
 	room: Room;
-	reservation: Reservation;
+	roomReservation: RoomReservation;
 }
 
 export const Route = createFileRoute(
-	"/_authenticated/admin/_admin/facilities/reservations/$reservationId/edit",
+	"/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit",
 )({
 	loader: async ({ params }): Promise<LoaderData> => {
-		const reservation = await reservationsApi.getReservationById(
-			params.reservationId,
+		const roomReservation = await roomReservationsApi.getRoomReservationById(
+			params.roomReservationId,
 		);
-		const room = await roomsApi.getRoomById(reservation.roomId);
+		const room = await roomsApi.getRoomById(roomReservation.roomId);
 		const complex = await complexesApi.getComplexById(room.complexId);
 
-		return { reservation, room, complex };
+		return { roomReservation, room, complex };
 	},
-	component: ReservationEditRoute,
+	component: RoomReservationEditRoute,
 	errorComponent: ({ error }) => {
 		console.error("Erreur chargement de la réservation pour édition:", error);
 		return (
@@ -69,11 +69,11 @@ export const Route = createFileRoute(
 	),
 });
 
-function ReservationEditRoute() {
-	const { reservation, room, complex } = Route.useLoaderData();
+function RoomReservationEditRoute() {
+	const { roomReservation, room, complex } = Route.useLoaderData();
 	return (
-		<ReservationEditPage
-			reservation={reservation}
+		<RoomReservationEditPage
+			roomReservation={roomReservation}
 			room={room}
 			complex={complex}
 		/>

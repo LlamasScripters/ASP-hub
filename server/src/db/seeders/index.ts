@@ -1,7 +1,13 @@
 import { db } from "../index.js";
+import { seedCategories } from "./data/categories.js";
+import { seedClubs } from "./data/clubs.js";
 import { seedComplexes } from "./data/complexes.js";
-import { seedReservations } from "./data/reservations.js";
+import { seedMinibusReservations } from "./data/minibusReservations.js";
+import { seedMinibuses } from "./data/minibuses.js";
+import { seedRoomReservations } from "./data/roomReservations.js";
 import { seedRooms } from "./data/rooms.js";
+import { seedSections } from "./data/sections.js";
+import { seedSessionsSport } from "./data/sessionsSport.js";
 import { resetAllTables } from "./reset.js";
 
 export async function seedDatabase() {
@@ -15,8 +21,26 @@ export async function seedDatabase() {
 		console.log("Seeding Rooms...");
 		const rooms = await seedRooms(db, complexes);
 
-		console.log("Seeding Reservations...");
-		await seedReservations(db, rooms);
+		console.log("Seeding Room Reservations...");
+		await seedRoomReservations(db, rooms);
+
+		console.log("Seeding Minibuses...");
+		const minibuses = await seedMinibuses(db);
+
+		console.log("Seeding Minibus Reservations...");
+		await seedMinibusReservations(db, minibuses);
+
+		console.log("Seeding Clubs...");
+		const clubs = await seedClubs(db);
+
+		console.log("Seeding Sections...");
+		const sections = await seedSections(db, clubs);
+
+		console.log("Seeding Categories...");
+		const categories = await seedCategories(db, sections);
+
+		console.log("Seeding Sports Sessions...");
+		await seedSessionsSport(db, categories);
 
 		console.log("All seeders have been executed successfully!");
 	} catch (error) {

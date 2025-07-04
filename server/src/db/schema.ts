@@ -11,6 +11,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import { d } from "node_modules/drizzle-kit/index-BAUrj6Ib.mjs";
 
 // énumérations pour les types
 export const sessionTypeEnum = pgEnum("session_type", [
@@ -134,6 +135,16 @@ export const defaultOpenHours = {
 	sunday: { open: null, close: null, closed: true },
 };
 
+export const defaultDisponibility = {
+	monday: { open: null, close: null, available: false },
+	tuesday: { open: null, close: null, available: false },
+	wednesday: { open: "06:00", close: "20:00", available: true },
+	thursday: { open: null, close: null, available: false },
+	friday: { open: null, close: null, available: false },
+	saturday: { open: "06:00", close: "20:00", available: true },
+	sunday: { open: "06:00", close: "20:00", available: true },
+};
+
 export const complexes = pgTable("complexes", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	name: varchar("name", { length: 255 }).notNull(),
@@ -173,13 +184,50 @@ export const rooms = pgTable("rooms", {
 		.$onUpdate(() => new Date()),
 });
 
-export const reservations = pgTable("reservations", {
+export const roomReservations = pgTable("room_reservations", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	title: varchar("title", { length: 255 }).notNull(),
 	startAt: timestamp("start_at").notNull(),
 	endAt: timestamp("end_at").notNull(),
 	roomId: uuid("room_id")
 		.references(() => rooms.id, { onDelete: "cascade" })
+		.notNull(),
+	bookerId: uuid("booker_id")
+		.references(() => users.id, { onDelete: "cascade" })
+		.notNull(),
+	status: reservationStatusEnum("status").notNull().default("pending"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
+});
+
+export const minibuses = pgTable("minibuses", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: varchar("name", { length: 255 }).notNull(),
+	description: text("description").notNull(),
+	licensePlate: varchar("license_plate", { length: 9 }).notNull().unique(),
+	capacity: integer("capacity").notNull(),
+	disabledPersonCapacity: integer("disabled_person_capacity")
+		.notNull()
+		.default(0),
+	disponibility: jsonb("disponibility").notNull().default(defaultDisponibility),
+	isAvailable: boolean("is_available").notNull().default(true),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
+});
+
+export const minibusReservations = pgTable("minibus_reservations", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	title: varchar("title", { length: 255 }).notNull(),
+	startAt: timestamp("start_at").notNull(),
+	endAt: timestamp("end_at").notNull(),
+	minibusId: uuid("minibus_id")
+		.references(() => minibuses.id, { onDelete: "cascade" })
 		.notNull(),
 	bookerId: uuid("booker_id")
 		.references(() => users.id, { onDelete: "cascade" })
@@ -481,9 +529,15 @@ export type SelectComplex = typeof complexes.$inferSelect;
 // Rooms
 export type InsertRoom = typeof rooms.$inferInsert;
 export type SelectRoom = typeof rooms.$inferSelect;
-// Reservations
-export type InsertReservation = typeof reservations.$inferInsert;
-export type SelectReservation = typeof reservations.$inferSelect;
+// Roomreservations
+export type InsertRoomReservation = typeof roomReservations.$inferInsert;
+export type SelectRoomReservation = typeof roomReservations.$inferSelect;
+// Minibuses
+export type InsertMinibus = typeof minibuses.$inferInsert;
+export type SelectMinibus = typeof minibuses.$inferSelect;
+// Minibus reservations
+export type InsertMinibusReservation = typeof minibusReservations.$inferInsert;
+export type SelectMinibusReservation = typeof minibusReservations.$inferSelect;
 
 export const reservationStatusEnumValues = [
 	"pending",

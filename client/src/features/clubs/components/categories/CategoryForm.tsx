@@ -19,7 +19,6 @@ import {
 	Calendar,
 	Loader2,
 	Save,
-	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -319,30 +318,6 @@ export function CategoryForm({
 	return (
 		<div className="container mx-auto p-6 max-w-2xl">
 			<div className="space-y-6">
-				{/* Header */}
-				<div className="flex items-center gap-4">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={handleBack}
-						className="p-2"
-					>
-						<ArrowLeft className="h-4 w-4" />
-					</Button>
-					<div className="space-y-1">
-						<h1 className="text-3xl font-bold tracking-tight">
-							{mode === "create"
-								? "Créer une catégorie"
-								: "Modifier la catégorie"}
-						</h1>
-						<p className="text-muted-foreground">
-							{mode === "create"
-								? "Ajoutez une nouvelle catégorie d'âge à votre section"
-								: "Modifiez les informations de cette catégorie"}
-						</p>
-					</div>
-				</div>
-
 				{/* Error Alert */}
 				{errors.general && (
 					<Alert variant="destructive">
@@ -355,11 +330,23 @@ export function CategoryForm({
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<Users className="h-5 w-5" />
-							Informations de la catégorie
+							Formulaire d{""}
+							{mode === "create" ? "e création" : "'édition"} d'une catégorie
 						</CardTitle>
 						<CardDescription>
-							Définissez les paramètres de votre catégorie d'âge
+							{mode === "edit" ? (
+								<p className="text-sm text-muted-foreground">
+									Modifiez les informations de cette catégorie pour mettre à
+									jour ses paramètres.
+								</p>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									Remplissez les informations ci-dessous pour créer une nouvelle
+									catégorie dans cette section. Les champs marqués d'un{" "}
+									<span className="text-destructive font-medium">*</span> sont
+									obligatoires.
+								</p>
+							)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -530,30 +517,35 @@ export function CategoryForm({
 							<Separator />
 
 							{/* Actions */}
-							<div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={handleBack}
-									disabled={isLoading}
-								>
-									Annuler
-								</Button>
+							<div className="flex flex-col sm:flex-row gap-3 pt-6">
 								<Button
 									type="submit"
 									disabled={
 										isLoading || !!ageRangeError || !!duplicateNameError
 									}
-									className="min-w-[120px]"
+									className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
 									{isLoading ? (
-										"Enregistrement..."
+										<>
+											<Loader2 className="h-4 w-4 animate-spin" />
+											{mode === "create" ? "Création..." : "Modification..."}
+										</>
 									) : (
 										<>
-											<Save className="mr-2 h-4 w-4" />
-											{mode === "create" ? "Créer" : "Modifier"}
+											<Save className="h-4 w-4" />
+											{mode === "create" ? "Créer la catégorie" : "Sauvegarder"}
 										</>
 									)}
+								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={handleBack}
+									disabled={isLoading}
+									className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
+								>
+									<ArrowLeft className="h-4 w-4" />
+									Annuler
 								</Button>
 							</div>
 						</form>

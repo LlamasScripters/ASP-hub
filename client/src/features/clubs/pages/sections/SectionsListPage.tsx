@@ -94,9 +94,6 @@ export function SectionsListPage() {
 					}
 				}
 
-				console.log("Toutes les catégories récupérées:", allCategoriesData);
-				console.log("Compteurs par section:", countBySection);
-
 				setAllCategories(allCategoriesData);
 				setCategoriesCountBySection(countBySection);
 			} catch (error) {
@@ -208,15 +205,15 @@ export function SectionsListPage() {
 							Gérez et organisez les sections sportives de votre club
 						</p>
 					</div>
-					<Link
-						to="/admin/dashboard/clubs/$clubId/sections/create"
-						params={{ clubId }}
-					>
-						<Button size="lg" className="flex items-center gap-2">
+					<Button size="lg" className="flex items-center gap-2" asChild>
+						<Link
+							to="/admin/dashboard/clubs/$clubId/sections/create"
+							params={{ clubId }}
+						>
 							<Plus className="h-5 w-5" />
 							Créer une section
-						</Button>
-					</Link>
+						</Link>
+					</Button>
 				</div>
 
 				{/* Statistiques rapides */}
@@ -284,15 +281,15 @@ export function SectionsListPage() {
 								Commencez par créer votre première section pour organiser les
 								activités sportives de votre club.
 							</p>
-							<Link
-								to="/admin/dashboard/clubs/$clubId/sections/create"
-								params={{ clubId }}
-							>
-								<Button size="lg">
+							<Button size="lg" asChild>
+								<Link
+									to="/admin/dashboard/clubs/$clubId/sections/create"
+									params={{ clubId }}
+								>
 									<Plus className="mr-2 h-5 w-5" />
 									Créer votre première section
-								</Button>
-							</Link>
+								</Link>
+							</Button>
 						</CardContent>
 					</Card>
 				) : (
@@ -300,18 +297,28 @@ export function SectionsListPage() {
 						{sections.map((section) => (
 							<Card
 								key={section.id}
-								className="group hover:shadow-lg transition-all duration-200 hover:border-primary/20"
+								className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-primary/30 hover:-translate-y-1 bg-gradient-to-br from-background to-muted/20"
 							>
-								<CardHeader className="space-y-3">
+								<CardHeader className="space-y-4 pb-4">
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-3">
-											<div
-												className="w-4 h-4 rounded-full border border-primary/20"
-												style={{ backgroundColor: section.color || "#3b82f6" }}
-											/>
+											<div className="relative">
+												<div
+													className="w-5 h-5 rounded-full border-2 border-primary/30 shadow-sm ring-2 ring-background"
+													style={{
+														backgroundColor: section.color || "#3b82f6",
+													}}
+												/>
+												<div
+													className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full opacity-60 animate-pulse"
+													style={{
+														backgroundColor: section.color || "#3b82f6",
+													}}
+												/>
+											</div>
 											<Badge
 												variant="secondary"
-												className="text-xs font-medium"
+												className="text-xs font-semibold px-2.5 py-1 bg-primary/10 text-primary border-primary/20"
 											>
 												Section
 											</Badge>
@@ -321,77 +328,94 @@ export function SectionsListPage() {
 												section.id,
 											);
 											return (
-												<Badge variant="outline" className="text-xs">
+												<Badge
+													variant="outline"
+													className={`text-xs font-medium px-2.5 py-1 transition-colors ${
+														categoryCount > 0
+															? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400"
+															: "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400"
+													}`}
+												>
 													{categoryCount} catégorie
 													{categoryCount !== 1 ? "s" : ""}
 												</Badge>
 											);
 										})()}
 									</div>
-									<div>
-										<CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+									<div className="space-y-2">
+										<CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-200 leading-tight">
 											{section.name}
 										</CardTitle>
-										<CardDescription className="text-sm text-muted-foreground line-clamp-2 mt-1">
+										<CardDescription className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
 											{section.description || "Aucune description disponible"}
 										</CardDescription>
 									</div>
 								</CardHeader>
 
-								<CardContent className="space-y-3">
-									<div className="space-y-2">
+								<CardContent className="space-y-2 pt-0">
+									<Button
+										variant="outline"
+										size="sm"
+										className="w-full justify-start h-10 hover:bg-primary/10 hover:border-primary/30 hover:text-primary group transition-all duration-200 font-medium"
+										asChild
+									>
 										<Link
 											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories"
 											params={{ clubId, sectionId: section.id }}
 											className="block"
 										>
-											<Button
-												variant="outline"
-												className="w-full justify-start hover:bg-primary/5 hover:border-primary/20 hover:text-primary group"
-											>
-												<Eye className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-												Voir les catégories
-											</Button>
+											<Eye className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+											Voir les catégories
 										</Link>
+									</Button>
 
+									<Button
+										variant="outline"
+										size="sm"
+										className="w-full justify-start h-10 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:hover:bg-blue-950/20 dark:hover:border-blue-700 group transition-all duration-200 font-medium"
+										asChild
+									>
 										<Link
 											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions"
 											params={{ clubId, sectionId: section.id }}
 											className="block"
 										>
-											<Button
-												variant="outline"
-												className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:hover:bg-blue-950/20 group"
-											>
-												<Calendar className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-												Gérer les sessions
-											</Button>
+											<Calendar className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+											Gérer les sessions
 										</Link>
+									</Button>
 
-										<Link
-											to="/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
-											params={{ clubId, sectionId: section.id }}
-											className="block"
+									<div className="flex gap-2 pt-1">
+										<Button
+											variant="ghost"
+											size="sm"
+											className="flex-1 justify-start h-9 hover:bg-destructive/10 text-muted-foreground hover:text-destructive group transition-all duration-200"
+											asChild
 										>
-											<Button
-												variant="ghost"
-												className="w-full justify-start hover:bg-muted/50 text-muted-foreground hover:text-foreground group"
+											<Link
+												to="/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+												params={{ clubId, sectionId: section.id }}
+												className="block"
 											>
-												<Edit className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-												Modifier la section
-											</Button>
-										</Link>
+												<Edit className="mr-2 h-3.5 w-3.5 group-hover:scale-110 transition-transform duration-200" />
+												Modifier
+											</Link>
+										</Button>
 
 										<Button
 											variant="ghost"
-											className="w-full justify-start hover:bg-destructive/10 text-muted-foreground hover:text-destructive group"
+											size="sm"
+											className="flex-1 justify-start h-9 hover:bg-destructive/10 hover:cursor-pointer text-muted-foreground hover:text-destructive group transition-all duration-200"
 											onClick={() => setDeleteSection(section)}
 										>
-											<Trash2 className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-											Supprimer la section
+											<Trash2 className="mr-2 h-3.5 w-3.5 group-hover:scale-110 transition-transform duration-200" />
+											Supprimer
 										</Button>
 									</div>
 								</CardContent>
+
+								{/* Subtle gradient overlay on hover */}
+								<div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 							</Card>
 						))}
 					</div>
