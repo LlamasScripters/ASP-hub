@@ -2,6 +2,7 @@ import { type SelectSessionSport, Session } from "@/db/schema.js";
 import { auth } from "@/lib/auth.js";
 import { UserRole } from "@/lib/roles.js";
 import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import {
 	requireCategoryAccess,
 	requireMemberManagement,
@@ -84,59 +85,63 @@ clubsRouter.get("/all/categories", async (req: Request, res: Response) => {
 });
 
 // toutes les sessions (de toutes catégories confondues)
-clubsRouter.get("/all/sessions", async (req: Request, res: Response) => {
-	try {
-		const limit = Number.parseInt(req.query.limit as string) || 100;
-		const allSessions = await clubsService.getSessions(limit);
-		const formatted = allSessions.map((session) => ({
-			id: session.id,
-			title: session.title,
-			description: session.description,
-			type: session.type,
-			status: session.status,
-			startDate: session.startDate,
-			endDate: session.endDate,
-			location: session.location,
-			maxParticipants: session.maxParticipants,
-			currentParticipants: session.currentParticipants,
-			categoryId: session.categoryId,
-			createdAt: session.createdAt,
-			coach: session.coachId
-				? {
-						id: session.coachId,
-						firstName: session.coachFirstName,
-						lastName: session.coachLastName,
-						name: session.coachName,
-					}
-				: null,
-			category: session.categoryId_join
-				? {
-						id: session.categoryId_join,
-						name: session.categoryName,
-						section: session.sectionId
-							? {
-									id: session.sectionId,
-									name: session.sectionName,
-									color: session.sectionColor,
-									club: session.clubId
-										? {
-												id: session.clubId,
-												name: session.clubName,
-											}
-										: null,
-								}
-							: null,
-					}
-				: null,
-		}));
-		res.json(formatted);
-	} catch (error) {
-		console.error("Erreur getSessions:", error);
-		res
-			.status(500)
-			.json({ error: "Erreur lors de la récupération des sessions" });
-	}
-});
+clubsRouter.get(
+	"/all/sessions",
+	requireMemberAccess(),
+	async (req: Request, res: Response) => {
+		try {
+			const limit = Number.parseInt(req.query.limit as string) || 100;
+			const allSessions = await clubsService.getSessions(limit);
+			const formatted = allSessions.map((session) => ({
+				id: session.id,
+				title: session.title,
+				description: session.description,
+				type: session.type,
+				status: session.status,
+				startDate: session.startDate,
+				endDate: session.endDate,
+				location: session.location,
+				maxParticipants: session.maxParticipants,
+				currentParticipants: session.currentParticipants,
+				categoryId: session.categoryId,
+				createdAt: session.createdAt,
+				coach: session.coachId
+					? {
+							id: session.coachId,
+							firstName: session.coachFirstName,
+							lastName: session.coachLastName,
+							name: session.coachName,
+						}
+					: null,
+				category: session.categoryId_join
+					? {
+							id: session.categoryId_join,
+							name: session.categoryName,
+							section: session.sectionId
+								? {
+										id: session.sectionId,
+										name: session.sectionName,
+										color: session.sectionColor,
+										club: session.clubId
+											? {
+													id: session.clubId,
+													name: session.clubName,
+												}
+											: null,
+									}
+								: null,
+						}
+					: null,
+			}));
+			res.json(formatted);
+		} catch (error) {
+			console.error("Erreur getSessions:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la récupération des sessions" });
+		}
+	},
+);
 
 // ========== ROUTES SESSIONS DIRECTES ==========
 // session individuelle
@@ -191,52 +196,57 @@ clubsRouter.get("/sessions/:sessionId", async (req: Request, res: Response) => {
 	}
 });
 
-clubsRouter.put("/sessions/:sessionId", async (req: Request, res: Response) => {
-	try {
-		const {
-			title,
-			description,
-			startDate,
-			endDate,
-			location,
-			type,
-			status,
-			maxParticipants,
-			notes,
-			categoryId,
-		} = req.body;
+clubsRouter.put(
+	"/sessions/:sessionId",
+	requireMemberManagement(),
+	async (req: Request, res: Response) => {
+		try {
+			const {
+				title,
+				description,
+				startDate,
+				endDate,
+				location,
+				type,
+				status,
+				maxParticipants,
+				notes,
+				categoryId,
+			} = req.body;
 
-		const updateData: Partial<SelectSessionSport> = {};
+			const updateData: Partial<SelectSessionSport> = {};
 
-		if (title !== undefined) updateData.title = title;
-		if (description !== undefined) updateData.description = description;
-		if (startDate !== undefined) updateData.startDate = new Date(startDate);
-		if (endDate !== undefined) updateData.endDate = new Date(endDate);
-		if (location !== undefined) updateData.location = location;
-		if (type !== undefined) updateData.type = type;
-		if (status !== undefined) updateData.status = status;
-		if (maxParticipants !== undefined)
-			updateData.maxParticipants = maxParticipants
-				? Number(maxParticipants)
-				: null;
-		if (notes !== undefined) updateData.notes = notes;
-		if (categoryId !== undefined) updateData.categoryId = categoryId;
+			if (title !== undefined) updateData.title = title;
+			if (description !== undefined) updateData.description = description;
+			if (startDate !== undefined) updateData.startDate = new Date(startDate);
+			if (endDate !== undefined) updateData.endDate = new Date(endDate);
+			if (location !== undefined) updateData.location = location;
+			if (type !== undefined) updateData.type = type;
+			if (status !== undefined) updateData.status = status;
+			if (maxParticipants !== undefined)
+				updateData.maxParticipants = maxParticipants
+					? Number(maxParticipants)
+					: null;
+			if (notes !== undefined) updateData.notes = notes;
+			if (categoryId !== undefined) updateData.categoryId = categoryId;
 
-		const updated = await clubsService.updateSession(
-			req.params.sessionId,
-			updateData,
-		);
-		res.json(updated);
-	} catch (error) {
-		console.error("Erreur updateSession:", error);
-		res
-			.status(500)
-			.json({ error: "Erreur lors de la mise à jour de la session" });
-	}
-});
+			const updated = await clubsService.updateSession(
+				req.params.sessionId,
+				updateData,
+			);
+			res.json(updated);
+		} catch (error) {
+			console.error("Erreur updateSession:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la mise à jour de la session" });
+		}
+	},
+);
 
 clubsRouter.delete(
 	"/sessions/:sessionId",
+	requireMemberManagement(),
 	async (req: Request, res: Response) => {
 		try {
 			await clubsService.deleteSession(req.params.sessionId);
