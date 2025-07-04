@@ -1,5 +1,12 @@
 import { type SelectSessionSport, Session } from "@/db/schema.js";
 import { auth } from "@/lib/auth.js";
+import { UserRole } from "@/lib/roles.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import {
+	requireCategoryAccess,
+	requireMemberManagement,
+	requireSectionAccess,
+} from "@/middleware/section.middleware.js";
 import { fromNodeHeaders } from "better-auth/node";
 import { type Request, type Response, Router } from "express";
 import { clubsService } from "./clubs.service.js";
@@ -7,29 +14,10 @@ import { clubsService } from "./clubs.service.js";
 const clubsRouter = Router();
 
 // Middleware d'authentification pour toutes les routes clubs
-clubsRouter.use(async (req: Request, res: Response, next) => {
-	try {
-		const authHeaders = fromNodeHeaders(req.headers);
-		const session = await auth.api.getSession({
-			headers: authHeaders,
-		});
-
-		if (!session) {
-			res.status(401).json({ error: "Authentication required" });
-			return;
-		}
-
-		// @ts-ignore - Express Request augmentation
-		req.session = session;
-		next();
-	} catch (error) {
-		console.error("Authentication middleware error:", error);
-		res.status(401).json({ error: "Authentication failed" });
-	}
-});
+clubsRouter.use(requireAuth);
 
 // ========== ROUTES GLOBALES ==========
-// toutes les sections du club
+// toutes les sections du club (accessible à tous les membres)
 clubsRouter.get("/all/sections", async (req: Request, res: Response) => {
 	try {
 		const allSections = await clubsService.getSections();
@@ -411,25 +399,38 @@ clubsRouter.get("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-clubsRouter.put("/:id", async (req: Request, res: Response) => {
-	try {
-		const updatedClub = await clubsService.updateClub(req.params.id, req.body);
-		res.json(updatedClub);
-	} catch (error) {
-		console.error("Erreur updateClub:", error);
-		res.status(500).json({ error: "Erreur lors de la mise à jour du club" });
-	}
-});
+// Only admin can update clubs
+clubsRouter.put(
+	"/:id",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const updatedClub = await clubsService.updateClub(
+				req.params.id,
+				req.body,
+			);
+			res.json(updatedClub);
+		} catch (error) {
+			console.error("Erreur updateClub:", error);
+			res.status(500).json({ error: "Erreur lors de la mise à jour du club" });
+		}
+	},
+);
 
-clubsRouter.delete("/:id", async (req: Request, res: Response) => {
-	try {
-		await clubsService.deleteClub(req.params.id);
-		res.sendStatus(204);
-	} catch (error) {
-		console.error("Erreur deleteClub:", error);
-		res.status(500).json({ error: "Erreur lors de la suppression du club" });
-	}
-});
+// Only admin can delete clubs
+clubsRouter.delete(
+	"/:id",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			await clubsService.deleteClub(req.params.id);
+			res.sendStatus(204);
+		} catch (error) {
+			console.error("Erreur deleteClub:", error);
+			res.status(500).json({ error: "Erreur lors de la suppression du club" });
+		}
+	},
+);
 
 // ========== ROUTES SECTIONS ==========
 // sections d'un club spécifique
