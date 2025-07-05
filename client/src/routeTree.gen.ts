@@ -16,6 +16,12 @@ import { Route as rootRoute } from "./routes/__root"
 import { Route as AuthenticatedImport } from "./routes/_authenticated"
 import { Route as AuthImport } from "./routes/_auth"
 import { Route as IndexImport } from "./routes/index"
+import { Route as AuthenticatedPermissionsDemoImport } from "./routes/_authenticated/permissions-demo"
+import { Route as AuthenticatedFirstLoginImport } from "./routes/_authenticated/first-login"
+import { Route as AuthenticatedFirstLoginIndexImport } from "./routes/_authenticated/first-login/index"
+import { Route as AuthenticatedFirstLoginValidationImport } from "./routes/_authenticated/first-login/validation"
+import { Route as AuthenticatedFirstLoginProfileImport } from "./routes/_authenticated/first-login/profile"
+import { Route as AuthenticatedFirstLoginApplicationImport } from "./routes/_authenticated/first-login/application"
 import { Route as AuthenticatedAdminAdminImport } from "./routes/_authenticated/admin/_admin"
 import { Route as AuthenticatednonadminNonadminImport } from "./routes/_authenticated/(nonadmin)/_nonadmin"
 import { Route as AuthAuthSendVerificationEmailImport } from "./routes/_auth/auth/send-verification-email"
@@ -27,8 +33,10 @@ import { Route as AuthAuthAccountCreatedImport } from "./routes/_auth/auth/accou
 import { Route as AuthenticatedAdminAdminIndexImport } from "./routes/_authenticated/admin/_admin.index"
 import { Route as AuthAuthVerifyIndexImport } from "./routes/_auth/auth/verify/index"
 import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
+import { Route as AuthenticatedAdminAdminApplicationsImport } from "./routes/_authenticated/admin/_admin.applications"
 import { Route as AuthAuthVerifyVerifyImport } from "./routes/_auth/auth/verify/_verify"
 import { Route as AuthenticatedAdminAdminBlogIndexImport } from "./routes/_authenticated/admin/_admin/blog/index"
+import { Route as AuthenticatedAdminAdminApplicationsIndexImport } from "./routes/_authenticated/admin/_admin/applications/index"
 import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
 import { Route as AuthenticatedAdminAdminBlogCreateImport } from "./routes/_authenticated/admin/_admin/blog/create"
 import { Route as AuthenticatednonadminNonadminUserUserImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user"
@@ -117,11 +125,52 @@ const AuthenticatednonadminRoute = AuthenticatednonadminImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
+const AuthenticatedPermissionsDemoRoute =
+  AuthenticatedPermissionsDemoImport.update({
+    id: "/permissions-demo",
+    path: "/permissions-demo",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedFirstLoginRoute = AuthenticatedFirstLoginImport.update({
+  id: "/first-login",
+  path: "/first-login",
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 const AuthAuthVerifyRoute = AuthAuthVerifyImport.update({
   id: "/auth/verify",
   path: "/auth/verify",
   getParentRoute: () => AuthRoute,
 } as any)
+
+const AuthenticatedFirstLoginIndexRoute =
+  AuthenticatedFirstLoginIndexImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthenticatedFirstLoginRoute,
+  } as any)
+
+const AuthenticatedFirstLoginValidationRoute =
+  AuthenticatedFirstLoginValidationImport.update({
+    id: "/validation",
+    path: "/validation",
+    getParentRoute: () => AuthenticatedFirstLoginRoute,
+  } as any)
+
+const AuthenticatedFirstLoginProfileRoute =
+  AuthenticatedFirstLoginProfileImport.update({
+    id: "/profile",
+    path: "/profile",
+    getParentRoute: () => AuthenticatedFirstLoginRoute,
+  } as any)
+
+const AuthenticatedFirstLoginApplicationRoute =
+  AuthenticatedFirstLoginApplicationImport.update({
+    id: "/application",
+    path: "/application",
+    getParentRoute: () => AuthenticatedFirstLoginRoute,
+  } as any)
 
 const AuthenticatedAdminAdminRoute = AuthenticatedAdminAdminImport.update({
   id: "/_admin",
@@ -198,6 +247,13 @@ const AuthenticatedAdminAdminUsersRoute =
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
+const AuthenticatedAdminAdminApplicationsRoute =
+  AuthenticatedAdminAdminApplicationsImport.update({
+    id: "/applications",
+    path: "/applications",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
 const AuthAuthVerifyVerifyRoute = AuthAuthVerifyVerifyImport.update({
   id: "/_verify",
   getParentRoute: () => AuthAuthVerifyRoute,
@@ -208,6 +264,13 @@ const AuthenticatedAdminAdminBlogIndexRoute =
     id: "/blog/",
     path: "/blog/",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminApplicationsIndexRoute =
+  AuthenticatedAdminAdminApplicationsIndexImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthenticatedAdminAdminApplicationsRoute,
   } as any)
 
 const AuthenticatednonadminNonadminDashboardIndexRoute =
@@ -586,6 +649,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
+    "/_authenticated/first-login": {
+      id: "/_authenticated/first-login"
+      path: "/first-login"
+      fullPath: "/first-login"
+      preLoaderRoute: typeof AuthenticatedFirstLoginImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    "/_authenticated/permissions-demo": {
+      id: "/_authenticated/permissions-demo"
+      path: "/permissions-demo"
+      fullPath: "/permissions-demo"
+      preLoaderRoute: typeof AuthenticatedPermissionsDemoImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_auth/auth/account-created": {
       id: "/_auth/auth/account-created"
       path: "/auth/account-created"
@@ -656,6 +733,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminAdminImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    "/_authenticated/first-login/application": {
+      id: "/_authenticated/first-login/application"
+      path: "/application"
+      fullPath: "/first-login/application"
+      preLoaderRoute: typeof AuthenticatedFirstLoginApplicationImport
+      parentRoute: typeof AuthenticatedFirstLoginImport
+    }
+    "/_authenticated/first-login/profile": {
+      id: "/_authenticated/first-login/profile"
+      path: "/profile"
+      fullPath: "/first-login/profile"
+      preLoaderRoute: typeof AuthenticatedFirstLoginProfileImport
+      parentRoute: typeof AuthenticatedFirstLoginImport
+    }
+    "/_authenticated/first-login/validation": {
+      id: "/_authenticated/first-login/validation"
+      path: "/validation"
+      fullPath: "/first-login/validation"
+      preLoaderRoute: typeof AuthenticatedFirstLoginValidationImport
+      parentRoute: typeof AuthenticatedFirstLoginImport
+    }
+    "/_authenticated/first-login/": {
+      id: "/_authenticated/first-login/"
+      path: "/"
+      fullPath: "/first-login/"
+      preLoaderRoute: typeof AuthenticatedFirstLoginIndexImport
+      parentRoute: typeof AuthenticatedFirstLoginImport
+    }
     "/_auth/auth/verify": {
       id: "/_auth/auth/verify"
       path: "/auth/verify"
@@ -669,6 +774,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/auth/verify"
       preLoaderRoute: typeof AuthAuthVerifyVerifyImport
       parentRoute: typeof AuthAuthVerifyRoute
+    }
+    "/_authenticated/admin/_admin/applications": {
+      id: "/_authenticated/admin/_admin/applications"
+      path: "/applications"
+      fullPath: "/admin/applications"
+      preLoaderRoute: typeof AuthenticatedAdminAdminApplicationsImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/users": {
       id: "/_authenticated/admin/_admin/users"
@@ -753,6 +865,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/dashboard"
       preLoaderRoute: typeof AuthenticatednonadminNonadminDashboardIndexImport
       parentRoute: typeof AuthenticatednonadminNonadminImport
+    }
+    "/_authenticated/admin/_admin/applications/": {
+      id: "/_authenticated/admin/_admin/applications/"
+      path: "/"
+      fullPath: "/admin/applications/"
+      preLoaderRoute: typeof AuthenticatedAdminAdminApplicationsIndexImport
+      parentRoute: typeof AuthenticatedAdminAdminApplicationsImport
     }
     "/_authenticated/admin/_admin/blog/": {
       id: "/_authenticated/admin/_admin/blog/"
@@ -1088,6 +1207,28 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface AuthenticatedFirstLoginRouteChildren {
+  AuthenticatedFirstLoginApplicationRoute: typeof AuthenticatedFirstLoginApplicationRoute
+  AuthenticatedFirstLoginProfileRoute: typeof AuthenticatedFirstLoginProfileRoute
+  AuthenticatedFirstLoginValidationRoute: typeof AuthenticatedFirstLoginValidationRoute
+  AuthenticatedFirstLoginIndexRoute: typeof AuthenticatedFirstLoginIndexRoute
+}
+
+const AuthenticatedFirstLoginRouteChildren: AuthenticatedFirstLoginRouteChildren =
+  {
+    AuthenticatedFirstLoginApplicationRoute:
+      AuthenticatedFirstLoginApplicationRoute,
+    AuthenticatedFirstLoginProfileRoute: AuthenticatedFirstLoginProfileRoute,
+    AuthenticatedFirstLoginValidationRoute:
+      AuthenticatedFirstLoginValidationRoute,
+    AuthenticatedFirstLoginIndexRoute: AuthenticatedFirstLoginIndexRoute,
+  }
+
+const AuthenticatedFirstLoginRouteWithChildren =
+  AuthenticatedFirstLoginRoute._addFileChildren(
+    AuthenticatedFirstLoginRouteChildren,
+  )
+
 interface AuthenticatednonadminNonadminUserUserRouteChildren {
   AuthenticatednonadminNonadminUserUserProfileRoute: typeof AuthenticatednonadminNonadminUserUserProfileRoute
   AuthenticatednonadminNonadminUserUserSettingsRoute: typeof AuthenticatednonadminNonadminUserUserSettingsRoute
@@ -1168,7 +1309,23 @@ const AuthenticatednonadminRouteWithChildren =
     AuthenticatednonadminRouteChildren,
   )
 
+interface AuthenticatedAdminAdminApplicationsRouteChildren {
+  AuthenticatedAdminAdminApplicationsIndexRoute: typeof AuthenticatedAdminAdminApplicationsIndexRoute
+}
+
+const AuthenticatedAdminAdminApplicationsRouteChildren: AuthenticatedAdminAdminApplicationsRouteChildren =
+  {
+    AuthenticatedAdminAdminApplicationsIndexRoute:
+      AuthenticatedAdminAdminApplicationsIndexRoute,
+  }
+
+const AuthenticatedAdminAdminApplicationsRouteWithChildren =
+  AuthenticatedAdminAdminApplicationsRoute._addFileChildren(
+    AuthenticatedAdminAdminApplicationsRouteChildren,
+  )
+
 interface AuthenticatedAdminAdminRouteChildren {
+  AuthenticatedAdminAdminApplicationsRoute: typeof AuthenticatedAdminAdminApplicationsRouteWithChildren
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminBlogCreateRoute: typeof AuthenticatedAdminAdminBlogCreateRoute
@@ -1212,6 +1369,8 @@ interface AuthenticatedAdminAdminRouteChildren {
 
 const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren =
   {
+    AuthenticatedAdminAdminApplicationsRoute:
+      AuthenticatedAdminAdminApplicationsRouteWithChildren,
     AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
     AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
     AuthenticatedAdminAdminBlogCreateRoute:
@@ -1307,11 +1466,15 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedFirstLoginRoute: typeof AuthenticatedFirstLoginRouteWithChildren
+  AuthenticatedPermissionsDemoRoute: typeof AuthenticatedPermissionsDemoRoute
   AuthenticatednonadminRoute: typeof AuthenticatednonadminRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedFirstLoginRoute: AuthenticatedFirstLoginRouteWithChildren,
+  AuthenticatedPermissionsDemoRoute: AuthenticatedPermissionsDemoRoute,
   AuthenticatednonadminRoute: AuthenticatednonadminRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
 }
@@ -1323,6 +1486,8 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
   "": typeof AuthenticatedRouteWithChildren
+  "/first-login": typeof AuthenticatedFirstLoginRouteWithChildren
+  "/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/auth/login": typeof AuthAuthLoginRoute
@@ -1330,7 +1495,12 @@ export interface FileRoutesByFullPath {
   "/auth/reset-password": typeof AuthAuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/first-login/application": typeof AuthenticatedFirstLoginApplicationRoute
+  "/first-login/profile": typeof AuthenticatedFirstLoginProfileRoute
+  "/first-login/validation": typeof AuthenticatedFirstLoginValidationRoute
+  "/first-login/": typeof AuthenticatedFirstLoginIndexRoute
   "/auth/verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsRouteWithChildren
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1342,6 +1512,7 @@ export interface FileRoutesByFullPath {
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
   "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/applications/": typeof AuthenticatedAdminAdminApplicationsIndexRoute
   "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
   "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
@@ -1387,6 +1558,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
   "": typeof AuthRouteWithChildren
+  "/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/auth/login": typeof AuthAuthLoginRoute
@@ -1394,6 +1566,10 @@ export interface FileRoutesByTo {
   "/auth/reset-password": typeof AuthAuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
+  "/first-login/application": typeof AuthenticatedFirstLoginApplicationRoute
+  "/first-login/profile": typeof AuthenticatedFirstLoginProfileRoute
+  "/first-login/validation": typeof AuthenticatedFirstLoginValidationRoute
+  "/first-login": typeof AuthenticatedFirstLoginIndexRoute
   "/auth/verify": typeof AuthAuthVerifyIndexRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
@@ -1404,6 +1580,7 @@ export interface FileRoutesByTo {
   "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
   "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsIndexRoute
   "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
   "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
@@ -1451,6 +1628,8 @@ export interface FileRoutesById {
   "/": typeof IndexRoute
   "/_auth": typeof AuthRouteWithChildren
   "/_authenticated": typeof AuthenticatedRouteWithChildren
+  "/_authenticated/first-login": typeof AuthenticatedFirstLoginRouteWithChildren
+  "/_authenticated/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/_auth/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/_auth/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/_auth/auth/login": typeof AuthAuthLoginRoute
@@ -1461,8 +1640,13 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin": typeof AuthenticatednonadminNonadminRouteWithChildren
   "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren
   "/_authenticated/admin/_admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/_authenticated/first-login/application": typeof AuthenticatedFirstLoginApplicationRoute
+  "/_authenticated/first-login/profile": typeof AuthenticatedFirstLoginProfileRoute
+  "/_authenticated/first-login/validation": typeof AuthenticatedFirstLoginValidationRoute
+  "/_authenticated/first-login/": typeof AuthenticatedFirstLoginIndexRoute
   "/_auth/auth/verify": typeof AuthAuthVerifyRouteWithChildren
   "/_auth/auth/verify/_verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/_authenticated/admin/_admin/applications": typeof AuthenticatedAdminAdminApplicationsRouteWithChildren
   "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/_auth/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1475,6 +1659,7 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin/user/_user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
   "/_authenticated/admin/_admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/_authenticated/admin/_admin/applications/": typeof AuthenticatedAdminAdminApplicationsIndexRoute
   "/_authenticated/admin/_admin/blog/": typeof AuthenticatedAdminAdminBlogIndexRoute
   "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
   "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
@@ -1522,6 +1707,8 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | ""
+    | "/first-login"
+    | "/permissions-demo"
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -1529,7 +1716,12 @@ export interface FileRouteTypes {
     | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/admin"
+    | "/first-login/application"
+    | "/first-login/profile"
+    | "/first-login/validation"
+    | "/first-login/"
     | "/auth/verify"
+    | "/admin/applications"
     | "/admin/users"
     | "/auth/verify/"
     | "/admin/"
@@ -1541,6 +1733,7 @@ export interface FileRouteTypes {
     | "/user"
     | "/admin/blog/create"
     | "/dashboard"
+    | "/admin/applications/"
     | "/admin/blog"
     | "/dashboard/blog/$blogId"
     | "/user/profile"
@@ -1585,6 +1778,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
+    | "/permissions-demo"
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -1592,6 +1786,10 @@ export interface FileRouteTypes {
     | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/admin"
+    | "/first-login/application"
+    | "/first-login/profile"
+    | "/first-login/validation"
+    | "/first-login"
     | "/auth/verify"
     | "/admin/users"
     | "/auth/verify/error"
@@ -1602,6 +1800,7 @@ export interface FileRouteTypes {
     | "/user"
     | "/admin/blog/create"
     | "/dashboard"
+    | "/admin/applications"
     | "/admin/blog"
     | "/dashboard/blog/$blogId"
     | "/user/profile"
@@ -1647,6 +1846,8 @@ export interface FileRouteTypes {
     | "/"
     | "/_auth"
     | "/_authenticated"
+    | "/_authenticated/first-login"
+    | "/_authenticated/permissions-demo"
     | "/_auth/auth/account-created"
     | "/_auth/auth/forgot-password"
     | "/_auth/auth/login"
@@ -1657,8 +1858,13 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin"
     | "/_authenticated/admin"
     | "/_authenticated/admin/_admin"
+    | "/_authenticated/first-login/application"
+    | "/_authenticated/first-login/profile"
+    | "/_authenticated/first-login/validation"
+    | "/_authenticated/first-login/"
     | "/_auth/auth/verify"
     | "/_auth/auth/verify/_verify"
+    | "/_authenticated/admin/_admin/applications"
     | "/_authenticated/admin/_admin/users"
     | "/_auth/auth/verify/"
     | "/_authenticated/admin/_admin/"
@@ -1671,6 +1877,7 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user"
     | "/_authenticated/admin/_admin/blog/create"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
+    | "/_authenticated/admin/_admin/applications/"
     | "/_authenticated/admin/_admin/blog/"
     | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
     | "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile"
@@ -1759,9 +1966,25 @@ export const routeTree = rootRoute
     "/_authenticated": {
       "filePath": "_authenticated.tsx",
       "children": [
+        "/_authenticated/first-login",
+        "/_authenticated/permissions-demo",
         "/_authenticated/(nonadmin)",
         "/_authenticated/admin"
       ]
+    },
+    "/_authenticated/first-login": {
+      "filePath": "_authenticated/first-login.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/first-login/application",
+        "/_authenticated/first-login/profile",
+        "/_authenticated/first-login/validation",
+        "/_authenticated/first-login/"
+      ]
+    },
+    "/_authenticated/permissions-demo": {
+      "filePath": "_authenticated/permissions-demo.tsx",
+      "parent": "/_authenticated"
     },
     "/_auth/auth/account-created": {
       "filePath": "_auth/auth/account-created.tsx",
@@ -1818,6 +2041,7 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/admin/_admin.tsx",
       "parent": "/_authenticated/admin",
       "children": [
+        "/_authenticated/admin/_admin/applications",
         "/_authenticated/admin/_admin/users",
         "/_authenticated/admin/_admin/",
         "/_authenticated/admin/_admin/blog/create",
@@ -1859,6 +2083,22 @@ export const routeTree = rootRoute
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
       ]
     },
+    "/_authenticated/first-login/application": {
+      "filePath": "_authenticated/first-login/application.tsx",
+      "parent": "/_authenticated/first-login"
+    },
+    "/_authenticated/first-login/profile": {
+      "filePath": "_authenticated/first-login/profile.tsx",
+      "parent": "/_authenticated/first-login"
+    },
+    "/_authenticated/first-login/validation": {
+      "filePath": "_authenticated/first-login/validation.tsx",
+      "parent": "/_authenticated/first-login"
+    },
+    "/_authenticated/first-login/": {
+      "filePath": "_authenticated/first-login/index.tsx",
+      "parent": "/_authenticated/first-login"
+    },
     "/_auth/auth/verify": {
       "filePath": "_auth/auth/verify",
       "parent": "/_auth",
@@ -1873,6 +2113,13 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/auth/verify/_verify/error",
         "/_auth/auth/verify/_verify/success"
+      ]
+    },
+    "/_authenticated/admin/_admin/applications": {
+      "filePath": "_authenticated/admin/_admin.applications.tsx",
+      "parent": "/_authenticated/admin/_admin",
+      "children": [
+        "/_authenticated/admin/_admin/applications/"
       ]
     },
     "/_authenticated/admin/_admin/users": {
@@ -1929,6 +2176,10 @@ export const routeTree = rootRoute
     "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
       "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/index.tsx",
       "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/applications/": {
+      "filePath": "_authenticated/admin/_admin/applications/index.tsx",
+      "parent": "/_authenticated/admin/_admin/applications"
     },
     "/_authenticated/admin/_admin/blog/": {
       "filePath": "_authenticated/admin/_admin/blog/index.tsx",

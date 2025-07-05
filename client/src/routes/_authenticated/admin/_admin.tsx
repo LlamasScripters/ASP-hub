@@ -1,33 +1,16 @@
+import { AdminRoute } from "@/components/guards/RouteGuards";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth/auth-client";
-import ForbiddenPage from "@/routes/-403";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/admin/_admin")({
-	loader: async () => {
-		const { data } = await authClient.admin.hasPermission({
-			permissions: {
-				user: ["create"],
-			},
-		});
-
-		if (!data?.success) {
-			throw new Error(
-				"Vous n'avez pas les permissions nécessaires pour accéder à cette page",
-			);
-		}
-
-		return data;
-	},
 	component: AdminLayout,
-	errorComponent: ForbiddenPage,
 });
 
 function AdminLayout() {
 	return (
-		<>
+		<AdminRoute>
 			<AdminSidebar />
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -39,6 +22,6 @@ function AdminLayout() {
 					<Outlet />
 				</main>
 			</SidebarInset>
-		</>
+		</AdminRoute>
 	);
 }

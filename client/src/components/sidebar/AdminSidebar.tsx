@@ -10,6 +10,7 @@ import {
 import {
 	Building2Icon,
 	BusIcon,
+	ClipboardListIcon,
 	HomeIcon,
 	RssIcon,
 	ShieldIcon,
@@ -31,6 +32,11 @@ const navigationItems: NavItemProps[] = [
 		url: "/admin/users",
 		title: "Utilisateurs",
 		IconComponent: UsersIcon,
+	},
+	{
+		url: "/admin/applications",
+		title: "Candidatures",
+		IconComponent: ClipboardListIcon,
 	},
 	{
 		url: "/admin/facilities/complexes",
