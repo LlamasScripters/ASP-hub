@@ -3,6 +3,7 @@ import * as schema from "@/db/schema.js";
 import { UserRole } from "@/lib/roles.js";
 import { and, eq, isNull } from "drizzle-orm";
 import type { z } from "zod/v4";
+import { NotificationService } from "../notifications/notification.service.js";
 
 // Import types directly to avoid module resolution issues
 import type {
@@ -11,6 +12,11 @@ import type {
 } from "./onboarding.types.js";
 
 export class OnboardingService {
+	private notificationService: NotificationService;
+
+	constructor() {
+		this.notificationService = new NotificationService();
+	}
 	/**
 	 * Check if a user needs to complete their profile
 	 */
@@ -174,8 +180,21 @@ export class OnboardingService {
 			throw new Error("Failed to create membership application");
 		}
 
-		// TODO: Send notification to section managers
-		// await this.notifyMembershipApplication(application);
+		// Send notifications
+		try {
+			// Send confirmation email to applicant
+			await this.notificationService.sendApplicationSubmittedEmail(
+				application.id,
+			);
+
+			// Notify section managers
+			await this.notificationService.notifyManagersOfNewApplication(
+				application.id,
+			);
+		} catch (error) {
+			console.error("Failed to send application notifications:", error);
+			// Don't throw - application creation should succeed even if notifications fail
+		}
 
 		return application;
 	}
@@ -294,8 +313,26 @@ export class OnboardingService {
 			}
 		}
 
-		// TODO: Send notification to user
-		// await this.notifyApplicationDecision(updatedApplication, decision);
+		// Send notification about the decision
+		try {
+			await this.notificationService.sendApplicationDecisionEmail(
+				applicationId,
+				decision,
+				comments,
+			);
+
+			// If approved, send role assignment notification
+			if (decision === "approved") {
+				await this.notificationService.sendRoleAssignmentEmail(
+					application.userId,
+					"member",
+					reviewerId,
+				);
+			}
+		} catch (error) {
+			console.error("Failed to send decision notifications:", error);
+			// Don't throw - review should succeed even if notifications fail
+		}
 
 		return updatedApplication;
 	}
@@ -438,4 +475,5 @@ export class OnboardingService {
 	}
 }
 
+// Export singleton instance
 export const onboardingService = new OnboardingService();
