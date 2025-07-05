@@ -7,6 +7,10 @@ import { routeTree } from "./routeTree.gen";
 
 //@ts-ignore
 import "./styles.css";
+
+// Import Tiptap styles
+import "@/styles/_variables.scss";
+import "@/styles/_keyframe-animations.scss";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query.ts";
 import reportWebVitals from "./reportWebVitals.ts";
