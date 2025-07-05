@@ -17,15 +17,11 @@ import { Route as AuthenticatedImport } from "./routes/_authenticated"
 import { Route as AuthImport } from "./routes/_auth"
 import { Route as IndexImport } from "./routes/index"
 import { Route as AuthenticatedPermissionsDemoImport } from "./routes/_authenticated/permissions-demo"
-import { Route as AuthenticatedFirstLoginValidationImport } from "./routes/_authenticated/first-login-validation"
-import { Route as AuthenticatedFirstLoginProfileImport } from "./routes/_authenticated/first-login-profile"
-import { Route as AuthenticatedFirstLoginApplicationImport } from "./routes/_authenticated/first-login-application"
 import { Route as AuthenticatedFirstLoginImport } from "./routes/_authenticated/first-login"
 import { Route as AuthenticatedFirstLoginIndexImport } from "./routes/_authenticated/first-login/index"
 import { Route as AuthenticatedFirstLoginValidationImport } from "./routes/_authenticated/first-login/validation"
 import { Route as AuthenticatedFirstLoginProfileImport } from "./routes/_authenticated/first-login/profile"
 import { Route as AuthenticatedFirstLoginApplicationImport } from "./routes/_authenticated/first-login/application"
-import { Route as AuthenticatedFirstLoginFirstLoginImport } from "./routes/_authenticated/first-login/_first-login"
 import { Route as AuthenticatedAdminAdminImport } from "./routes/_authenticated/admin/_admin"
 import { Route as AuthenticatednonadminNonadminImport } from "./routes/_authenticated/(nonadmin)/_nonadmin"
 import { Route as AuthAuthSendVerificationEmailImport } from "./routes/_auth/auth/send-verification-email"
@@ -136,27 +132,6 @@ const AuthenticatedPermissionsDemoRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
-const AuthenticatedFirstLoginValidationRoute =
-  AuthenticatedFirstLoginValidationImport.update({
-    id: "/first-login-validation",
-    path: "/first-login-validation",
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-
-const AuthenticatedFirstLoginProfileRoute =
-  AuthenticatedFirstLoginProfileImport.update({
-    id: "/first-login-profile",
-    path: "/first-login-profile",
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-
-const AuthenticatedFirstLoginApplicationRoute =
-  AuthenticatedFirstLoginApplicationImport.update({
-    id: "/first-login-application",
-    path: "/first-login-application",
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-
 const AuthenticatedFirstLoginRoute = AuthenticatedFirstLoginImport.update({
   id: "/first-login",
   path: "/first-login",
@@ -194,12 +169,6 @@ const AuthenticatedFirstLoginApplicationRoute =
   AuthenticatedFirstLoginApplicationImport.update({
     id: "/application",
     path: "/application",
-    getParentRoute: () => AuthenticatedFirstLoginRoute,
-  } as any)
-
-const AuthenticatedFirstLoginFirstLoginRoute =
-  AuthenticatedFirstLoginFirstLoginImport.update({
-    id: "/_first-login",
     getParentRoute: () => AuthenticatedFirstLoginRoute,
   } as any)
 
@@ -687,27 +656,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFirstLoginImport
       parentRoute: typeof AuthenticatedImport
     }
-    "/_authenticated/first-login-application": {
-      id: "/_authenticated/first-login-application"
-      path: "/first-login-application"
-      fullPath: "/first-login-application"
-      preLoaderRoute: typeof AuthenticatedFirstLoginApplicationImport
-      parentRoute: typeof AuthenticatedImport
-    }
-    "/_authenticated/first-login-profile": {
-      id: "/_authenticated/first-login-profile"
-      path: "/first-login-profile"
-      fullPath: "/first-login-profile"
-      preLoaderRoute: typeof AuthenticatedFirstLoginProfileImport
-      parentRoute: typeof AuthenticatedImport
-    }
-    "/_authenticated/first-login-validation": {
-      id: "/_authenticated/first-login-validation"
-      path: "/first-login-validation"
-      fullPath: "/first-login-validation"
-      preLoaderRoute: typeof AuthenticatedFirstLoginValidationImport
-      parentRoute: typeof AuthenticatedImport
-    }
     "/_authenticated/permissions-demo": {
       id: "/_authenticated/permissions-demo"
       path: "/permissions-demo"
@@ -784,13 +732,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/admin"
       preLoaderRoute: typeof AuthenticatedAdminAdminImport
       parentRoute: typeof AuthenticatedAdminRoute
-    }
-    "/_authenticated/first-login/_first-login": {
-      id: "/_authenticated/first-login/_first-login"
-      path: ""
-      fullPath: "/first-login"
-      preLoaderRoute: typeof AuthenticatedFirstLoginFirstLoginImport
-      parentRoute: typeof AuthenticatedFirstLoginImport
     }
     "/_authenticated/first-login/application": {
       id: "/_authenticated/first-login/application"
@@ -1267,7 +1208,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface AuthenticatedFirstLoginRouteChildren {
-  AuthenticatedFirstLoginFirstLoginRoute: typeof AuthenticatedFirstLoginFirstLoginRoute
   AuthenticatedFirstLoginApplicationRoute: typeof AuthenticatedFirstLoginApplicationRoute
   AuthenticatedFirstLoginProfileRoute: typeof AuthenticatedFirstLoginProfileRoute
   AuthenticatedFirstLoginValidationRoute: typeof AuthenticatedFirstLoginValidationRoute
@@ -1276,8 +1216,6 @@ interface AuthenticatedFirstLoginRouteChildren {
 
 const AuthenticatedFirstLoginRouteChildren: AuthenticatedFirstLoginRouteChildren =
   {
-    AuthenticatedFirstLoginFirstLoginRoute:
-      AuthenticatedFirstLoginFirstLoginRoute,
     AuthenticatedFirstLoginApplicationRoute:
       AuthenticatedFirstLoginApplicationRoute,
     AuthenticatedFirstLoginProfileRoute: AuthenticatedFirstLoginProfileRoute,
@@ -1529,9 +1467,6 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedFirstLoginRoute: typeof AuthenticatedFirstLoginRouteWithChildren
-  AuthenticatedFirstLoginApplicationRoute: typeof AuthenticatedFirstLoginApplicationRoute
-  AuthenticatedFirstLoginProfileRoute: typeof AuthenticatedFirstLoginProfileRoute
-  AuthenticatedFirstLoginValidationRoute: typeof AuthenticatedFirstLoginValidationRoute
   AuthenticatedPermissionsDemoRoute: typeof AuthenticatedPermissionsDemoRoute
   AuthenticatednonadminRoute: typeof AuthenticatednonadminRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
@@ -1539,11 +1474,6 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFirstLoginRoute: AuthenticatedFirstLoginRouteWithChildren,
-  AuthenticatedFirstLoginApplicationRoute:
-    AuthenticatedFirstLoginApplicationRoute,
-  AuthenticatedFirstLoginProfileRoute: AuthenticatedFirstLoginProfileRoute,
-  AuthenticatedFirstLoginValidationRoute:
-    AuthenticatedFirstLoginValidationRoute,
   AuthenticatedPermissionsDemoRoute: AuthenticatedPermissionsDemoRoute,
   AuthenticatednonadminRoute: AuthenticatednonadminRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
@@ -1556,10 +1486,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
   "": typeof AuthenticatedRouteWithChildren
-  "/first-login": typeof AuthenticatedFirstLoginFirstLoginRoute
-  "/first-login-application": typeof AuthenticatedFirstLoginApplicationRoute
-  "/first-login-profile": typeof AuthenticatedFirstLoginProfileRoute
-  "/first-login-validation": typeof AuthenticatedFirstLoginValidationRoute
+  "/first-login": typeof AuthenticatedFirstLoginRouteWithChildren
   "/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
@@ -1631,9 +1558,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
   "": typeof AuthRouteWithChildren
-  "/first-login-application": typeof AuthenticatedFirstLoginApplicationRoute
-  "/first-login-profile": typeof AuthenticatedFirstLoginProfileRoute
-  "/first-login-validation": typeof AuthenticatedFirstLoginValidationRoute
   "/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
@@ -1642,10 +1566,10 @@ export interface FileRoutesByTo {
   "/auth/reset-password": typeof AuthAuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
-  "/first-login": typeof AuthenticatedFirstLoginIndexRoute
   "/first-login/application": typeof AuthenticatedFirstLoginApplicationRoute
   "/first-login/profile": typeof AuthenticatedFirstLoginProfileRoute
   "/first-login/validation": typeof AuthenticatedFirstLoginValidationRoute
+  "/first-login": typeof AuthenticatedFirstLoginIndexRoute
   "/auth/verify": typeof AuthAuthVerifyIndexRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
@@ -1705,9 +1629,6 @@ export interface FileRoutesById {
   "/_auth": typeof AuthRouteWithChildren
   "/_authenticated": typeof AuthenticatedRouteWithChildren
   "/_authenticated/first-login": typeof AuthenticatedFirstLoginRouteWithChildren
-  "/_authenticated/first-login-application": typeof AuthenticatedFirstLoginApplicationRoute
-  "/_authenticated/first-login-profile": typeof AuthenticatedFirstLoginProfileRoute
-  "/_authenticated/first-login-validation": typeof AuthenticatedFirstLoginValidationRoute
   "/_authenticated/permissions-demo": typeof AuthenticatedPermissionsDemoRoute
   "/_auth/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/_auth/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
@@ -1719,7 +1640,6 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin": typeof AuthenticatednonadminNonadminRouteWithChildren
   "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren
   "/_authenticated/admin/_admin": typeof AuthenticatedAdminAdminRouteWithChildren
-  "/_authenticated/first-login/_first-login": typeof AuthenticatedFirstLoginFirstLoginRoute
   "/_authenticated/first-login/application": typeof AuthenticatedFirstLoginApplicationRoute
   "/_authenticated/first-login/profile": typeof AuthenticatedFirstLoginProfileRoute
   "/_authenticated/first-login/validation": typeof AuthenticatedFirstLoginValidationRoute
@@ -1788,9 +1708,6 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/first-login"
-    | "/first-login-application"
-    | "/first-login-profile"
-    | "/first-login-validation"
     | "/permissions-demo"
     | "/auth/account-created"
     | "/auth/forgot-password"
@@ -1861,9 +1778,6 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
-    | "/first-login-application"
-    | "/first-login-profile"
-    | "/first-login-validation"
     | "/permissions-demo"
     | "/auth/account-created"
     | "/auth/forgot-password"
@@ -1872,10 +1786,10 @@ export interface FileRouteTypes {
     | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/admin"
-    | "/first-login"
     | "/first-login/application"
     | "/first-login/profile"
     | "/first-login/validation"
+    | "/first-login"
     | "/auth/verify"
     | "/admin/users"
     | "/auth/verify/error"
@@ -1933,9 +1847,6 @@ export interface FileRouteTypes {
     | "/_auth"
     | "/_authenticated"
     | "/_authenticated/first-login"
-    | "/_authenticated/first-login-application"
-    | "/_authenticated/first-login-profile"
-    | "/_authenticated/first-login-validation"
     | "/_authenticated/permissions-demo"
     | "/_auth/auth/account-created"
     | "/_auth/auth/forgot-password"
@@ -1947,7 +1858,6 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin"
     | "/_authenticated/admin"
     | "/_authenticated/admin/_admin"
-    | "/_authenticated/first-login/_first-login"
     | "/_authenticated/first-login/application"
     | "/_authenticated/first-login/profile"
     | "/_authenticated/first-login/validation"
@@ -2057,9 +1967,6 @@ export const routeTree = rootRoute
       "filePath": "_authenticated.tsx",
       "children": [
         "/_authenticated/first-login",
-        "/_authenticated/first-login-application",
-        "/_authenticated/first-login-profile",
-        "/_authenticated/first-login-validation",
         "/_authenticated/permissions-demo",
         "/_authenticated/(nonadmin)",
         "/_authenticated/admin"
@@ -2069,24 +1976,11 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/first-login.tsx",
       "parent": "/_authenticated",
       "children": [
-        "/_authenticated/first-login/_first-login",
         "/_authenticated/first-login/application",
         "/_authenticated/first-login/profile",
         "/_authenticated/first-login/validation",
         "/_authenticated/first-login/"
       ]
-    },
-    "/_authenticated/first-login-application": {
-      "filePath": "_authenticated/first-login-application.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/first-login-profile": {
-      "filePath": "_authenticated/first-login-profile.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/first-login-validation": {
-      "filePath": "_authenticated/first-login-validation.tsx",
-      "parent": "/_authenticated"
     },
     "/_authenticated/permissions-demo": {
       "filePath": "_authenticated/permissions-demo.tsx",
@@ -2188,10 +2082,6 @@ export const routeTree = rootRoute
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
         "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
       ]
-    },
-    "/_authenticated/first-login/_first-login": {
-      "filePath": "_authenticated/first-login/_first-login.tsx",
-      "parent": "/_authenticated/first-login"
     },
     "/_authenticated/first-login/application": {
       "filePath": "_authenticated/first-login/application.tsx",
