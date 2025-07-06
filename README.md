@@ -161,6 +161,9 @@ npm run dev
 ### Tests serveur
 
 ```bash
+# Aller dans le dossier server
+cd server
+
 # Lancer tous les tests
 npm test
 
@@ -176,6 +179,9 @@ npx tsx --test tests/unit/password.test.ts
 ### Tests client
 
 ```bash
+# Aller dans le dossier client
+cd client
+
 # Lancer tous les tests
 npx playwright test
 ```
