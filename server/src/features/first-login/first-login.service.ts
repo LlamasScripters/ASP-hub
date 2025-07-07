@@ -218,6 +218,25 @@ export class FirstLoginService {
 	}
 
 	/**
+	 * Update an existing membership application (only if pending)
+	 */
+	async updateMembershipApplication(
+		applicationId: string,
+		userId: string,
+		applicationData: z.infer<typeof MembershipApplicationSchema>,
+	) {
+		// Update application through onboarding service
+		const updatedApplication =
+			await this.onboardingService.updateMembershipApplication(
+				applicationId,
+				userId,
+				applicationData,
+			);
+
+		return updatedApplication;
+	}
+
+	/**
 	 * Get all pending applications for review (admin/managers)
 	 */
 	async getPendingApplications(reviewerId: string, sectionId?: string) {
@@ -236,6 +255,16 @@ export class FirstLoginService {
 				reviewComments: schema.membershipApplications.reviewComments,
 				createdAt: schema.membershipApplications.createdAt,
 				reviewedAt: schema.membershipApplications.reviewedAt,
+				// Include all fields needed for editing
+				sectionId: schema.membershipApplications.sectionId,
+				categoryId: schema.membershipApplications.categoryId,
+				emergencyContactName:
+					schema.membershipApplications.emergencyContactName,
+				emergencyContactPhone:
+					schema.membershipApplications.emergencyContactPhone,
+				medicalCertificateUrl:
+					schema.membershipApplications.medicalCertificateUrl,
+				// Keep the names for display
 				sectionName: schema.sections.name,
 				categoryName: schema.categories.name,
 				reviewerName: schema.users.firstName,

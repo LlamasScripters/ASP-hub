@@ -75,8 +75,81 @@ import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCa
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRouteImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
 import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRouteImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
 
+<<<<<<< HEAD
 const AuthenticatedAdminRouteImport = createFileRoute("/_authenticated/admin")()
 const AuthenticatednonadminRouteImport = createFileRoute(
+=======
+import { Route as rootRoute } from "./routes/__root"
+import { Route as AuthenticatedImport } from "./routes/_authenticated"
+import { Route as AuthImport } from "./routes/_auth"
+import { Route as IndexImport } from "./routes/index"
+import { Route as AuthenticatedFirstLoginSetupImport } from "./routes/_authenticated/first-login/setup"
+import { Route as AuthenticatedAdminAdminImport } from "./routes/_authenticated/admin/_admin"
+import { Route as AuthenticatednonadminNonadminImport } from "./routes/_authenticated/(nonadmin)/_nonadmin"
+import { Route as AuthAuthSendVerificationEmailImport } from "./routes/_auth/auth/send-verification-email"
+import { Route as AuthAuthResetPasswordImport } from "./routes/_auth/auth/reset-password"
+import { Route as AuthAuthRegisterImport } from "./routes/_auth/auth/register"
+import { Route as AuthAuthLoginImport } from "./routes/_auth/auth/login"
+import { Route as AuthAuthForgotPasswordImport } from "./routes/_auth/auth/forgot-password"
+import { Route as AuthAuthAccountCreatedImport } from "./routes/_auth/auth/account-created"
+import { Route as AuthenticatedAdminAdminIndexImport } from "./routes/_authenticated/admin/_admin.index"
+import { Route as AuthAuthVerifyIndexImport } from "./routes/_auth/auth/verify/index"
+import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
+import { Route as AuthAuthVerifyVerifyImport } from "./routes/_auth/auth/verify/_verify"
+import { Route as AuthenticatedAdminAdminBlogIndexImport } from "./routes/_authenticated/admin/_admin/blog/index"
+import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
+import { Route as AuthenticatedAdminAdminBlogCreateImport } from "./routes/_authenticated/admin/_admin/blog/create"
+import { Route as AuthenticatednonadminNonadminUserUserImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user"
+import { Route as AuthenticatednonadminNonadminDashboardSocialImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
+import { Route as AuthenticatednonadminNonadminDashboardMembersImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
+import { Route as AuthenticatednonadminNonadminDashboardActivitiesImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/activities"
+import { Route as AuthAuthVerifyVerifySuccessImport } from "./routes/_auth/auth/verify/_verify.success"
+import { Route as AuthAuthVerifyVerifyErrorImport } from "./routes/_auth/auth/verify/_verify.error"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomsIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/index"
+import { Route as AuthenticatedAdminAdminFacilitiesComplexesIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/index"
+import { Route as AuthenticatedAdminAdminBlogBlogIdIndexImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/index"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesIndexImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/index"
+import { Route as AuthenticatednonadminNonadminDashboardBlogIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index"
+import { Route as AuthenticatedAdminAdminFacilitiesComplexesCreateImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/create"
+import { Route as AuthenticatedAdminAdminDashboardClubsCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/create"
+import { Route as AuthenticatedAdminAdminBlogBlogIdEditImport } from "./routes/_authenticated/admin/_admin/blog/$blogId/edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesCreateImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/create"
+import { Route as AuthenticatednonadminNonadminUserUserSettingsImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.settings"
+import { Route as AuthenticatednonadminNonadminUserUserProfileImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/user/_user.profile"
+import { Route as AuthenticatednonadminNonadminDashboardBlogBlogIdImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId/index"
+import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/index"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId/index"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.edit"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationImport } from "./routes/_authenticated/admin/_admin/facilities/rooms/$roomId.create-reservation"
+import { Route as AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId.edit"
+import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.edit"
+import { Route as AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomImport } from "./routes/_authenticated/admin/_admin/facilities/complexes/$complexId.create-room"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId.edit"
+import { Route as AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationImport } from "./routes/_authenticated/admin/_admin/assets/minibuses/$minibusId.create-reservation"
+import { Route as AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditImport } from "./routes/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId.edit"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdCategoriesIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdSessionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/index"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+import { Route as AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditImport } from "./routes/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+
+// Create Virtual Routes
+
+const AuthenticatedAdminImport = createFileRoute("/_authenticated/admin")()
+const AuthenticatednonadminImport = createFileRoute(
+>>>>>>> 4864aab (Implement first login on the frontend (#38))
   "/_authenticated/(nonadmin)",
 )()
 const AuthAuthVerifyRouteImport = createFileRoute("/_auth/auth/verify")()
@@ -111,7 +184,19 @@ const AuthAuthVerifyRoute = AuthAuthVerifyRouteImport.update({
   path: "/auth/verify",
   getParentRoute: () => AuthRoute,
 } as any)
+<<<<<<< HEAD
 const AuthenticatedAdminAdminRoute = AuthenticatedAdminAdminRouteImport.update({
+=======
+
+const AuthenticatedFirstLoginSetupRoute =
+  AuthenticatedFirstLoginSetupImport.update({
+    id: "/first-login/setup",
+    path: "/first-login/setup",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedAdminAdminRoute = AuthenticatedAdminAdminImport.update({
+>>>>>>> 4864aab (Implement first login on the frontend (#38))
   id: "/_admin",
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
@@ -923,6 +1008,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatednonadminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    "/_authenticated/first-login/setup": {
+      id: "/_authenticated/first-login/setup"
+      path: "/first-login/setup"
+      fullPath: "/first-login/setup"
+      preLoaderRoute: typeof AuthenticatedFirstLoginSetupImport
+      parentRoute: typeof AuthenticatedImport
+    }
     "/_auth/auth/verify": {
       id: "/_auth/auth/verify"
       path: "/auth/verify"
@@ -1630,17 +1722,428 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatednonadminRoute: typeof AuthenticatednonadminRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedFirstLoginSetupRoute: typeof AuthenticatedFirstLoginSetupRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatednonadminRoute: AuthenticatednonadminRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedFirstLoginSetupRoute: AuthenticatedFirstLoginSetupRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+<<<<<<< HEAD
+=======
+export interface FileRoutesByFullPath {
+  "/": typeof AuthenticatednonadminNonadminRouteWithChildren
+  "": typeof AuthenticatedRouteWithChildren
+  "/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/auth/login": typeof AuthAuthLoginRoute
+  "/auth/register": typeof AuthAuthRegisterRoute
+  "/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
+  "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
+  "/auth/verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
+  "/auth/verify/": typeof AuthAuthVerifyIndexRoute
+  "/admin/": typeof AuthenticatedAdminAdminIndexRoute
+  "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
+  "/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
+  "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
+  "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
+  "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
+  "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
+  "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
+  "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
+  "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
+  "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
+  "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/assets/minibuses": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
+  "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
+  "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
+  "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
+  "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
+  "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
+  "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
+  "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
+  "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
+  "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/admin/assets/minibuses/$minibusId": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
+  "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
+  "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
+  "/admin/facilities/rooms/$roomId": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsCreateRoute
+  "/admin/dashboard/clubs/$clubId/categories": typeof AuthenticatedAdminAdminDashboardClubsClubIdCategoriesIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
+}
+
+export interface FileRoutesByTo {
+  "/": typeof AuthenticatednonadminNonadminRouteWithChildren
+  "": typeof AuthRouteWithChildren
+  "/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/auth/login": typeof AuthAuthLoginRoute
+  "/auth/register": typeof AuthAuthRegisterRoute
+  "/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
+  "/admin": typeof AuthenticatedAdminAdminIndexRoute
+  "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
+  "/auth/verify": typeof AuthAuthVerifyIndexRoute
+  "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
+  "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
+  "/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
+  "/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
+  "/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
+  "/user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
+  "/dashboard": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/admin/blog": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
+  "/user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
+  "/user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
+  "/admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
+  "/admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
+  "/admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/dashboard/blog": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/admin/assets/minibuses": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
+  "/admin/blog/$blogId": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
+  "/admin/dashboard/clubs": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
+  "/admin/facilities/complexes": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
+  "/admin/facilities/rooms": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
+  "/admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
+  "/admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
+  "/admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
+  "/admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
+  "/admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/admin/assets/minibuses/$minibusId": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
+  "/admin/dashboard/clubs/$clubId": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
+  "/admin/facilities/complexes/$complexId": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
+  "/admin/facilities/rooms/$roomId": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsCreateRoute
+  "/admin/dashboard/clubs/$clubId/categories": typeof AuthenticatedAdminAdminDashboardClubsClubIdCategoriesIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  "/": typeof IndexRoute
+  "/_auth": typeof AuthRouteWithChildren
+  "/_authenticated": typeof AuthenticatedRouteWithChildren
+  "/_auth/auth/account-created": typeof AuthAuthAccountCreatedRoute
+  "/_auth/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
+  "/_auth/auth/login": typeof AuthAuthLoginRoute
+  "/_auth/auth/register": typeof AuthAuthRegisterRoute
+  "/_auth/auth/reset-password": typeof AuthAuthResetPasswordRoute
+  "/_auth/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
+  "/_authenticated/(nonadmin)": typeof AuthenticatednonadminRouteWithChildren
+  "/_authenticated/(nonadmin)/_nonadmin": typeof AuthenticatednonadminNonadminRouteWithChildren
+  "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren
+  "/_authenticated/admin/_admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/_authenticated/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
+  "/_auth/auth/verify": typeof AuthAuthVerifyRouteWithChildren
+  "/_auth/auth/verify/_verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
+  "/_auth/auth/verify/": typeof AuthAuthVerifyIndexRoute
+  "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
+  "/_auth/auth/verify/_verify/error": typeof AuthAuthVerifyVerifyErrorRoute
+  "/_auth/auth/verify/_verify/success": typeof AuthAuthVerifyVerifySuccessRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities": typeof AuthenticatednonadminNonadminDashboardActivitiesRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/members": typeof AuthenticatednonadminNonadminDashboardMembersRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/social": typeof AuthenticatednonadminNonadminDashboardSocialRoute
+  "/_authenticated/(nonadmin)/_nonadmin/user": typeof AuthenticatednonadminNonadminUserRouteWithChildren
+  "/_authenticated/(nonadmin)/_nonadmin/user/_user": typeof AuthenticatednonadminNonadminUserUserRouteWithChildren
+  "/_authenticated/admin/_admin/blog/create": typeof AuthenticatedAdminAdminBlogCreateRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/": typeof AuthenticatednonadminNonadminDashboardIndexRoute
+  "/_authenticated/admin/_admin/blog/": typeof AuthenticatedAdminAdminBlogIndexRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": typeof AuthenticatednonadminNonadminDashboardBlogBlogIdRoute
+  "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": typeof AuthenticatednonadminNonadminUserUserProfileRoute
+  "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings": typeof AuthenticatednonadminNonadminUserUserSettingsRoute
+  "/_authenticated/admin/_admin/assets/minibuses/create": typeof AuthenticatedAdminAdminAssetsMinibusesCreateRoute
+  "/_authenticated/admin/_admin/blog/$blogId/edit": typeof AuthenticatedAdminAdminBlogBlogIdEditRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/create": typeof AuthenticatedAdminAdminDashboardClubsCreateRoute
+  "/_authenticated/admin/_admin/facilities/complexes/create": typeof AuthenticatedAdminAdminFacilitiesComplexesCreateRoute
+  "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": typeof AuthenticatednonadminNonadminDashboardBlogIndexRoute
+  "/_authenticated/admin/_admin/assets/minibuses/": typeof AuthenticatedAdminAdminAssetsMinibusesIndexRoute
+  "/_authenticated/admin/_admin/blog/$blogId/": typeof AuthenticatedAdminAdminBlogBlogIdIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/": typeof AuthenticatedAdminAdminDashboardClubsIndexRoute
+  "/_authenticated/admin/_admin/facilities/complexes/": typeof AuthenticatedAdminAdminFacilitiesComplexesIndexRoute
+  "/_authenticated/admin/_admin/facilities/rooms/": typeof AuthenticatedAdminAdminFacilitiesRoomsIndexRoute
+  "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit": typeof AuthenticatedAdminAdminAssetsMinibusReservationsMinibusReservationIdEditRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdCreateReservationRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdEditRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdEditRoute
+  "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdCreateRoomRoute
+  "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdEditRoute
+  "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomReservationsRoomReservationIdEditRoute
+  "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdCreateReservationRoute
+  "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdEditRoute
+  "/_authenticated/admin/_admin/assets/minibuses/$minibusId/": typeof AuthenticatedAdminAdminAssetsMinibusesMinibusIdIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": typeof AuthenticatedAdminAdminDashboardClubsClubIdIndexRoute
+  "/_authenticated/admin/_admin/facilities/complexes/$complexId/": typeof AuthenticatedAdminAdminFacilitiesComplexesComplexIdIndexRoute
+  "/_authenticated/admin/_admin/facilities/rooms/$roomId/": typeof AuthenticatedAdminAdminFacilitiesRoomsRoomIdIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsCreateRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/": typeof AuthenticatedAdminAdminDashboardClubsClubIdCategoriesIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSessionsIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdEditRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCreateRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdSessionsIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdEditRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsCreateRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsIndexRoute
+  "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": typeof AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCategoryIdSessionsSessionIdEditRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | "/"
+    | ""
+    | "/auth/account-created"
+    | "/auth/forgot-password"
+    | "/auth/login"
+    | "/auth/register"
+    | "/auth/reset-password"
+    | "/auth/send-verification-email"
+    | "/admin"
+    | "/first-login/setup"
+    | "/auth/verify"
+    | "/admin/users"
+    | "/auth/verify/"
+    | "/admin/"
+    | "/auth/verify/error"
+    | "/auth/verify/success"
+    | "/dashboard/activities"
+    | "/dashboard/members"
+    | "/dashboard/social"
+    | "/user"
+    | "/admin/blog/create"
+    | "/dashboard"
+    | "/admin/blog"
+    | "/dashboard/blog/$blogId"
+    | "/user/profile"
+    | "/user/settings"
+    | "/admin/assets/minibuses/create"
+    | "/admin/blog/$blogId/edit"
+    | "/admin/dashboard/clubs/create"
+    | "/admin/facilities/complexes/create"
+    | "/dashboard/blog"
+    | "/admin/assets/minibuses"
+    | "/admin/blog/$blogId"
+    | "/admin/dashboard/clubs"
+    | "/admin/facilities/complexes"
+    | "/admin/facilities/rooms"
+    | "/admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/admin/assets/minibuses/$minibusId/create-reservation"
+    | "/admin/assets/minibuses/$minibusId/edit"
+    | "/admin/dashboard/clubs/$clubId/edit"
+    | "/admin/facilities/complexes/$complexId/create-room"
+    | "/admin/facilities/complexes/$complexId/edit"
+    | "/admin/facilities/roomReservations/$roomReservationId/edit"
+    | "/admin/facilities/rooms/$roomId/create-reservation"
+    | "/admin/facilities/rooms/$roomId/edit"
+    | "/admin/assets/minibuses/$minibusId"
+    | "/admin/dashboard/clubs/$clubId"
+    | "/admin/facilities/complexes/$complexId"
+    | "/admin/facilities/rooms/$roomId"
+    | "/admin/dashboard/clubs/$clubId/sections/create"
+    | "/admin/dashboard/clubs/$clubId/categories"
+    | "/admin/dashboard/clubs/$clubId/sections"
+    | "/admin/dashboard/clubs/$clubId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | "/"
+    | ""
+    | "/auth/account-created"
+    | "/auth/forgot-password"
+    | "/auth/login"
+    | "/auth/register"
+    | "/auth/reset-password"
+    | "/auth/send-verification-email"
+    | "/admin"
+    | "/first-login/setup"
+    | "/auth/verify"
+    | "/admin/users"
+    | "/auth/verify/error"
+    | "/auth/verify/success"
+    | "/dashboard/activities"
+    | "/dashboard/members"
+    | "/dashboard/social"
+    | "/user"
+    | "/admin/blog/create"
+    | "/dashboard"
+    | "/admin/blog"
+    | "/dashboard/blog/$blogId"
+    | "/user/profile"
+    | "/user/settings"
+    | "/admin/assets/minibuses/create"
+    | "/admin/blog/$blogId/edit"
+    | "/admin/dashboard/clubs/create"
+    | "/admin/facilities/complexes/create"
+    | "/dashboard/blog"
+    | "/admin/assets/minibuses"
+    | "/admin/blog/$blogId"
+    | "/admin/dashboard/clubs"
+    | "/admin/facilities/complexes"
+    | "/admin/facilities/rooms"
+    | "/admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/admin/assets/minibuses/$minibusId/create-reservation"
+    | "/admin/assets/minibuses/$minibusId/edit"
+    | "/admin/dashboard/clubs/$clubId/edit"
+    | "/admin/facilities/complexes/$complexId/create-room"
+    | "/admin/facilities/complexes/$complexId/edit"
+    | "/admin/facilities/roomReservations/$roomReservationId/edit"
+    | "/admin/facilities/rooms/$roomId/create-reservation"
+    | "/admin/facilities/rooms/$roomId/edit"
+    | "/admin/assets/minibuses/$minibusId"
+    | "/admin/dashboard/clubs/$clubId"
+    | "/admin/facilities/complexes/$complexId"
+    | "/admin/facilities/rooms/$roomId"
+    | "/admin/dashboard/clubs/$clubId/sections/create"
+    | "/admin/dashboard/clubs/$clubId/categories"
+    | "/admin/dashboard/clubs/$clubId/sections"
+    | "/admin/dashboard/clubs/$clubId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions"
+    | "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+  id:
+    | "__root__"
+    | "/"
+    | "/_auth"
+    | "/_authenticated"
+    | "/_auth/auth/account-created"
+    | "/_auth/auth/forgot-password"
+    | "/_auth/auth/login"
+    | "/_auth/auth/register"
+    | "/_auth/auth/reset-password"
+    | "/_auth/auth/send-verification-email"
+    | "/_authenticated/(nonadmin)"
+    | "/_authenticated/(nonadmin)/_nonadmin"
+    | "/_authenticated/admin"
+    | "/_authenticated/admin/_admin"
+    | "/_authenticated/first-login/setup"
+    | "/_auth/auth/verify"
+    | "/_auth/auth/verify/_verify"
+    | "/_authenticated/admin/_admin/users"
+    | "/_auth/auth/verify/"
+    | "/_authenticated/admin/_admin/"
+    | "/_auth/auth/verify/_verify/error"
+    | "/_auth/auth/verify/_verify/success"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/members"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/social"
+    | "/_authenticated/(nonadmin)/_nonadmin/user"
+    | "/_authenticated/(nonadmin)/_nonadmin/user/_user"
+    | "/_authenticated/admin/_admin/blog/create"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/"
+    | "/_authenticated/admin/_admin/blog/"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId"
+    | "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile"
+    | "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
+    | "/_authenticated/admin/_admin/assets/minibuses/create"
+    | "/_authenticated/admin/_admin/blog/$blogId/edit"
+    | "/_authenticated/admin/_admin/dashboard/clubs/create"
+    | "/_authenticated/admin/_admin/facilities/complexes/create"
+    | "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
+    | "/_authenticated/admin/_admin/assets/minibuses/"
+    | "/_authenticated/admin/_admin/blog/$blogId/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/"
+    | "/_authenticated/admin/_admin/facilities/complexes/"
+    | "/_authenticated/admin/_admin/facilities/rooms/"
+    | "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit"
+    | "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room"
+    | "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit"
+    | "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit"
+    | "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation"
+    | "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit"
+    | "/_authenticated/admin/_admin/assets/minibuses/$minibusId/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/"
+    | "/_authenticated/admin/_admin/facilities/complexes/$complexId/"
+    | "/_authenticated/admin/_admin/facilities/rooms/$roomId/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/"
+    | "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+}
+
+>>>>>>> 4864aab (Implement first login on the frontend (#38))
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
@@ -1649,3 +2152,375 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+<<<<<<< HEAD
+=======
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/_auth",
+        "/_authenticated"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/auth/account-created",
+        "/_auth/auth/forgot-password",
+        "/_auth/auth/login",
+        "/_auth/auth/register",
+        "/_auth/auth/reset-password",
+        "/_auth/auth/send-verification-email",
+        "/_auth/auth/verify"
+      ]
+    },
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/(nonadmin)",
+        "/_authenticated/admin",
+        "/_authenticated/first-login/setup"
+      ]
+    },
+    "/_auth/auth/account-created": {
+      "filePath": "_auth/auth/account-created.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/forgot-password": {
+      "filePath": "_auth/auth/forgot-password.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/login": {
+      "filePath": "_auth/auth/login.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/register": {
+      "filePath": "_auth/auth/register.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/reset-password": {
+      "filePath": "_auth/auth/reset-password.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/send-verification-email": {
+      "filePath": "_auth/auth/send-verification-email.tsx",
+      "parent": "/_auth"
+    },
+    "/_authenticated/(nonadmin)": {
+      "filePath": "_authenticated/(nonadmin)",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/(nonadmin)/_nonadmin"
+      ]
+    },
+    "/_authenticated/(nonadmin)/_nonadmin": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin.tsx",
+      "parent": "/_authenticated/(nonadmin)",
+      "children": [
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/members",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/social",
+        "/_authenticated/(nonadmin)/_nonadmin/user",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId",
+        "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/"
+      ]
+    },
+    "/_authenticated/admin": {
+      "filePath": "_authenticated/admin",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/admin/_admin"
+      ]
+    },
+    "/_authenticated/admin/_admin": {
+      "filePath": "_authenticated/admin/_admin.tsx",
+      "parent": "/_authenticated/admin",
+      "children": [
+        "/_authenticated/admin/_admin/users",
+        "/_authenticated/admin/_admin/",
+        "/_authenticated/admin/_admin/blog/create",
+        "/_authenticated/admin/_admin/blog/",
+        "/_authenticated/admin/_admin/assets/minibuses/create",
+        "/_authenticated/admin/_admin/blog/$blogId/edit",
+        "/_authenticated/admin/_admin/dashboard/clubs/create",
+        "/_authenticated/admin/_admin/facilities/complexes/create",
+        "/_authenticated/admin/_admin/assets/minibuses/",
+        "/_authenticated/admin/_admin/blog/$blogId/",
+        "/_authenticated/admin/_admin/dashboard/clubs/",
+        "/_authenticated/admin/_admin/facilities/complexes/",
+        "/_authenticated/admin/_admin/facilities/rooms/",
+        "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit",
+        "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room",
+        "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit",
+        "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit",
+        "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation",
+        "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit",
+        "/_authenticated/admin/_admin/assets/minibuses/$minibusId/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/",
+        "/_authenticated/admin/_admin/facilities/complexes/$complexId/",
+        "/_authenticated/admin/_admin/facilities/rooms/$roomId/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
+        "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit"
+      ]
+    },
+    "/_authenticated/first-login/setup": {
+      "filePath": "_authenticated/first-login/setup.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_auth/auth/verify": {
+      "filePath": "_auth/auth/verify",
+      "parent": "/_auth",
+      "children": [
+        "/_auth/auth/verify/_verify",
+        "/_auth/auth/verify/"
+      ]
+    },
+    "/_auth/auth/verify/_verify": {
+      "filePath": "_auth/auth/verify/_verify.tsx",
+      "parent": "/_auth/auth/verify",
+      "children": [
+        "/_auth/auth/verify/_verify/error",
+        "/_auth/auth/verify/_verify/success"
+      ]
+    },
+    "/_authenticated/admin/_admin/users": {
+      "filePath": "_authenticated/admin/_admin.users.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_auth/auth/verify/": {
+      "filePath": "_auth/auth/verify/index.tsx",
+      "parent": "/_auth/auth/verify"
+    },
+    "/_authenticated/admin/_admin/": {
+      "filePath": "_authenticated/admin/_admin.index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_auth/auth/verify/_verify/error": {
+      "filePath": "_auth/auth/verify/_verify.error.tsx",
+      "parent": "/_auth/auth/verify/_verify"
+    },
+    "/_auth/auth/verify/_verify/success": {
+      "filePath": "_auth/auth/verify/_verify.success.tsx",
+      "parent": "/_auth/auth/verify/_verify"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/activities": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/activities.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/members": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/members.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/social": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/social.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/user": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/user",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin",
+      "children": [
+        "/_authenticated/(nonadmin)/_nonadmin/user/_user"
+      ]
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/user/_user": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/user/_user.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin/user",
+      "children": [
+        "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile",
+        "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings"
+      ]
+    },
+    "/_authenticated/admin/_admin/blog/create": {
+      "filePath": "_authenticated/admin/_admin/blog/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/index.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/blog/": {
+      "filePath": "_authenticated/admin/_admin/blog/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/blog/$blogId.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/user/_user/profile": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/user/_user.profile.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin/user/_user"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/user/_user/settings": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/user/_user.settings.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin/user/_user"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/create": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/blog/$blogId/edit": {
+      "filePath": "_authenticated/admin/_admin/blog/$blogId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/create": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/complexes/create": {
+      "filePath": "_authenticated/admin/_admin/facilities/complexes/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/(nonadmin)/_nonadmin/dashboard/blog/": {
+      "filePath": "_authenticated/(nonadmin)/_nonadmin/dashboard/blog/index.tsx",
+      "parent": "/_authenticated/(nonadmin)/_nonadmin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/blog/$blogId/": {
+      "filePath": "_authenticated/admin/_admin/blog/$blogId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/complexes/": {
+      "filePath": "_authenticated/admin/_admin/facilities/complexes/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/rooms/": {
+      "filePath": "_authenticated/admin/_admin/facilities/rooms/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId/edit": {
+      "filePath": "_authenticated/admin/_admin/assets/minibusReservations/$minibusReservationId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/create-reservation": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId.create-reservation.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/edit": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/edit": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/complexes/$complexId/create-room": {
+      "filePath": "_authenticated/admin/_admin/facilities/complexes/$complexId.create-room.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/complexes/$complexId/edit": {
+      "filePath": "_authenticated/admin/_admin/facilities/complexes/$complexId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId/edit": {
+      "filePath": "_authenticated/admin/_admin/facilities/roomReservations/$roomReservationId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/rooms/$roomId/create-reservation": {
+      "filePath": "_authenticated/admin/_admin/facilities/rooms/$roomId.create-reservation.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/rooms/$roomId/edit": {
+      "filePath": "_authenticated/admin/_admin/facilities/rooms/$roomId.edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/assets/minibuses/$minibusId/": {
+      "filePath": "_authenticated/admin/_admin/assets/minibuses/$minibusId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/complexes/$complexId/": {
+      "filePath": "_authenticated/admin/_admin/facilities/complexes/$complexId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/facilities/rooms/$roomId/": {
+      "filePath": "_authenticated/admin/_admin/facilities/rooms/$roomId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/categories/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/index.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    },
+    "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit": {
+      "filePath": "_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/$sessionId/edit.tsx",
+      "parent": "/_authenticated/admin/_admin"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
+>>>>>>> 4864aab (Implement first login on the frontend (#38))

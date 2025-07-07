@@ -473,6 +473,81 @@ export class OnboardingService {
 
 		return { sections, categories };
 	}
+
+	/**
+	 * Update an existing membership application (only if pending)
+	 */
+	async updateMembershipApplication(
+		applicationId: string,
+		userId: string,
+		applicationData: z.infer<typeof MembershipApplicationSchema>,
+	) {
+		// Find the application
+		const [application] = await db
+			.select()
+			.from(schema.membershipApplications)
+			.where(
+				and(
+					eq(schema.membershipApplications.id, applicationId),
+					eq(schema.membershipApplications.userId, userId),
+					isNull(schema.membershipApplications.deletedAt),
+				),
+			)
+			.limit(1);
+
+		if (!application) {
+			throw new Error("Application not found or not authorized");
+		}
+
+		// Only allow updates if the application is still pending
+		if (application.status !== "pending") {
+			throw new Error("Only pending applications can be updated");
+		}
+
+		// Verify sections and categories exist
+		if (applicationData.sectionIds && applicationData.sectionIds.length > 0) {
+			const sections = await db
+				.select({ id: schema.sections.id })
+				.from(schema.sections)
+				.where(eq(schema.sections.id, applicationData.sectionIds[0])); // For now, support single section
+
+			if (sections.length === 0) {
+				throw new Error("Invalid section selected");
+			}
+		}
+
+		if (applicationData.categoryIds && applicationData.categoryIds.length > 0) {
+			const categories = await db
+				.select({ id: schema.categories.id })
+				.from(schema.categories)
+				.where(eq(schema.categories.id, applicationData.categoryIds[0])); // For now, support single category
+
+			if (categories.length === 0) {
+				throw new Error("Invalid category selected");
+			}
+		}
+
+		// Update the application
+		const [updatedApplication] = await db
+			.update(schema.membershipApplications)
+			.set({
+				sectionId: applicationData.sectionIds?.[0] || null,
+				categoryId: applicationData.categoryIds?.[0] || null,
+				motivation: applicationData.motivation,
+				medicalCertificateUrl: applicationData.medicalCertificateUrl,
+				emergencyContactName: applicationData.emergencyContactName,
+				emergencyContactPhone: applicationData.emergencyContactPhone,
+				updatedAt: new Date(),
+			})
+			.where(eq(schema.membershipApplications.id, applicationId))
+			.returning();
+
+		if (!updatedApplication) {
+			throw new Error("Failed to update membership application");
+		}
+
+		return updatedApplication;
+	}
 }
 
 // Export singleton instance
