@@ -22,7 +22,7 @@ export const MembershipApplicationSchema = z.object({
 	categoryIds: z.array(z.string().uuid()).optional(),
 	motivation: z
 		.string()
-		.min(50, "Please provide a detailed motivation (minimum 50 characters)"),
+		.min(5, "Please provide a detailed motivation (minimum 5 characters)"),
 	medicalCertificateUrl: z.string().url().optional(),
 	emergencyContactName: z.string().min(1, "Emergency contact name is required"),
 	emergencyContactPhone: z

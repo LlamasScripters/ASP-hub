@@ -282,4 +282,66 @@ firstLoginRouter.post(
 	},
 );
 
+/**
+ * PUT /api/first-login/applications/:id
+ * Update an existing membership application (only if pending)
+ */
+firstLoginRouter.put("/applications/:id", requireAuth, async (req, res) => {
+	try {
+		if (!req.session) {
+			res.status(401).json({ error: "Authentication required" });
+			return;
+		}
+
+		const userId = req.session.user.id;
+		const applicationId = req.params.id;
+
+		// Validate request body
+		const result = MembershipApplicationSchema.safeParse(req.body);
+		if (!result.success) {
+			res.status(400).json({
+				error: "Validation failed",
+				details: formatZodError(result.error),
+			});
+			return;
+		}
+
+		// Update application
+		const updatedApplication =
+			await firstLoginService.updateMembershipApplication(
+				applicationId,
+				userId,
+				result.data,
+			);
+
+		res.json({
+			success: true,
+			message: "Application updated successfully!",
+			data: {
+				application: {
+					id: updatedApplication.id,
+					status: updatedApplication.status,
+					updatedAt: updatedApplication.updatedAt,
+				},
+			},
+		});
+	} catch (error) {
+		console.error("Error updating application:", error);
+
+		if (
+			error instanceof Error &&
+			(error.message.includes("not found") ||
+				error.message.includes("cannot be updated") ||
+				error.message.includes("not authorized"))
+		) {
+			res.status(400).json({ error: error.message });
+			return;
+		}
+
+		res.status(500).json({
+			error: "Failed to update application",
+		});
+	}
+});
+
 export default firstLoginRouter;
