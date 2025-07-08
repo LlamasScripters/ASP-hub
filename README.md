@@ -1,17 +1,19 @@
-# Project Setup & Usage
+# ASP-hub
 
-## Pré-requis
+## Project Setup & Usage
+
+### Pré-requis
 
 - [nvm](https://github.com/nvm-sh/nvm) (ou [nvm-windows](https://github.com/coreybutler/nvm-windows)) pour gérer la version de Node.js
 - [Node.js](https://nodejs.org/) (version 22.15.0, voir `.nvmrc`)
 - [npm](https://www.npmjs.com/)
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/) (**obligatoire** pour le développement)
 
-## Démarrage du projet (mode recommandé)
+### Démarrage du projet (mode recommandé)
 
 Le projet doit être lancé via **Docker Compose** pour fonctionner correctement en développement (reverse proxy Nginx, BDD, etc.).
 
-### Premier démarrage
+#### Premier démarrage
 
 1. **Configurer les variables d'environnement :**
    ```bash
@@ -29,7 +31,7 @@ Le projet doit être lancé via **Docker Compose** pour fonctionner correctement
    npm run db:migrate
    ```
 
-### Démarrages suivants
+#### Démarrages suivants
 
 ```bash
 # Commande principale de développement (avec watch mode)
@@ -41,7 +43,7 @@ npm run dev
 - Backend (API) : http://localhost:8080/api
 - Console MinIO : http://localhost:9001 (admin/password)
 
-## Installation manuelle (cas particulier)
+### Installation manuelle (cas particulier)
 
 > ⚠️ Ce mode n'est à utiliser qu'en cas de besoin spécifique (débogage, développement isolé, etc.). L'accès au front ne se fera alors pas via Nginx.
 >
@@ -62,7 +64,7 @@ npm run dev
    cd ../server && npm install
    ```
 
-### Démarrage manuel
+#### Démarrage manuel
 
 - **Lancer le serveur** :
   ```bash
@@ -79,9 +81,9 @@ npm run dev
   - Frontend : http://localhost:5173
   - Backend : http://localhost:3000
 
-## Scripts utiles
+### Scripts utiles
 
-### Développement
+#### Développement
 
 - **Démarrer le développement** :
   ```bash
@@ -103,7 +105,7 @@ npm run dev
   npm run dev:down
   ```
 
-### Code Quality
+#### Code Quality
 
 - **Lint** (racine, client, server) :
   ```bash
@@ -125,7 +127,7 @@ npm run dev
   cd client
   npm run test
   ```
-### Base de données
+#### Base de données
 
 - **Lancer les migrations** :
   ```bash
@@ -158,7 +160,7 @@ npm run dev
   ```
 
   
-### Tests serveur
+#### Tests serveur
 
 ```bash
 # Aller dans le dossier server
@@ -176,7 +178,7 @@ node --test tests/interface/
 npx tsx --test tests/unit/password.test.ts
 ```
 
-### Tests client
+#### Tests client
 
 ```bash
 # Aller dans le dossier client
@@ -185,3 +187,9 @@ cd client
 # Lancer tous les tests
 npx playwright test
 ```
+
+## Documentation
+
+### Google Drive (autorisations nécessaires)
+
+Lien du Drive contenant les documents du projet : https://drive.google.com/drive/folders/1ZqHodTuhoczDxv4GG3eN2YHtUHpXcVXY
