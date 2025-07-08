@@ -1,7 +1,7 @@
 import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 import { UserRole } from "@/lib/roles.js";
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, isNull, or, sql } from "drizzle-orm";
 import type { z } from "zod/v4";
 import { NotificationService } from "../notifications/notification.service.js";
 
@@ -247,7 +247,10 @@ export class OnboardingService {
 						.where(
 							and(
 								eq(schema.users.role, "section_manager"),
-								eq(schema.sectionResponsibilities.sectionId, application.sectionId),
+								eq(
+									schema.sectionResponsibilities.sectionId,
+									application.sectionId,
+								),
 								eq(schema.sectionResponsibilities.isActive, true),
 							),
 						);
@@ -271,7 +274,10 @@ export class OnboardingService {
 						.where(
 							and(
 								eq(schema.users.role, "coach"),
-								eq(schema.sectionResponsibilities.categoryId, application.categoryId),
+								eq(
+									schema.sectionResponsibilities.categoryId,
+									application.categoryId,
+								),
 								eq(schema.sectionResponsibilities.isActive, true),
 							),
 						);
@@ -474,16 +480,45 @@ export class OnboardingService {
 	/**
 	 * Get pending membership applications for review (admin/section_manager)
 	 */
-	async getPendingApplications(reviewerId: string, sectionId?: string) {
-		const query = db
+	async getPendingApplications(
+		reviewerId: string,
+		filters: {
+			status?: string;
+			sectionId?: string;
+			categoryId?: string;
+			search?: string;
+			dateRange?: string;
+			page: number;
+			limit: number;
+		},
+	) {
+		// Build where conditions
+		const conditions = [isNull(schema.membershipApplications.deletedAt)];
+
+		// Status filter - default to 'pending' if not specified
+		if (filters.status && filters.status !== "all") {
+			const status = filters.status as "pending" | "approved" | "rejected";
+			conditions.push(eq(schema.membershipApplications.status, status));
+		} else {
+			conditions.push(eq(schema.membershipApplications.status, "pending"));
+		}
+
+		const applications = await db
 			.select({
 				id: schema.membershipApplications.id,
 				motivation: schema.membershipApplications.motivation,
+				status: schema.membershipApplications.status,
+				reviewComments: schema.membershipApplications.reviewComments,
 				createdAt: schema.membershipApplications.createdAt,
+				reviewedAt: schema.membershipApplications.reviewedAt,
+				sectionId: schema.membershipApplications.sectionId,
+				categoryId: schema.membershipApplications.categoryId,
 				emergencyContactName:
 					schema.membershipApplications.emergencyContactName,
 				emergencyContactPhone:
 					schema.membershipApplications.emergencyContactPhone,
+				medicalCertificateUrl:
+					schema.membershipApplications.medicalCertificateUrl,
 				user: {
 					id: schema.users.id,
 					firstName: schema.users.firstName,
@@ -492,14 +527,9 @@ export class OnboardingService {
 					dateOfBirth: schema.users.dateOfBirth,
 					phone: schema.users.phone,
 				},
-				section: {
-					id: schema.sections.id,
-					name: schema.sections.name,
-				},
-				category: {
-					id: schema.categories.id,
-					name: schema.categories.name,
-				},
+				sectionName: schema.sections.name,
+				categoryName: schema.categories.name,
+				reviewerName: sql<string | null>`null`,
 			})
 			.from(schema.membershipApplications)
 			.innerJoin(
@@ -514,68 +544,27 @@ export class OnboardingService {
 				schema.categories,
 				eq(schema.membershipApplications.categoryId, schema.categories.id),
 			)
-			.where(
-				and(
-					eq(schema.membershipApplications.status, "pending"),
-					isNull(schema.membershipApplications.deletedAt),
-				),
-			);
+			.where(and(...conditions))
+			.orderBy(desc(schema.membershipApplications.createdAt))
+			.limit(filters.limit)
+			.offset((filters.page - 1) * filters.limit);
 
-		// If section manager, filter by their section
-		if (sectionId) {
-			const filteredQuery = db
-				.select({
-					id: schema.membershipApplications.id,
-					motivation: schema.membershipApplications.motivation,
-					createdAt: schema.membershipApplications.createdAt,
-					emergencyContactName:
-						schema.membershipApplications.emergencyContactName,
-					emergencyContactPhone:
-						schema.membershipApplications.emergencyContactPhone,
-					user: {
-						id: schema.users.id,
-						firstName: schema.users.firstName,
-						lastName: schema.users.lastName,
-						email: schema.users.email,
-						dateOfBirth: schema.users.dateOfBirth,
-						phone: schema.users.phone,
-					},
-					section: {
-						id: schema.sections.id,
-						name: schema.sections.name,
-					},
-					category: {
-						id: schema.categories.id,
-						name: schema.categories.name,
-					},
-				})
-				.from(schema.membershipApplications)
-				.innerJoin(
-					schema.users,
-					eq(schema.membershipApplications.userId, schema.users.id),
-				)
-				.leftJoin(
-					schema.sections,
-					eq(schema.membershipApplications.sectionId, schema.sections.id),
-				)
-				.leftJoin(
-					schema.categories,
-					eq(schema.membershipApplications.categoryId, schema.categories.id),
-				)
-				.where(
-					and(
-						eq(schema.membershipApplications.status, "pending"),
-						isNull(schema.membershipApplications.deletedAt),
-						eq(schema.membershipApplications.sectionId, sectionId),
-					),
-				);
+		// Simple count query for total
+		const totalQuery = await db
+			.select({ count: count() })
+			.from(schema.membershipApplications)
+			.where(and(...conditions));
 
-			return await filteredQuery.orderBy(
-				schema.membershipApplications.createdAt,
-			);
-		}
+		const total = totalQuery[0]?.count || 0;
+		const totalPages = Math.ceil(total / filters.limit);
 
-		return await query.orderBy(schema.membershipApplications.createdAt);
+		return {
+			data: applications,
+			total,
+			page: filters.page,
+			limit: filters.limit,
+			totalPages,
+		};
 	}
 
 	/**

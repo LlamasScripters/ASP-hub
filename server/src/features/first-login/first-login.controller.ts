@@ -1,8 +1,6 @@
 import { formatZodError } from "@/lib/zod.js";
-import {
-	requireAuth,
-	requirePermissions,
-} from "@/middleware/auth.middleware.js";
+import { requireMembershipApplicationAccess } from "@/middleware/app-permissions.middleware.js";
+import { requireAuth } from "@/middleware/auth.middleware.js";
 import { Router } from "express";
 import { z } from "zod/v4";
 import {
@@ -180,7 +178,7 @@ firstLoginRouter.get("/applications", requireAuth, async (req, res) => {
 firstLoginRouter.get(
 	"/applications/pending",
 	requireAuth,
-	requirePermissions("admin", { user: ["review-applications"] }),
+	requireMembershipApplicationAccess(),
 	async (req, res) => {
 		try {
 			if (!req.session) {
@@ -188,16 +186,26 @@ firstLoginRouter.get(
 				return;
 			}
 
+			// Parse query parameters
+			const filters = {
+				status: req.query.status as string | undefined,
+				sectionId: req.query.sectionId as string | undefined,
+				categoryId: req.query.categoryId as string | undefined,
+				search: req.query.search as string | undefined,
+				dateRange: req.query.dateRange as string | undefined,
+				page: Number.parseInt(req.query.page as string) || 1,
+				limit: Math.min(Number.parseInt(req.query.limit as string) || 20, 100), // Max 100 items per page
+			};
+
 			const userId = req.session.user.id;
-			const sectionId = req.query.sectionId as string | undefined;
-			const applications = await firstLoginService.getPendingApplications(
+			const result = await firstLoginService.getPendingApplications(
 				userId,
-				sectionId,
+				filters,
 			);
 
 			res.json({
 				success: true,
-				data: applications,
+				...result,
 			});
 		} catch (error) {
 			console.error("Error getting pending applications:", error);
@@ -215,7 +223,7 @@ firstLoginRouter.get(
 firstLoginRouter.post(
 	"/applications/:id/review",
 	requireAuth,
-	requirePermissions("admin", { user: ["review-applications"] }),
+	requireMembershipApplicationAccess(),
 	async (req, res) => {
 		try {
 			if (!req.session) {

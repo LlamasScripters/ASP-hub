@@ -4,10 +4,8 @@ import {
 	requireAuth,
 	requirePermissions,
 } from "@/middleware/auth.middleware.js";
-import { requireSectionAccess } from "@/middleware/section.middleware.js";
 import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
-import { z } from "zod/v4";
 import { onboardingService } from "./onboarding.service.js";
 import {
 	CompleteProfileSchema,
@@ -194,20 +192,26 @@ onboardingRouter.get(
 			const reviewerId = req.session.user.id;
 			const userRole = req.session.user.role;
 
-			// If section manager, they can only see applications for their sections
-			// For now, let's implement basic filtering - this would need to be enhanced
-			// to check which sections the manager is responsible for
-			const sectionId =
-				userRole === "section_manager"
-					? (req.query.sectionId as string)
-					: undefined;
+			// Parse query parameters
+			const filters = {
+				status: req.query.status as string | undefined,
+				sectionId:
+					userRole === "section_manager"
+						? (req.query.sectionId as string)
+						: (req.query.sectionId as string | undefined),
+				categoryId: req.query.categoryId as string | undefined,
+				search: req.query.search as string | undefined,
+				dateRange: req.query.dateRange as string | undefined,
+				page: Number.parseInt(req.query.page as string) || 1,
+				limit: Math.min(Number.parseInt(req.query.limit as string) || 20, 100),
+			};
 
-			const applications = await onboardingService.getPendingApplications(
+			const result = await onboardingService.getPendingApplications(
 				reviewerId,
-				sectionId,
+				filters,
 			);
 
-			res.json({ applications });
+			res.json(result);
 		} catch (error) {
 			console.error("Error fetching pending applications:", error);
 			res.status(500).json({

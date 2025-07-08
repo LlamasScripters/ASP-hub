@@ -28,6 +28,7 @@ import { Route as AuthAuthAccountCreatedImport } from "./routes/_auth/auth/accou
 import { Route as AuthenticatedAdminAdminIndexImport } from "./routes/_authenticated/admin/_admin.index"
 import { Route as AuthAuthVerifyIndexImport } from "./routes/_auth/auth/verify/index"
 import { Route as AuthenticatedAdminAdminUsersImport } from "./routes/_authenticated/admin/_admin.users"
+import { Route as AuthenticatedAdminAdminApplicationsImport } from "./routes/_authenticated/admin/_admin.applications"
 import { Route as AuthAuthVerifyVerifyImport } from "./routes/_auth/auth/verify/_verify"
 import { Route as AuthenticatedAdminAdminBlogIndexImport } from "./routes/_authenticated/admin/_admin/blog/index"
 import { Route as AuthenticatednonadminNonadminDashboardIndexImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
@@ -203,6 +204,13 @@ const AuthenticatedAdminAdminUsersRoute =
   AuthenticatedAdminAdminUsersImport.update({
     id: "/users",
     path: "/users",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+
+const AuthenticatedAdminAdminApplicationsRoute =
+  AuthenticatedAdminAdminApplicationsImport.update({
+    id: "/applications",
+    path: "/applications",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 
@@ -684,6 +692,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/auth/verify"
       preLoaderRoute: typeof AuthAuthVerifyVerifyImport
       parentRoute: typeof AuthAuthVerifyRoute
+    }
+    "/_authenticated/admin/_admin/applications": {
+      id: "/_authenticated/admin/_admin/applications"
+      path: "/applications"
+      fullPath: "/admin/applications"
+      preLoaderRoute: typeof AuthenticatedAdminAdminApplicationsImport
+      parentRoute: typeof AuthenticatedAdminAdminImport
     }
     "/_authenticated/admin/_admin/users": {
       id: "/_authenticated/admin/_admin/users"
@@ -1184,6 +1199,7 @@ const AuthenticatednonadminRouteWithChildren =
   )
 
 interface AuthenticatedAdminAdminRouteChildren {
+  AuthenticatedAdminAdminApplicationsRoute: typeof AuthenticatedAdminAdminApplicationsRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminBlogCreateRoute: typeof AuthenticatedAdminAdminBlogCreateRoute
@@ -1227,6 +1243,8 @@ interface AuthenticatedAdminAdminRouteChildren {
 
 const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren =
   {
+    AuthenticatedAdminAdminApplicationsRoute:
+      AuthenticatedAdminAdminApplicationsRoute,
     AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
     AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
     AuthenticatedAdminAdminBlogCreateRoute:
@@ -1349,6 +1367,7 @@ export interface FileRoutesByFullPath {
   "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
   "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/auth/verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1414,6 +1433,7 @@ export interface FileRoutesByTo {
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
   "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/auth/verify": typeof AuthAuthVerifyIndexRoute
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
@@ -1483,6 +1503,7 @@ export interface FileRoutesById {
   "/_authenticated/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/_auth/auth/verify": typeof AuthAuthVerifyRouteWithChildren
   "/_auth/auth/verify/_verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/_authenticated/admin/_admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/_auth/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -1551,6 +1572,7 @@ export interface FileRouteTypes {
     | "/admin"
     | "/first-login/setup"
     | "/auth/verify"
+    | "/admin/applications"
     | "/admin/users"
     | "/auth/verify/"
     | "/admin/"
@@ -1615,6 +1637,7 @@ export interface FileRouteTypes {
     | "/admin"
     | "/first-login/setup"
     | "/auth/verify"
+    | "/admin/applications"
     | "/admin/users"
     | "/auth/verify/error"
     | "/auth/verify/success"
@@ -1682,6 +1705,7 @@ export interface FileRouteTypes {
     | "/_authenticated/first-login/setup"
     | "/_auth/auth/verify"
     | "/_auth/auth/verify/_verify"
+    | "/_authenticated/admin/_admin/applications"
     | "/_authenticated/admin/_admin/users"
     | "/_auth/auth/verify/"
     | "/_authenticated/admin/_admin/"
@@ -1842,6 +1866,7 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/admin/_admin.tsx",
       "parent": "/_authenticated/admin",
       "children": [
+        "/_authenticated/admin/_admin/applications",
         "/_authenticated/admin/_admin/users",
         "/_authenticated/admin/_admin/",
         "/_authenticated/admin/_admin/blog/create",
@@ -1902,6 +1927,10 @@ export const routeTree = rootRoute
         "/_auth/auth/verify/_verify/error",
         "/_auth/auth/verify/_verify/success"
       ]
+    },
+    "/_authenticated/admin/_admin/applications": {
+      "filePath": "_authenticated/admin/_admin.applications.tsx",
+      "parent": "/_authenticated/admin/_admin"
     },
     "/_authenticated/admin/_admin/users": {
       "filePath": "_authenticated/admin/_admin.users.tsx",
