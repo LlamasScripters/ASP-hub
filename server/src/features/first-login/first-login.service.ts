@@ -17,6 +17,16 @@ export interface FirstLoginStatus {
 	nextAction: string;
 }
 
+export interface ApplicationFilters {
+	status?: string;
+	sectionId?: string;
+	categoryId?: string;
+	search?: string;
+	dateRange?: string;
+	page: number;
+	limit: number;
+}
+
 export class FirstLoginService {
 	private onboardingService: OnboardingService;
 
@@ -158,8 +168,11 @@ export class FirstLoginService {
 	/**
 	 * Get all pending applications for review (admin/managers)
 	 */
-	async getPendingApplications(reviewerId: string, sectionId?: string) {
-		return this.onboardingService.getPendingApplications(reviewerId, sectionId);
+	async getPendingApplications(
+		reviewerId: string,
+		filters: ApplicationFilters,
+	) {
+		return this.onboardingService.getPendingApplications(reviewerId, filters);
 	}
 
 	/**
