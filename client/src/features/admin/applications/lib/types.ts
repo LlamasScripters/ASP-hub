@@ -76,7 +76,7 @@ export const applicationSchema = z
 	}));
 
 export const applicationFiltersSchema = z.object({
-	status: applicationStatusEnum.optional(),
+	status: z.enum(["pending", "approved", "rejected", "all"]).optional(),
 	sectionId: z.string().uuid().optional(),
 	categoryId: z.string().uuid().optional(),
 	search: z.string().optional(),
@@ -112,4 +112,5 @@ export const applicationStatusTranslations = {
 	pending: "En attente",
 	approved: "Approuvée",
 	rejected: "Refusée",
+	all: "Toutes",
 } as const;

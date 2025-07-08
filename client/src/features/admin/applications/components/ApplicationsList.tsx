@@ -391,7 +391,7 @@ export function ApplicationsList({
 	initialApplications = [],
 }: ApplicationsListProps) {
 	const [filters, setFilters] = useState<Partial<ApplicationFilters>>({
-		status: "pending",
+		status: "all", // Changer de "pending" à "all" pour afficher toutes les candidatures par défaut
 		page: 1,
 		limit: 20,
 		dateRange: "all",
@@ -434,10 +434,7 @@ export function ApplicationsList({
 	const handleStatusFilter = (status: string) => {
 		setFilters((prev: Partial<ApplicationFilters>) => ({
 			...prev,
-			status:
-				status === "all"
-					? undefined
-					: (status as "pending" | "approved" | "rejected"),
+			status: status as "pending" | "approved" | "rejected" | "all",
 			page: 1,
 		}));
 	};
@@ -578,7 +575,7 @@ export function ApplicationsList({
 
 	const resetFilters = () => {
 		setFilters({
-			status: "pending",
+			status: "all",
 			page: 1,
 			limit: 20,
 			dateRange: "all",
@@ -588,7 +585,7 @@ export function ApplicationsList({
 	const getActiveFiltersCount = () => {
 		let count = 0;
 		if (filters.search) count++;
-		if (filters.status && filters.status !== "pending") count++;
+		if (filters.status && filters.status !== "all") count++;
 		if (filters.sectionId) count++;
 		if (filters.categoryId) count++;
 		if (filters.dateRange && filters.dateRange !== "all") count++;
@@ -840,9 +837,9 @@ export function ApplicationsList({
 								{filters.search && (
 									<Badge variant="secondary">Recherche: {filters.search}</Badge>
 								)}
-								{filters.status && filters.status !== "pending" && (
+								{filters.status && filters.status !== "all" && (
 									<Badge variant="secondary">
-										Statut: {applicationStatusTranslations[filters.status]}
+										Statut: {applicationStatusTranslations[filters.status as keyof typeof applicationStatusTranslations]}
 									</Badge>
 								)}
 								{filters.sectionId && (

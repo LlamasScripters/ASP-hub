@@ -495,13 +495,12 @@ export class OnboardingService {
 		// Build where conditions
 		const conditions = [isNull(schema.membershipApplications.deletedAt)];
 
-		// Status filter - default to 'pending' if not specified
+		// Status filter - only add condition if status is specified and not "all"
 		if (filters.status && filters.status !== "all") {
 			const status = filters.status as "pending" | "approved" | "rejected";
 			conditions.push(eq(schema.membershipApplications.status, status));
-		} else {
-			conditions.push(eq(schema.membershipApplications.status, "pending"));
 		}
+		// If status is "all" or undefined, don't add any status filter - show all applications
 
 		const applications = await db
 			.select({
