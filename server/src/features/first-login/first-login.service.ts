@@ -96,14 +96,6 @@ export class FirstLoginService {
 			profileData,
 		);
 
-		// Send welcome email
-		try {
-			await this.notificationService.sendWelcomeEmail(userId);
-		} catch (error) {
-			console.error("Failed to send welcome email:", error);
-			// Don't throw - profile completion should succeed even if email fails
-		}
-
 		return updatedUser;
 	}
 
@@ -200,12 +192,6 @@ export class FirstLoginService {
 					});
 				}
 
-				// Send role assignment notification
-				await this.notificationService.sendRoleAssignmentEmail(
-					updatedApplication.userId,
-					"member",
-					reviewerId,
-				);
 			} catch (error) {
 				console.error(
 					"Failed to update user role or send role notification:",

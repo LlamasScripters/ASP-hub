@@ -320,15 +320,7 @@ export class OnboardingService {
 				decision,
 				comments,
 			);
-
-			// If approved, send role assignment notification
-			if (decision === "approved") {
-				await this.notificationService.sendRoleAssignmentEmail(
-					application.userId,
-					"member",
-					reviewerId,
-				);
-			}
+			
 		} catch (error) {
 			console.error("Failed to send decision notifications:", error);
 			// Don't throw - review should succeed even if notifications fail

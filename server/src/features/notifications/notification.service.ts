@@ -11,49 +11,13 @@ export interface NotificationData {
 
 // Template IDs for different notification types
 const TEMPLATE_IDS = {
-	welcome: 9,
 	applicationSubmitted: 10,
 	newApplicationManager: 11,
 	applicationApproved: 12,
 	applicationRejected: 13,
-	roleAssignment: 14,
 } as const;
 
 export class NotificationService {
-	/**
-	 * Send welcome email after profile completion
-	 */
-	async sendWelcomeEmail(userId: string) {
-		const user = await db
-			.select({
-				email: schema.users.email,
-				firstName: schema.users.firstName,
-				lastName: schema.users.lastName,
-			})
-			.from(schema.users)
-			.where(eq(schema.users.id, userId))
-			.limit(1);
-
-		if (!user[0]) {
-			throw new Error("User not found");
-		}
-
-		const emailData = {
-			to: {
-				email: user[0].email,
-				name: `${user[0].firstName} ${user[0].lastName}`,
-			},
-			templateId: TEMPLATE_IDS.welcome,
-			params: {
-				FIRST_NAME: user[0].firstName || "",
-				LAST_NAME: user[0].lastName || "",
-				DASHBOARD_URL: `${process.env.FRONTEND_URL}/dashboard`,
-				PROFILE_URL: `${process.env.FRONTEND_URL}/profile`,
-			},
-		};
-
-		return this.sendNotification(emailData);
-	}
 
 	/**
 	 * Send notification when membership application is submitted
@@ -97,7 +61,7 @@ export class NotificationService {
 				USER_NAME: application[0].userName || "",
 				SECTION_NAME: application[0].sectionName || "",
 				CATEGORY_NAME: application[0].categoryName || "",
-				STATUS_URL: `${process.env.FRONTEND_URL}/dashboard/applications`,
+				STATUS_URL: `${process.env.HOST}/dashboard/applications`,
 			},
 		};
 
@@ -169,7 +133,7 @@ export class NotificationService {
 				APPLICANT_NAME: `${application[0].applicantName || ""} ${application[0].applicantLastName || ""}`,
 				SECTION_NAME: application[0].sectionName || "",
 				CATEGORY_NAME: application[0].categoryName || "",
-				REVIEW_URL: `${process.env.FRONTEND_URL}/admin/applications/${applicationId}`,
+				REVIEW_URL: `${process.env.HOST}/admin/applications/${applicationId}`,
 			},
 		}));
 
@@ -230,55 +194,7 @@ export class NotificationService {
 				SECTION_NAME: application[0].sectionName || "",
 				CATEGORY_NAME: application[0].categoryName || "",
 				COMMENTS: comments,
-				DASHBOARD_URL: `${process.env.FRONTEND_URL}/dashboard`,
-			},
-		};
-
-		return this.sendNotification(emailData);
-	}
-
-	/**
-	 * Send notification when user is assigned a new role
-	 */
-	async sendRoleAssignmentEmail(
-		userId: string,
-		newRole: string,
-		assignedBy: string,
-	) {
-		const user = await db
-			.select({
-				email: schema.users.email,
-				firstName: schema.users.firstName,
-				lastName: schema.users.lastName,
-			})
-			.from(schema.users)
-			.where(eq(schema.users.id, userId))
-			.limit(1);
-
-		const assigner = await db
-			.select({
-				firstName: schema.users.firstName,
-				lastName: schema.users.lastName,
-			})
-			.from(schema.users)
-			.where(eq(schema.users.id, assignedBy))
-			.limit(1);
-
-		if (!user[0] || !assigner[0]) {
-			throw new Error("User or assigner not found");
-		}
-
-		const emailData = {
-			to: {
-				email: user[0].email,
-				name: `${user[0].firstName || ""} ${user[0].lastName || ""}`,
-			},
-			templateId: TEMPLATE_IDS.roleAssignment,
-			params: {
-				USER_NAME: user[0].firstName || "",
-				NEW_ROLE: this.getRoleDisplayName(newRole),
-				ASSIGNER_NAME: `${assigner[0].firstName || ""} ${assigner[0].lastName || ""}`,
-				DASHBOARD_URL: `${process.env.FRONTEND_URL}/dashboard`,
+				DASHBOARD_URL: `${process.env.HOST}/dashboard`,
 			},
 		};
 
@@ -304,18 +220,5 @@ export class NotificationService {
 			throw error;
 		}
 	}
-
-	/**
-	 * Get user-friendly role display name
-	 */
-	private getRoleDisplayName(role: string): string {
-		const roleMap = {
-			user: "Utilisateur",
-			member: "Membre",
-			coach: "Entraîneur",
-			section_manager: "Responsable de section",
-			admin: "Administrateur",
-		};
-		return roleMap[role as keyof typeof roleMap] || role;
-	}
+	
 }
