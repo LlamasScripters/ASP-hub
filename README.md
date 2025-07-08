@@ -158,3 +158,30 @@ npm run dev
   ```
 
   
+### Tests serveur
+
+```bash
+# Aller dans le dossier server
+cd server
+
+# Lancer tous les tests
+npm test
+
+# Lancer une catégorie spécifique
+node --test tests/unit/
+node --test tests/functional/
+node --test tests/interface/
+
+# Lancer un fichier spécifique
+npx tsx --test tests/unit/password.test.ts
+```
+
+### Tests client
+
+```bash
+# Aller dans le dossier client
+cd client
+
+# Lancer tous les tests
+npx playwright test
+```

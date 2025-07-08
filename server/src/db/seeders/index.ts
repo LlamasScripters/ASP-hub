@@ -8,6 +8,7 @@ import { seedRoomReservations } from "./data/roomReservations.js";
 import { seedRooms } from "./data/rooms.js";
 import { seedSections } from "./data/sections.js";
 import { seedSessionsSport } from "./data/sessionsSport.js";
+import { seedUsers } from "./data/users.js";
 import { resetAllTables } from "./reset.js";
 
 export async function seedDatabase() {
@@ -15,6 +16,9 @@ export async function seedDatabase() {
 
 	try {
 		// Seeding dans l'ordre des dépendances
+		console.log("Seeding Users...");
+		await seedUsers(db);
+
 		console.log("Seeding Complexes...");
 		const complexes = await seedComplexes(db);
 
