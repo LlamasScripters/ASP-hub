@@ -1,7 +1,7 @@
 import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 import { UserRole } from "@/lib/roles.js";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import type { z } from "zod/v4";
 import { NotificationService } from "../notifications/notification.service.js";
 
@@ -182,15 +182,125 @@ export class OnboardingService {
 
 		// Send notifications
 		try {
-			// Send confirmation email to applicant
-			await this.notificationService.sendApplicationSubmittedEmail(
-				application.id,
-			);
+			// Get application data with user and section/category info for notifications
+			const applicationWithDetails = await db
+				.select({
+					userEmail: schema.users.email,
+					userName: schema.users.firstName,
+					userLastName: schema.users.lastName,
+					sectionName: schema.sections.name,
+					categoryName: schema.categories.name,
+				})
+				.from(schema.membershipApplications)
+				.leftJoin(
+					schema.users,
+					eq(schema.membershipApplications.userId, schema.users.id),
+				)
+				.leftJoin(
+					schema.sections,
+					eq(schema.membershipApplications.sectionId, schema.sections.id),
+				)
+				.leftJoin(
+					schema.categories,
+					eq(schema.membershipApplications.categoryId, schema.categories.id),
+				)
+				.where(eq(schema.membershipApplications.id, application.id))
+				.limit(1);
 
-			// Notify section managers
-			await this.notificationService.notifyManagersOfNewApplication(
-				application.id,
-			);
+			if (applicationWithDetails[0]?.userEmail) {
+				// Send confirmation email to applicant
+				await this.notificationService.sendApplicationSubmittedEmail({
+					userEmail: applicationWithDetails[0].userEmail,
+					userName: applicationWithDetails[0].userName || "",
+					userLastName: applicationWithDetails[0].userLastName || "",
+					sectionName: applicationWithDetails[0].sectionName || undefined,
+					categoryName: applicationWithDetails[0].categoryName || undefined,
+				});
+
+				// Get managers for notification based on section/category
+				// Always include all admins
+				const allAdmins = await db
+					.select({
+						email: schema.users.email,
+						firstName: schema.users.firstName,
+						lastName: schema.users.lastName,
+						role: schema.users.role,
+					})
+					.from(schema.users)
+					.where(eq(schema.users.role, "admin"));
+
+				// Get section managers for the specific section (if any)
+				let sectionManagers: typeof allAdmins = [];
+				if (application.sectionId) {
+					sectionManagers = await db
+						.select({
+							email: schema.users.email,
+							firstName: schema.users.firstName,
+							lastName: schema.users.lastName,
+							role: schema.users.role,
+						})
+						.from(schema.users)
+						.innerJoin(
+							schema.sectionResponsibilities,
+							eq(schema.sectionResponsibilities.userId, schema.users.id),
+						)
+						.where(
+							and(
+								eq(schema.users.role, "section_manager"),
+								eq(schema.sectionResponsibilities.sectionId, application.sectionId),
+								eq(schema.sectionResponsibilities.isActive, true),
+							),
+						);
+				}
+
+				// Get coaches for the specific category (if any)
+				let coaches: typeof allAdmins = [];
+				if (application.categoryId) {
+					coaches = await db
+						.select({
+							email: schema.users.email,
+							firstName: schema.users.firstName,
+							lastName: schema.users.lastName,
+							role: schema.users.role,
+						})
+						.from(schema.users)
+						.innerJoin(
+							schema.sectionResponsibilities,
+							eq(schema.sectionResponsibilities.userId, schema.users.id),
+						)
+						.where(
+							and(
+								eq(schema.users.role, "coach"),
+								eq(schema.sectionResponsibilities.categoryId, application.categoryId),
+								eq(schema.sectionResponsibilities.isActive, true),
+							),
+						);
+				}
+
+				// Combine all managers and remove duplicates by email
+				const allManagers = [...allAdmins, ...sectionManagers, ...coaches];
+				const uniqueManagers = allManagers.filter(
+					(manager, index, self) =>
+						index === self.findIndex((m) => m.email === manager.email),
+				);
+				const managers = uniqueManagers;
+
+				// Notify section managers
+				if (managers.length > 0) {
+					await this.notificationService.notifyManagersOfNewApplication({
+						managers: managers.map((m) => ({
+							email: m.email,
+							firstName: m.firstName || "",
+							lastName: m.lastName || "",
+						})),
+						applicantName: applicationWithDetails[0].userName || "",
+						applicantLastName: applicationWithDetails[0].userLastName || "",
+						sectionName: applicationWithDetails[0].sectionName || undefined,
+						categoryName: applicationWithDetails[0].categoryName || undefined,
+						applicationId: application.id,
+					});
+				}
+			}
 		} catch (error) {
 			console.error("Failed to send application notifications:", error);
 			// Don't throw - application creation should succeed even if notifications fail
@@ -315,11 +425,44 @@ export class OnboardingService {
 
 		// Send notification about the decision
 		try {
-			await this.notificationService.sendApplicationDecisionEmail(
-				applicationId,
-				decision,
-				comments,
-			);
+			// Get application data with user and section/category info for notifications
+			const applicationWithDetails = await db
+				.select({
+					userEmail: schema.users.email,
+					userName: schema.users.firstName,
+					userLastName: schema.users.lastName,
+					sectionName: schema.sections.name,
+					categoryName: schema.categories.name,
+				})
+				.from(schema.membershipApplications)
+				.leftJoin(
+					schema.users,
+					eq(schema.membershipApplications.userId, schema.users.id),
+				)
+				.leftJoin(
+					schema.sections,
+					eq(schema.membershipApplications.sectionId, schema.sections.id),
+				)
+				.leftJoin(
+					schema.categories,
+					eq(schema.membershipApplications.categoryId, schema.categories.id),
+				)
+				.where(eq(schema.membershipApplications.id, applicationId))
+				.limit(1);
+
+			if (applicationWithDetails[0]?.userEmail) {
+				await this.notificationService.sendApplicationDecisionEmail(
+					{
+						userEmail: applicationWithDetails[0].userEmail,
+						userName: applicationWithDetails[0].userName || "",
+						userLastName: applicationWithDetails[0].userLastName || "",
+						sectionName: applicationWithDetails[0].sectionName || undefined,
+						categoryName: applicationWithDetails[0].categoryName || undefined,
+					},
+					decision,
+					comments,
+				);
+			}
 		} catch (error) {
 			console.error("Failed to send decision notifications:", error);
 			// Don't throw - review should succeed even if notifications fail
