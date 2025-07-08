@@ -2,6 +2,7 @@ import { db } from "../index.js";
 import { seedComplexes } from "./data/complexes.js";
 import { seedReservations } from "./data/reservations.js";
 import { seedRooms } from "./data/rooms.js";
+import { seedUsers } from "./data/users.js";
 import { resetAllTables } from "./reset.js";
 
 export async function seedDatabase() {
@@ -9,6 +10,9 @@ export async function seedDatabase() {
 
 	try {
 		// Seeding dans l'ordre des dépendances
+		console.log("Seeding Users...");
+		await seedUsers(db);
+
 		console.log("Seeding Complexes...");
 		const complexes = await seedComplexes(db);
 

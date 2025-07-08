@@ -1,0 +1,271 @@
+
+> server@1.0.0 test
+> tsx --test tests/**/*.test.ts --reporter=tap
+
+TAP version 13
+# Subtest: Users Functional Tests
+    # Subtest: should validate password schema correctly
+    ok 1 - should validate password schema correctly
+      ---
+      duration_ms: 3.163529
+      type: 'test'
+      ...
+    # Subtest: should check admin permissions correctly
+    ok 2 - should check admin permissions correctly
+      ---
+      duration_ms: 0.340427
+      type: 'test'
+      ...
+    # Subtest: should set user password correctly
+    ok 3 - should set user password correctly
+      ---
+      duration_ms: 0.453181
+      type: 'test'
+      ...
+    # Subtest: should get session correctly
+    ok 4 - should get session correctly
+      ---
+      duration_ms: 0.330698
+      type: 'test'
+      ...
+    # Subtest: should handle S3 operations correctly
+    ok 5 - should handle S3 operations correctly
+      ---
+      duration_ms: 0.334856
+      type: 'test'
+      ...
+    # Subtest: should handle file upload correctly
+    ok 6 - should handle file upload correctly
+      ---
+      duration_ms: 0.452971
+      type: 'test'
+      ...
+    1..6
+ok 1 - Users Functional Tests
+  ---
+  duration_ms: 6.675878
+  type: 'suite'
+  ...
+# Subtest: API Interface Tests
+    # Subtest: should handle set user password endpoint - admin success
+    ok 1 - should handle set user password endpoint - admin success
+      ---
+      duration_ms: 3.112902
+      type: 'test'
+      ...
+    # Subtest: should handle set user password endpoint - non-admin failure
+    ok 2 - should handle set user password endpoint - non-admin failure
+      ---
+      duration_ms: 0.502564
+      type: 'test'
+      ...
+    # Subtest: should handle set user password endpoint - validation error
+    ok 3 - should handle set user password endpoint - validation error
+      ---
+      duration_ms: 0.997852
+      type: 'test'
+      ...
+    # Subtest: should handle get user avatar endpoint - success
+    ok 4 - should handle get user avatar endpoint - success
+      ---
+      duration_ms: 0.414727
+      type: 'test'
+      ...
+    # Subtest: should handle get user avatar endpoint - not found
+    ok 5 - should handle get user avatar endpoint - not found
+      ---
+      duration_ms: 0.230408
+      type: 'test'
+      ...
+    # Subtest: should handle upload user avatar endpoint - user uploads own avatar
+    ok 6 - should handle upload user avatar endpoint - user uploads own avatar
+      ---
+      duration_ms: 0.394379
+      type: 'test'
+      ...
+    # Subtest: should handle upload user avatar endpoint - admin uploads for user
+    ok 7 - should handle upload user avatar endpoint - admin uploads for user
+      ---
+      duration_ms: 0.199208
+      type: 'test'
+      ...
+    # Subtest: should handle upload user avatar endpoint - unauthorized access
+    ok 8 - should handle upload user avatar endpoint - unauthorized access
+      ---
+      duration_ms: 0.238213
+      type: 'test'
+      ...
+    # Subtest: should handle upload user avatar endpoint - no file provided
+    ok 9 - should handle upload user avatar endpoint - no file provided
+      ---
+      duration_ms: 0.248152
+      type: 'test'
+      ...
+    1..9
+ok 2 - API Interface Tests
+  ---
+  duration_ms: 8.323664
+  type: 'suite'
+  ...
+# Subtest: Password Module
+    # Subtest: should check password strength correctly
+    ok 1 - should check password strength correctly
+      ---
+      duration_ms: 9.055728
+      type: 'test'
+      ...
+    # Subtest: should identify strong passwords
+    ok 2 - should identify strong passwords
+      ---
+      duration_ms: 92.269537
+      type: 'test'
+      ...
+    # Subtest: should handle empty password
+    ok 3 - should handle empty password
+      ---
+      duration_ms: 0.277027
+      type: 'test'
+      ...
+    # Subtest: should handle very long passwords
+    ok 4 - should handle very long passwords
+      ---
+      duration_ms: 248.944445
+      type: 'test'
+      ...
+    # Subtest: should have correct MIN_PASSWORD_STRENGTH constant
+    ok 5 - should have correct MIN_PASSWORD_STRENGTH constant
+      ---
+      duration_ms: 0.186464
+      type: 'test'
+      ...
+    1..5
+ok 3 - Password Module
+  ---
+  duration_ms: 351.803253
+  type: 'suite'
+  ...
+# Subtest: Tags Service Unit Tests
+    # Subtest: should have getAllTags method
+    ok 1 - should have getAllTags method
+      ---
+      duration_ms: 1.60112
+      type: 'test'
+      ...
+    # Subtest: should have getTagById method
+    ok 2 - should have getTagById method
+      ---
+      duration_ms: 0.412513
+      type: 'test'
+      ...
+    # Subtest: should have createTag method
+    ok 3 - should have createTag method
+      ---
+      duration_ms: 0.354443
+      type: 'test'
+      ...
+    # Subtest: should have updateTag method
+    ok 4 - should have updateTag method
+      ---
+      duration_ms: 0.475333
+      type: 'test'
+      ...
+    # Subtest: should have deleteTag method
+    ok 5 - should have deleteTag method
+      ---
+      duration_ms: 0.251067
+      type: 'test'
+      ...
+    # Subtest: should have searchTags method
+    ok 6 - should have searchTags method
+      ---
+      duration_ms: 0.307714
+      type: 'test'
+      ...
+    # Subtest: should handle tag data structure
+    ok 7 - should handle tag data structure
+      ---
+      duration_ms: 0.363229
+      type: 'test'
+      ...
+    # Subtest: should handle partial tag data for updates
+    ok 8 - should handle partial tag data for updates
+      ---
+      duration_ms: 0.352249
+      type: 'test'
+      ...
+    # Subtest: should handle numeric IDs
+    ok 9 - should handle numeric IDs
+      ---
+      duration_ms: 0.375002
+      type: 'test'
+      ...
+    # Subtest: should handle search queries
+    ok 10 - should handle search queries
+      ---
+      duration_ms: 0.359343
+      type: 'test'
+      ...
+    # Subtest: should handle empty search query
+    ok 11 - should handle empty search query
+      ---
+      duration_ms: 0.134395
+      type: 'test'
+      ...
+    # Subtest: should handle special characters in search query
+    ok 12 - should handle special characters in search query
+      ---
+      duration_ms: 0.174431
+      type: 'test'
+      ...
+    1..12
+ok 4 - Tags Service Unit Tests
+  ---
+  duration_ms: 7.36186
+  type: 'suite'
+  ...
+# Subtest: Zod Module
+    # Subtest: should format simple validation error
+    ok 1 - should format simple validation error
+      ---
+      duration_ms: 7.382151
+      type: 'test'
+      ...
+    # Subtest: should format nested validation error
+    ok 2 - should format nested validation error
+      ---
+      duration_ms: 2.6755
+      type: 'test'
+      ...
+    # Subtest: should format array validation error
+    ok 3 - should format array validation error
+      ---
+      duration_ms: 1.818884
+      type: 'test'
+      ...
+    # Subtest: should handle root level error
+    ok 4 - should handle root level error
+      ---
+      duration_ms: 0.670163
+      type: 'test'
+      ...
+    # Subtest: should handle empty error object
+    ok 5 - should handle empty error object
+      ---
+      duration_ms: 0.729105
+      type: 'test'
+      ...
+    1..5
+ok 5 - Zod Module
+  ---
+  duration_ms: 15.130947
+  type: 'suite'
+  ...
+1..5
+# tests 37
+# suites 5
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 934.831276
