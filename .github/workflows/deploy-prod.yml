@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: |
             ./package-lock.json
@@ -57,6 +57,11 @@ jobs:
 
       - name: Run client tests
         working-directory: ./client
+        run: |
+          npm run test:e2e
+
+      - name: Run server tests
+        working-directory: ./server
         run: npm run test
 
   build-and-push:
@@ -95,7 +100,7 @@ jobs:
           echo "server-image=${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}:${TAG}" >> $GITHUB_OUTPUT
 
       - name: Build and push client image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./client
           target: production
@@ -108,7 +113,7 @@ jobs:
           platforms: linux/amd64
 
       - name: Build and push server image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./server
           target: production
@@ -129,16 +134,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
+      - name: Setup SSH Key for Docker Context
+        uses: webfactory/ssh-agent@v0.9.1
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          name: id_ed25519
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Setup Docker context
         run: |
-          docker context create production --docker "host=ssh://${{ secrets.PRODUCTION_HOST }}"
+          docker context create production --docker "host=ssh://${{ secrets.HOST }}" --ssh "default=-A"
           docker context use production
 
       - name: Verify Docker connection
