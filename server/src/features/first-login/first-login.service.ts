@@ -2,7 +2,6 @@ import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 import { eq } from "drizzle-orm";
 import type { z } from "zod/v4";
-import { NotificationService } from "../notifications/notification.service.js";
 import { OnboardingService } from "../onboarding/onboarding.service.js";
 import type {
 	CompleteProfileSchema,
@@ -20,11 +19,9 @@ export interface FirstLoginStatus {
 
 export class FirstLoginService {
 	private onboardingService: OnboardingService;
-	private notificationService: NotificationService;
 
 	constructor() {
 		this.onboardingService = new OnboardingService();
-		this.notificationService = new NotificationService();
 	}
 
 	/**
@@ -113,24 +110,7 @@ export class FirstLoginService {
 				applicationData,
 			);
 
-		// Send confirmation email to applicant
-		try {
-			await this.notificationService.sendApplicationSubmittedEmail(
-				application.id,
-			);
-		} catch (error) {
-			console.error("Failed to send application confirmation email:", error);
-		}
-
-		// Notify section managers
-		try {
-			await this.notificationService.notifyManagersOfNewApplication(
-				application.id,
-			);
-		} catch (error) {
-			console.error("Failed to notify managers of new application:", error);
-		}
-
+		// Notifications are handled by the onboarding service
 		return application;
 	}
 
@@ -152,53 +132,7 @@ export class FirstLoginService {
 				comments,
 			);
 
-		// Send decision email to applicant
-		try {
-			await this.notificationService.sendApplicationDecisionEmail(
-				applicationId,
-				decision,
-				comments,
-			);
-		} catch (error) {
-			console.error("Failed to send application decision email:", error);
-		}
-
-		// If approved, update user role to member
-		if (decision === "approved") {
-			try {
-				await db
-					.update(schema.users)
-					.set({
-						role: "member",
-						updatedAt: new Date(),
-					})
-					.where(eq(schema.users.id, updatedApplication.userId));
-
-				// Add user to section members if section is specified
-				if (updatedApplication.sectionId) {
-					await db.insert(schema.sectionMembers).values({
-						userId: updatedApplication.userId,
-						sectionId: updatedApplication.sectionId,
-						joinedAt: new Date(),
-					});
-				}
-
-				// Add user to category members if category is specified
-				if (updatedApplication.categoryId) {
-					await db.insert(schema.categoryMembers).values({
-						userId: updatedApplication.userId,
-						categoryId: updatedApplication.categoryId,
-						joinedAt: new Date(),
-					});
-				}
-			} catch (error) {
-				console.error(
-					"Failed to update user role or send role notification:",
-					error,
-				);
-			}
-		}
-
+		// Notifications and role updates are handled by the onboarding service
 		return updatedApplication;
 	}
 
