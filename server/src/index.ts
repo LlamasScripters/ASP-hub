@@ -1,21 +1,11 @@
-import cors from "cors";
-import dotenv from "dotenv";
-import express from "express";
-import helmet from "helmet";
+import server from "./server.js";
 
-dotenv.config();
+async function main() {
+	server.listen(3000, "0.0.0.0", () => {
+		console.log("Server running on port 3000");
+	});
 
-const app = express();
-const PORT = process.env.PORT || 8000;
+	return;
+}
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-	res.json({ message: "ASP API is running!" });
-});
-
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
-});
+main();

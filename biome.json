@@ -7,12 +7,34 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"client/src/components/tiptap-*",
+			"client/src/hooks/use-cursor-visibility.ts",
+			"client/src/hooks/use-menu-navigation.ts",
+			"client/src/hooks/use-tiptap-editor.ts",
+			"client/src/hooks/use-window-size.ts",
+			"client/src/lib/tiptap-utils.ts",
+			"client/src/styles",
+			"server/drizzle"
+		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"client/src/components/tiptap-*",
+			"client/src/hooks/use-cursor-visibility.ts",
+			"client/src/hooks/use-menu-navigation.ts",
+			"client/src/hooks/use-tiptap-editor.ts",
+			"client/src/hooks/use-window-size.ts",
+			"client/src/lib/tiptap-utils.ts",
+			"client/src/styles",
+			"server/drizzle"
+		]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -22,7 +44,18 @@
 		"rules": {
 			"recommended": true
 		},
-		"ignore": ["**/routeTree.gen.ts"]
+		"ignore": [
+			"**/routeTree.gen.ts",
+			"client/src/components/ui",
+			"client/src/components/tiptap-*",
+			"client/src/hooks/use-cursor-visibility.ts",
+			"client/src/hooks/use-menu-navigation.ts",
+			"client/src/hooks/use-tiptap-editor.ts",
+			"client/src/hooks/use-window-size.ts",
+			"client/src/lib/tiptap-utils.ts",
+			"client/src/styles",
+			"server/drizzle"
+		]
 	},
 	"javascript": {
 		"formatter": {
