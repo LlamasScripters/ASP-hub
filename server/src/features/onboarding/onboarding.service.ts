@@ -320,7 +320,6 @@ export class OnboardingService {
 				decision,
 				comments,
 			);
-			
 		} catch (error) {
 			console.error("Failed to send decision notifications:", error);
 			// Don't throw - review should succeed even if notifications fail

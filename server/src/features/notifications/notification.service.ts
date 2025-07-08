@@ -11,14 +11,13 @@ export interface NotificationData {
 
 // Template IDs for different notification types
 const TEMPLATE_IDS = {
-	applicationSubmitted: 10,
-	newApplicationManager: 11,
-	applicationApproved: 12,
-	applicationRejected: 13,
+	applicationSubmitted: 9,
+	newApplicationManager: 10,
+	applicationApproved: 11,
+	applicationRejected: 12,
 } as const;
 
 export class NotificationService {
-
 	/**
 	 * Send notification when membership application is submitted
 	 */
@@ -220,5 +219,4 @@ export class NotificationService {
 			throw error;
 		}
 	}
-	
 }
