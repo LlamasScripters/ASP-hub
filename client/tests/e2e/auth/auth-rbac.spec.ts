@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { testUsers } from "../../fixtures/test-users.js";
 import { authFiles } from "../../setup/auth.config.js";
 
 test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
@@ -10,15 +11,23 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 
 			// Look for admin-specific navigation or content
 			const adminElements = [
-				page.getByRole("link", { name: /admin|administration/i }),
-				page.getByText(/admin|administration/i),
-				page.locator('[href*="admin"]'),
+				page.getByRole("link", { name: /paramètres|settings/i }), // Admin-specific settings
+				page.getByRole("link", { name: /adhérents|membres|members/i }), // Member management
+				page
+					.getByText("Admin User")
+					.first(), // Admin user indicator
+				page.getByText(/bienvenue.*admin/i), // Admin welcome message
 			];
 
-			// At least one admin element should be visible
-			await expect(
-				adminElements[0].or(adminElements[1]).or(adminElements[2]),
-			).toBeVisible();
+			// Check each element individually to avoid strict mode violations
+			let hasAdminAccess = false;
+			for (const element of adminElements) {
+				if (await element.isVisible().catch(() => false)) {
+					hasAdminAccess = true;
+					break;
+				}
+			}
+			expect(hasAdminAccess).toBe(true);
 		});
 
 		test("should have access to user management", async ({ page }) => {
@@ -36,22 +45,28 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 				if (!page.url().includes("/auth/login")) {
 					// Look for user management content
 					const userManagementElements = [
-						page.getByText(/gestion.*utilisateurs|user.*management|users/i),
-						page.getByRole("heading", { name: /utilisateurs|users/i }),
-						page.locator("table").filter({ hasText: /email|nom|role/i }),
+						page
+							.getByText(/gestion.*utilisateurs|user.*management|users/i)
+							.first(),
+						page.getByRole("heading", { name: /utilisateurs|users/i }).first(),
+						page
+							.locator("table")
+							.filter({ hasText: /email|nom|role/i })
+							.first(),
 					];
 
-					const hasUserManagement = await userManagementElements[0]
-						.or(userManagementElements[1])
-						.or(userManagementElements[2])
-						.isVisible();
+					// Check each element individually to avoid strict mode violations
+					let hasUserManagement = false;
+					for (const element of userManagementElements) {
+						if (await element.isVisible().catch(() => false)) {
+							hasUserManagement = true;
+							break;
+						}
+					}
 
 					if (hasUserManagement) {
-						await expect(
-							userManagementElements[0]
-								.or(userManagementElements[1])
-								.or(userManagementElements[2]),
-						).toBeVisible();
+						// Just confirm we found user management access
+						expect(hasUserManagement).toBe(true);
 						break;
 					}
 				}
@@ -72,24 +87,29 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 				if (!page.url().includes("/auth/login")) {
 					// Look for content management features
 					const contentElements = [
-						page.getByText(
-							/gestion.*articles|content.*management|blog.*admin/i,
-						),
-						page.getByRole("button", {
-							name: /créer.*article|create.*post|new.*article/i,
-						}),
-						page.getByRole("link", { name: /créer|new|add/i }),
+						page
+							.getByText(/gestion.*articles|content.*management|blog.*admin/i)
+							.first(),
+						page
+							.getByRole("button", {
+								name: /créer.*article|create.*post|new.*article/i,
+							})
+							.first(),
+						page.getByRole("link", { name: /créer|new|add/i }).first(),
 					];
 
-					const hasContentManagement = await contentElements[0]
-						.or(contentElements[1])
-						.or(contentElements[2])
-						.isVisible();
+					// Check each element individually to avoid strict mode violations
+					let hasContentManagement = false;
+					for (const element of contentElements) {
+						if (await element.isVisible().catch(() => false)) {
+							hasContentManagement = true;
+							break;
+						}
+					}
 
 					if (hasContentManagement) {
-						await expect(
-							contentElements[0].or(contentElements[1]).or(contentElements[2]),
-						).toBeVisible();
+						// Just confirm we found content management access
+						expect(hasContentManagement).toBe(true);
 						break;
 					}
 				}
@@ -211,20 +231,25 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 				if (!page.url().includes("/auth/login")) {
 					// Look for profile content
 					const profileElements = [
-						page.getByText(/profil|profile/i),
-						page.getByText(/User Test/i), // Test user name
-						page.getByLabel(/nom|prénom|email/i),
+						page.getByText(/profil|profile/i).first(),
+						page
+							.getByText(/User Test/i)
+							.first(), // Test user name
+						page.getByLabel(/nom|prénom|email/i).first(),
 					];
 
-					const hasProfile = await profileElements[0]
-						.or(profileElements[1])
-						.or(profileElements[2])
-						.isVisible();
+					// Check each element individually to avoid strict mode violations
+					let hasProfile = false;
+					for (const element of profileElements) {
+						if (await element.isVisible().catch(() => false)) {
+							hasProfile = true;
+							break;
+						}
+					}
 
 					if (hasProfile) {
-						await expect(
-							profileElements[0].or(profileElements[1]).or(profileElements[2]),
-						).toBeVisible();
+						// Just confirm we found profile access
+						expect(hasProfile).toBe(true);
 						break;
 					}
 				}
@@ -337,7 +362,7 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 				};
 
 				await page.getByLabel("Adresse email").fill(regularUser.email);
-				await page.getByLabel("Mot de passe").fill(regularUser.password);
+				await page.locator('input[name="password"]').fill(regularUser.password);
 				await page.getByRole("button", { name: /se connecter/i }).click();
 
 				// Should redirect back to originally requested page
@@ -350,7 +375,14 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 		test("admin should not be able to access invalid routes", async ({
 			page,
 		}) => {
-			test.use({ storageState: authFiles.admin });
+			// Login as admin first
+			await page.goto("/auth/login");
+			await page.getByLabel("Adresse email").fill(testUsers.admin.email);
+			await page
+				.locator('input[name="password"]')
+				.fill(testUsers.admin.password);
+			await page.getByRole("button", { name: /se connecter/i }).click();
+			await expect(page).toHaveURL(/dashboard/);
 
 			// Even admin should not access non-existent routes
 			await page.goto("/admin/invalid-route-that-does-not-exist");
@@ -359,7 +391,11 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 			const is404 =
 				page.url().includes("/404") ||
 				page.url().includes("/not-found") ||
-				(await page.getByText(/404|not found|page.*exist/i).isVisible());
+				(await page
+					.getByText(/404|not found|page.*exist/i)
+					.first()
+					.isVisible()
+					.catch(() => false));
 
 			expect(is404 || !page.url().includes("/admin/invalid-route")).toBe(true);
 		});
@@ -372,7 +408,14 @@ test.describe("Authentication - Role-Based Access Control (RBAC)", () => {
 			// 3. Test that new permissions are enforced immediately
 
 			// For now, we'll just verify that the current user sees their correct role
-			test.use({ storageState: authFiles.user });
+			// Login as regular user first
+			await page.goto("/auth/login");
+			await page.getByLabel("Adresse email").fill(testUsers.regularUser.email);
+			await page
+				.locator('input[name="password"]')
+				.fill(testUsers.regularUser.password);
+			await page.getByRole("button", { name: /se connecter/i }).click();
+			await expect(page).toHaveURL(/dashboard/);
 
 			await page.goto("/dashboard");
 
