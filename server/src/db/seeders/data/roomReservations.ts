@@ -1,5 +1,5 @@
+import type { db } from "@/db/index.js";
 import { eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	type InsertRoomReservation,
 	type SelectRoom,
@@ -196,10 +196,10 @@ function generateRoomReservationTitle(room: SelectRoom): string {
 }
 
 export async function seedRoomReservations(
-	db: NodePgDatabase,
+	database: typeof db,
 	rooms: SelectRoom[],
 ): Promise<void> {
-	const existingUsers = await db
+	const existingUsers = await database
 		.select()
 		.from(users)
 		.where(eq(users.role, "admin"))
@@ -290,7 +290,7 @@ export async function seedRoomReservations(
 
 	try {
 		if (roomReservationsData.length > 0) {
-			const insertedRoomReservations = await db
+			const insertedRoomReservations = await database
 				.insert(roomReservations)
 				.values(roomReservationsData)
 				.returning();

@@ -1,5 +1,5 @@
+import type { db } from "@/db/index.js";
 import { eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	type InsertSessionSport,
 	type SelectCategory,
@@ -232,11 +232,11 @@ function generateLocation(): string {
 }
 
 export async function seedSessionsSport(
-	db: NodePgDatabase,
+	database: typeof db,
 	categories: SelectCategory[],
 ): Promise<SelectSessionSport[]> {
 	// Récupérer quelques utilisateurs pour assigner comme coach/responsable
-	const availableUsers = await db
+	const availableUsers = await database
 		.select()
 		.from(users)
 		.where(eq(users.role, "admin"))
@@ -290,7 +290,7 @@ export async function seedSessionsSport(
 	console.log(`Insertion of ${sessionsData.length} sports sessions...`);
 
 	try {
-		const insertedSessions = await db
+		const insertedSessions = await database
 			.insert(sessionsSport)
 			.values(sessionsData)
 			.returning();

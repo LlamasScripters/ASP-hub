@@ -1,4 +1,4 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { db } from "@/db/index.js";
 import {
 	type InsertCategory,
 	type SelectCategory,
@@ -22,7 +22,7 @@ const createCategory = (
 });
 
 export async function seedCategories(
-	db: NodePgDatabase,
+	database: typeof db,
 	sections: SelectSection[],
 ): Promise<SelectCategory[]> {
 	const categoriesData: InsertCategory[] = [];
@@ -456,7 +456,7 @@ export async function seedCategories(
 	console.log(`Insertion of ${categoriesData.length} categories...`);
 
 	try {
-		const insertedCategories = await db
+		const insertedCategories = await database
 			.insert(categories)
 			.values(categoriesData)
 			.returning();

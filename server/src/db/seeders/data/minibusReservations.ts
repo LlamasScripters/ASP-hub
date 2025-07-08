@@ -1,5 +1,5 @@
+import type { db } from "@/db/index.js";
 import { eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	type InsertMinibusReservation,
 	type SelectMinibus,
@@ -168,10 +168,10 @@ function generateMinibusReservationTitle(minibus: SelectMinibus): string {
 }
 
 export async function seedMinibusReservations(
-	db: NodePgDatabase,
+	database: typeof db,
 	minibuses: SelectMinibus[],
 ): Promise<void> {
-	const existingUsers = await db
+	const existingUsers = await database
 		.select()
 		.from(users)
 		.where(eq(users.role, "admin"))
@@ -314,7 +314,7 @@ export async function seedMinibusReservations(
 
 	if (minibusReservationsData.length > 0) {
 		try {
-			const insertedMinibusReservations = await db
+			const insertedMinibusReservations = await database
 				.insert(minibusReservations)
 				.values(minibusReservationsData)
 				.returning();

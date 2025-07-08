@@ -1,4 +1,4 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { db } from "@/db/index.js";
 import { type InsertClub, type SelectClub, clubs } from "../../schema.js";
 
 const createClub = (
@@ -30,11 +30,14 @@ const clubsData: InsertClub[] = [
 	),
 ];
 
-export async function seedClubs(db: NodePgDatabase): Promise<SelectClub[]> {
+export async function seedClubs(database: typeof db): Promise<SelectClub[]> {
 	console.log(`Insertion of ${clubsData.length} clubs...`);
 
 	try {
-		const insertedClubs = await db.insert(clubs).values(clubsData).returning();
+		const insertedClubs = await database
+			.insert(clubs)
+			.values(clubsData)
+			.returning();
 
 		console.log(`${insertedClubs.length} clubs created successfully`);
 		return insertedClubs;

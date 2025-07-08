@@ -1,4 +1,4 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { db } from "@/db/index.js";
 import {
 	type InsertSection,
 	type SelectClub,
@@ -20,7 +20,7 @@ const createSection = (
 });
 
 export async function seedSections(
-	db: NodePgDatabase,
+	database: typeof db,
 	clubs: SelectClub[],
 ): Promise<SelectSection[]> {
 	const mainClub = clubs[0]; // ASP Pierrefitte
@@ -91,7 +91,7 @@ export async function seedSections(
 	console.log(`Insertion of ${sectionsData.length} sections...`);
 
 	try {
-		const insertedSections = await db
+		const insertedSections = await database
 			.insert(sections)
 			.values(sectionsData)
 			.returning();

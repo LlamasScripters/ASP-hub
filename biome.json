@@ -3,12 +3,12 @@
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
-		"useIgnoreFile": false
+		"useIgnoreFile": true
 	},
 	"files": {
 		"ignoreUnknown": false,
 		"ignore": [
-			"**/routeTree.gen.ts",
+			"client/src/routeTree.gen.ts",
 			"client/src/components/ui",
 			"client/src/components/tiptap-*",
 			"client/src/hooks/use-cursor-visibility.ts",
@@ -17,14 +17,16 @@
 			"client/src/hooks/use-window-size.ts",
 			"client/src/lib/tiptap-utils.ts",
 			"client/src/styles",
-			"server/drizzle"
+			"server/drizzle",
+			"client/dist",
+			"server/dist"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
 		"ignore": [
-			"**/routeTree.gen.ts",
+			"client/src/routeTree.gen.ts",
 			"client/src/components/ui",
 			"client/src/components/tiptap-*",
 			"client/src/hooks/use-cursor-visibility.ts",
@@ -45,7 +47,7 @@
 			"recommended": true
 		},
 		"ignore": [
-			"**/routeTree.gen.ts",
+			"client/src/routeTree.gen.ts",
 			"client/src/components/ui",
 			"client/src/components/tiptap-*",
 			"client/src/hooks/use-cursor-visibility.ts",

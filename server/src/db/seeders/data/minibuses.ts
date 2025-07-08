@@ -1,4 +1,4 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { db } from "@/db/index.js";
 import {
 	type InsertMinibus,
 	type SelectMinibus,
@@ -59,12 +59,12 @@ const minibusesData: InsertMinibus[] = [
 ];
 
 export async function seedMinibuses(
-	db: NodePgDatabase,
+	database: typeof db,
 ): Promise<SelectMinibus[]> {
 	console.log(`Insertion of ${minibusesData.length} minibuses...`);
 
 	try {
-		const insertedMinibuses = await db
+		const insertedMinibuses = await database
 			.insert(minibuses)
 			.values(minibusesData)
 			.returning();

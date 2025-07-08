@@ -107,9 +107,9 @@ export function MinibusesPage({ initialMinibuses = [] }: MinibusesPageProps) {
 		window.location.reload();
 	};
 
-	const handleCreate = () => {
-		navigate({ to: "/admin/assets/minibuses/create" });
-	};
+	// const handleCreate = () => {
+	// 	navigate({ to: "/admin/assets/minibuses/create" });
+	// };
 
 	const getActionIcon = (type: string) => {
 		switch (type) {

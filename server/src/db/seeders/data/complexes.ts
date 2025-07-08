@@ -1,4 +1,4 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { db } from "@/db/index.js";
 import {
 	type InsertComplex,
 	type SelectComplex,
@@ -153,12 +153,12 @@ const complexesData: InsertComplex[] = [
 ];
 
 export async function seedComplexes(
-	db: NodePgDatabase,
+	database: typeof db,
 ): Promise<SelectComplex[]> {
 	console.log(`Insertion of ${complexesData.length} complexes...`);
 
 	try {
-		const insertedComplexes = await db
+		const insertedComplexes = await database
 			.insert(complexes)
 			.values(complexesData)
 			.returning();
