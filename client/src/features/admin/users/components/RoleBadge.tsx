@@ -8,6 +8,21 @@ const roleMap: Record<AppRole, { label: string; className: string }> = {
 		className:
 			"bg-destructive text-white border-transparent dark:bg-transparent dark:text-red-400 dark:border-red-400",
 	},
+	section_manager: {
+		label: "Responsable Section",
+		className:
+			"bg-orange-500 text-white border-transparent dark:bg-transparent dark:text-orange-400 dark:border-orange-400",
+	},
+	coach: {
+		label: "Entraîneur",
+		className:
+			"bg-purple-500 text-white border-transparent dark:bg-transparent dark:text-purple-400 dark:border-purple-400",
+	},
+	member: {
+		label: "Membre",
+		className:
+			"bg-green-500 text-white border-transparent dark:bg-transparent dark:text-green-400 dark:border-green-400",
+	},
 	user: {
 		label: "Utilisateur",
 		className:

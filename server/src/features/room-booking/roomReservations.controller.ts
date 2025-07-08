@@ -1,8 +1,14 @@
+import { UserRole } from "@/lib/roles.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { roomReservationsService } from "./roomReservations.service.js";
 
 const roomReservationsRouter = Router();
+
+// Authentication required for all room reservation routes
+roomReservationsRouter.use(requireAuth);
 
 const roomReservationSchema = z.object({
 	title: z.string().min(1).max(255),
@@ -38,41 +44,90 @@ const roomReservationQuerySchema = z
 		limit: Number.parseInt(data.limit || "20", 10),
 	}));
 
-//@ts-ignore
-roomReservationsRouter.get("/", async (req: Request, res: Response) => {
-	const roomReservations = await roomReservationsService.getAll();
-	return res.json(roomReservations);
-});
+// GET all reservations - Only admins can view all reservations
+roomReservationsRouter.get(
+	"/",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		const roomReservations = await roomReservationsService.getAll();
+		res.json(roomReservations);
+	},
+);
 
-//@ts-ignore
+// GET reservation by ID - Owner or admin can view
 roomReservationsRouter.get("/:id", async (req: Request, res: Response) => {
 	const roomReservation = await roomReservationsService.getById(req.params.id);
-	if (!roomReservation)
-		return res.status(404).json({ error: "Room Reservation not found" });
-	return res.json(roomReservation);
-});
-
-//@ts-ignore
-roomReservationsRouter.post("/", async (req: Request, res: Response) => {
-	const parse = roomReservationSchema.safeParse(req.body);
-	if (!parse.success)
-		return res.status(400).json({ error: parse.error.flatten() });
-
-	const created = await roomReservationsService.create(parse.data);
-	if (!created) {
-		return res
-			.status(409)
-			.json({ error: "Time slot is already reserved for this room" });
+	if (!roomReservation) {
+		res.status(404).json({ error: "Room Reservation not found" });
+		return;
 	}
 
-	return res.status(201).json(created);
+	// Check if user can access this reservation (owner or admin)
+	const session = req.session;
+	const isOwner = session?.user.id === roomReservation.bookerId;
+	const isAdmin = session?.user.role === "admin";
+
+	if (!isOwner && !isAdmin) {
+		res
+			.status(403)
+			.json({ error: "Access denied: can only view own reservations" });
+		return;
+	}
+
+	res.json(roomReservation);
 });
 
-//@ts-ignore
+// POST new reservation - Members can create reservations
+roomReservationsRouter.post(
+	"/",
+	requireMemberAccess(),
+	async (req: Request, res: Response) => {
+		const parse = roomReservationSchema.safeParse(req.body);
+		if (!parse.success) {
+			res.status(400).json({ error: parse.error.flatten() });
+			return;
+		}
+
+		const created = await roomReservationsService.create(parse.data);
+		if (!created) {
+			res
+				.status(409)
+				.json({ error: "Time slot is already reserved for this room" });
+			return;
+		}
+
+		res.status(201).json(created);
+	},
+);
+
+// PUT update reservation - Owner or admin can modify
 roomReservationsRouter.put("/:id", async (req: Request, res: Response) => {
+	// First check if reservation exists and get ownership info
+	const existingReservation = await roomReservationsService.getById(
+		req.params.id,
+	);
+	if (!existingReservation) {
+		res.status(404).json({ error: "Room Reservation not found" });
+		return;
+	}
+
+	// Check ownership
+	const session = req.session;
+	const isOwner = session?.user.id === existingReservation.bookerId;
+	const isAdmin = session?.user.role === "admin";
+
+	if (!isOwner && !isAdmin) {
+		res
+			.status(403)
+			.json({ error: "Access denied: can only modify own reservations" });
+		return;
+	}
+
 	const parse = roomReservationSchema.partial().safeParse(req.body);
-	if (!parse.success)
-		return res.status(400).json({ error: parse.error.flatten() });
+	if (!parse.success) {
+		res.status(400).json({ error: parse.error.flatten() });
+		return;
+	}
 
 	const result = await roomReservationsService.update(
 		req.params.id,
@@ -80,27 +135,41 @@ roomReservationsRouter.put("/:id", async (req: Request, res: Response) => {
 	);
 
 	if (result === "not_found") {
-		return res.status(404).json({ error: "Room Reservation not found" });
+		res.status(404).json({ error: "Room Reservation not found" });
+		return;
 	}
 	if (result === "conflict") {
-		return res.status(409).json({
+		res.status(409).json({
 			error: "Updated time slot conflicts with another room reservation",
 		});
+		return;
 	}
 
-	return res.json(result);
+	res.json(result);
 });
 
-//@ts-ignore
+// DELETE reservation - Owner or admin can delete
 roomReservationsRouter.delete("/:id", async (req: Request, res: Response) => {
 	const roomReservation = await roomReservationsService.getById(req.params.id);
-	if (!roomReservation)
-		return res.status(404).json({ error: "Room Reservation not found" });
+	if (!roomReservation) {
+		res.status(404).json({ error: "Room Reservation not found" });
+		return;
+	}
+
+	// Check ownership
+	const session = req.session;
+	const isOwner = session?.user.id === roomReservation.bookerId;
+	const isAdmin = session?.user.role === "admin";
+
+	if (!isOwner && !isAdmin) {
+		res
+			.status(403)
+			.json({ error: "Access denied: can only delete own reservations" });
+		return;
+	}
 
 	await roomReservationsService.delete(req.params.id);
-	return res
-		.status(200)
-		.json({ message: "Room Reservation deleted successfully" });
+	res.status(200).json({ message: "Room Reservation deleted successfully" });
 });
 
 export default roomReservationsRouter;

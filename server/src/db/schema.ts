@@ -11,9 +11,16 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { d } from "node_modules/drizzle-kit/index-BAUrj6Ib.mjs";
 
 // énumérations pour les types
+export const userRoleEnum = pgEnum("user_role", [
+	"admin",
+	"section_manager",
+	"coach",
+	"member",
+	"user",
+]);
+
 export const sessionTypeEnum = pgEnum("session_type", [
 	"entrainement",
 	"match",
@@ -27,6 +34,12 @@ export const sessionStatusEnum = pgEnum("session_status", [
 	"en_cours",
 	"termine",
 	"annule",
+]);
+
+export const applicationStatusEnum = pgEnum("application_status", [
+	"pending",
+	"approved",
+	"rejected",
 ]);
 
 export const civilityEnum = pgEnum("civility", [
@@ -60,7 +73,7 @@ export const users = pgTable("users", {
 		.notNull()
 		.defaultNow(),
 	deletedAt: timestamp("deleted_at"),
-	role: text("role").notNull().default("user"),
+	role: userRoleEnum("role").notNull().default("user"),
 	banned: boolean("banned").notNull().default(false),
 	banReason: text("ban_reason"),
 	banExpires: timestamp("ban_expires"),
@@ -476,6 +489,68 @@ export const commentReactions = pgTable("comment_reactions", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Membership applications table
+export const membershipApplications = pgTable("membership_applications", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	sectionId: uuid("section_id").references(() => sections.id, {
+		onDelete: "set null",
+	}),
+	categoryId: uuid("category_id").references(() => categories.id, {
+		onDelete: "set null",
+	}),
+	motivation: text("motivation").notNull(),
+	medicalCertificateUrl: text("medical_certificate_url"),
+	emergencyContactName: varchar("emergency_contact_name", {
+		length: 255,
+	}).notNull(),
+	emergencyContactPhone: varchar("emergency_contact_phone", {
+		length: 20,
+	}).notNull(),
+	status: applicationStatusEnum("status").notNull().default("pending"),
+	reviewComments: text("review_comments"),
+	reviewedAt: timestamp("reviewed_at"),
+	reviewedBy: uuid("reviewed_by").references(() => users.id, {
+		onDelete: "set null",
+	}),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.$onUpdate(() => new Date())
+		.notNull()
+		.defaultNow(),
+	deletedAt: timestamp("deleted_at"),
+});
+
+// Section members table (relationship between users and sections)
+export const sectionMembers = pgTable("section_members", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	sectionId: uuid("section_id")
+		.notNull()
+		.references(() => sections.id, { onDelete: "cascade" }),
+	joinedAt: timestamp("joined_at").defaultNow().notNull(),
+	leftAt: timestamp("left_at"),
+	isActive: boolean("is_active").notNull().default(true),
+});
+
+// Category members table (relationship between users and categories)
+export const categoryMembers = pgTable("category_members", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	categoryId: uuid("category_id")
+		.notNull()
+		.references(() => categories.id, { onDelete: "cascade" }),
+	joinedAt: timestamp("joined_at").defaultNow().notNull(),
+	leftAt: timestamp("left_at"),
+	isActive: boolean("is_active").notNull().default(true),
+});
+
 // Types for enumerations
 export const civilityValues = [
 	"monsieur",
@@ -572,3 +647,17 @@ export type InsertComment = typeof comments.$inferInsert;
 export type SelectComment = typeof comments.$inferSelect;
 export type InsertReaction = typeof reactions.$inferInsert;
 export type SelectReaction = typeof reactions.$inferSelect;
+
+// Membership applications types
+export type InsertMembershipApplication =
+	typeof membershipApplications.$inferInsert;
+export type SelectMembershipApplication =
+	typeof membershipApplications.$inferSelect;
+
+// Section members types
+export type InsertSectionMember = typeof sectionMembers.$inferInsert;
+export type SelectSectionMember = typeof sectionMembers.$inferSelect;
+
+// Category members types
+export type InsertCategoryMember = typeof categoryMembers.$inferInsert;
+export type SelectCategoryMember = typeof categoryMembers.$inferSelect;

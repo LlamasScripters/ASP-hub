@@ -9,9 +9,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { usePostLoginRedirection } from "@/features/first-login/hooks/use-post-login-redirection";
 import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { LoginWithGoogleButton } from "./LoginWithGoogleButton";
@@ -24,9 +26,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
-	// const [isLoading, setIsLoading] = useState(false);
-	const navigate = useNavigate();
 	const location = useLocation();
+	const queryClient = useQueryClient();
+	const { handlePostLoginRedirection } = usePostLoginRedirection();
 	const { isPending: isPendingSession } = authClient.useSession();
 
 	const form = useForm<FormValues>({
@@ -45,8 +47,19 @@ export function LoginForm() {
 					password: values.password,
 				},
 				{
-					onSuccess: () => {
-						navigate({ to: location.search.redirect ?? "/dashboard" });
+					onSuccess: async () => {
+						await new Promise((resolve) => setTimeout(resolve, 500));
+
+						await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+
+						const defaultRedirect = location.search.redirect ?? "/dashboard";
+
+						const { data: session } = await authClient.getSession();
+
+						await handlePostLoginRedirection(
+							session?.user ?? null,
+							defaultRedirect,
+						);
 					},
 				},
 			);

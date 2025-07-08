@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Candidature non retenue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Merriweather:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background-color: #fcfcfd;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: #ffffff;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        .highlight h3 {
+            margin-top: 0;
+            color: #dc2626;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .highlight ul {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .highlight li {
+            margin: 8px 0;
+            color: #b91c1c;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: #2d3748;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 24px 0;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .rejected-badge {
+            display: inline-block;
+            background-color: #ef4444;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comments-section {
+            background-color: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .encouragement-card {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Candidature non retenue</h1>
+        </div>
+
+        <div class="content">
+            <p>Bonjour <strong>{{ params.USER_NAME }}</strong>,</p>
+
+            <p>Nous vous remercions pour l'intérêt que vous portez à notre club sportif et pour avoir soumis votre
+                candidature d'adhésion.</p>
+
+            <div class="highlight">
+                <h3>📋 Détails de votre candidature</h3>
+                <ul>
+                    <li><strong>Section :</strong> {{ params.SECTION_NAME }}</li>
+                    <li><strong>Catégorie :</strong> {{ params.CATEGORY_NAME }}</li>
+                    <li><strong>Statut :</strong> <span class="rejected-badge">Non retenue</span></li>
+                </ul>
+            </div>
+
+            <p>Après examen attentif de votre dossier, nous sommes au regret de vous informer que votre candidature n'a
+                pas pu être retenue pour cette session d'adhésion.</p>
+
+            {% if params.COMMENTS %}
+            <div class="comments-section">
+                <h4 style="color: #ea580c; margin-top: 0;">💬 Commentaires des responsables :</h4>
+                <p style="color: #c2410c;">{{ params.COMMENTS }}</p>
+            </div>
+            {% endif %}
+
+            <div class="encouragement-card">
+                <h3 style="color: #0369a1; margin-top: 0;">🌟 Ne baissez pas les bras !</h3>
+                <p style="color: #0c4a6e;">Cette décision ne remet pas en question vos qualités. Nous vous encourageons
+                    à retenter votre chance lors de la prochaine session d'adhésion ou à explorer d'autres sections qui
+                    pourraient vous convenir.</p>
+            </div>
+
+            <p>Si vous avez des questions concernant cette décision, n'hésitez pas à contacter directement la section
+                concernée.</p>
+
+            <p>Nous vous souhaitons le meilleur pour vos projets sportifs futurs.</p>
+
+            <p>Cordialement,<br>
+                <strong>L'équipe du club sportif</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Ce message a été envoyé automatiquement, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+
+</html>
