@@ -191,7 +191,6 @@ export class FirstLoginService {
 						joinedAt: new Date(),
 					});
 				}
-
 			} catch (error) {
 				console.error(
 					"Failed to update user role or send role notification:",
