@@ -41,32 +41,27 @@ export function LoginForm() {
 
 	const onSubmit = async (values: FormValues) => {
 		try {
-			const { error } = await authClient.signIn.email(
-				{
-					email: values.email,
-					password: values.password,
-				},
-				{
-					onSuccess: async () => {
-						await new Promise((resolve) => setTimeout(resolve, 500));
+			const { error } = await authClient.signIn.email({
+				email: values.email,
+				password: values.password,
+			});
+		if (error?.code) {
+			form.setError("root", { message: getAuthErrorMessage(error.code) });
+			return;
+		}
 
-						await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+		await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
 
-						const defaultRedirect = location.search.redirect ?? "/dashboard";
+		await new Promise((resolve) => setTimeout(resolve, 100));
 
-						const { data: session } = await authClient.getSession();
+		const { data: session } = await authClient.getSession();
 
-						await handlePostLoginRedirection(
-							session?.user ?? null,
-							defaultRedirect,
-						);
-					},
-				},
-			);
+		const defaultRedirect = location.search.redirect ?? "/dashboard";
 
-			if (error?.code) {
-				form.setError("root", { message: getAuthErrorMessage(error.code) });
-			}
+		await handlePostLoginRedirection(
+			session?.user ?? null,
+			defaultRedirect,
+		);
 		} catch (err) {
 			form.setError("root", {
 				message: "Une erreur inattendue s'est produite",
