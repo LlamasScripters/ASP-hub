@@ -6,7 +6,7 @@ import type { Complex } from "@room-booking/hooks/useComplexes";
 import type { Room } from "@room-booking/hooks/useRooms";
 import { useNavigate } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
-import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 interface RoomReservationEditPageProps {
 	complex: Complex;

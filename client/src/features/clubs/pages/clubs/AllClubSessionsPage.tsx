@@ -42,7 +42,6 @@ import {
 	ChevronUp,
 	Clock,
 	Edit,
-	Filter,
 	MapPin,
 	Search,
 	Trash2,

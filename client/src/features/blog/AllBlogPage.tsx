@@ -12,17 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+	CardContent
 } from "@/components/ui/card";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
 import {
@@ -30,7 +21,6 @@ import {
 	Edit,
 	Eye,
 	FileText,
-	MoreHorizontal,
 	Plus,
 	Search,
 	Trash2,
