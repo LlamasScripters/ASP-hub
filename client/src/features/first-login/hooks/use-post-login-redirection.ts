@@ -1,6 +1,5 @@
 import type { UserLoggedIn } from "@/lib/auth/auth-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import {
 	type FirstLoginStatus,
@@ -12,20 +11,17 @@ import { getPostLoginRedirectUrl } from "../first-login.utils";
  * Hook to handle post-login redirection based on first-login status
  */
 export function usePostLoginRedirection() {
-	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
 	const handlePostLoginRedirection = useCallback(
-		async (user: UserLoggedIn | null, defaultRedirect = "/dashboard") => {
+		async (user: UserLoggedIn | null, customRedirect?: string) => {
 			if (!user) {
-				navigate({ to: defaultRedirect });
+				window.location.href = "/";
 				return;
 			}
 
-			// Only check first-login status for users with role "user"
 			if (user.role === "user") {
 				try {
-					// Retry mechanism in case the first request fails
 					let firstLoginStatus: FirstLoginStatus | null = null;
 					let attempts = 0;
 					const maxAttempts = 3;
@@ -48,26 +44,29 @@ export function usePostLoginRedirection() {
 							}
 						}
 					}
+			const redirectUrl = getPostLoginRedirectUrl(
+				user,
+				firstLoginStatus,
+				customRedirect,
+			);
 
-					const redirectUrl = getPostLoginRedirectUrl(
-						user,
-						firstLoginStatus,
-						defaultRedirect,
-					);
-
-					navigate({ to: redirectUrl });
-					return;
+			window.location.href = redirectUrl;
+			return;
 				} catch (error) {
-					// If first-login status check fails, redirect to setup as safety measure
 					console.warn("Failed to check first-login status:", error);
-					navigate({ to: "/first-login/setup" });
+					window.location.href = "/first-login/setup";
 					return;
 				}
 			}
+		const redirectUrl = getPostLoginRedirectUrl(
+			user,
+			null,
+			customRedirect,
+		);
 
-			navigate({ to: defaultRedirect });
+		window.location.href = redirectUrl;
 		},
-		[navigate, queryClient],
+		[queryClient],
 	);
 
 	return { handlePostLoginRedirection };
