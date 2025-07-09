@@ -51,7 +51,7 @@ export class NotificationService {
 				USER_NAME: data.userName,
 				SECTION_NAME: data.sectionName || "",
 				CATEGORY_NAME: data.categoryName || "",
-				STATUS_URL: `${process.env.HOST}/dashboard/applications`,
+				STATUS_URL: `${process.env.HOST}/first-login/setup`,
 			},
 		};
 
@@ -106,7 +106,9 @@ export class NotificationService {
 				SECTION_NAME: data.sectionName || "",
 				CATEGORY_NAME: data.categoryName || "",
 				COMMENTS: comments,
-				DASHBOARD_URL: `${process.env.HOST}/dashboard`,
+				DASHBOARD_URL: decision === "approved"
+					? `${process.env.HOST}/dashboard`
+					: `${process.env.HOST}/first-login/setup`,
 			},
 		};
 
