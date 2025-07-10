@@ -9,6 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@tanstack/react-router";
@@ -19,11 +26,14 @@ import {
 	Calendar,
 	Loader2,
 	Save,
+	User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import type { Category } from "../../types";
+import { useCategoryCoach } from "../../hooks/useCategoryCoach";
+import { useEligibleUsersForCategory } from "../../hooks/useEligibleUsers";
+import type { Category, EligibleUser } from "../../types";
 
 const schema = z
 	.object({
@@ -31,6 +41,7 @@ const schema = z
 		description: z.string().optional(),
 		ageMin: z.number().int().nonnegative().optional(),
 		ageMax: z.number().int().nonnegative().optional(),
+		coachId: z.string().optional(),
 	})
 	.refine(
 		(data) => {
@@ -85,13 +96,18 @@ export function CategoryForm({
 	clubId,
 	sectionId,
 	categoryId,
+	category,
 }: {
 	mode: "create" | "edit";
 	clubId: string;
 	sectionId: string;
 	categoryId?: string;
+	category?: Category;
 }) {
 	const navigate = useNavigate();
+	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
+		useEligibleUsersForCategory(categoryId);
+	const { assignCoach, removeCoach } = useCategoryCoach();
 	const [form, setForm] = useState<Partial<Category>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -123,16 +139,46 @@ export function CategoryForm({
 	}, [clubId, sectionId]);
 
 	useEffect(() => {
-		if (mode === "edit" && categoryId && !isLoadingExistingCategories) {
+		if (mode === "edit" && category) {
+			// If category data is already provided, use it
+			setForm({
+				name: category.name || "",
+				description: category.description || "",
+				ageMin: category.ageMin,
+				ageMax: category.ageMax,
+				coachId: category.coachId || "none",
+			});
+		} else if (
+			mode === "edit" &&
+			categoryId &&
+			!isLoadingExistingCategories &&
+			!category
+		) {
+			// If no category data provided, fetch it
 			setIsLoading(true);
 			fetch(
 				`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
 			)
 				.then((res) => res.json())
-				.then(setForm)
+				.then((data) => {
+					setForm({
+						name: data.name || "",
+						description: data.description || "",
+						ageMin: data.ageMin,
+						ageMax: data.ageMax,
+						coachId: data.coachId || "none",
+					});
+				})
 				.finally(() => setIsLoading(false));
 		}
-	}, [mode, categoryId, clubId, sectionId, isLoadingExistingCategories]);
+	}, [
+		mode,
+		categoryId,
+		category,
+		clubId,
+		sectionId,
+		isLoadingExistingCategories,
+	]);
 
 	// validation pour les noms dupliqués
 	const validateDuplicateName = (name: string) => {
@@ -225,6 +271,7 @@ export function CategoryForm({
 			...form,
 			ageMin: form.ageMin ? Number(form.ageMin) : undefined,
 			ageMax: form.ageMax ? Number(form.ageMax) : undefined,
+			coachId: form.coachId, // Explicitement inclure coachId
 		});
 
 		if (!parsed.success) {
@@ -240,13 +287,16 @@ export function CategoryForm({
 
 		try {
 			let response: Response;
+			let createdCategory: Category | null = null;
+			const { coachId, ...categoryData } = parsed.data;
+
 			if (mode === "create") {
 				response = await fetch(
 					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
 					{
 						method: "POST",
 						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(parsed.data),
+						body: JSON.stringify(categoryData),
 					},
 				);
 			} else {
@@ -255,7 +305,7 @@ export function CategoryForm({
 					{
 						method: "PUT",
 						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(parsed.data),
+						body: JSON.stringify(categoryData),
 					},
 				);
 			}
@@ -273,6 +323,33 @@ export function CategoryForm({
 					return;
 				}
 				throw new Error(errorData.message || "Erreur lors de la sauvegarde");
+			}
+
+			if (mode === "create") {
+				createdCategory = await response.json();
+			}
+
+			// Gestion du coach
+			const targetCategoryId =
+				mode === "create" ? createdCategory?.id : categoryId;
+			const actualCoachId = coachId === "none" ? "" : coachId;
+			// Pour la comparaison, utiliser le coachId original de la catégorie, pas l'état du formulaire
+			const originalCoachId =
+				mode === "edit" && category ? category.coachId || "" : "";
+
+			if (targetCategoryId && actualCoachId) {
+				// Si un coach est sélectionné, l'assigner
+				if (actualCoachId !== originalCoachId) {
+					await assignCoach({
+						clubId,
+						sectionId,
+						categoryId: targetCategoryId,
+						userId: actualCoachId,
+					});
+				}
+			} else if (targetCategoryId && originalCoachId && !actualCoachId) {
+				// Si le coach a été supprimé, le retirer
+				await removeCoach({ clubId, sectionId, categoryId: targetCategoryId });
 			}
 
 			toast.success(
@@ -512,6 +589,53 @@ export function CategoryForm({
 										</p>
 									</div>
 								)}
+							</div>
+
+							<Separator />
+
+							{/* Coach */}
+							<div className="space-y-4">
+								<div className="flex items-center gap-2">
+									<User className="h-4 w-4" />
+									<h3 className="text-lg font-semibold">
+										Coach de la catégorie
+									</h3>
+								</div>
+								<p className="text-sm text-muted-foreground">
+									Désignez un utilisateur comme coach pour cette catégorie
+								</p>
+
+								<div className="space-y-2">
+									<Label htmlFor="coachId" className="text-sm font-medium">
+										Coach (optionnel)
+									</Label>
+									<Select
+										value={form.coachId || "none"}
+										onValueChange={(value) =>
+											setForm({
+												...form,
+												coachId: value === "none" ? undefined : value,
+											})
+										}
+										disabled={isLoadingUsers}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Sélectionner un coach" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">Aucun coach</SelectItem>
+											{eligibleUsers.map((user: EligibleUser) => (
+												<SelectItem key={user.id} value={user.id}>
+													{user.firstName} {user.lastName} ({user.email})
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<p className="text-xs text-muted-foreground">
+										Seuls les utilisateurs non-administrateurs peuvent être
+										sélectionnés comme coach.
+									</p>
+								</div>
 							</div>
 
 							<Separator />

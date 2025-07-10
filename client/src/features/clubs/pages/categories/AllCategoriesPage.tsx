@@ -35,6 +35,7 @@ import {
 	Plus,
 	Tag,
 	Trash2,
+	User,
 	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -141,6 +142,9 @@ export function AllCategoriesPage() {
 	};
 
 	const sectionsCount = sections.length;
+	const categoriesWithCoach = categories.filter(
+		(cat) => cat.coachFirstName && cat.coachLastName,
+	).length;
 	const avgAge =
 		categories.length > 0
 			? Math.round(
@@ -163,7 +167,7 @@ export function AllCategoriesPage() {
 						</div>
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-						{Array.from({ length: 4 }).map(() => (
+						{Array.from({ length: 5 }).map(() => (
 							<Skeleton key={crypto.randomUUID()} className="h-20" />
 						))}
 					</div>
@@ -218,7 +222,7 @@ export function AllCategoriesPage() {
 				</div>
 
 				{/* Statistiques rapides */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 					<Card className="bg-primary/5 border-primary/20">
 						<CardContent className="p-4">
 							<div className="flex items-center gap-3">
@@ -255,7 +259,23 @@ export function AllCategoriesPage() {
 						<CardContent className="p-4">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-									<Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+									<User className="h-5 w-5 text-green-600 dark:text-green-400" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">
+										Avec coach
+									</p>
+									<p className="text-2xl font-bold">{categoriesWithCoach}</p>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card className="bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800">
+						<CardContent className="p-4">
+							<div className="flex items-center gap-3">
+								<div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+									<Calendar className="h-5 w-5 text-orange-600 dark:text-orange-400" />
 								</div>
 								<div>
 									<p className="text-sm font-medium text-muted-foreground">
@@ -269,11 +289,11 @@ export function AllCategoriesPage() {
 						</CardContent>
 					</Card>
 
-					<Card className="bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800">
+					<Card className="bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800">
 						<CardContent className="p-4">
 							<div className="flex items-center gap-3">
-								<div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-									<Tag className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+								<div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+									<Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />
 								</div>
 								<div>
 									<p className="text-sm font-medium text-muted-foreground">
@@ -344,6 +364,7 @@ export function AllCategoriesPage() {
 										<TableRow>
 											<TableHead className="font-semibold">Nom</TableHead>
 											<TableHead className="font-semibold">Section</TableHead>
+											<TableHead className="font-semibold">Coach</TableHead>
 											<TableHead className="font-semibold">
 												Tranche d'âge
 											</TableHead>
@@ -379,6 +400,26 @@ export function AllCategoriesPage() {
 															{cat.sectionName}
 														</Badge>
 													</div>
+												</TableCell>
+												<TableCell>
+													{cat.coachFirstName && cat.coachLastName ? (
+														<div className="flex items-center gap-2">
+															<User className="h-4 w-4 text-muted-foreground" />
+															<div className="flex flex-col">
+																<span className="text-sm font-medium">
+																	{cat.coachFirstName} {cat.coachLastName}
+																</span>
+																<span className="text-xs text-muted-foreground">
+																	{cat.coachEmail}
+																</span>
+															</div>
+														</div>
+													) : (
+														<div className="flex items-center gap-2 text-muted-foreground">
+															<User className="h-4 w-4" />
+															<span className="text-sm">Aucun coach</span>
+														</div>
+													)}
 												</TableCell>
 												<TableCell>
 													<Badge variant="outline" className="text-xs">

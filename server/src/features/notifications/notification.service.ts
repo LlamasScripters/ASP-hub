@@ -106,9 +106,10 @@ export class NotificationService {
 				SECTION_NAME: data.sectionName || "",
 				CATEGORY_NAME: data.categoryName || "",
 				COMMENTS: comments,
-				DASHBOARD_URL: decision === "approved"
-					? `${process.env.HOST}/dashboard`
-					: `${process.env.HOST}/first-login/setup`,
+				DASHBOARD_URL:
+					decision === "approved"
+						? `${process.env.HOST}/dashboard`
+						: `${process.env.HOST}/first-login/setup`,
 			},
 		};
 

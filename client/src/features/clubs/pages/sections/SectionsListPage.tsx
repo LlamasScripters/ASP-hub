@@ -27,6 +27,7 @@ import {
 	FolderOpen,
 	Plus,
 	Trash2,
+	User,
 	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -349,6 +350,21 @@ export function SectionsListPage() {
 										<CardDescription className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
 											{section.description || "Aucune description disponible"}
 										</CardDescription>
+										{/* Responsable de section */}
+										{section.managerFirstName && section.managerLastName ? (
+											<div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+												<User className="h-3 w-3" />
+												<span>
+													Responsable: {section.managerFirstName}{" "}
+													{section.managerLastName}
+												</span>
+											</div>
+										) : (
+											<div className="flex items-center gap-2 text-xs text-muted-foreground/60 mt-2">
+												<User className="h-3 w-3" />
+												<span>Aucun responsable assigné</span>
+											</div>
+										)}
 									</div>
 								</CardHeader>
 

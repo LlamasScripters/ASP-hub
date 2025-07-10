@@ -407,6 +407,96 @@ clubsRouter.post(
 	},
 );
 
+// Obtenir les utilisateurs éligibles pour être responsables/coaches
+// IMPORTANT: Cette route doit être placée AVANT les routes avec paramètres /:clubId
+clubsRouter.get(
+	"/eligible-users",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const users = await clubsService.getEligibleUsers();
+			res.json(users);
+		} catch (error) {
+			console.error("Erreur getEligibleUsers:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la récupération des utilisateurs" });
+		}
+	},
+);
+
+// Obtenir les utilisateurs éligibles pour une section spécifique (inclut le responsable actuel)
+clubsRouter.get(
+	"/eligible-users/section",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const users = await clubsService.getEligibleUsersForSection();
+			res.json(users);
+		} catch (error) {
+			console.error("Erreur getEligibleUsersForSection:", error);
+			res.status(500).json({
+				error:
+					"Erreur lors de la récupération des utilisateurs pour la section",
+			});
+		}
+	},
+);
+
+clubsRouter.get(
+	"/eligible-users/section/:sectionId",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const sectionId = req.params.sectionId;
+			const users = await clubsService.getEligibleUsersForSection(sectionId);
+			res.json(users);
+		} catch (error) {
+			console.error("Erreur getEligibleUsersForSection:", error);
+			res.status(500).json({
+				error:
+					"Erreur lors de la récupération des utilisateurs pour la section",
+			});
+		}
+	},
+);
+
+// Obtenir les utilisateurs éligibles pour une catégorie spécifique (inclut le coach actuel)
+clubsRouter.get(
+	"/eligible-users/category",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const users = await clubsService.getEligibleUsersForCategory();
+			res.json(users);
+		} catch (error) {
+			console.error("Erreur getEligibleUsersForCategory:", error);
+			res.status(500).json({
+				error:
+					"Erreur lors de la récupération des utilisateurs pour la catégorie",
+			});
+		}
+	},
+);
+
+clubsRouter.get(
+	"/eligible-users/category/:categoryId",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const categoryId = req.params.categoryId;
+			const users = await clubsService.getEligibleUsersForCategory(categoryId);
+			res.json(users);
+		} catch (error) {
+			console.error("Erreur getEligibleUsersForCategory:", error);
+			res.status(500).json({
+				error:
+					"Erreur lors de la récupération des utilisateurs pour la catégorie",
+			});
+		}
+	},
+);
+
 // ========== ROUTES CLUBS ==========
 clubsRouter.get("/", async (req: Request, res: Response) => {
 	try {
@@ -557,6 +647,44 @@ clubsRouter.delete(
 			res
 				.status(500)
 				.json({ error: "Erreur lors de la suppression de la section" });
+		}
+	},
+);
+
+// Assigner un responsable à une section
+clubsRouter.post(
+	"/:clubId/sections/:sectionId/manager",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const { userId } = req.body;
+			const responsibility = await clubsService.assignSectionManager(
+				req.params.sectionId,
+				userId,
+			);
+			res.status(201).json(responsibility);
+		} catch (error) {
+			console.error("Erreur assignSectionManager:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de l'assignation du responsable" });
+		}
+	},
+);
+
+// Supprimer le responsable d'une section
+clubsRouter.delete(
+	"/:clubId/sections/:sectionId/manager",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			await clubsService.removeSectionManager(req.params.sectionId);
+			res.sendStatus(204);
+		} catch (error) {
+			console.error("Erreur removeSectionManager:", error);
+			res
+				.status(500)
+				.json({ error: "Erreur lors de la suppression du responsable" });
 		}
 	},
 );
@@ -738,5 +866,47 @@ clubsRouter.post(
 		}
 	},
 );
+
+// Assigner un coach à une catégorie
+clubsRouter.post(
+	"/:clubId/sections/:sectionId/categories/:categoryId/coach",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			const { userId } = req.body;
+			if (!userId) {
+				res.status(400).json({ error: "userId requis" });
+				return;
+			}
+
+			const responsibility = await clubsService.assignCategoryCoach(
+				req.params.categoryId,
+				userId,
+			);
+
+			res.status(201).json(responsibility);
+		} catch (error) {
+			console.error("Erreur assignCategoryCoach:", error);
+			res.status(500).json({ error: "Erreur lors de l'assignation du coach" });
+		}
+	},
+);
+
+// Supprimer le coach d'une catégorie
+clubsRouter.delete(
+	"/:clubId/sections/:sectionId/categories/:categoryId/coach",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response) => {
+		try {
+			await clubsService.removeCategoryCoach(req.params.categoryId);
+			res.sendStatus(204);
+		} catch (error) {
+			console.error("Erreur removeCategoryCoach:", error);
+			res.status(500).json({ error: "Erreur lors de la suppression du coach" });
+		}
+	},
+);
+
+// ========== ROUTES SESSIONS ==========
 
 export default clubsRouter;

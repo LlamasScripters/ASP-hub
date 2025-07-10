@@ -19,7 +19,9 @@ export function shouldRedirectToFirstLogin(
 /**
  * Get role-specific dashboard URL
  */
-export function getRoleDashboardUrl(userRole: string | null | undefined): string {
+export function getRoleDashboardUrl(
+	userRole: string | null | undefined,
+): string {
 	switch (userRole) {
 		case "admin":
 			return "/admin";
@@ -44,10 +46,12 @@ export function getPostLoginRedirectUrl(
 		return "/first-login/setup";
 	}
 
-	if (customRedirect && 
-		customRedirect !== "/" && 
+	if (
+		customRedirect &&
+		customRedirect !== "/" &&
 		customRedirect !== "/dashboard" &&
-		customRedirect !== "/auth/login") {
+		customRedirect !== "/auth/login"
+	) {
 		return customRedirect;
 	}
 

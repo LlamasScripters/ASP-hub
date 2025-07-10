@@ -839,7 +839,12 @@ export function ApplicationsList({
 								)}
 								{filters.status && filters.status !== "all" && (
 									<Badge variant="secondary">
-										Statut: {applicationStatusTranslations[filters.status as keyof typeof applicationStatusTranslations]}
+										Statut:{" "}
+										{
+											applicationStatusTranslations[
+												filters.status as keyof typeof applicationStatusTranslations
+											]
+										}
 									</Badge>
 								)}
 								{filters.sectionId && (
