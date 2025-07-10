@@ -2,7 +2,6 @@ node_modules
 .env*
 !.env.example
 
-
-server/drizzle
+server/migrations/local
 .claude
 CLAUDE.md

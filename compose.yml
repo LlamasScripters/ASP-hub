@@ -45,8 +45,6 @@ services:
         - action: sync
           path: ./client/.env
           target: /app/.env
-    volumes:
-      - ./client:/app
 
   server:
     build:
@@ -59,9 +57,6 @@ services:
       - NODE_ENV=development
     env_file:
       - ./server/.env
-    volumes:
-      # Mount .env file for development
-      - ./server/.env:/app/.env:ro
     depends_on:
       - postgres
       - minio
@@ -90,7 +85,7 @@ services:
           path: ./server/drizzle-dev.config.ts
           target: /app/drizzle-dev.config.ts
         # Watch .env file for changes
-        - action: sync
+        - action: sync+restart
           path: ./server/.env
           target: /app/.env
 
