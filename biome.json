@@ -8,6 +8,8 @@
 	"files": {
 		"ignoreUnknown": false,
 		"ignore": [
+			"server/dist",
+			"client/dist",
 			"client/src/routeTree.gen.ts",
 			"client/src/components/ui",
 			"client/src/components/tiptap-*",
@@ -18,8 +20,7 @@
 			"client/src/lib/tiptap-utils.ts",
 			"client/src/styles",
 			"server/drizzle",
-			"client/dist",
-			"server/dist"
+			"client/my-app"
 		]
 	},
 	"formatter": {
