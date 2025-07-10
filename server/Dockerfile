@@ -45,8 +45,9 @@ WORKDIR /app
 
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/drizzle /app/drizzle
+COPY --from=builder /app/migrations/production /app/migrations/production
 
+ENV ENV_FILE=/run/secrets/env
 EXPOSE 3000
 USER node
-ENTRYPOINT ["node"]
+CMD ["node", "--env-file-if-exists=${ENV_FILE}", "dist/index.js"]
