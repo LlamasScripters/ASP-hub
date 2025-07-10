@@ -18,6 +18,11 @@ export interface Section {
 	clubId: string;
 	createdAt?: string;
 	updatedAt?: string;
+	// Responsable de section
+	managerId?: string;
+	managerFirstName?: string;
+	managerLastName?: string;
+	managerEmail?: string;
 }
 
 export interface Category {
@@ -29,6 +34,18 @@ export interface Category {
 	sectionId: string;
 	createdAt?: string;
 	updatedAt?: string;
+	// Coach de catégorie
+	coachId?: string;
+	coachFirstName?: string;
+	coachLastName?: string;
+	coachEmail?: string;
+}
+
+export interface EligibleUser {
+	id: string;
+	firstName: string;
+	lastName: string;
+	email: string;
 }
 
 export interface SessionSport {
@@ -47,3 +64,13 @@ export interface SessionSport {
 	updatedAt?: string;
 	notes?: string;
 }
+
+// Re-export types from mutations module for easier access
+export type {
+	AssignCoachParams,
+	RemoveCoachParams,
+	AssignManagerParams,
+	RemoveManagerParams,
+	ResponsibilityAssignmentResponse,
+	ClubManagementError,
+} from "./types/mutations";

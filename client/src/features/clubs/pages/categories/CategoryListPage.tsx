@@ -34,6 +34,7 @@ import {
 	Edit,
 	Search,
 	Trash2,
+	User,
 	Users,
 } from "lucide-react";
 // client/src/features/clubs/pages/CategoriesListPage.tsx
@@ -382,6 +383,7 @@ export function CategoriesListPage() {
 										</div>
 									</TableHead>
 									<TableHead className="font-semibold">Tranche d'âge</TableHead>
+									<TableHead className="font-semibold">Coach</TableHead>
 									<TableHead className="font-semibold text-right">
 										Actions
 									</TableHead>
@@ -391,7 +393,7 @@ export function CategoriesListPage() {
 								{filteredAndSortedCategories.length === 0 ? (
 									<TableRow>
 										<TableCell
-											colSpan={5}
+											colSpan={6}
 											className="h-24 text-center text-muted-foreground"
 										>
 											{categories.length === 0
@@ -443,6 +445,20 @@ export function CategoriesListPage() {
 													<Badge variant="outline" className="font-mono">
 														Non défini
 													</Badge>
+												)}
+											</TableCell>
+											<TableCell>
+												{c.coachFirstName && c.coachLastName ? (
+													<div className="flex items-center gap-2 text-sm">
+														<User className="h-3 w-3 text-muted-foreground" />
+														<span>
+															{c.coachFirstName} {c.coachLastName}
+														</span>
+													</div>
+												) : (
+													<span className="text-muted-foreground text-sm">
+														Aucun coach
+													</span>
 												)}
 											</TableCell>
 											<TableCell className="text-right">

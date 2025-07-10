@@ -1,5 +1,5 @@
-import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { getRoleDashboardUrl } from "@/features/first-login/first-login.utils";
+import { getLoggedInUserQueryOptions } from "@/features/users/users.config";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -18,9 +18,12 @@ export const Route = createFileRoute("/_auth")({
 		const userLoggedIn = await queryClient.ensureQueryData(queryOptions);
 
 		if (userLoggedIn) {
-			const redirectTo = search.redirect && search.redirect !== "/" && search.redirect !== "/dashboard"
-				? search.redirect
-				: getRoleDashboardUrl(userLoggedIn.role);
+			const redirectTo =
+				search.redirect &&
+				search.redirect !== "/" &&
+				search.redirect !== "/dashboard"
+					? search.redirect
+					: getRoleDashboardUrl(userLoggedIn.role);
 
 			throw redirect({ to: redirectTo });
 		}

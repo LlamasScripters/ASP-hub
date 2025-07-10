@@ -7,6 +7,7 @@ import {
 	Loader2,
 	Palette,
 	Save,
+	User,
 } from "lucide-react";
 // client/src/features/clubs/components/SectionForm.tsx
 import { useEffect, useState } from "react";
@@ -33,7 +34,16 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useEligibleUsersForSection } from "../../hooks/useEligibleUsers";
+import { useSectionManager } from "../../hooks/useSectionManager";
 import { useSections } from "../../hooks/useSections";
 import type { Section } from "../../types";
 
@@ -54,6 +64,9 @@ export function SectionForm({
 }: SectionFormProps) {
 	const navigate = useNavigate();
 	const { sections, createSection, updateSection } = useSections({ clubId });
+	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
+		useEligibleUsersForSection(sectionId);
+	const { assignManager, removeManager } = useSectionManager();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const isEditing = mode === "edit";
@@ -89,6 +102,7 @@ export function SectionForm({
 					"La couleur doit être au format hexadécimal (#000000)",
 				)
 				.optional(),
+			managerId: z.string().optional(),
 		});
 	};
 
@@ -101,12 +115,22 @@ export function SectionForm({
 			name: section?.name || "",
 			description: section?.description || "",
 			color: section?.color || "#3b82f6", // blue-500 par défaut
+			managerId: section?.managerId || "none",
 		},
 	});
 
 	// Chargement de la section en mode édition
 	useEffect(() => {
-		if (isEditing && sectionId && !section) {
+		if (isEditing && section) {
+			// If section data is already provided, use it to reset the form
+			form.reset({
+				name: section.name || "",
+				description: section.description || "",
+				color: section.color || "#3b82f6",
+				managerId: section.managerId || "none",
+			});
+		} else if (isEditing && sectionId && !section) {
+			// If no section data provided, fetch it
 			setIsLoading(true);
 			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
 				.then((res) => {
@@ -114,11 +138,12 @@ export function SectionForm({
 						throw new Error("Erreur lors du chargement de la section");
 					return res.json();
 				})
-				.then((section: Section) => {
+				.then((sectionData: Section) => {
 					form.reset({
-						name: section.name || "",
-						description: section.description || "",
-						color: section.color || "#3b82f6",
+						name: sectionData.name || "",
+						description: sectionData.description || "",
+						color: sectionData.color || "#3b82f6",
+						managerId: sectionData.managerId || "none",
 					});
 				})
 				.catch((error) => {
@@ -178,11 +203,43 @@ export function SectionForm({
 			return;
 		}
 
+		setIsLoading(true);
 		try {
+			let createdSection: Section | null = null;
+			const { managerId, ...sectionData } = data;
+			const actualManagerId = managerId === "none" ? "" : managerId;
+
 			if (mode === "create") {
-				await createSection({ ...data, clubId });
+				createdSection = await createSection({ ...sectionData, clubId });
+				if (!createdSection) {
+					throw new Error("Erreur lors de la création de la section");
+				}
 			} else if (sectionId) {
-				await updateSection(sectionId, data);
+				await updateSection(sectionId, sectionData);
+			}
+
+			// Gestion du responsable
+			const targetSectionId =
+				mode === "create" ? createdSection?.id : sectionId;
+			if (targetSectionId && actualManagerId) {
+				// Si un responsable est sélectionné, l'assigner
+				const currentManagerId =
+					section?.managerId === "none" ? "" : section?.managerId;
+				if (actualManagerId !== (currentManagerId || "")) {
+					assignManager({
+						clubId,
+						sectionId: targetSectionId,
+						userId: actualManagerId,
+					});
+				}
+			} else if (
+				targetSectionId &&
+				section?.managerId &&
+				section.managerId !== "none" &&
+				!actualManagerId
+			) {
+				// Si le responsable a été supprimé, le retirer
+				removeManager({ clubId, sectionId: targetSectionId });
 			}
 
 			toast.success(
@@ -197,6 +254,8 @@ export function SectionForm({
 		} catch (error) {
 			console.error("Erreur:", error);
 			toast.error("Une erreur est survenue lors de la sauvegarde");
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -315,6 +374,49 @@ export function SectionForm({
 											<FormDescription>
 												Choisissez une couleur pour identifier visuellement
 												cette section dans l'interface.
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								{/* Responsable de section */}
+								<FormField
+									control={form.control}
+									name="managerId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="text-foreground font-medium flex items-center gap-2">
+												<User className="h-4 w-4" />
+												Responsable de section
+											</FormLabel>
+											<Select
+												value={field.value || "none"}
+												onValueChange={(value) =>
+													field.onChange(value === "none" ? "" : value)
+												}
+												disabled={isLoadingUsers}
+											>
+												<FormControl>
+													<SelectTrigger className="h-11">
+														<SelectValue placeholder="Sélectionner un responsable (optionnel)" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="none">
+														Aucun responsable
+													</SelectItem>
+													{eligibleUsers.map((user) => (
+														<SelectItem key={user.id} value={user.id}>
+															{user.firstName} {user.lastName} ({user.email})
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormDescription>
+												Désignez un utilisateur comme responsable de cette
+												section. Seuls les utilisateurs non-administrateurs
+												peuvent être sélectionnés.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>

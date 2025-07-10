@@ -44,27 +44,23 @@ export function usePostLoginRedirection() {
 							}
 						}
 					}
-			const redirectUrl = getPostLoginRedirectUrl(
-				user,
-				firstLoginStatus,
-				customRedirect,
-			);
+					const redirectUrl = getPostLoginRedirectUrl(
+						user,
+						firstLoginStatus,
+						customRedirect,
+					);
 
-			window.location.href = redirectUrl;
-			return;
+					window.location.href = redirectUrl;
+					return;
 				} catch (error) {
 					console.warn("Failed to check first-login status:", error);
 					window.location.href = "/first-login/setup";
 					return;
 				}
 			}
-		const redirectUrl = getPostLoginRedirectUrl(
-			user,
-			null,
-			customRedirect,
-		);
+			const redirectUrl = getPostLoginRedirectUrl(user, null, customRedirect);
 
-		window.location.href = redirectUrl;
+			window.location.href = redirectUrl;
 		},
 		[queryClient],
 	);
