@@ -38,9 +38,11 @@ import {
 	Users,
 } from "lucide-react";
 // client/src/features/clubs/pages/CategoriesListPage.tsx
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section } from "../../types";
+import { useMemo, useState } from "react";
+import { useCategoriesBySection } from "../../hooks/useCategories";
+import { useSection } from "../../hooks/useSections";
+import { useDeleteCategory } from "../../hooks/useCategories";
+import type { Category } from "../../types";
 
 type SortField = "name" | "ageMin" | "ageMax";
 type SortDirection = "asc" | "desc";
@@ -61,8 +63,12 @@ export function CategoriesListPage() {
 	const { clubId, sectionId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/",
 	});
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [sectionName, setSectionName] = useState("");
+
+	// Hooks pour les données
+	const { data: categories = [], isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
+	const { mutateAsync: deleteCategory } = useDeleteCategory();
+
 	const [sortField, setSortField] = useState<SortField>("name");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 	const [filters, setFilters] = useState<Filters>({
@@ -71,28 +77,11 @@ export function CategoriesListPage() {
 		ageMax: "",
 		ageRange: "",
 	});
-	const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+	const [deleteCategoryState, setDeleteCategoryState] = useState<Category | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			// Fetch categories
-			const categoriesRes = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-			);
-			const categoriesData = await categoriesRes.json();
-			setCategories(categoriesData);
-
-			// Fetch section name for better context
-			const sectionRes = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}`,
-			);
-			const sectionData: Section = await sectionRes.json();
-			setSectionName(sectionData.name);
-		};
-
-		fetchData();
-	}, [clubId, sectionId]);
+	const sectionName = section?.name || "";
+	const isLoading = categoriesLoading || sectionLoading;
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -190,34 +179,26 @@ export function CategoriesListPage() {
 	};
 
 	const handleDeleteCategory = async () => {
-		if (!deleteCategory) return;
+		if (!deleteCategoryState) return;
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories/${deleteCategory.id}`,
-				{
-					method: "DELETE",
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la catégorie de la liste
-			setCategories((prev) =>
-				prev.filter((cat) => cat.id !== deleteCategory.id),
-			);
-			setDeleteCategory(null);
-			toast.success("Catégorie supprimée avec succès");
+			await deleteCategory(deleteCategoryState.id);
+			setDeleteCategoryState(null);
 		} catch (error) {
 			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la catégorie");
 		} finally {
 			setIsDeleting(false);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="container mx-auto p-6">
+				<div className="text-center">Chargement...</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto p-6 space-y-8">
@@ -485,7 +466,7 @@ export function CategoriesListPage() {
 														variant="ghost"
 														size="sm"
 														className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-														onClick={() => setDeleteCategory(c)}
+														onClick={() => setDeleteCategoryState(c)}
 													>
 														<Trash2 className="mr-1 h-3 w-3" />
 														Supprimer
@@ -503,15 +484,15 @@ export function CategoriesListPage() {
 
 			{/* Modal de confirmation de suppression */}
 			<AlertDialog
-				open={!!deleteCategory}
-				onOpenChange={() => setDeleteCategory(null)}
+				open={!!deleteCategoryState}
+				onOpenChange={() => setDeleteCategoryState(null)}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Supprimer la catégorie</AlertDialogTitle>
 						<AlertDialogDescription>
 							Êtes-vous sûr de vouloir supprimer la catégorie{" "}
-							<strong>"{deleteCategory?.name}"</strong> ?
+							<strong>"{deleteCategoryState?.name}"</strong> ?
 							<br />
 							<br />
 							<span className="text-destructive font-medium">

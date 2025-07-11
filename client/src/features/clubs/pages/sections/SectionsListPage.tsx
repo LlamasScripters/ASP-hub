@@ -30,86 +30,25 @@ import {
 	User,
 	Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section } from "../../types";
-
-interface EnrichedSection extends Section {
-	categoriesCount?: number;
-}
+import { useState } from "react";
+import { useSectionsByClub, useDeleteSection } from "../../hooks/useSections";
+import type { Section } from "../../types";
 
 export function SectionsListPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/",
 	});
 	const navigate = useNavigate();
-	const [sections, setSections] = useState<EnrichedSection[]>([]);
-	const [allCategories, setAllCategories] = useState<Category[]>([]);
-	const [categoriesCountBySection, setCategoriesCountBySection] = useState<
-		Record<string, number>
-	>({});
-	const [isLoading, setIsLoading] = useState(true);
-	const [deleteSection, setDeleteSection] = useState<EnrichedSection | null>(
-		null,
-	);
+	
+	// Utilisation des hooks
+	const { data: sections = [], isLoading } = useSectionsByClub(clubId);
+	const deleteSectionMutation = useDeleteSection();
+	
+	const [deleteSection, setDeleteSection] = useState<Section | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleGoBack = () => {
 		navigate({ to: ".." });
-	};
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const sectionsRes = await fetch(`/api/clubs/${clubId}/sections`);
-				if (!sectionsRes.ok)
-					throw new Error("Erreur lors du chargement des sections");
-				const sectionsData = await sectionsRes.json();
-				setSections(sectionsData);
-
-				const allCategoriesData: Category[] = [];
-				const countBySection: Record<string, number> = {};
-
-				for (const section of sectionsData) {
-					try {
-						const cats = await fetch(
-							`/api/clubs/${clubId}/sections/${section.id}/categories`,
-						);
-						if (cats.ok) {
-							const categoriesData = await cats.json();
-							console.log(
-								`Section ${section.name} (${section.id}):`,
-								categoriesData,
-							);
-							allCategoriesData.push(...categoriesData);
-							countBySection[section.id] = categoriesData.length;
-						} else {
-							countBySection[section.id] = 0;
-						}
-					} catch (error) {
-						console.error(
-							`Erreur lors du chargement des catégories pour la section ${section.id}:`,
-							error,
-						);
-						countBySection[section.id] = 0;
-					}
-				}
-
-				setAllCategories(allCategoriesData);
-				setCategoriesCountBySection(countBySection);
-			} catch (error) {
-				console.error("Erreur:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [clubId]);
-
-	// Fonction pour obtenir le nombre de catégories par section
-	const getCategoriesCountForSection = (sectionId: string) => {
-		return categoriesCountBySection[sectionId] || 0;
 	};
 
 	const handleDeleteSection = async () => {
@@ -117,36 +56,10 @@ export function SectionsListPage() {
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(
-				`/api/clubs/${clubId}/sections/${deleteSection.id}`,
-				{
-					method: "DELETE",
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la section de la liste
-			setSections((prev) =>
-				prev.filter((section) => section.id !== deleteSection.id),
-			);
-			// Mettre à jour les compteurs
-			setCategoriesCountBySection((prev) => {
-				const newCount = { ...prev };
-				delete newCount[deleteSection.id];
-				return newCount;
-			});
-			// Retirer les catégories de cette section
-			setAllCategories((prev) =>
-				prev.filter((cat) => cat.sectionId !== deleteSection.id),
-			);
+			await deleteSectionMutation.mutateAsync(deleteSection.id);
 			setDeleteSection(null);
-			toast.success("Section supprimée avec succès");
 		} catch (error) {
 			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la section");
 		} finally {
 			setIsDeleting(false);
 		}
@@ -245,7 +158,7 @@ export function SectionsListPage() {
 										<p className="text-sm font-medium text-muted-foreground">
 											Total catégories
 										</p>
-										<p className="text-2xl font-bold">{allCategories.length}</p>
+										<p className="text-2xl font-bold">-</p>
 									</div>
 								</div>
 							</CardContent>
@@ -325,9 +238,7 @@ export function SectionsListPage() {
 											</Badge>
 										</div>
 										{(() => {
-											const categoryCount = getCategoriesCountForSection(
-												section.id,
-											);
+											const categoryCount = 0; // Sera implémenté plus tard
 											return (
 												<Badge
 													variant="outline"
@@ -338,7 +249,7 @@ export function SectionsListPage() {
 													}`}
 												>
 													{categoryCount} catégorie
-													{categoryCount !== 1 ? "s" : ""}
+													{categoryCount > 1 ? "s" : ""}
 												</Badge>
 											);
 										})()}

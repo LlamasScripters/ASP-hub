@@ -3,40 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCategory } from "../../hooks/useCategories";
 import { CategoryForm } from "../../components/categories/CategoryForm";
-import type { Category } from "../../types";
 
 export function CategoryEditPage() {
 	const { clubId, sectionId, categoryId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit",
 	});
 
-	const [category, setCategory] = useState<Category | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const fetchCategory = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
-				);
-				if (!response.ok) {
-					throw new Error("Erreur lors du chargement de la catégorie");
-				}
-				const categoryData = await response.json();
-				setCategory(categoryData);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Erreur inconnue");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchCategory();
-	}, [clubId, sectionId, categoryId]);
+	// Utilisation du hook pour récupérer la catégorie
+	const { data: category, isLoading, error } = useCategory(categoryId);
 
 	if (isLoading) {
 		return (
@@ -81,7 +57,7 @@ export function CategoryEditPage() {
 				<Alert variant="destructive">
 					<AlertCircle className="h-4 w-4" />
 					<AlertDescription>
-						{error || "Catégorie non trouvée"}
+						{error?.message || "Catégorie non trouvée"}
 					</AlertDescription>
 				</Alert>
 			</div>

@@ -10,7 +10,11 @@ import type {
 export const responsibilitiesQueryKeys = {
 	all: ['responsibilities'] as const,
 	eligibleUsers: () => [...responsibilitiesQueryKeys.all, 'eligibleUsers'] as const,
+	eligibleUsersForSection: (sectionId?: string) => [...responsibilitiesQueryKeys.all, 'eligibleUsers', 'section', sectionId] as const,
+	eligibleUsersForCategory: (categoryId?: string) => [...responsibilitiesQueryKeys.all, 'eligibleUsers', 'category', categoryId] as const,
 	sectionResponsibilities: (sectionId: string) => [...responsibilitiesQueryKeys.all, 'section', sectionId] as const,
+	categoryResponsibilities: (categoryId: string) => [...responsibilitiesQueryKeys.all, 'category', categoryId] as const,
+	userResponsibilities: (userId: string) => [...responsibilitiesQueryKeys.all, 'user', userId] as const,
 };
 
 // Query hooks
@@ -32,6 +36,42 @@ export function useSectionResponsibilities(sectionId: string) {
 	});
 }
 
+export function useEligibleUsersForSection(sectionId?: string) {
+	return useQuery({
+		queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId),
+		queryFn: () => responsibilitiesApi.getEligibleUsersForSection(sectionId),
+		staleTime: 10 * 60 * 1000, // 10 minutes (user data changes infrequently)
+		gcTime: 30 * 60 * 1000, // 30 minutes
+	});
+}
+
+export function useEligibleUsersForCategory(categoryId?: string) {
+	return useQuery({
+		queryKey: responsibilitiesQueryKeys.eligibleUsersForCategory(categoryId),
+		queryFn: () => responsibilitiesApi.getEligibleUsersForCategory(categoryId),
+		staleTime: 10 * 60 * 1000, // 10 minutes (user data changes infrequently)
+		gcTime: 30 * 60 * 1000, // 30 minutes
+	});
+}
+
+export function useCategoryResponsibilities(categoryId: string) {
+	return useQuery({
+		queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId),
+		queryFn: () => responsibilitiesApi.getCategoryResponsibilities(categoryId),
+		enabled: !!categoryId,
+		staleTime: 5 * 60 * 1000,
+	});
+}
+
+export function useUserResponsibilities(userId: string) {
+	return useQuery({
+		queryKey: responsibilitiesQueryKeys.userResponsibilities(userId),
+		queryFn: () => responsibilitiesApi.getUserResponsibilities(userId),
+		enabled: !!userId,
+		staleTime: 5 * 60 * 1000,
+	});
+}
+
 // Mutation hooks
 export function useAssignSectionManager() {
 	const queryClient = useQueryClient();
@@ -48,6 +88,11 @@ export function useAssignSectionManager() {
 			// Invalidate eligible users (their availability might have changed)
 			queryClient.invalidateQueries({ 
 				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
+			});
+			
+			// Invalidate eligible users for section
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
 			});
 			
 			toast.success("Responsable de section assigné avec succès");
@@ -75,6 +120,11 @@ export function useRemoveSectionManager() {
 				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
 			});
 			
+			// Invalidate eligible users for section
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
+			});
+			
 			toast.success("Responsable de section supprimé avec succès");
 		},
 		onError: (error) => {
@@ -90,14 +140,21 @@ export function useAssignCategoryCoach() {
 	return useMutation({
 		mutationFn: ({ categoryId, data }: { categoryId: string; data: AssignCategoryCoachData }) =>
 			responsibilitiesApi.assignCategoryCoach(categoryId, data),
-		onSuccess: () => {
+		onSuccess: (_, { categoryId }) => {
 			// Invalidate eligible users (their availability might have changed)
 			queryClient.invalidateQueries({ 
 				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
 			});
 			
-			// We might want to invalidate category data too (depends on how it's structured)
-			// queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.detail(categoryId) });
+			// Invalidate eligible users for category
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForCategory(categoryId) 
+			});
+			
+			// Invalidate category responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
+			});
 			
 			toast.success("Coach assigné avec succès");
 		},
@@ -113,14 +170,21 @@ export function useRemoveCategoryCoach() {
 
 	return useMutation({
 		mutationFn: (categoryId: string) => responsibilitiesApi.removeCategoryCoach(categoryId),
-		onSuccess: () => {
+		onSuccess: (_, categoryId) => {
 			// Invalidate eligible users (their availability might have changed)
 			queryClient.invalidateQueries({ 
 				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
 			});
 			
-			// We might want to invalidate category data too (depends on how it's structured)
-			// queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.detail(categoryId) });
+			// Invalidate eligible users for category
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForCategory(categoryId) 
+			});
+			
+			// Invalidate category responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
+			});
 			
 			toast.success("Coach supprimé avec succès");
 		},

@@ -3,40 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSection } from "../../hooks/useSections";
 import { SectionForm } from "../../components/sections/SectionForm";
-import type { Section } from "../../types";
 
 export function SectionEditPage() {
 	const { clubId, sectionId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/edit",
 	});
 
-	const [section, setSection] = useState<Section | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const fetchSection = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}`,
-				);
-				if (!response.ok) {
-					throw new Error("Erreur lors du chargement de la section");
-				}
-				const sectionData = await response.json();
-				setSection(sectionData);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Erreur inconnue");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSection();
-	}, [clubId, sectionId]);
+	// Utilisation du hook pour récupérer la section
+	const { data: section, isLoading, error } = useSection(sectionId);
 
 	if (isLoading) {
 		return (
@@ -80,7 +56,7 @@ export function SectionEditPage() {
 				</div>
 				<Alert variant="destructive">
 					<AlertCircle className="h-4 w-4" />
-					<AlertDescription>{error || "Section non trouvée"}</AlertDescription>
+					<AlertDescription>{error?.message || "Section non trouvée"}</AlertDescription>
 				</Alert>
 			</div>
 		);

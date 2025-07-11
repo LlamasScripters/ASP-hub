@@ -71,6 +71,31 @@ export class CategoriesApiClient {
 	}
 
 	/**
+	 * Récupère les catégories d'une section
+	 */
+	async getCategoriesBySection(
+		sectionId: string,
+		options?: ApiOptions,
+	): Promise<Category[]> {
+		const response = await fetch(
+			`${this.baseUrl}/categories/section/${sectionId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
 	 * Crée une nouvelle catégorie
 	 */
 	async createCategory(data: CreateCategoryData, options?: ApiOptions): Promise<Category> {

@@ -37,7 +37,7 @@ export class ClubsApiClient {
 			queryParams.append("limit", "20");
 		}
 
-		const url = `${this.baseUrl}/clubs-modular?${queryParams}`;
+		const url = `${this.baseUrl}/clubs?${queryParams}`;
 		const response = await fetch(url, {
 			method: "GET",
 			signal: options?.signal,
@@ -54,7 +54,7 @@ export class ClubsApiClient {
 	 * Récupère un club par son ID
 	 */
 	async getClubById(id: string, options?: ApiOptions): Promise<Club> {
-		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const url = `${this.baseUrl}/clubs/${id}`;
 		const response = await fetch(url, {
 			method: "GET",
 			signal: options?.signal,
@@ -71,7 +71,7 @@ export class ClubsApiClient {
 	 * Crée un nouveau club
 	 */
 	async createClub(data: CreateClubData, options?: ApiOptions): Promise<Club> {
-		const url = `${this.baseUrl}/clubs-modular`;
+		const url = `${this.baseUrl}/clubs`;
 		const response = await fetch(url, {
 			method: "POST",
 			headers: {
@@ -92,7 +92,7 @@ export class ClubsApiClient {
 	 * Met à jour un club
 	 */
 	async updateClub(id: string, data: UpdateClubData, options?: ApiOptions): Promise<Club> {
-		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const url = `${this.baseUrl}/clubs/${id}`;
 		const response = await fetch(url, {
 			method: "PUT",
 			headers: {
@@ -113,7 +113,7 @@ export class ClubsApiClient {
 	 * Supprime un club
 	 */
 	async deleteClub(id: string, options?: ApiOptions): Promise<void> {
-		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const url = `${this.baseUrl}/clubs/${id}`;
 		const response = await fetch(url, {
 			method: "DELETE",
 			signal: options?.signal,
