@@ -170,12 +170,8 @@ jobs:
           context-name: production
           context-use: true
 
-      - name: Pull images in production
-        run: |
-          docker pull ${{ env.CLIENT_IMAGE }}:main
-          docker pull ${{ env.SERVER_IMAGE }}:main
-
       - name: Update stack services
+        
         run: |
           # Use commit SHA for deterministic deployments
           CLIENT_IMAGE_WITH_TAG="${{ env.CLIENT_IMAGE }}:main"
@@ -193,15 +189,17 @@ jobs:
             --image "${CLIENT_IMAGE_WITH_TAG}" \
             ${{ env.STACK_NAME }}_client
 
+          echo "📦 Updating server migrator service..."
+          docker service update \
+            --image "${SERVER_MIGRATOR_IMAGE_WITH_TAG}" \
+            ${{ env.STACK_NAME }}_init-db
+
           echo "📦 Updating server service..."
           docker service update \
             --image "${SERVER_IMAGE_WITH_TAG}" \
             ${{ env.STACK_NAME }}_server
 
-          echo "📦 Updating server migrator service..."
-          docker service update \
-            --image "${SERVER_MIGRATOR_IMAGE_WITH_TAG}" \
-            ${{ env.STACK_NAME }}_init-db
+
 
       - name: Verify deployment
         run: |
