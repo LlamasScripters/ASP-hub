@@ -46,6 +46,8 @@ WORKDIR /app
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/migrations/production /app/migrations/production
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/drizzle.config.ts /app/drizzle.config.ts
 
 ENV ENV_FILE=/run/secrets/env
 EXPOSE 3000
