@@ -10,7 +10,6 @@ env:
   ORGANIZATION: llamasscripters
   CLIENT_IMAGE: ghcr.io/llamasscripters/asphub-client
   SERVER_IMAGE: ghcr.io/llamasscripters/asphub-server
-  STACK_NAME: asphub
   NODE_VERSION: "22.15.0"
 
 jobs:
@@ -171,41 +170,40 @@ jobs:
           context-use: true
 
       - name: Update stack services
-        
+
         run: |
           # Use commit SHA for deterministic deployments
           CLIENT_IMAGE_WITH_TAG="${{ env.CLIENT_IMAGE }}:main"
           SERVER_IMAGE_WITH_TAG="${{ env.SERVER_IMAGE }}:main"
+          SERVER_MIGRATOR_IMAGE_WITH_TAG="${{ env.SERVER_IMAGE }}:main"
 
           echo "🚀 Deployment summary:"
           echo "  Trigger: ${{ github.ref_type }}"
           echo "  Branch: ${{ github.ref_name }}"
           echo "  Commit SHA: ${{ github.sha }}"
           echo "  Client image: ${CLIENT_IMAGE_WITH_TAG}"
-          echo "  Server image: ${SERVER_IMAGE_WITH_TAG}
+          echo "  Server image: ${SERVER_IMAGE_WITH_TAG}"
 
           echo "📦 Updating client service..."
           docker service update \
             --image "${CLIENT_IMAGE_WITH_TAG}" \
-            ${{ env.STACK_NAME }}_client
+            asphub_application_client
 
           echo "📦 Updating server migrator service..."
           docker service update \
             --image "${SERVER_MIGRATOR_IMAGE_WITH_TAG}" \
-            ${{ env.STACK_NAME }}_init-db
+            asphub_init_db
 
           echo "📦 Updating server service..."
           docker service update \
             --image "${SERVER_IMAGE_WITH_TAG}" \
-            ${{ env.STACK_NAME }}_server
-
-
+            asphub_application_server
 
       - name: Verify deployment
         run: |
           # Use reusable deployment verification script
           scripts/deployment/verify-deployment.sh \
-            --stack-name="${{ env.STACK_NAME }}" \
+            --stack-name="asphub_application" \
             --services="client,server" \
             --timeout=300 \
             --interval=10
