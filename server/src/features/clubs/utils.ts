@@ -85,12 +85,12 @@ export async function updateUserRole(userId: string): Promise<UserRole> {
 	// Determine role based on responsibilities (priority order)
 	if (
 		responsibilities.some(
-			(r: any) => r.role === RESPONSIBILITY_ROLES.SECTION_MANAGER,
+			(r) => r.role === RESPONSIBILITY_ROLES.SECTION_MANAGER,
 		)
 	) {
 		newRole = USER_ROLES.SECTION_MANAGER;
 	} else if (
-		responsibilities.some((r: any) => r.role === RESPONSIBILITY_ROLES.COACH)
+		responsibilities.some((r) => r.role === RESPONSIBILITY_ROLES.COACH)
 	) {
 		newRole = USER_ROLES.COACH;
 	} else {
