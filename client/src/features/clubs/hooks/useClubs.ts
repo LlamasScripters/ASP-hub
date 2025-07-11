@@ -1,146 +1,103 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Club } from "../types";
+import { clubsApi } from "./../lib/api";
+import type { CreateClubData, UpdateClubData, ClubFilters } from "./../types";
 
-interface UseClubsProps {
-	initialData?: Club[];
-	autoLoad?: boolean;
+// Query keys
+export const clubsQueryKeys = {
+	all: ['clubs'] as const,
+	lists: () => [...clubsQueryKeys.all, 'list'] as const,
+	list: (filters: Partial<ClubFilters> = {}) => [...clubsQueryKeys.lists(), filters] as const,
+	details: () => [...clubsQueryKeys.all, 'detail'] as const,
+	detail: (id: string) => [...clubsQueryKeys.details(), id] as const,
+};
+
+// Query hooks
+export function useClubs(filters?: Partial<ClubFilters>) {
+	return useQuery({
+		queryKey: clubsQueryKeys.list(filters),
+		queryFn: () => clubsApi.getClubs(filters),
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
+	});
 }
 
-interface UseClubsReturn {
-	clubs: Club[];
-	loading: boolean;
-	error: string | null;
-	createClub: (
-		data: Omit<Club, "id" | "createdAt" | "updatedAt">,
-	) => Promise<Club | null>;
-	updateClub: (id: string, data: Partial<Club>) => Promise<Club | null>;
-	deleteClub: (id: string) => Promise<boolean>;
-	refresh: () => Promise<void>;
+export function useClub(id: string) {
+	return useQuery({
+		queryKey: clubsQueryKeys.detail(id),
+		queryFn: () => clubsApi.getClubById(id),
+		enabled: !!id,
+		staleTime: 5 * 60 * 1000,
+	});
 }
 
-export function useClubs({
-	initialData = [],
-	autoLoad = true,
-}: UseClubsProps = {}): UseClubsReturn {
-	const [clubs, setClubs] = useState<Club[]>(initialData);
-	const [loading, setLoading] = useState(autoLoad);
-	const [error, setError] = useState<string | null>(null);
+// Mutation hooks
+export function useCreateClub() {
+	const queryClient = useQueryClient();
 
-	const refresh = useCallback(async () => {
-		setLoading(true);
-		setError(null);
-		try {
-			const response = await fetch("/api/clubs");
-			if (!response.ok) {
-				throw new Error("Erreur lors du chargement des associations");
-			}
-			const data = await response.json();
-			setClubs(data);
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Erreur inconnue";
-			setError(errorMessage);
-			toast.error(errorMessage);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Auto-chargement au montage
-	useEffect(() => {
-		if (autoLoad && initialData.length === 0) {
-			refresh();
-		}
-	}, [autoLoad, initialData.length, refresh]);
-
-	const createClub = useCallback(
-		async (data: Omit<Club, "id" | "createdAt" | "updatedAt">) => {
-			setError(null);
-			try {
-				const response = await fetch("/api/clubs", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
-				});
-
-				if (!response.ok) {
-					throw new Error("Erreur lors de la création de l'association");
-				}
-
-				const newClub = await response.json();
-				setClubs((prev) => [...prev, newClub]);
-				toast.success("Association créée avec succès");
-				return newClub;
-			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : "Erreur lors de la création";
-				setError(errorMessage);
-				toast.error(errorMessage);
-				return null;
-			}
-		},
-		[],
-	);
-
-	const updateClub = useCallback(async (id: string, data: Partial<Club>) => {
-		setError(null);
-		try {
-			const response = await fetch(`/api/clubs/${id}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la modification de l'association");
-			}
-
-			const updatedClub = await response.json();
-			setClubs((prev) =>
-				prev.map((club) => (club.id === id ? updatedClub : club)),
+	return useMutation({
+		mutationFn: (data: CreateClubData) => clubsApi.createClub(data),
+		onSuccess: (newClub) => {
+			// Invalidate and refetch clubs list
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
+			// Optimistically update the cache
+			queryClient.setQueryData(
+				clubsQueryKeys.detail(newClub.id),
+				newClub
 			);
+			
+			toast.success("Association créée avec succès");
+		},
+		onError: (error) => {
+			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création";
+			toast.error(errorMessage);
+		},
+	});
+}
+
+export function useUpdateClub() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, data }: { id: string; data: UpdateClubData }) =>
+			clubsApi.updateClub(id, data),
+		onSuccess: (updatedClub, { id }) => {
+			// Update the specific club in the cache
+			queryClient.setQueryData(
+				clubsQueryKeys.detail(id),
+				updatedClub
+			);
+			
+			// Invalidate lists to ensure consistency
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
 			toast.success("Association modifiée avec succès");
-			return updatedClub;
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Erreur lors de la modification";
-			setError(errorMessage);
+		},
+		onError: (error) => {
+			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la modification";
 			toast.error(errorMessage);
-			return null;
-		}
-	}, []);
+		},
+	});
+}
 
-	const deleteClub = useCallback(async (id: string) => {
-		setError(null);
-		try {
-			const response = await fetch(`/api/clubs/${id}`, {
-				method: "DELETE",
-			});
+export function useDeleteClub() {
+	const queryClient = useQueryClient();
 
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression de l'association");
-			}
-
-			setClubs((prev) => prev.filter((club) => club.id !== id));
+	return useMutation({
+		mutationFn: (id: string) => clubsApi.deleteClub(id),
+		onSuccess: (_, id) => {
+			// Remove the club from the cache
+			queryClient.removeQueries({ queryKey: clubsQueryKeys.detail(id) });
+			
+			// Invalidate lists to ensure consistency
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
 			toast.success("Association supprimée avec succès");
-			return true;
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Erreur lors de la suppression";
-			setError(errorMessage);
+		},
+		onError: (error) => {
+			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la suppression";
 			toast.error(errorMessage);
-			return false;
-		}
-	}, []);
-
-	return {
-		clubs,
-		loading,
-		error,
-		createClub,
-		updateClub,
-		deleteClub,
-		refresh,
-	};
+		},
+	});
 }

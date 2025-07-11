@@ -1,0 +1,129 @@
+import type { Club, ClubFilters, ClubsPaginatedResponse, CreateClubData, UpdateClubData } from "@/features/clubs/types/clubs";
+
+const API_BASE_URL = "/api";
+
+export interface ApiOptions {
+	signal?: AbortSignal;
+}
+
+export class ClubsApiClient {
+	private baseUrl: string;
+
+	constructor(baseUrl: string = API_BASE_URL) {
+		this.baseUrl = baseUrl;
+	}
+
+	/**
+	 * Récupère tous les clubs avec pagination et filtres
+	 */
+	async getClubs(
+		filters?: Partial<ClubFilters>,
+		options?: ApiOptions,
+	): Promise<ClubsPaginatedResponse> {
+		const queryParams = new URLSearchParams();
+
+		if (filters) {
+			for (const [key, value] of Object.entries(filters)) {
+				if (value !== undefined && value !== null && value !== "") {
+					queryParams.append(key, String(value));
+				}
+			}
+		}
+
+		if (!queryParams.has("page")) {
+			queryParams.append("page", "1");
+		}
+		if (!queryParams.has("limit")) {
+			queryParams.append("limit", "20");
+		}
+
+		const url = `${this.baseUrl}/clubs-modular?${queryParams}`;
+		const response = await fetch(url, {
+			method: "GET",
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	}
+
+	/**
+	 * Récupère un club par son ID
+	 */
+	async getClubById(id: string, options?: ApiOptions): Promise<Club> {
+		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const response = await fetch(url, {
+			method: "GET",
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	}
+
+	/**
+	 * Crée un nouveau club
+	 */
+	async createClub(data: CreateClubData, options?: ApiOptions): Promise<Club> {
+		const url = `${this.baseUrl}/clubs-modular`;
+		const response = await fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	}
+
+	/**
+	 * Met à jour un club
+	 */
+	async updateClub(id: string, data: UpdateClubData, options?: ApiOptions): Promise<Club> {
+		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const response = await fetch(url, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	}
+
+	/**
+	 * Supprime un club
+	 */
+	async deleteClub(id: string, options?: ApiOptions): Promise<void> {
+		const url = `${this.baseUrl}/clubs-modular/${id}`;
+		const response = await fetch(url, {
+			method: "DELETE",
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+		}
+	}
+}
+
+// Instance partagée
+export const clubsApi = new ClubsApiClient();
