@@ -31,6 +31,15 @@ export function useCategory(id: string) {
 	});
 }
 
+export function useCategoriesBySection(sectionId: string) {
+	return useQuery({
+		queryKey: [...categoriesQueryKeys.all, 'section', sectionId],
+		queryFn: () => categoriesApi.getCategoriesBySection(sectionId),
+		enabled: !!sectionId,
+		staleTime: 5 * 60 * 1000,
+	});
+}
+
 // Mutation hooks
 export function useCreateCategory() {
 	const queryClient = useQueryClient();

@@ -29,10 +29,9 @@ import {
 	User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
-import { useCategoryCoach } from "../../hooks/useCategoryCoach";
-import { useEligibleUsersForCategory } from "../../hooks/useEligibleUsers";
+import { useEligibleUsersForCategory, useAssignCategoryCoach, useRemoveCategoryCoach } from "../../hooks/useResponsibilities";
+import { useCategories, useCategory, useCreateCategory, useUpdateCategory } from "../../hooks/useCategories";
 import type { Category, EligibleUser } from "../../types";
 
 const schema = z
@@ -105,38 +104,29 @@ export function CategoryForm({
 	category?: Category;
 }) {
 	const navigate = useNavigate();
+	
+	// Utilisation des hooks personnalisés
+	const { data: categoriesData } = useCategories({ sectionId });
+	const existingCategories = categoriesData?.data || [];
+	const { data: categoryData } = useCategory(categoryId || "");
+	const createCategoryMutation = useCreateCategory();
+	const updateCategoryMutation = useUpdateCategory();
+	
 	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
 		useEligibleUsersForCategory(categoryId);
-	const { assignCoach, removeCoach } = useCategoryCoach();
+	const assignCoachMutation = useAssignCategoryCoach();
+	const removeCoachMutation = useRemoveCategoryCoach();
+	
 	const [form, setForm] = useState<Partial<Category>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
-	const [isLoading, setIsLoading] = useState(false);
-	const [existingCategories, setExistingCategories] = useState<Category[]>([]);
-	const [isLoadingExistingCategories, setIsLoadingExistingCategories] =
-		useState(true);
+	
+	const isLoading = createCategoryMutation.isPending || updateCategoryMutation.isPending;
 
 	// récupération des catégories existantes au chargement
 	useEffect(() => {
-		const fetchExistingCategories = async () => {
-			try {
-				setIsLoadingExistingCategories(true);
-				const response = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-				);
-				if (!response.ok)
-					throw new Error("Erreur lors du chargement des catégories");
-				const categories: Category[] = await response.json();
-				setExistingCategories(categories);
-			} catch (error) {
-				console.error("Erreur lors du chargement des catégories:", error);
-				toast.error("Erreur lors du chargement des catégories existantes");
-			} finally {
-				setIsLoadingExistingCategories(false);
-			}
-		};
-
-		fetchExistingCategories();
-	}, [clubId, sectionId]);
+		// Les catégories existantes sont déjà récupérées via le hook useCategories
+		// Pas besoin de fetch manuel
+	}, []);
 
 	useEffect(() => {
 		if (mode === "edit" && category) {
@@ -148,37 +138,17 @@ export function CategoryForm({
 				ageMax: category.ageMax,
 				coachId: category.coachId || "none",
 			});
-		} else if (
-			mode === "edit" &&
-			categoryId &&
-			!isLoadingExistingCategories &&
-			!category
-		) {
-			// If no category data provided, fetch it
-			setIsLoading(true);
-			fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
-			)
-				.then((res) => res.json())
-				.then((data) => {
-					setForm({
-						name: data.name || "",
-						description: data.description || "",
-						ageMin: data.ageMin,
-						ageMax: data.ageMax,
-						coachId: data.coachId || "none",
-					});
-				})
-				.finally(() => setIsLoading(false));
+		} else if (mode === "edit" && categoryData) {
+			// Use data from hook
+			setForm({
+				name: categoryData.name || "",
+				description: categoryData.description || "",
+				ageMin: categoryData.ageMin,
+				ageMax: categoryData.ageMax,
+				coachId: categoryData.coachId || "none",
+			});
 		}
-	}, [
-		mode,
-		categoryId,
-		category,
-		clubId,
-		sectionId,
-		isLoadingExistingCategories,
-	]);
+	}, [mode, category, categoryData]);
 
 	// validation pour les noms dupliqués
 	const validateDuplicateName = (name: string) => {
@@ -250,20 +220,17 @@ export function CategoryForm({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setErrors({});
-		setIsLoading(true);
 
 		// validation des noms dupliqués
 		const nameError = validateDuplicateName(form.name || "");
 		if (nameError) {
 			setErrors({ name: nameError });
-			setIsLoading(false);
 			return;
 		}
 
 		// validation côté client
 		if (ageRangeError) {
 			setErrors({ ageRange: ageRangeError });
-			setIsLoading(false);
 			return;
 		}
 
@@ -281,52 +248,23 @@ export function CategoryForm({
 				formattedErrors[field] = error.message;
 			}
 			setErrors(formattedErrors);
-			setIsLoading(false);
 			return;
 		}
 
 		try {
-			let response: Response;
 			let createdCategory: Category | null = null;
 			const { coachId, ...categoryData } = parsed.data;
 
 			if (mode === "create") {
-				response = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(categoryData),
-					},
-				);
+				createdCategory = await createCategoryMutation.mutateAsync({
+					...categoryData,
+					sectionId,
+				});
 			} else {
-				response = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}`,
-					{
-						method: "PUT",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(categoryData),
-					},
-				);
-			}
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				if (
-					response.status === 409 ||
-					errorData.message?.includes("existe déjà")
-				) {
-					setErrors({
-						name: "Une catégorie avec ce nom existe déjà dans cette section",
-					});
-					setIsLoading(false);
-					return;
-				}
-				throw new Error(errorData.message || "Erreur lors de la sauvegarde");
-			}
-
-			if (mode === "create") {
-				createdCategory = await response.json();
+				await updateCategoryMutation.mutateAsync({
+					id: categoryId || "",
+					data: categoryData,
+				});
 			}
 
 			// Gestion du coach
@@ -340,33 +278,24 @@ export function CategoryForm({
 			if (targetCategoryId && actualCoachId) {
 				// Si un coach est sélectionné, l'assigner
 				if (actualCoachId !== originalCoachId) {
-					await assignCoach({
-						clubId,
-						sectionId,
+					await assignCoachMutation.mutateAsync({
 						categoryId: targetCategoryId,
-						userId: actualCoachId,
+						data: { userId: actualCoachId },
 					});
 				}
 			} else if (targetCategoryId && originalCoachId && !actualCoachId) {
 				// Si le coach a été supprimé, le retirer
-				await removeCoach({ clubId, sectionId, categoryId: targetCategoryId });
+				await removeCoachMutation.mutateAsync(targetCategoryId);
 			}
 
-			toast.success(
-				mode === "create"
-					? "Catégorie créée avec succès !"
-					: "Catégorie modifiée avec succès !",
-			);
 			navigate({
 				to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories",
 				params: { clubId, sectionId },
 			});
 		} catch (error) {
 			console.error("Erreur:", error);
-			toast.error("Erreur lors de la sauvegarde de la catégorie");
+			// Les erreurs sont gérées par les hooks de mutation
 			setErrors({ general: "Une erreur est survenue lors de la sauvegarde" });
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -377,7 +306,7 @@ export function CategoryForm({
 		});
 	};
 
-	if (isLoadingExistingCategories) {
+	if (isLoading) {
 		return (
 			<div className="container mx-auto p-6 max-w-2xl">
 				<Card>
@@ -645,11 +574,11 @@ export function CategoryForm({
 								<Button
 									type="submit"
 									disabled={
-										isLoading || !!ageRangeError || !!duplicateNameError
+										createCategoryMutation.isPending || updateCategoryMutation.isPending || !!ageRangeError || !!duplicateNameError
 									}
 									className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
-									{isLoading ? (
+									{createCategoryMutation.isPending || updateCategoryMutation.isPending ? (
 										<>
 											<Loader2 className="h-4 w-4 animate-spin" />
 											{mode === "create" ? "Création..." : "Modification..."}
@@ -665,7 +594,7 @@ export function CategoryForm({
 									type="button"
 									variant="outline"
 									onClick={handleBack}
-									disabled={isLoading}
+									disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
 									className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
 									<ArrowLeft className="h-4 w-4" />

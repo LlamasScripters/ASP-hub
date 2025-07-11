@@ -10,9 +10,8 @@ import {
 	User,
 } from "lucide-react";
 // client/src/features/clubs/components/SectionForm.tsx
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -42,10 +41,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useEligibleUsersForSection } from "../../hooks/useEligibleUsers";
-import { useSectionManager } from "../../hooks/useSectionManager";
-import { useSections } from "../../hooks/useSections";
-import type { Section } from "../../types";
+import { useEligibleUsersForSection, useAssignSectionManager, useRemoveSectionManager } from "../../hooks/useResponsibilities";
+import { useSectionsByClub, useSection, useCreateSection, useUpdateSection } from "../../hooks/useSections";
+import type { Section, EligibleUser } from "../../types";
 
 interface SectionFormProps {
 	mode: "create" | "edit";
@@ -63,11 +61,20 @@ export function SectionForm({
 	section,
 }: SectionFormProps) {
 	const navigate = useNavigate();
-	const { sections, createSection, updateSection } = useSections({ clubId });
+	
+	// Utilisation des hooks personnalisés
+	const { data: sectionsData } = useSectionsByClub(clubId);
+	const sections = sectionsData || [];
+	const { data: sectionData } = useSection(sectionId || "");
+	const createSectionMutation = useCreateSection();
+	const updateSectionMutation = useUpdateSection();
+	
 	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
 		useEligibleUsersForSection(sectionId);
-	const { assignManager, removeManager } = useSectionManager();
-	const [isLoading, setIsLoading] = useState(false);
+	const assignManagerMutation = useAssignSectionManager();
+	const removeManagerMutation = useRemoveSectionManager();
+	
+	const isLoading = createSectionMutation.isPending || updateSectionMutation.isPending;
 
 	const isEditing = mode === "edit";
 
@@ -129,30 +136,16 @@ export function SectionForm({
 				color: section.color || "#3b82f6",
 				managerId: section.managerId || "none",
 			});
-		} else if (isEditing && sectionId && !section) {
-			// If no section data provided, fetch it
-			setIsLoading(true);
-			fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
-				.then((res) => {
-					if (!res.ok)
-						throw new Error("Erreur lors du chargement de la section");
-					return res.json();
-				})
-				.then((sectionData: Section) => {
-					form.reset({
-						name: sectionData.name || "",
-						description: sectionData.description || "",
-						color: sectionData.color || "#3b82f6",
-						managerId: sectionData.managerId || "none",
-					});
-				})
-				.catch((error) => {
-					console.error("Erreur:", error);
-					toast.error("Erreur lors du chargement de la section");
-				})
-				.finally(() => setIsLoading(false));
+		} else if (isEditing && sectionData) {
+			// Use data from the hook
+			form.reset({
+				name: sectionData.name || "",
+				description: sectionData.description || "",
+				color: sectionData.color || "#3b82f6",
+				managerId: sectionData.managerId || "none",
+			});
 		}
-	}, [isEditing, sectionId, section, clubId, form]);
+	}, [isEditing, section, sectionData, form]);
 
 	// validation en temps réel pour les noms dupliqués
 	useEffect(() => {
@@ -203,19 +196,15 @@ export function SectionForm({
 			return;
 		}
 
-		setIsLoading(true);
 		try {
 			let createdSection: Section | null = null;
 			const { managerId, ...sectionData } = data;
 			const actualManagerId = managerId === "none" ? "" : managerId;
 
 			if (mode === "create") {
-				createdSection = await createSection({ ...sectionData, clubId });
-				if (!createdSection) {
-					throw new Error("Erreur lors de la création de la section");
-				}
+				createdSection = await createSectionMutation.mutateAsync({ ...sectionData, clubId });
 			} else if (sectionId) {
-				await updateSection(sectionId, sectionData);
+				await updateSectionMutation.mutateAsync({ id: sectionId, data: sectionData });
 			}
 
 			// Gestion du responsable
@@ -226,10 +215,9 @@ export function SectionForm({
 				const currentManagerId =
 					section?.managerId === "none" ? "" : section?.managerId;
 				if (actualManagerId !== (currentManagerId || "")) {
-					assignManager({
-						clubId,
+					await assignManagerMutation.mutateAsync({
 						sectionId: targetSectionId,
-						userId: actualManagerId,
+						data: { userId: actualManagerId },
 					});
 				}
 			} else if (
@@ -239,23 +227,16 @@ export function SectionForm({
 				!actualManagerId
 			) {
 				// Si le responsable a été supprimé, le retirer
-				removeManager({ clubId, sectionId: targetSectionId });
+				await removeManagerMutation.mutateAsync(targetSectionId);
 			}
 
-			toast.success(
-				mode === "create"
-					? "Section créée avec succès !"
-					: "Section modifiée avec succès !",
-			);
 			navigate({
 				to: "/admin/dashboard/clubs/$clubId/sections",
 				params: { clubId },
 			});
 		} catch (error) {
 			console.error("Erreur:", error);
-			toast.error("Une erreur est survenue lors de la sauvegarde");
-		} finally {
-			setIsLoading(false);
+			// Les erreurs sont gérées par les hooks de mutation
 		}
 	};
 
@@ -406,7 +387,7 @@ export function SectionForm({
 													<SelectItem value="none">
 														Aucun responsable
 													</SelectItem>
-													{eligibleUsers.map((user) => (
+													{eligibleUsers.map((user: EligibleUser) => (
 														<SelectItem key={user.id} value={user.id}>
 															{user.firstName} {user.lastName} ({user.email})
 														</SelectItem>

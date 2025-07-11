@@ -25,24 +25,15 @@ import {
 	Plus,
 	Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { SessionSport } from "../../types";
+import { useSessionsByCategory } from "../../hooks/useSessions";
 
 export function SessionsListPage() {
 	const { clubId, sectionId, categoryId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/",
 	});
-	const [sessions, setSessions] = useState<SessionSport[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
 
-	useEffect(() => {
-		fetch(
-			`/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}/sessions`,
-		)
-			.then((res) => res.json())
-			.then(setSessions)
-			.finally(() => setIsLoading(false));
-	}, [clubId, sectionId, categoryId]);
+	// Utilisation du hook pour récupérer les sessions par catégorie
+	const { data: sessions = [], isLoading } = useSessionsByCategory(categoryId);
 
 	const getStatusBadge = (status: string) => {
 		const variants = {

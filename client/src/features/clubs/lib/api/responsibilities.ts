@@ -132,6 +132,90 @@ export class ResponsibilitiesApiClient {
 
 		return response.json();
 	}
+
+	/**
+	 * Récupère les utilisateurs éligibles pour une section
+	 */
+	async getEligibleUsersForSection(sectionId?: string, options?: ApiOptions): Promise<EligibleUser[]> {
+		const url = sectionId 
+			? `${this.baseUrl}/responsibilities/eligible-users/section/${sectionId}`
+			: `${this.baseUrl}/responsibilities/eligible-users/section`;
+		
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Récupère les utilisateurs éligibles pour une catégorie
+	 */
+	async getEligibleUsersForCategory(categoryId?: string, options?: ApiOptions): Promise<EligibleUser[]> {
+		const url = categoryId 
+			? `${this.baseUrl}/responsibilities/eligible-users/category/${categoryId}`
+			: `${this.baseUrl}/responsibilities/eligible-users/category`;
+		
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Récupère les responsabilités d'une catégorie
+	 */
+	async getCategoryResponsibilities(categoryId: string, options?: ApiOptions): Promise<Responsibility[]> {
+		const response = await fetch(`${this.baseUrl}/responsibilities/categories/${categoryId}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Récupère les responsabilités d'un utilisateur
+	 */
+	async getUserResponsibilities(userId: string, options?: ApiOptions): Promise<Responsibility[]> {
+		const response = await fetch(`${this.baseUrl}/responsibilities/users/${userId}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
 }
 
 // Instance partagée
