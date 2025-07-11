@@ -14,7 +14,7 @@ import {
 } from "@/middleware/section.middleware.js";
 import { fromNodeHeaders } from "better-auth/node";
 import { type Request, type Response, Router } from "express";
-import { clubsService } from "./clubs.service.js";
+import { clubsService } from "./old.clubs.service.js";
 
 const clubsRouter = Router();
 

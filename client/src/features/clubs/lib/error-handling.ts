@@ -8,15 +8,28 @@ import type { ClubManagementError } from "../types/mutations";
 /**
  * Handles and displays appropriate error messages for club management operations
  */
-export function handleClubError(error: unknown, operation: string): void {
-	console.error(`Erreur lors de ${operation}:`, error);
+export function handleClubError(error: unknown, operation?: string): void {
+	console.error(`Erreur lors de ${operation || "l'opération"}:`, error);
 
 	if (isClubManagementError(error)) {
 		toast.error(error.message);
 	} else if (error instanceof Error) {
-		toast.error(`Erreur lors de ${operation}: ${error.message}`);
+		toast.error(`Erreur lors de ${operation || "l'opération"}: ${error.message}`);
 	} else {
-		toast.error(`Erreur lors de ${operation}`);
+		toast.error(`Erreur lors de ${operation || "l'opération"}`);
+	}
+}
+
+/**
+ * Simple error handler for mutations
+ */
+export function handleSimpleError(error: unknown): void {
+	console.error("Erreur:", error);
+
+	if (error instanceof Error) {
+		toast.error(error.message);
+	} else {
+		toast.error("Une erreur est survenue");
 	}
 }
 
@@ -44,6 +57,11 @@ export const successMessages = {
 		assign: "Responsable assigné avec succès",
 		remove: "Responsable supprimé avec succès",
 	},
+	club: {
+		create: "Club créé avec succès",
+		update: "Club mis à jour avec succès",
+		delete: "Club supprimé avec succès",
+	},
 } as const;
 
 /**
@@ -60,4 +78,11 @@ export function showSuccessMessage(
 	if (message) {
 		toast.success(message);
 	}
+}
+
+/**
+ * Simplified success message for direct usage
+ */
+export function showSimpleSuccessMessage(message: string): void {
+	toast.success(message);
 }
