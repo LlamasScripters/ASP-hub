@@ -95,6 +95,9 @@ export function useAssignSectionManager() {
 				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
 			});
 			
+			// Invalidate sections data (for manager info)
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
+			
 			toast.success("Responsable de section assigné avec succès");
 		},
 		onError: (error) => {
@@ -124,6 +127,9 @@ export function useRemoveSectionManager() {
 			queryClient.invalidateQueries({ 
 				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
 			});
+			
+			// Invalidate sections data (for manager info)
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
 			
 			toast.success("Responsable de section supprimé avec succès");
 		},
@@ -156,6 +162,9 @@ export function useAssignCategoryCoach() {
 				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
 			});
 			
+			// Invalidate categories data (for coach info)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			
 			toast.success("Coach assigné avec succès");
 		},
 		onError: (error) => {
@@ -185,6 +194,9 @@ export function useRemoveCategoryCoach() {
 			queryClient.invalidateQueries({ 
 				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
 			});
+			
+			// Invalidate categories data (for coach info)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			
 			toast.success("Coach supprimé avec succès");
 		},

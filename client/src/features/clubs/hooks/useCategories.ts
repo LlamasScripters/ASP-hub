@@ -47,8 +47,18 @@ export function useCreateCategory() {
 	return useMutation({
 		mutationFn: (data: CreateCategoryData) => categoriesApi.createCategory(data),
 		onSuccess: (newCategory) => {
-			// Invalidate and refetch categories list
+			// Invalidate all categories lists
 			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.lists() });
+			
+			// Invalidate categories by section
+			if (newCategory.sectionId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...categoriesQueryKeys.all, 'section', newCategory.sectionId] 
+				});
+			}
+			
+			// Invalidate all categories (for AllCategoriesPage)
+			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
 			
 			// Optimistically update the cache
 			queryClient.setQueryData(
@@ -78,8 +88,18 @@ export function useUpdateCategory() {
 				updatedCategory
 			);
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all categories lists
 			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.lists() });
+			
+			// Invalidate categories by section
+			if (updatedCategory.sectionId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...categoriesQueryKeys.all, 'section', updatedCategory.sectionId] 
+				});
+			}
+			
+			// Invalidate all categories (for AllCategoriesPage)
+			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
 			
 			toast.success("Catégorie modifiée avec succès");
 		},
@@ -99,8 +119,16 @@ export function useDeleteCategory() {
 			// Remove the category from the cache
 			queryClient.removeQueries({ queryKey: categoriesQueryKeys.detail(id) });
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all categories lists
 			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.lists() });
+			
+			// Invalidate all categories by section queries
+			queryClient.invalidateQueries({ 
+				queryKey: [...categoriesQueryKeys.all, 'section'] 
+			});
+			
+			// Invalidate all categories (for AllCategoriesPage)
+			queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
 			
 			toast.success("Catégorie supprimée avec succès");
 		},

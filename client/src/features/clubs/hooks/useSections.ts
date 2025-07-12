@@ -48,7 +48,7 @@ export function useCreateSection() {
 	return useMutation({
 		mutationFn: (data: CreateSectionData) => sectionsApi.createSection(data),
 		onSuccess: (newSection) => {
-			// Invalidate and refetch sections list
+			// Invalidate all sections lists
 			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.lists() });
 			
 			// Invalidate sections by club
@@ -57,6 +57,9 @@ export function useCreateSection() {
 					queryKey: sectionsQueryKeys.byClub(newSection.clubId) 
 				});
 			}
+			
+			// Invalidate all sections
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.all });
 			
 			// Optimistically update the cache
 			queryClient.setQueryData(
@@ -86,7 +89,7 @@ export function useUpdateSection() {
 				updatedSection
 			);
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all sections lists
 			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.lists() });
 			
 			// Invalidate sections by club
@@ -95,6 +98,9 @@ export function useUpdateSection() {
 					queryKey: sectionsQueryKeys.byClub(updatedSection.clubId) 
 				});
 			}
+			
+			// Invalidate all sections
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.all });
 			
 			toast.success("Section modifiée avec succès");
 		},
