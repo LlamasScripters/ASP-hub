@@ -19,6 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -30,7 +31,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useEligibleUsersForCategory, useAssignCategoryCoach, useRemoveCategoryCoach } from "../../hooks/useResponsibilities";
+import { useEligibleUsersForCategory, useAssignCategoryCoachSilent, useRemoveCategoryCoachSilent } from "../../hooks/useResponsibilities";
 import { useCategoriesBySection, useCategory, useCreateCategory, useUpdateCategory } from "../../hooks/useCategories";
 import type { Category, EligibleUser } from "../../types";
 
@@ -114,13 +115,17 @@ export function CategoryForm({
 	
 	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
 		useEligibleUsersForCategory(categoryId);
-	const assignCoachMutation = useAssignCategoryCoach();
-	const removeCoachMutation = useRemoveCategoryCoach();
+	const assignCoachMutation = useAssignCategoryCoachSilent();
+	const removeCoachMutation = useRemoveCategoryCoachSilent();
 	
 	const [form, setForm] = useState<Partial<Category & { coachId?: string }>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	
-	const isLoading = createCategoryMutation.isPending || updateCategoryMutation.isPending;
+	const isLoading = 
+		createCategoryMutation.isPending || 
+		updateCategoryMutation.isPending ||
+		assignCoachMutation.isPending ||
+		removeCoachMutation.isPending;
 
 	// récupération des catégories existantes au chargement
 	useEffect(() => {
@@ -255,6 +260,7 @@ export function CategoryForm({
 			let createdCategory: Category | null = null;
 			const { coachId, ...categoryData } = parsed.data;
 
+			// Étape 1: Créer ou mettre à jour la catégorie
 			if (mode === "create") {
 				createdCategory = await createCategoryMutation.mutateAsync({
 					...categoryData,
@@ -267,27 +273,42 @@ export function CategoryForm({
 				});
 			}
 
-			// Gestion du coach
+			// Étape 2: Gestion du coach (seulement si l'étape 1 a réussi)
 			const targetCategoryId =
 				mode === "create" ? createdCategory?.id : categoryId;
 			const actualCoachId = coachId === "none" ? "" : coachId;
-			// Pour la comparaison, utiliser le coachId original de la catégorie, pas l'état du formulaire
 			const originalCoachId =
 				mode === "edit" && category ? category.coach?.id || "" : "";
 
 			if (targetCategoryId && actualCoachId) {
 				// Si un coach est sélectionné, l'assigner
 				if (actualCoachId !== originalCoachId) {
-					await assignCoachMutation.mutateAsync({
-						categoryId: targetCategoryId,
-						data: { userId: actualCoachId },
-					});
+					try {
+						await assignCoachMutation.mutateAsync({
+							categoryId: targetCategoryId,
+							data: { userId: actualCoachId },
+						});
+					} catch (coachError) {
+						console.error("Erreur lors de l'assignation du coach:", coachError);
+						setErrors({ general: "Catégorie créée/modifiée mais erreur lors de l'assignation du coach" });
+						return; // Arrêter ici, ne pas naviguer
+					}
 				}
 			} else if (targetCategoryId && originalCoachId && !actualCoachId) {
 				// Si le coach a été supprimé, le retirer
-				await removeCoachMutation.mutateAsync(targetCategoryId);
+				try {
+					await removeCoachMutation.mutateAsync(targetCategoryId);
+				} catch (coachError) {
+					console.error("Erreur lors de la suppression du coach:", coachError);
+					setErrors({ general: "Catégorie créée/modifiée mais erreur lors de la suppression du coach" });
+					return; // Arrêter ici, ne pas naviguer
+				}
 			}
 
+			// Étape 3: Navigation seulement si tout s'est bien passé
+			const successMessage = mode === "create" ? "Catégorie créée avec succès" : "Catégorie modifiée avec succès";
+			toast.success(successMessage);
+			
 			navigate({
 				to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories",
 				params: { clubId, sectionId },

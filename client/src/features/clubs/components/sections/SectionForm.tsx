@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
 	ArrowLeft,
 	FileText,
@@ -41,7 +42,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useEligibleUsersForSection, useAssignSectionManager, useRemoveSectionManager } from "../../hooks/useResponsibilities";
+import { useEligibleUsersForSection, useAssignSectionManagerSilent, useRemoveSectionManagerSilent } from "../../hooks/useResponsibilities";
 import { useSectionsByClub, useSection, useCreateSection, useUpdateSection } from "../../hooks/useSections";
 import type { Section, EligibleUser } from "../../types";
 
@@ -71,10 +72,14 @@ export function SectionForm({
 	
 	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
 		useEligibleUsersForSection(sectionId);
-	const assignManagerMutation = useAssignSectionManager();
-	const removeManagerMutation = useRemoveSectionManager();
+	const assignManagerMutation = useAssignSectionManagerSilent();
+		const removeManagerMutation = useRemoveSectionManagerSilent();
 	
-	const isLoading = createSectionMutation.isPending || updateSectionMutation.isPending;
+	const isLoading = 
+		createSectionMutation.isPending || 
+		updateSectionMutation.isPending ||
+		assignManagerMutation.isPending ||
+		removeManagerMutation.isPending;
 
 	const isEditing = mode === "edit";
 
@@ -201,24 +206,35 @@ export function SectionForm({
 			const { managerId, ...sectionData } = data;
 			const actualManagerId = managerId === "none" ? "" : managerId;
 
+			// Étape 1: Créer ou mettre à jour la section
 			if (mode === "create") {
 				createdSection = await createSectionMutation.mutateAsync({ ...sectionData, clubId });
 			} else if (sectionId) {
 				await updateSectionMutation.mutateAsync({ id: sectionId, data: sectionData });
 			}
 
-			// Gestion du responsable
+			// Étape 2: Gestion du responsable (seulement si l'étape 1 a réussi)
 			const targetSectionId =
 				mode === "create" ? createdSection?.id : sectionId;
+			
 			if (targetSectionId && actualManagerId) {
 				// Si un responsable est sélectionné, l'assigner
 				const currentManagerId =
 					section?.manager?.id === "none" ? "" : section?.manager?.id;
 				if (actualManagerId !== (currentManagerId || "")) {
-					await assignManagerMutation.mutateAsync({
-						sectionId: targetSectionId,
-						data: { userId: actualManagerId },
-					});
+					try {
+						await assignManagerMutation.mutateAsync({
+							sectionId: targetSectionId,
+							data: { userId: actualManagerId },
+						});
+					} catch (managerError) {
+						console.error("Erreur lors de l'assignation du responsable:", managerError);
+						form.setError("managerId", {
+							type: "manual",
+							message: "Section créée/modifiée mais erreur lors de l'assignation du responsable",
+						});
+						return; // Arrêter ici, ne pas naviguer
+					}
 				}
 			} else if (
 				targetSectionId &&
@@ -227,9 +243,22 @@ export function SectionForm({
 				!actualManagerId
 			) {
 				// Si le responsable a été supprimé, le retirer
-				await removeManagerMutation.mutateAsync(targetSectionId);
+				try {
+					await removeManagerMutation.mutateAsync(targetSectionId);
+				} catch (managerError) {
+					console.error("Erreur lors de la suppression du responsable:", managerError);
+					form.setError("managerId", {
+						type: "manual",
+						message: "Section créée/modifiée mais erreur lors de la suppression du responsable",
+					});
+					return; // Arrêter ici, ne pas naviguer
+				}
 			}
 
+			// Étape 3: Navigation seulement si tout s'est bien passé
+			const successMessage = mode === "create" ? "Section créée avec succès" : "Section modifiée avec succès";
+			toast.success(successMessage);
+			
 			navigate({
 				to: "/admin/dashboard/clubs/$clubId/sections",
 				params: { clubId },

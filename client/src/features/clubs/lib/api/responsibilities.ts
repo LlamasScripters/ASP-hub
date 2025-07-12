@@ -3,7 +3,8 @@ import type {
 	EligibleUser,
 	AssignSectionManagerData,
 	AssignCategoryCoachData,
-	ResponsibilityAssignmentResponse
+	ResponsibilityAssignmentResponse,
+	UserResponsibilityWithDetails
 } from "../../types";
 
 const API_BASE_URL = "/api";
@@ -201,7 +202,7 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les responsabilités d'un utilisateur
 	 */
-	async getUserResponsibilities(userId: string, options?: ApiOptions): Promise<Responsibility[]> {
+	async getUserResponsibilities(userId: string, options?: ApiOptions): Promise<UserResponsibilityWithDetails[]> {
 		const response = await fetch(`${this.baseUrl}/responsibilities/users/${userId}`, {
 			method: "GET",
 			headers: {

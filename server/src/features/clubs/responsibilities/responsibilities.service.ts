@@ -2,11 +2,13 @@ import type {
 	SectionResponsibility, 
 	ResponsibilityWithUser, 
 	ResponsibilityAssignmentResult, 
-	ResponsibilityFilters 
+	ResponsibilityFilters,
+	UserResponsibilityWithDetails 
 } from "./responsibilities.types.js";
 import { db } from "@/db/index.js";
-import { sectionResponsibilities, users } from "@/db/schema.js";
+import { sectionResponsibilities, users, sections, categories } from "@/db/schema.js";
 import { eq, and, ne, isNull, asc } from "drizzle-orm";
+import { updateUserRole } from "../shared/membership-helpers.js";
 
 export class ResponsibilitiesService {
 	/**
@@ -57,142 +59,266 @@ export class ResponsibilitiesService {
 	}
 
 	/**
+	 * Assigne une responsabilité générique
+	 */
+	async assignResponsibility(data: {
+		userId: string;
+		sectionId?: string;
+		categoryId?: string;
+		role: string;
+	}) {
+		const [responsibility] = await db
+			.insert(sectionResponsibilities)
+			.values(data)
+			.returning();
+		return responsibility;
+	}
+
+	/**
 	 * Assigne un responsable de section
 	 */
 	async assignSectionManager(sectionId: string, userId: string): Promise<ResponsibilityAssignmentResult> {
-		try {
-			// Vérifier s'il y a déjà un responsable actif pour cette section
-			const existingManager = await db
+		// Validation des paramètres d'entrée
+		if (!sectionId || !userId) {
+			throw new Error("Section ID and User ID are required");
+		}
+
+		// Utiliser une transaction pour assurer la cohérence
+		return await db.transaction(async (tx) => {
+			// Vérifier que la section existe
+			const [section] = await tx
+				.select({ id: sections.id })
+				.from(sections)
+				.where(eq(sections.id, sectionId));
+
+			if (!section) {
+				throw new Error("Section non trouvée");
+			}
+
+			// Vérifier que l'utilisateur existe
+			const [user] = await tx
+				.select({ id: users.id })
+				.from(users)
+				.where(eq(users.id, userId));
+
+			if (!user) {
+				throw new Error("Utilisateur non trouvé");
+			}
+
+			// D'abord, récupérer l'ancien responsable s'il existe
+			const [currentManager] = await tx
 				.select()
 				.from(sectionResponsibilities)
 				.where(
 					and(
 						eq(sectionResponsibilities.sectionId, sectionId),
 						eq(sectionResponsibilities.role, "section_manager"),
-						eq(sectionResponsibilities.isActive, true)
-					)
-				)
-				.limit(1);
+						eq(sectionResponsibilities.isActive, true),
+					),
+				);
 
-			if (existingManager.length > 0) {
-				// Désactiver l'ancien responsable
-				await db
+			// Désactiver le responsable actuel s'il y en a un
+			if (currentManager) {
+				await tx
 					.update(sectionResponsibilities)
 					.set({ isActive: false })
-					.where(eq(sectionResponsibilities.id, existingManager[0].id));
+					.where(eq(sectionResponsibilities.id, currentManager.id));
+
+				// Mettre à jour le rôle de l'ancien responsable
+				await updateUserRole(currentManager.userId, tx);
 			}
 
-			// Créer la nouvelle responsabilité
-			const [newResponsibility] = await db
+			// Assigner le nouveau responsable
+			const [responsibility] = await tx
 				.insert(sectionResponsibilities)
 				.values({
 					userId,
 					sectionId,
-					categoryId: null,
 					role: "section_manager",
-					assignedAt: new Date(),
 					isActive: true,
 				})
 				.returning();
 
+			// Mettre à jour le rôle du nouveau responsable
+			await updateUserRole(userId, tx);
+
 			return {
-				id: newResponsibility.id,
+				id: responsibility.id,
 				message: "Responsable de section assigné avec succès",
 				success: true,
 			};
-		} catch (error) {
-			console.error("Erreur lors de l'assignation du responsable:", error);
-			throw new Error("Erreur lors de l'assignation du responsable");
-		}
+		});
 	}
 
 	/**
 	 * Supprime un responsable de section
 	 */
-	async removeSectionManager(sectionId: string): Promise<void> {
-		await db
-			.update(sectionResponsibilities)
-			.set({ isActive: false })
-			.where(
-				and(
-					eq(sectionResponsibilities.sectionId, sectionId),
-					eq(sectionResponsibilities.role, "section_manager"),
-					eq(sectionResponsibilities.isActive, true)
-				)
-			);
+	async removeSectionManager(sectionId: string) {
+		// Utiliser une transaction pour assurer la cohérence
+		return await db.transaction(async (tx) => {
+			// Récupérer le responsable actuel
+			const [currentManager] = await tx
+				.select()
+				.from(sectionResponsibilities)
+				.where(
+					and(
+						eq(sectionResponsibilities.sectionId, sectionId),
+						eq(sectionResponsibilities.role, "section_manager"),
+						eq(sectionResponsibilities.isActive, true),
+					),
+				);
+
+			if (currentManager) {
+				// Désactiver la responsabilité
+				await tx
+					.update(sectionResponsibilities)
+					.set({ isActive: false })
+					.where(eq(sectionResponsibilities.id, currentManager.id));
+
+				// Mettre à jour le rôle de l'utilisateur
+				await updateUserRole(currentManager.userId, tx);
+			}
+		});
 	}
 
 	/**
 	 * Assigne un coach à une catégorie
 	 */
 	async assignCategoryCoach(categoryId: string, userId: string): Promise<ResponsibilityAssignmentResult> {
-		try {
-			// Vérifier s'il y a déjà un coach actif pour cette catégorie
-			const existingCoach = await db
+		// Validation des paramètres d'entrée
+		if (!categoryId || !userId) {
+			throw new Error("Category ID and User ID are required");
+		}
+
+		// Utiliser une transaction pour assurer la cohérence
+		return await db.transaction(async (tx) => {
+			// Récupérer la catégorie pour obtenir la sectionId
+			const [category] = await tx
+				.select({ sectionId: categories.sectionId })
+				.from(categories)
+				.where(eq(categories.id, categoryId));
+
+			if (!category) {
+				throw new Error("Catégorie non trouvée");
+			}
+
+			// Vérifier que l'utilisateur existe
+			const [user] = await tx
+				.select({ id: users.id })
+				.from(users)
+				.where(eq(users.id, userId));
+
+			if (!user) {
+				throw new Error("Utilisateur non trouvé");
+			}
+
+			// D'abord, récupérer l'ancien coach s'il existe
+			const [currentCoach] = await tx
 				.select()
 				.from(sectionResponsibilities)
 				.where(
 					and(
 						eq(sectionResponsibilities.categoryId, categoryId),
 						eq(sectionResponsibilities.role, "coach"),
-						eq(sectionResponsibilities.isActive, true)
-					)
-				)
-				.limit(1);
+						eq(sectionResponsibilities.isActive, true),
+					),
+				);
 
-			if (existingCoach.length > 0) {
-				// Désactiver l'ancien coach
-				await db
+			// Désactiver le coach actuel s'il y en a un
+			if (currentCoach) {
+				await tx
 					.update(sectionResponsibilities)
 					.set({ isActive: false })
-					.where(eq(sectionResponsibilities.id, existingCoach[0].id));
+					.where(eq(sectionResponsibilities.id, currentCoach.id));
+
+				// Mettre à jour le rôle de l'ancien coach
+				await updateUserRole(currentCoach.userId, tx);
 			}
 
-			// Créer la nouvelle responsabilité
-			const [newResponsibility] = await db
+			// Assigner le nouveau coach
+			const [responsibility] = await tx
 				.insert(sectionResponsibilities)
 				.values({
 					userId,
-					sectionId: null,
+					sectionId: category.sectionId, // Ajouter le sectionId
 					categoryId,
 					role: "coach",
-					assignedAt: new Date(),
 					isActive: true,
 				})
 				.returning();
 
+			// Mettre à jour le rôle du nouveau coach
+			await updateUserRole(userId, tx);
+
 			return {
-				id: newResponsibility.id,
+				id: responsibility.id,
 				message: "Coach assigné avec succès",
 				success: true,
 			};
-		} catch (error) {
-			console.error("Erreur lors de l'assignation du coach:", error);
-			throw new Error("Erreur lors de l'assignation du coach");
-		}
+		});
 	}
 
 	/**
 	 * Supprime un coach d'une catégorie
 	 */
-	async removeCategoryCoach(categoryId: string): Promise<void> {
-		await db
-			.update(sectionResponsibilities)
-			.set({ isActive: false })
-			.where(
-				and(
-					eq(sectionResponsibilities.categoryId, categoryId),
-					eq(sectionResponsibilities.role, "coach"),
-					eq(sectionResponsibilities.isActive, true)
-				)
-			);
+	async removeCategoryCoach(categoryId: string) {
+		// Utiliser une transaction pour assurer la cohérence
+		return await db.transaction(async (tx) => {
+			// Récupérer le coach actuel
+			const [currentCoach] = await tx
+				.select()
+				.from(sectionResponsibilities)
+				.where(
+					and(
+						eq(sectionResponsibilities.categoryId, categoryId),
+						eq(sectionResponsibilities.role, "coach"),
+						eq(sectionResponsibilities.isActive, true),
+					),
+				);
+
+			if (currentCoach) {
+				// Désactiver la responsabilité
+				await tx
+					.update(sectionResponsibilities)
+					.set({ isActive: false })
+					.where(eq(sectionResponsibilities.id, currentCoach.id));
+
+				// Mettre à jour le rôle de l'utilisateur
+				await updateUserRole(currentCoach.userId, tx);
+			}
+		});
 	}
 
 	/**
 	 * Récupère les responsabilités d'un utilisateur
 	 */
-	async getUserResponsibilities(userId: string): Promise<ResponsibilityWithUser[]> {
-		return this.getResponsibilities({ userId, isActive: true });
+	async getUserResponsibilities(userId: string): Promise<UserResponsibilityWithDetails[]> {
+		const results = await db
+			.select({
+				id: sectionResponsibilities.id,
+				role: sectionResponsibilities.role,
+				assignedAt: sectionResponsibilities.assignedAt,
+				sectionId: sections.id,
+				sectionName: sections.name,
+				sectionClubId: sections.clubId,
+				categoryId: categories.id,
+				categoryName: categories.name,
+			})
+			.from(sectionResponsibilities)
+			.leftJoin(sections, eq(sections.id, sectionResponsibilities.sectionId))
+			.leftJoin(
+				categories,
+				eq(categories.id, sectionResponsibilities.categoryId),
+			)
+			.where(
+				and(
+					eq(sectionResponsibilities.userId, userId),
+					eq(sectionResponsibilities.isActive, true),
+				),
+			)
+			.orderBy(asc(sections.name));
+
+		return results as UserResponsibilityWithDetails[];
 	}
 
 	/**
@@ -227,7 +353,7 @@ export class ResponsibilitiesService {
 					and(
 						ne(users.role, "admin"), // Exclure les admins
 						isNull(users.deletedAt), // Exclure les utilisateurs supprimés
-					)
+					),
 				)
 				.orderBy(asc(users.firstName), asc(users.lastName));
 
@@ -256,8 +382,8 @@ export class ResponsibilitiesService {
 				.where(
 					and(
 						ne(users.role, "admin"), // Exclure les admins
-						isNull(users.deletedAt) // Exclure les utilisateurs supprimés
-					)
+						isNull(users.deletedAt), // Exclure les utilisateurs supprimés
+					),
 				)
 				.orderBy(asc(users.firstName), asc(users.lastName));
 
@@ -281,8 +407,8 @@ export class ResponsibilitiesService {
 					and(
 						eq(sectionResponsibilities.sectionId, sectionId),
 						eq(sectionResponsibilities.role, "section_manager"),
-						eq(sectionResponsibilities.isActive, true)
-					)
+						eq(sectionResponsibilities.isActive, true),
+					),
 				);
 
 			return eligibleUsers
@@ -324,8 +450,8 @@ export class ResponsibilitiesService {
 				.where(
 					and(
 						ne(users.role, "admin"), // Exclure les admins
-						isNull(users.deletedAt) // Exclure les utilisateurs supprimés
-					)
+						isNull(users.deletedAt), // Exclure les utilisateurs supprimés
+					),
 				)
 				.orderBy(asc(users.firstName), asc(users.lastName));
 
@@ -349,8 +475,8 @@ export class ResponsibilitiesService {
 					and(
 						eq(sectionResponsibilities.categoryId, categoryId),
 						eq(sectionResponsibilities.role, "coach"),
-						eq(sectionResponsibilities.isActive, true)
-					)
+						eq(sectionResponsibilities.isActive, true),
+					),
 				);
 
 			return eligibleUsers

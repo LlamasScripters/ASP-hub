@@ -1,7 +1,7 @@
 // Types pour les responsabilités côté client
 export interface Responsibility {
 	id: string;
-	role: "section_manager" | "category_coach";
+	role: "section_manager" | "coach";
 	userId: string;
 	sectionId?: string;
 	categoryId?: string;
@@ -25,8 +25,20 @@ export interface Responsibility {
 	};
 }
 
+// Nouveau type pour les responsabilités utilisateur avec détails
+export interface UserResponsibilityWithDetails {
+	id: string;
+	role: "section_manager" | "coach";
+	assignedAt: string;
+	sectionId: string | null;
+	sectionName: string | null;
+	sectionClubId: string | null;
+	categoryId: string | null;
+	categoryName: string | null;
+}
+
 export interface CreateResponsibilityData {
-	role: "section_manager" | "category_coach";
+	role: "section_manager" | "coach";
 	userId: string;
 	sectionId?: string;
 	categoryId?: string;
@@ -50,5 +62,5 @@ export interface AssignCategoryCoachData {
 export interface ResponsibilityAssignmentResponse {
 	id: string;
 	message: string;
-	responsibility: Responsibility;
+	success: boolean;
 }

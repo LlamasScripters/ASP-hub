@@ -23,4 +23,3 @@ export {
 
 // Export des nouveaux utilitaires partagés
 export * from "./shared/membership-helpers.js";
-export * from "./shared/role-helpers.js";
