@@ -37,7 +37,7 @@ import {
 	User,
 	Users,
 } from "lucide-react";
-// client/src/features/clubs/pages/CategoriesListPage.tsx
+
 import { useMemo, useState } from "react";
 import { useCategoriesBySection } from "../../hooks/useCategories";
 import { useSection } from "../../hooks/useSections";
@@ -54,7 +54,6 @@ interface Filters {
 	ageRange: string;
 }
 
-// fonction pour vérifier si un âge est valide
 const isValidAge = (age: number | undefined | null): age is number => {
 	return age !== undefined && age !== null && age >= 0;
 };
@@ -64,7 +63,6 @@ export function CategoriesListPage() {
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/",
 	});
 
-	// Hooks pour les données
 	const { data, isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
 	const categories = data?.data || [];
 	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
@@ -140,7 +138,6 @@ export function CategoriesListPage() {
 			return nameMatch && ageMinMatch && ageMaxMatch && ageRangeMatch;
 		});
 
-		// Sort
 		filtered.sort((a, b) => {
 			let aValue: string | number;
 			let bValue: string | number;
