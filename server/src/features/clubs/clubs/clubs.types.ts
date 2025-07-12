@@ -23,14 +23,5 @@ export interface ClubResponse {
 export interface ClubsPaginatedResponse {
 	data: ClubResponse[];
 	total: number;
-	page: number;
-	limit: number;
 }
 
-// Types pour les filtres
-export interface ClubFilters {
-	page?: number;
-	limit?: number;
-	search?: string;
-	isActive?: boolean;
-}

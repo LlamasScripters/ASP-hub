@@ -1,4 +1,4 @@
-import type { Club, ClubFilters, ClubsPaginatedResponse, CreateClubData, UpdateClubData } from "@/features/clubs/types/clubs";
+import type { Club, CreateClubData, UpdateClubData, ClubsResponse } from "@/features/clubs/types/clubs";
 
 const API_BASE_URL = "/api";
 
@@ -17,25 +17,9 @@ export class ClubsApiClient {
 	 * Récupère tous les clubs avec pagination et filtres
 	 */
 	async getClubs(
-		filters?: Partial<ClubFilters>,
 		options?: ApiOptions,
-	): Promise<ClubsPaginatedResponse> {
+	): Promise<ClubsResponse> {
 		const queryParams = new URLSearchParams();
-
-		if (filters) {
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null && value !== "") {
-					queryParams.append(key, String(value));
-				}
-			}
-		}
-
-		if (!queryParams.has("page")) {
-			queryParams.append("page", "1");
-		}
-		if (!queryParams.has("limit")) {
-			queryParams.append("limit", "20");
-		}
 
 		const url = `${this.baseUrl}/clubs?${queryParams}`;
 		const response = await fetch(url, {

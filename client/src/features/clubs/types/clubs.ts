@@ -31,16 +31,7 @@ export interface UpdateClubData {
 	website?: string;
 }
 
-export interface ClubFilters {
-	page?: number;
-	limit?: number;
-	search?: string;
-	isActive?: boolean;
-}
-
-export interface ClubsPaginatedResponse {
+export interface ClubsResponse {
 	data: Club[];
 	total: number;
-	page: number;
-	limit: number;
 }
