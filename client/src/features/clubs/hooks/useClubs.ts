@@ -1,22 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clubsApi } from "./../lib/api";
-import type { CreateClubData, UpdateClubData, ClubFilters } from "./../types";
+import type { CreateClubData, UpdateClubData } from "./../types";
 
 // Query keys
 export const clubsQueryKeys = {
 	all: ['clubs'] as const,
 	lists: () => [...clubsQueryKeys.all, 'list'] as const,
-	list: (filters: Partial<ClubFilters> = {}) => [...clubsQueryKeys.lists(), filters] as const,
+	list: () => [...clubsQueryKeys.lists()] as const,
 	details: () => [...clubsQueryKeys.all, 'detail'] as const,
 	detail: (id: string) => [...clubsQueryKeys.details(), id] as const,
 };
 
 // Query hooks
-export function useClubs(filters?: Partial<ClubFilters>) {
+export function useClubs() {
 	return useQuery({
-		queryKey: clubsQueryKeys.list(filters),
-		queryFn: () => clubsApi.getClubs(filters),
+		queryKey: clubsQueryKeys.list(),
+		queryFn: () => clubsApi.getClubs(),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});

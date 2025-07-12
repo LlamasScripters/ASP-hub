@@ -4,11 +4,9 @@ import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import { type Request, type Response, Router } from "express";
 import {
 	type ClubParamsData,
-	type ClubQueryData,
 	type CreateClubData,
 	type UpdateClubData,
 	clubParamsSchema,
-	clubQuerySchema,
 	createClubSchema,
 	updateClubSchema,
 } from "./clubs.schema.js";
@@ -21,24 +19,12 @@ clubsRouter.use(requireAuth);
 
 /**
  * GET /api/clubs
- * Récupère tous les clubs avec pagination et filtres
+ * Récupère tous les clubs (dans notre cas il y en a un seul)
  * Accessible aux membres pour visualiser les clubs
  */
 clubsRouter.get("/", requireMemberAccess(), async (req: Request, res: Response) => {
 	try {
-		const query = clubQuerySchema.safeParse(req.query);
-		if (!query.success) {
-			res.status(400).json({ error: query.error.flatten() });
-			return;
-		}
-
-		const { page, limit } = query.data;
-		if (page < 1 || limit < 1) {
-			res.status(400).json({ error: "Page et limit doivent être supérieurs à 0" });
-			return;
-		}
-
-		const result = await clubsService.getAll(query.data);
+		const result = await clubsService.getAll();
 		res.json(result);
 	} catch (error) {
 		console.error("Erreur lors de la récupération des clubs:", error);

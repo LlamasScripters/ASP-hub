@@ -13,21 +13,6 @@ export const createClubSchema = z.object({
 // Schema pour la modification d'un club
 export const updateClubSchema = createClubSchema.partial();
 
-// Schema pour les paramètres de requête
-export const clubQuerySchema = z
-	.object({
-		page: z.string().optional(),
-		limit: z.string().optional(),
-		search: z.string().optional(),
-		isActive: z.string().optional(),
-	})
-	.transform((data) => ({
-		page: Number.parseInt(data.page || "1", 10),
-		limit: Number.parseInt(data.limit || "20", 10),
-		search: data.search,
-		isActive: data.isActive === "true" ? true : data.isActive === "false" ? false : undefined,
-	}));
-
 // Schema pour les paramètres d'URL
 export const clubParamsSchema = z.object({
 	id: z.string().uuid("ID invalide"),
@@ -35,5 +20,4 @@ export const clubParamsSchema = z.object({
 
 export type CreateClubData = z.infer<typeof createClubSchema>;
 export type UpdateClubData = z.infer<typeof updateClubSchema>;
-export type ClubQueryData = z.infer<typeof clubQuerySchema>;
 export type ClubParamsData = z.infer<typeof clubParamsSchema>;

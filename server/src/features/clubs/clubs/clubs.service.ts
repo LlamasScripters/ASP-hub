@@ -1,47 +1,27 @@
 import { db } from "@/db/index.js";
 import { type InsertClub, type SelectClub, clubs } from "@/db/schema.js";
 import { and, asc, eq, ilike, sql } from "drizzle-orm";
-import type { ClubFilters, ClubsPaginatedResponse } from "./clubs.types.js";
+import type { ClubsPaginatedResponse } from "./clubs.types.js";
 
 export const clubsService = {
 	/**
 	 * Récupère tous les clubs avec pagination et filtres
 	 */
-	async getAll(filters: ClubFilters = {}): Promise<ClubsPaginatedResponse> {
-		const { page = 1, limit = 20, search, isActive } = filters;
-		const offset = (page - 1) * limit;
-
-		// Construction de la requête avec filtres
-		const conditions = [];
-		
-		if (search) {
-			conditions.push(ilike(clubs.name, `%${search}%`));
-		}
-		
-		if (isActive !== undefined) {
-			conditions.push(eq(clubs.isActive, isActive));
-		}
+	async getAll(): Promise<ClubsPaginatedResponse> {
 
 		// Récupération des données
 		const data = await db
 			.select()
-			.from(clubs)
-			.where(conditions.length > 0 ? and(...conditions) : undefined)
-			.orderBy(asc(clubs.name))
-			.limit(limit)
-			.offset(offset);
+			.from(clubs);
 
 		// Comptage total
 		const [{ count }] = await db
 			.select({ count: sql<number>`count(*)` })
-			.from(clubs)
-			.where(conditions.length > 0 ? and(...conditions) : undefined);
+			.from(clubs);
 
 		return {
 			data,
-			total: count,
-			page,
-			limit,
+			total: count
 		};
 	},
 
