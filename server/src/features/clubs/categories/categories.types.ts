@@ -17,47 +17,26 @@ export interface CategoryResponse {
 	createdAt: Date;
 	updatedAt: Date;
 	// Relations
-	section?: {
+	section: {
 		id: string;
 		name: string;
 		color: string | null;
-		club?: {
+		club: {
 			id: string;
 			name: string;
 		};
 	};
 	sessionsCount?: number;
+	coach?: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
 }
 
 export interface CategoriesPaginatedResponse {
 	data: CategoryResponse[];
 	total: number;
-	page: number;
-	limit: number;
 }
 
-// Types pour les filtres
-export interface CategoryFilters {
-	page?: number;
-	limit?: number;
-	sectionId?: string;
-	clubId?: string;
-	search?: string;
-	isActive?: boolean;
-	ageMin?: number;
-	ageMax?: number;
-}
-
-// Types pour les relations
-export interface CategoryWithRelations extends SelectCategory {
-	section?: {
-		id: string;
-		name: string;
-		color: string | null;
-		club?: {
-			id: string;
-			name: string;
-		};
-	};
-	sessionsCount?: number;
-}

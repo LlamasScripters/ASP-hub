@@ -9,7 +9,7 @@ export interface Section {
 	createdAt?: string;
 	updatedAt?: string;
 	// Relations
-	club?: {
+	club: {
 		id: string;
 		name: string;
 	};

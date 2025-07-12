@@ -1,183 +1,283 @@
 import type { 
-	CategoryFilters, 
-	CategoryWithRelations, 
+	CategoryResponse,
+	CategoriesPaginatedResponse,
 	CreateCategoryData, 
 	UpdateCategoryData 
 } from "./categories.types.js";
 import { db } from "@/db/index.js";
-import { categories, sections, clubs, sessionsSport } from "@/db/schema.js";
-import { eq, and, like, count, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm";
+import { categories, sections, clubs, sessionsSport, sectionResponsibilities, users, type SelectCategory, } from "@/db/schema.js";
+import { eq, and, asc, count, sql } from "drizzle-orm";
 
 export class CategoriesService {
 	/**
 	 * Récupère une catégorie par son ID avec ses relations
 	 */
-	async getCategoryById(categoryId: string): Promise<CategoryWithRelations | null> {
-		const result = await db
-			.select()
+	async getCategoryById(categoryId: string): Promise<CategoryResponse | undefined> {
+		const [result] = await db
+			.select({
+				id: categories.id,
+				sectionId: categories.sectionId,
+				name: categories.name,
+				description: categories.description,
+				ageMin: categories.ageMin,
+				ageMax: categories.ageMax,
+				isActive: categories.isActive,
+				createdAt: categories.createdAt,
+				updatedAt: categories.updatedAt,
+				// Section relation
+				sectionName: sections.name,
+				sectionColor: sections.color,
+				// Session relation
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('sessionsCount'),
+				// Club relation
+				clubId: clubs.id,
+				clubName: clubs.name,
+				// Coach relation
+				coachId: users.id,
+				coachFirstName: users.firstName,
+				coachLastName: users.lastName,
+				coachEmail: users.email,
+			})
 			.from(categories)
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
+			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
+			.leftJoin(sectionResponsibilities,
+				and(
+					eq(sectionResponsibilities.sectionId, sections.id),
+					eq(sectionResponsibilities.categoryId, categories.id),
+					eq(sectionResponsibilities.role, "coach"),
+					eq(sectionResponsibilities.isActive, true)
+				)
+			)
+			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.where(eq(categories.id, categoryId))
-			.limit(1);
+			.groupBy(categories.id, sections.id, clubs.id, users.id);
 
-		if (!result.length) return null;
-
-		const row = result[0];
-		const sessionsCount = await db
-			.select({ count: count() })
-			.from(sessionsSport)
-			.where(eq(sessionsSport.categoryId, categoryId));
+		if (!result) return undefined;
 
 		return {
-			...row.categories,
-			section: row.sections ? {
-				...row.sections,
-				club: row.clubs ? row.clubs : undefined,
+			id: result.id,
+			sectionId: result.sectionId,
+			name: result.name,
+			description: result.description || null,
+			ageMin: result.ageMin || null,
+			ageMax: result.ageMax || null,
+			isActive: result.isActive ?? false,
+			createdAt: result.createdAt,
+			updatedAt: result.updatedAt,
+			section: {
+				id: result.sectionId || '',
+				name: result.sectionName || '',
+				color: result.sectionColor || null,
+				club: {
+					id: result.clubId || '',
+					name: result.clubName || '',
+				},
+			},
+			sessionsCount: result.sessionsCount ?? 0,
+			coach: result.coachId ? {
+				id: result.coachId,
+				firstName: result.coachFirstName ?? "",
+				lastName: result.coachLastName ?? "",
+				email: result.coachEmail ?? "",
 			} : undefined,
-			sessionsCount: sessionsCount[0]?.count || 0,
 		};
 	}
 
 	/**
 	 * Récupère toutes les catégories avec pagination et filtres
 	 */
-	async getCategories(filters: CategoryFilters = {}): Promise<{
-		data: CategoryWithRelations[];
-		total: number;
-		page: number;
-		limit: number;
-	}> {
-		const { page = 1, limit = 10, sectionId, clubId, search, isActive, ageMin, ageMax } = filters;
-		const offset = (page - 1) * limit;
-
-		// Construction des conditions WHERE
-		const whereConditions: SQL[] = [];
-
-		if (sectionId) {
-			whereConditions.push(eq(categories.sectionId, sectionId));
-		}
-
-		if (clubId) {
-			whereConditions.push(eq(clubs.id, clubId));
-		}
-
-		if (search) {
-			whereConditions.push(like(categories.name, `%${search}%`));
-		}
-
-		if (isActive !== undefined) {
-			whereConditions.push(eq(categories.isActive, isActive));
-		}
-
-		if (ageMin !== undefined) {
-			whereConditions.push(
-				sql`${categories.ageMin} IS NULL OR ${categories.ageMin} >= ${ageMin}`
-			);
-		}
-
-		if (ageMax !== undefined) {
-			whereConditions.push(
-				sql`${categories.ageMax} IS NULL OR ${categories.ageMax} <= ${ageMax}`
-			);
-		}
-
-		// Requête pour les données
+	async getCategories(): Promise<CategoriesPaginatedResponse> {
 		const data = await db
-			.select()
+			.select({
+				id: categories.id,
+				sectionId: categories.sectionId,
+				name: categories.name,
+				description: categories.description,
+				ageMin: categories.ageMin,
+				ageMax: categories.ageMax,
+				isActive: categories.isActive,
+				createdAt: categories.createdAt,
+				updatedAt: categories.updatedAt,
+				// Section relation
+				sectionName: sections.name,
+				sectionColor: sections.color,
+				// Session relation
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('categoriesCount'),
+				// Club relation
+				clubId: clubs.id,
+				clubName: clubs.name,
+				// Coach relation
+				coachId: users.id,
+				coachFirstName: users.firstName,
+				coachLastName: users.lastName,
+				coachEmail: users.email,
+			})
 			.from(categories)
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
-			.where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-			.orderBy(categories.name)
-			.offset(offset)
-			.limit(limit);
+			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
+			.leftJoin(sectionResponsibilities,
+				and(
+					eq(sectionResponsibilities.sectionId, sections.id),
+					eq(sectionResponsibilities.categoryId, categories.id),
+					eq(sectionResponsibilities.role, "coach"),
+					eq(sectionResponsibilities.isActive, true)
+				)
+			)
+			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
+			.groupBy(categories.id, sections.id, clubs.id, users.id)
+			.orderBy(asc(categories.name));
 
-		// Requête pour le total
-		const totalResult = await db
-			.select({ count: count() })
-			.from(categories)
-			.leftJoin(sections, eq(categories.sectionId, sections.id))
-			.leftJoin(clubs, eq(sections.clubId, clubs.id))
-			.where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
 
-		// Transformation des données avec comptage des sessions
-		const transformedData: CategoryWithRelations[] = [];
-		for (const row of data) {
-			const sessionsCount = await db
-				.select({ count: count() })
-				.from(sessionsSport)
-				.where(eq(sessionsSport.categoryId, row.categories.id));
+		// Comptage total
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(categories);
 
-			transformedData.push({
-				...row.categories,
-				section: row.sections ? {
-					...row.sections,
-					club: row.clubs ? row.clubs : undefined,
-				} : undefined,
-				sessionsCount: sessionsCount[0]?.count || 0,
-			});
-		}
+		const formattedData = data.map(row => ({
+			id: row.id,
+			sectionId: row.sectionId,
+			name: row.name,
+			description: row.description || null,
+			ageMin: row.ageMin || null,
+			ageMax: row.ageMax || null,
+			isActive: row.isActive || false,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+			section: {
+				id: row.sectionId || '',
+				name: row.sectionName || '',
+				color: row.sectionColor || null,
+				club: {
+					id: row.clubId || '',
+					name: row.clubName || '',
+				},
+			},
+			sessionsCount: row.sessionsCount || 0,
+			coach: row.coachId ? {
+				id: row.coachId,
+				firstName: row.coachFirstName || "",
+				lastName: row.coachLastName || "",
+				email: row.coachEmail || "",
+			} : undefined,
+		}));
 
 		return {
-			data: transformedData,
-			total: totalResult[0]?.count || 0,
-			page,
-			limit,
+			data: formattedData,
+			total: count,
 		};
 	}
 
 	/**
 	 * Récupère les catégories d'une section
 	 */
-	async getCategoriesBySection(sectionId: string): Promise<CategoryWithRelations[]> {
+	async getCategoriesBySection(sectionId: string): Promise<CategoriesPaginatedResponse> {
 		const data = await db
-			.select()
+			.select({
+				id: categories.id,
+				sectionId: categories.sectionId,
+				name: categories.name,
+				description: categories.description,
+				ageMin: categories.ageMin,
+				ageMax: categories.ageMax,
+				isActive: categories.isActive,
+				createdAt: categories.createdAt,
+				updatedAt: categories.updatedAt,
+				// Section relation
+				sectionName: sections.name,
+				sectionColor: sections.color,
+				// Session relation
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('categoriesCount'),
+				// Club relation
+				clubId: clubs.id,
+				clubName: clubs.name,
+				// Coach relation
+				coachId: users.id,
+				coachFirstName: users.firstName,
+				coachLastName: users.lastName,
+				coachEmail: users.email,
+			})
 			.from(categories)
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
+			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
+			.leftJoin(sectionResponsibilities,
+				and(
+					eq(sectionResponsibilities.sectionId, sections.id),
+					eq(sectionResponsibilities.categoryId, categories.id),
+					eq(sectionResponsibilities.role, "coach"),
+					eq(sectionResponsibilities.isActive, true)
+				)
+			)
+			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.where(eq(categories.sectionId, sectionId))
-			.orderBy(categories.name);
+			.groupBy(categories.id, sections.id, clubs.id, users.id)
+			.orderBy(asc(categories.name));
 
-		const transformedData: CategoryWithRelations[] = [];
-		for (const row of data) {
-			const sessionsCount = await db
-				.select({ count: count() })
-				.from(sessionsSport)
-				.where(eq(sessionsSport.categoryId, row.categories.id));
 
-			transformedData.push({
-				...row.categories,
-				section: row.sections ? {
-					...row.sections,
-					club: row.clubs ? row.clubs : undefined,
-				} : undefined,
-				sessionsCount: sessionsCount[0]?.count || 0,
-			});
-		}
+		// Comptage total
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(categories)
+			.where(eq(categories.sectionId, sectionId));
 
-		return transformedData;
+		const formattedData = data.map(row => ({
+			id: row.id,
+			sectionId: row.sectionId,
+			name: row.name,
+			description: row.description || null,
+			ageMin: row.ageMin || null,
+			ageMax: row.ageMax || null,
+			isActive: row.isActive || false,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+			section: {
+				id: row.sectionId || '',
+				name: row.sectionName || '',
+				color: row.sectionColor || null,
+				club: {
+					id: row.clubId || '',
+					name: row.clubName || '',
+				},
+			},
+			sessionsCount: row.sessionsCount || 0,
+			coach: row.coachId ? {
+				id: row.coachId,
+				firstName: row.coachFirstName || "",
+				lastName: row.coachLastName || "",
+				email: row.coachEmail || "",
+			} : undefined,
+		}));
+
+		return {
+			data: formattedData,
+			total: count,
+		};
 	}
 
 	/**
 	 * Créer une nouvelle catégorie
 	 */
-	async createCategory(data: CreateCategoryData): Promise<CategoryWithRelations> {
-		const [createdCategory] = await db
+	async createCategory(data: CreateCategoryData): Promise<SelectCategory> {
+		const [newCategory] = await db
 			.insert(categories)
 			.values({
 				...data,
-				id: crypto.randomUUID(),
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
 			.returning();
 
-		// Récupérer la catégorie créée avec ses relations
-		const category = await this.getCategoryById(createdCategory.id);
-		if (!category) {
+		if (!newCategory) {
 			throw new Error("Erreur lors de la création de la catégorie");
+		}
+
+		// Récupérer la catégorie créée avec ses relations
+		const category = await this.getCategoryById(newCategory.id);
+		if (!category) {
+			throw new Error("Erreur lors de la récupération de la catégorie créée");
 		}
 
 		return category;
@@ -186,7 +286,7 @@ export class CategoriesService {
 	/**
 	 * Mettre à jour une catégorie
 	 */
-	async updateCategory(id: string, data: UpdateCategoryData): Promise<CategoryWithRelations> {
+	async updateCategory(id: string, data: UpdateCategoryData): Promise<SelectCategory | undefined> {
 		const [updatedCategory] = await db
 			.update(categories)
 			.set({
@@ -229,7 +329,7 @@ export class CategoriesService {
 	/**
 	 * Désactiver/Activer une catégorie
 	 */
-	async toggleCategoryStatus(id: string, isActive: boolean): Promise<CategoryWithRelations> {
+	async toggleCategoryStatus(id: string, isActive: boolean): Promise<SelectCategory | undefined> {
 		return await this.updateCategory(id, { isActive });
 	}
 

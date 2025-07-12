@@ -64,7 +64,7 @@ export function SectionForm({
 	
 	// Utilisation des hooks personnalisés
 	const { data: sectionsData } = useSectionsByClub(clubId);
-	const sections = sectionsData || [];
+	const sections = sectionsData?.data || [];
 	const { data: sectionData } = useSection(sectionId || "");
 	const createSectionMutation = useCreateSection();
 	const updateSectionMutation = useUpdateSection();
@@ -122,7 +122,7 @@ export function SectionForm({
 			name: section?.name || "",
 			description: section?.description || "",
 			color: section?.color || "#3b82f6", // blue-500 par défaut
-			managerId: section?.managerId || "none",
+			managerId: section?.manager?.id || "none",
 		},
 	});
 
@@ -134,7 +134,7 @@ export function SectionForm({
 				name: section.name || "",
 				description: section.description || "",
 				color: section.color || "#3b82f6",
-				managerId: section.managerId || "none",
+				managerId: section.manager?.id || "none",
 			});
 		} else if (isEditing && sectionData) {
 			// Use data from the hook
@@ -142,7 +142,7 @@ export function SectionForm({
 				name: sectionData.name || "",
 				description: sectionData.description || "",
 				color: sectionData.color || "#3b82f6",
-				managerId: sectionData.managerId || "none",
+				managerId: sectionData.manager?.id || "none",
 			});
 		}
 	}, [isEditing, section, sectionData, form]);
@@ -213,7 +213,7 @@ export function SectionForm({
 			if (targetSectionId && actualManagerId) {
 				// Si un responsable est sélectionné, l'assigner
 				const currentManagerId =
-					section?.managerId === "none" ? "" : section?.managerId;
+					section?.manager?.id === "none" ? "" : section?.manager?.id;
 				if (actualManagerId !== (currentManagerId || "")) {
 					await assignManagerMutation.mutateAsync({
 						sectionId: targetSectionId,
@@ -222,8 +222,8 @@ export function SectionForm({
 				}
 			} else if (
 				targetSectionId &&
-				section?.managerId &&
-				section.managerId !== "none" &&
+				section?.manager?.id &&
+				section.manager.id !== "none" &&
 				!actualManagerId
 			) {
 				// Si le responsable a été supprimé, le retirer

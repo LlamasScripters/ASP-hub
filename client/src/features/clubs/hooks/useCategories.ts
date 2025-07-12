@@ -1,22 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { categoriesApi } from "./../lib/api";
-import type { CreateCategoryData, UpdateCategoryData, CategoryFilters } from "./../types";
+import type { CreateCategoryData, UpdateCategoryData } from "./../types";
 
 // Query keys
 export const categoriesQueryKeys = {
 	all: ['categories'] as const,
 	lists: () => [...categoriesQueryKeys.all, 'list'] as const,
-	list: (filters: Partial<CategoryFilters> = {}) => [...categoriesQueryKeys.lists(), filters] as const,
+	list: () => [...categoriesQueryKeys.lists()] as const,
 	details: () => [...categoriesQueryKeys.all, 'detail'] as const,
 	detail: (id: string) => [...categoriesQueryKeys.details(), id] as const,
 };
 
 // Query hooks
-export function useCategories(filters?: Partial<CategoryFilters>) {
+export function useCategories() {
 	return useQuery({
-		queryKey: categoriesQueryKeys.list(filters),
-		queryFn: () => categoriesApi.getCategories(filters),
+		queryKey: categoriesQueryKeys.list(),
+		queryFn: () => categoriesApi.getCategories(),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});

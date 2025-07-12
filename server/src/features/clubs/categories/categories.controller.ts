@@ -3,7 +3,6 @@ import { CategoriesService } from "./categories.service.js";
 import { 
 	createCategorySchema, 
 	updateCategorySchema, 
-	getCategoriesSchema 
 } from "./categories.schema.js";
 import { requireAuth } from "@/middleware/auth.middleware.js";
 import { requireRole } from "@/middleware/auth.middleware.js";
@@ -20,15 +19,7 @@ const categoriesService = new CategoriesService();
 //@ts-ignore
 router.get("/", async (req: Request, res: Response) => {
 	try {
-		const query = getCategoriesSchema.safeParse(req.query);
-		if (!query.success) {
-			return res.status(400).json({ 
-				message: "Paramètres invalides",
-				errors: query.error.issues 
-			});
-		}
-
-		const result = await categoriesService.getCategories(query.data);
+		const result = await categoriesService.getCategories();
 		res.json(result);
 	} catch (error) {
 		console.error("Erreur lors de la récupération des catégories:", error);
@@ -104,7 +95,7 @@ router.get("/:id/stats", async (req: Request, res: Response) => {
  * @access Private - Admin, Section Manager
  */
 //@ts-ignore
-router.post("/", requireAuth, requireRole(["admin", "section_manager"]), async (req: Request, res: Response) => {
+router.post("/", requireAuth, requireRole("section_manager"), async (req: Request, res: Response) => {
 	try {
 		const body = createCategorySchema.safeParse(req.body);
 		if (!body.success) {
@@ -130,7 +121,7 @@ router.post("/", requireAuth, requireRole(["admin", "section_manager"]), async (
  * @access Private - Admin, Section Manager
  */
 //@ts-ignore
-router.put("/:id", requireAuth, requireRole(["admin", "section_manager"]), async (req: Request, res: Response) => {
+router.put("/:id", requireAuth, requireRole("section_manager"), async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const body = updateCategorySchema.safeParse(req.body);
@@ -160,7 +151,7 @@ router.put("/:id", requireAuth, requireRole(["admin", "section_manager"]), async
  * @access Private - Admin, Section Manager
  */
 //@ts-ignore
-router.patch("/:id/status", requireAuth, requireRole(["admin", "section_manager"]), async (req: Request, res: Response) => {
+router.patch("/:id/status", requireAuth, requireRole("section_manager"), async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const { isActive } = req.body;
@@ -190,7 +181,7 @@ router.patch("/:id/status", requireAuth, requireRole(["admin", "section_manager"
  * @access Private - Admin, Section Manager
  */
 //@ts-ignore
-router.delete("/:id", requireAuth, requireRole(["admin", "section_manager"]), async (req: Request, res: Response) => {
+router.delete("/:id", requireAuth, requireRole("section_manager"), async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		

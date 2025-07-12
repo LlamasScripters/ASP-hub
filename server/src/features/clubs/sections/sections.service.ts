@@ -68,10 +68,10 @@ export const sectionsService = {
 			isActive: row.isActive,
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
-			club: row.clubName ? {
+			club: {
 				id: row.clubId,
-				name: row.clubName,
-			} : undefined,
+				name: row.clubName || "",
+			},
 			categoriesCount: row.categoriesCount || 0,
 			manager: row.managerId ? {
 				id: row.managerId,
@@ -137,10 +137,10 @@ export const sectionsService = {
 			isActive: result.isActive,
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
-			club: result.clubName ? {
+			club: {
 				id: result.clubId,
-				name: result.clubName,
-			} : undefined,
+				name: result.clubName || "",
+			},
 			categoriesCount: result.categoriesCount || 0,
 			manager: result.managerId ? {
 				id: result.managerId,
@@ -246,10 +246,10 @@ export const sectionsService = {
 			isActive: row.isActive,
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
-			club: row.clubName ? {
+			club: {
 				id: row.clubId,
-				name: row.clubName,
-			} : undefined,
+				name: row.clubName || "",
+			},
 			categoriesCount: row.categoriesCount || 0,
 			manager: row.managerId ? {
 				id: row.managerId,

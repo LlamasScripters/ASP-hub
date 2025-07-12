@@ -16,7 +16,7 @@ export interface SectionResponse {
 	createdAt: Date;
 	updatedAt: Date;
 	// Relations
-	club?: {
+	club: {
 		id: string;
 		name: string;
 	};
