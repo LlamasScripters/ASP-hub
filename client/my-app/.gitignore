@@ -6,4 +6,3 @@ node_modules/
 .sourcemaps
 dist/
 /android
-/ios
