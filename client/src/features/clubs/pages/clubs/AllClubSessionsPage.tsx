@@ -47,9 +47,10 @@ import {
 	Trash2,
 	Users,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section, SessionSport } from "../../types";
+import { useMemo, useState } from "react";
+
+import { useSessions, useDeleteSession } from "../../hooks/useSessions";
+import type { SessionSport } from "../../types";
 
 type SortField =
 	| "title"
@@ -79,9 +80,11 @@ export function AllClubSessionsPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/",
 	});
-	const [sessions, setSessions] = useState<EnrichedSession[]>([]);
-	const [, setSections] = useState<Section[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	
+	// Use the sessions hook
+	const { data: allSessions, isLoading } = useSessions();
+	const deleteSessionMutation = useDeleteSession();
+	
 	const [sortField, setSortField] = useState<SortField>("startDate");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 	const [filters, setFilters] = useState<Filters>({
@@ -96,60 +99,19 @@ export function AllClubSessionsPage() {
 	);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	useEffect(() => {
-		const fetchSessions = async () => {
-			try {
-				const sectionsData: Section[] = await fetch(
-					`/api/clubs/${clubId}/sections`,
-				).then((res) => {
-					if (!res.ok)
-						throw new Error("Erreur lors du chargement des sections");
-					return res.json();
-				});
-				setSections(sectionsData);
-
-				const result: EnrichedSession[] = [];
-
-				for (const section of sectionsData) {
-					const categories: Category[] = await fetch(
-						`/api/clubs/${clubId}/sections/${section.id}/categories`,
-					).then((res) => {
-						if (!res.ok)
-							throw new Error("Erreur lors du chargement des catégories");
-						return res.json();
-					});
-
-					for (const cat of categories) {
-						const catSessions: SessionSport[] = await fetch(
-							`/api/clubs/${clubId}/sections/${section.id}/categories/${cat.id}/sessions`,
-						).then((res) => {
-							if (!res.ok)
-								throw new Error("Erreur lors du chargement des sessions");
-							return res.json();
-						});
-						result.push(
-							...catSessions.map((s) => ({
-								...s,
-								categoryName: cat.name,
-								sectionName: section.name,
-								categoryId: cat.id,
-								sectionId: section.id,
-							})),
-						);
-					}
-				}
-
-				setSessions(result);
-			} catch (error) {
-				console.error("Erreur:", error);
-				toast.error("Erreur lors du chargement des sessions");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSessions();
-	}, [clubId]);
+	// Filter sessions for this club and enrich with additional data
+	const sessions = useMemo(() => {
+		if (!allSessions?.data) return [];
+		
+		return allSessions.data
+			.filter(session => session.category?.section?.club?.id === clubId)
+			.map(session => ({
+				...session,
+				categoryName: session.category?.name || '',
+				sectionName: session.category?.section?.name || '',
+				sectionId: session.category?.section?.id || '',
+			}));
+	}, [allSessions, clubId]);
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -305,23 +267,10 @@ export function AllClubSessionsPage() {
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(`/api/clubs/sessions/${deleteSession.id}`, {
-				method: "DELETE",
-			});
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la session de la liste
-			setSessions((prev) =>
-				prev.filter((session) => session.id !== deleteSession.id),
-			);
+			await deleteSessionMutation.mutateAsync(deleteSession.id);
 			setDeleteSession(null);
-			toast.success("Session supprimée avec succès");
 		} catch (error) {
-			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la session");
+			// Error is already handled by the mutation
 		} finally {
 			setIsDeleting(false);
 		}

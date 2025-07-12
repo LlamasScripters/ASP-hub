@@ -4,7 +4,6 @@ import { sessionsApi } from "./../lib/api";
 import type { 
 	CreateSessionData, 
 	UpdateSessionData, 
-	SessionFilters, 
 	ParticipantAction 
 } from "./../types";
 
@@ -12,7 +11,6 @@ import type {
 export const sessionsQueryKeys = {
 	all: ['sessions'] as const,
 	lists: () => [...sessionsQueryKeys.all, 'list'] as const,
-	list: (filters: Partial<SessionFilters> = {}) => [...sessionsQueryKeys.lists(), filters] as const,
 	details: () => [...sessionsQueryKeys.all, 'detail'] as const,
 	detail: (id: string) => [...sessionsQueryKeys.details(), id] as const,
 	stats: () => [...sessionsQueryKeys.all, 'stats'] as const,
@@ -20,10 +18,10 @@ export const sessionsQueryKeys = {
 };
 
 // Query hooks
-export function useSessions(filters?: Partial<SessionFilters>) {
+export function useSessions() {
 	return useQuery({
-		queryKey: sessionsQueryKeys.list(filters),
-		queryFn: () => sessionsApi.getSessions(filters),
+		queryKey: sessionsQueryKeys.lists(),
+		queryFn: () => sessionsApi.getSessions(),
 		staleTime: 2 * 60 * 1000, // 2 minutes (sessions change frequently)
 		gcTime: 5 * 60 * 1000, // 5 minutes
 	});

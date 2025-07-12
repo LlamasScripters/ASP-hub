@@ -4,8 +4,7 @@ import { SessionsService } from "./sessions.service.js";
 import { 
 	createSessionSchema, 
 	updateSessionSchema, 
-	sessionFiltersQuerySchema,
-	sessionParticipantsSchema
+	participantActionSchema
 } from "./sessions.schema.js";
 import { requireAuth } from "@/middleware/auth.middleware.js";
 import { requireSessionManagement } from "@/middleware/role-specific.middleware.js";
@@ -19,22 +18,11 @@ sessionsRouter.use(requireAuth);
 
 /**
  * @route GET /api/sessions
- * @description Récupère toutes les sessions avec pagination et filtres
+ * @description Récupère toutes les sessions
  */
 sessionsRouter.get("/", async (req: Request, res: Response) => {
 	try {
-		const result = sessionFiltersQuerySchema.safeParse(req.query);
-		
-		if (!result.success) {
-			res.status(400).json({ 
-				error: "Paramètres invalides", 
-				details: result.error.issues 
-			});
-			return;
-		}
-		
-		const filters = result.data;
-		const sessionsData = await sessionsService.getSessions(filters);
+		const sessionsData = await sessionsService.getSessions();
 		
 		res.json(sessionsData);
 	} catch (error) {
@@ -308,7 +296,7 @@ sessionsRouter.patch("/:id/status", requireSessionManagement(), async (req: Requ
 sessionsRouter.patch("/:id/participants", requireSessionManagement(), async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
-		const result = sessionParticipantsSchema.safeParse(req.body);
+		const result = participantActionSchema.safeParse(req.body);
 		
 		if (!result.success) {
 			res.status(400).json({ 
@@ -318,7 +306,11 @@ sessionsRouter.patch("/:id/participants", requireSessionManagement(), async (req
 			return;
 		}
 		
-		const participantAction = result.data;
+		const participantAction = {
+			action: result.data.action as "add" | "remove",
+			memberIds: [result.data.userId],
+		};
+		
 		await sessionsService.manageParticipants(id, participantAction);
 		
 		res.json({ message: "Participants mis à jour avec succès" });

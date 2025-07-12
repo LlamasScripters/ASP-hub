@@ -1,27 +1,39 @@
+// Énumérations des types et statuts
+export type SessionType = "entrainement" | "match" | "stage" | "competition" | "autre";
+export type SessionStatus = "planifie" | "en_cours" | "termine" | "annule";
+
 // Types pour les sessions côté client
 export interface SessionSport {
 	id: string;
-	title: string;
-	description?: string;
-	type: "entrainement" | "match" | "stage" | "competition" | "autre";
-	status: "planifie" | "en_cours" | "termine" | "annule";
-	startDate: string;
-	endDate: string;
-	location?: string;
-	maxParticipants?: number;
-	currentParticipants?: number;
 	categoryId: string;
-	createdAt?: string;
-	updatedAt?: string;
-	notes?: string;
+	title: string;
+	description: string | null;
+	type: SessionType;
+	status: SessionStatus;
+	startDate: Date;
+	endDate: Date;
+	location: string | null;
+	maxParticipants: number | null;
+	currentParticipants: number;
+	notes: string | null;
+	coachId: string | null;
+	responsibleId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	// Relations
-	category?: {
+	category: {
 		id: string;
 		name: string;
-		section: {
+		ageMin: number | null;
+		ageMax: number | null;
+		section?: {
 			id: string;
 			name: string;
-			clubId: string;
+			color: string | null;
+			club?: {
+				id: string;
+				name: string;
+			};
 		};
 	};
 	coach?: {
@@ -30,7 +42,19 @@ export interface SessionSport {
 		lastName: string;
 		email: string;
 	};
-	participants?: SessionParticipant[];
+	responsible?: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
+	participants?: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string;
+	}[];
+	participantsCount?: number;
 }
 
 export interface SessionParticipant {
@@ -70,23 +94,9 @@ export interface UpdateSessionData {
 	notes?: string;
 }
 
-export interface SessionFilters {
-	categoryId?: string;
-	type?: "entrainement" | "match" | "stage" | "competition" | "autre";
-	status?: "planifie" | "en_cours" | "termine" | "annule";
-	startDate?: string;
-	endDate?: string;
-	search?: string;
-}
-
 export interface SessionsPaginatedResponse {
 	data: SessionSport[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		pages: number;
-	};
+	total: number;
 }
 
 export interface SessionStats {

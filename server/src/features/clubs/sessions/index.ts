@@ -6,7 +6,6 @@ export { default as sessionsRouter } from "./sessions.controller.js";
 
 // Export des types
 export type { 
-	SessionWithRelations, 
 	SessionStats, 
 	SessionConflict, 
 	ParticipantAction 

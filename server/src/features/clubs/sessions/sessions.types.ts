@@ -2,8 +2,8 @@ import type { InsertSessionSport, SelectSessionSport } from "@/db/schema.js";
 
 // Types pour les sessions
 export type Session = SelectSessionSport;
-export type CreateSessionData = InsertSessionSport;
-export type UpdateSessionData = Partial<InsertSessionSport>;
+export type CreateSessionData = Omit<InsertSessionSport, 'id' | 'createdAt' | 'updatedAt' | 'currentParticipants'>;
+export type UpdateSessionData = Partial<Omit<InsertSessionSport, 'id' | 'createdAt' | 'categoryId'>>;
 
 // Énumérations des types et statuts
 export type SessionType = "entrainement" | "match" | "stage" | "competition" | "autre";
@@ -28,7 +28,7 @@ export interface SessionResponse {
 	createdAt: Date;
 	updatedAt: Date;
 	// Relations
-	category?: {
+	category: {
 		id: string;
 		name: string;
 		ageMin: number | null;
@@ -67,62 +67,6 @@ export interface SessionResponse {
 export interface SessionsPaginatedResponse {
 	data: SessionResponse[];
 	total: number;
-	page: number;
-	limit: number;
-}
-
-// Types pour les filtres
-export interface SessionFilters {
-	page?: number;
-	limit?: number;
-	categoryId?: string;
-	clubId?: string;
-	sectionId?: string;
-	type?: SessionType;
-	status?: SessionStatus;
-	coachId?: string;
-	responsibleId?: string;
-	startDate?: Date;
-	endDate?: Date;
-	search?: string;
-}
-
-// Types pour les relations
-export interface SessionWithRelations extends SelectSessionSport {
-	category?: {
-		id: string;
-		name: string;
-		ageMin: number | null;
-		ageMax: number | null;
-		section?: {
-			id: string;
-			name: string;
-			color: string | null;
-			club?: {
-				id: string;
-				name: string;
-			};
-		};
-	};
-	coach?: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
-	};
-	responsible?: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
-	};
-	participants?: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
-	}[];
-	participantsCount?: number;
 }
 
 // Types pour les statistiques
@@ -152,6 +96,13 @@ export interface SessionParticipant {
 export interface ParticipantAction {
 	memberIds: string[];
 	action: "add" | "remove";
+}
+
+// Type pour une action individuelle sur un participant
+export interface SingleParticipantAction {
+	action: "add" | "remove" | "update_status";
+	userId: string;
+	status?: "inscrit" | "present" | "absent" | "excuse";
 }
 
 // Types pour les conflits de planning

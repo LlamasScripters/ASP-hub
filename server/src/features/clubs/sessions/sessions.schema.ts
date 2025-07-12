@@ -51,35 +51,13 @@ export const updateSessionSchema = baseSessionSchema.partial().omit({ categoryId
 	path: ["endDate"],
 });
 
-// Schema pour les requêtes GET (filtres)
-export const getSessionsSchema = z.object({
-	page: z.string().optional().transform(val => val ? Number.parseInt(val) : 1),
-	limit: z.string().optional().transform(val => val ? Number.parseInt(val) : 10),
-	categoryId: z.string().uuid().optional(),
-	clubId: z.string().uuid().optional(),
-	sectionId: z.string().uuid().optional(),
-	type: z.enum(["entrainement", "match", "stage", "competition", "autre"]).optional(),
-	status: z.enum(["planifie", "en_cours", "termine", "annule"]).optional(),
-	coachId: z.string().uuid().optional(),
-	responsibleId: z.string().uuid().optional(),
-	startDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
-	endDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
-	search: z.string().optional(),
-});
-
-// Schema pour les paramètres d'URL
-export const sessionParamsSchema = z.object({
-	id: z.string().uuid("ID de session invalide"),
-	categoryId: z.string().uuid("ID de catégorie invalide").optional(),
-	clubId: z.string().uuid("ID du club invalide").optional(),
-});
-
 // Schema pour la gestion des participants
-export const sessionParticipantsSchema = z.object({
-	memberIds: z.array(z.string().uuid("ID de membre invalide")).min(1, "Au moins un membre doit être sélectionné"),
-	action: z.enum(["add", "remove"], {
-		errorMap: () => ({ message: "Action invalide (add ou remove)" })
+export const participantActionSchema = z.object({
+	action: z.enum(["add", "remove", "update_status"], {
+		errorMap: () => ({ message: "Action invalide" })
 	}),
+	userId: z.string().uuid("ID utilisateur invalide"),
+	status: z.enum(["inscrit", "present", "absent", "excuse"]).optional(),
 });
 
 // Schema pour la gestion du statut
@@ -90,27 +68,8 @@ export const sessionStatusSchema = z.object({
 	notes: z.string().max(500, "Les notes sont trop longues").optional(),
 });
 
-// Schema pour les filtres de requête (query params)
-export const sessionFiltersQuerySchema = z.object({
-	page: z.coerce.number().int().min(1).optional(),
-	limit: z.coerce.number().int().min(1).max(100).optional(),
-	categoryId: z.string().uuid().optional(),
-	clubId: z.string().uuid().optional(),
-	sectionId: z.string().uuid().optional(),
-	type: z.enum(["entrainement", "match", "stage", "competition", "autre"]).optional(),
-	status: z.enum(["planifie", "en_cours", "termine", "annule"]).optional(),
-	coachId: z.string().uuid().optional(),
-	responsibleId: z.string().uuid().optional(),
-	startDate: z.coerce.date().optional(),
-	endDate: z.coerce.date().optional(),
-	search: z.string().optional(),
-});
-
 // Types d'export
 export type CreateSessionData = z.infer<typeof createSessionSchema>;
 export type UpdateSessionData = z.infer<typeof updateSessionSchema>;
-export type SessionFilters = z.infer<typeof getSessionsSchema>;
-export type SessionFiltersQuery = z.infer<typeof sessionFiltersQuerySchema>;
-export type SessionParamsData = z.infer<typeof sessionParamsSchema>;
-export type SessionParticipantsData = z.infer<typeof sessionParticipantsSchema>;
 export type SessionStatusData = z.infer<typeof sessionStatusSchema>;
+export type ParticipantActionData = z.infer<typeof participantActionSchema>;
