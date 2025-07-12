@@ -206,3 +206,118 @@ export function useRemoveCategoryCoach() {
 		},
 	});
 }
+
+// Mutation hooks SANS toast automatique (pour usage dans les formulaires)
+export function useAssignSectionManagerSilent() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ sectionId, data }: { sectionId: string; data: AssignSectionManagerData }) =>
+			responsibilitiesApi.assignSectionManager(sectionId, data),
+		onSuccess: (_, { sectionId }) => {
+			// Invalidate section responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.sectionResponsibilities(sectionId) 
+			});
+			
+			// Invalidate eligible users (their availability might have changed)
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
+			});
+			
+			// Invalidate eligible users for section
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
+			});
+			
+			// Invalidate sections data (for manager info)
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
+		},
+		// Pas de toast automatique, laissé au composant parent
+	});
+}
+
+export function useRemoveSectionManagerSilent() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (sectionId: string) => responsibilitiesApi.removeSectionManager(sectionId),
+		onSuccess: (_, sectionId) => {
+			// Invalidate section responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.sectionResponsibilities(sectionId) 
+			});
+			
+			// Invalidate eligible users (their availability might have changed)
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
+			});
+			
+			// Invalidate eligible users for section
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForSection(sectionId) 
+			});
+			
+			// Invalidate sections data (for manager info)
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
+		},
+		// Pas de toast automatique, laissé au composant parent
+	});
+}
+
+export function useAssignCategoryCoachSilent() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ categoryId, data }: { categoryId: string; data: AssignCategoryCoachData }) =>
+			responsibilitiesApi.assignCategoryCoach(categoryId, data),
+		onSuccess: (_, { categoryId }) => {
+			// Invalidate eligible users (their availability might have changed)
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
+			});
+			
+			// Invalidate eligible users for category
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForCategory(categoryId) 
+			});
+			
+			// Invalidate category responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
+			});
+			
+			// Invalidate categories data (for coach info)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+		},
+		// Pas de toast automatique, laissé au composant parent
+	});
+}
+
+export function useRemoveCategoryCoachSilent() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (categoryId: string) => responsibilitiesApi.removeCategoryCoach(categoryId),
+		onSuccess: (_, categoryId) => {
+			// Invalidate eligible users (their availability might have changed)
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsers() 
+			});
+			
+			// Invalidate eligible users for category
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.eligibleUsersForCategory(categoryId) 
+			});
+			
+			// Invalidate category responsibilities
+			queryClient.invalidateQueries({ 
+				queryKey: responsibilitiesQueryKeys.categoryResponsibilities(categoryId) 
+			});
+			
+			// Invalidate categories data (for coach info)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+		},
+		// Pas de toast automatique, laissé au composant parent
+	});
+}

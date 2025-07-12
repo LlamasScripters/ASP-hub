@@ -18,6 +18,18 @@ export interface ResponsibilityWithUser extends SectionResponsibility {
 	};
 }
 
+// Nouveau type pour les responsabilités d'utilisateur avec détails section/catégorie
+export interface UserResponsibilityWithDetails {
+	id: string;
+	role: "section_manager" | "coach";
+	assignedAt: Date;
+	sectionId: string | null;
+	sectionName: string | null;
+	sectionClubId: string | null;
+	categoryId: string | null;
+	categoryName: string | null;
+}
+
 export interface ResponsibilityAssignmentResult {
 	id: string;
 	message: string;
