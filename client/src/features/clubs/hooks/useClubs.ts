@@ -38,8 +38,11 @@ export function useCreateClub() {
 	return useMutation({
 		mutationFn: (data: CreateClubData) => clubsApi.createClub(data),
 		onSuccess: (newClub) => {
-			// Invalidate and refetch clubs list
+			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
+			// Invalidate all clubs queries
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
 			
 			// Optimistically update the cache
 			queryClient.setQueryData(
@@ -69,8 +72,15 @@ export function useUpdateClub() {
 				updatedClub
 			);
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
+			// Invalidate all clubs queries
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
+			
+			// Invalidate related sections and categories data
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			
 			toast.success("Association modifiée avec succès");
 		},
@@ -90,8 +100,16 @@ export function useDeleteClub() {
 			// Remove the club from the cache
 			queryClient.removeQueries({ queryKey: clubsQueryKeys.detail(id) });
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
+			
+			// Invalidate all clubs queries
+			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
+			
+			// Invalidate related sections and categories data (cascade delete)
+			queryClient.invalidateQueries({ queryKey: ['sections'] });
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			queryClient.invalidateQueries({ queryKey: ['sessions'] });
 			
 			toast.success("Association supprimée avec succès");
 		},

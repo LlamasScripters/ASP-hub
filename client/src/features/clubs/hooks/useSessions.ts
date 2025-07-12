@@ -71,11 +71,24 @@ export function useCreateSession() {
 	return useMutation({
 		mutationFn: (data: CreateSessionData) => sessionsApi.createSession(data),
 		onSuccess: (newSession) => {
-			// Invalidate and refetch sessions list
+			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
+			
+			// Invalidate sessions by category
+			if (newSession.categoryId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...sessionsQueryKeys.all, 'category', newSession.categoryId] 
+				});
+			}
 			
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
+			
+			// Invalidate categories (for session count)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			
 			// Optimistically update the cache
 			queryClient.setQueryData(
@@ -105,11 +118,24 @@ export function useUpdateSession() {
 				updatedSession
 			);
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
+			
+			// Invalidate sessions by category
+			if (updatedSession.categoryId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...sessionsQueryKeys.all, 'category', updatedSession.categoryId] 
+				});
+			}
 			
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
+			
+			// Invalidate categories (for session count)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			
 			toast.success("Session modifiée avec succès");
 		},
@@ -129,11 +155,22 @@ export function useDeleteSession() {
 			// Remove the session from the cache
 			queryClient.removeQueries({ queryKey: sessionsQueryKeys.detail(id) });
 			
-			// Invalidate lists to ensure consistency
+			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
+			
+			// Invalidate all sessions by category queries
+			queryClient.invalidateQueries({ 
+				queryKey: [...sessionsQueryKeys.all, 'category'] 
+			});
 			
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
+			
+			// Invalidate categories (for session count)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			
 			toast.success("Session supprimée avec succès");
 		},
@@ -156,8 +193,11 @@ export function useManageParticipants() {
 				queryKey: sessionsQueryKeys.detail(sessionId) 
 			});
 			
-			// Invalidate sessions list to update participant counts
+			// Invalidate all sessions lists to update participant counts
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
 			
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
