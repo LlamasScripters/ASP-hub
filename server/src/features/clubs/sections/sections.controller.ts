@@ -5,12 +5,8 @@ import { requireSectionAccess } from "@/middleware/section.middleware.js";
 import { type Request, type Response, Router } from "express";
 import {
 	type CreateSectionData,
-	type SectionParamsData,
-	type SectionQueryData,
 	type UpdateSectionData,
 	createSectionSchema,
-	sectionParamsSchema,
-	sectionQuerySchema,
 	updateSectionSchema,
 } from "./sections.schema.js";
 import { sectionsService } from "./sections.service.js";
@@ -27,19 +23,7 @@ sectionsRouter.use(requireAuth);
  */
 sectionsRouter.get("/", requireMemberAccess(), async (req: Request, res: Response) => {
 	try {
-		const query = sectionQuerySchema.safeParse(req.query);
-		if (!query.success) {
-			res.status(400).json({ error: query.error.flatten() });
-			return;
-		}
-
-		const { page, limit } = query.data;
-		if (page < 1 || limit < 1) {
-			res.status(400).json({ error: "Page et limit doivent être supérieurs à 0" });
-			return;
-		}
-
-		const result = await sectionsService.getAll(query.data);
+		const result = await sectionsService.getAll();
 		res.json(result);
 	} catch (error) {
 		console.error("Erreur lors de la récupération des sections:", error);
@@ -54,13 +38,7 @@ sectionsRouter.get("/", requireMemberAccess(), async (req: Request, res: Respons
  */
 sectionsRouter.get("/:id", requireMemberAccess(), async (req: Request, res: Response) => {
 	try {
-		const params = sectionParamsSchema.safeParse(req.params);
-		if (!params.success) {
-			res.status(400).json({ error: params.error.flatten() });
-			return;
-		}
-
-		const section = await sectionsService.getById(params.data.id);
+		const section = await sectionsService.getById(req.params.id);
 		if (!section) {
 			res.status(404).json({ error: "Section non trouvée" });
 			return;
@@ -101,19 +79,13 @@ sectionsRouter.post("/", requireRole(UserRole.ADMIN), async (req: Request, res: 
  */
 sectionsRouter.put("/:id", requireSectionAccess(), async (req: Request, res: Response) => {
 	try {
-		const params = sectionParamsSchema.safeParse(req.params);
-		if (!params.success) {
-			res.status(400).json({ error: params.error.flatten() });
-			return;
-		}
-
 		const data = updateSectionSchema.safeParse(req.body);
 		if (!data.success) {
 			res.status(400).json({ error: data.error.flatten() });
 			return;
 		}
 
-		const section = await sectionsService.update(params.data.id, data.data);
+		const section = await sectionsService.update(req.params.id, data.data);
 		if (!section) {
 			res.status(404).json({ error: "Section non trouvée" });
 			return;
@@ -133,13 +105,7 @@ sectionsRouter.put("/:id", requireSectionAccess(), async (req: Request, res: Res
  */
 sectionsRouter.delete("/:id", requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
 	try {
-		const params = sectionParamsSchema.safeParse(req.params);
-		if (!params.success) {
-			res.status(400).json({ error: params.error.flatten() });
-			return;
-		}
-
-		const success = await sectionsService.delete(params.data.id);
+		const success = await sectionsService.delete(req.params.id);
 		if (!success) {
 			res.status(404).json({ error: "Section non trouvée" });
 			return;

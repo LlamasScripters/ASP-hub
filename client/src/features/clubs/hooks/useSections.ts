@@ -1,23 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { sectionsApi } from "./../lib/api";
-import type { CreateSectionData, UpdateSectionData, SectionFilters } from "./../types";
+import type { CreateSectionData, UpdateSectionData } from "./../types";
 
 // Query keys
 export const sectionsQueryKeys = {
 	all: ['sections'] as const,
 	lists: () => [...sectionsQueryKeys.all, 'list'] as const,
-	list: (filters: Partial<SectionFilters> = {}) => [...sectionsQueryKeys.lists(), filters] as const,
+	list: () => [...sectionsQueryKeys.lists()] as const,
 	details: () => [...sectionsQueryKeys.all, 'detail'] as const,
 	detail: (id: string) => [...sectionsQueryKeys.details(), id] as const,
 	byClub: (clubId: string) => [...sectionsQueryKeys.all, 'byClub', clubId] as const,
 };
 
 // Query hooks
-export function useSections(filters?: Partial<SectionFilters>) {
+export function useSections() {
 	return useQuery({
-		queryKey: sectionsQueryKeys.list(filters),
-		queryFn: () => sectionsApi.getSections(filters),
+		queryKey: sectionsQueryKeys.list(),
+		queryFn: () => sectionsApi.getSections(),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});

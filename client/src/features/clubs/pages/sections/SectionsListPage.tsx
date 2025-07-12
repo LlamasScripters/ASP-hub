@@ -40,8 +40,13 @@ export function SectionsListPage() {
 	});
 	const navigate = useNavigate();
 	
-	// Utilisation des hooks
-	const { data: sections = [], isLoading } = useSectionsByClub(clubId);
+	const { data, isLoading } = useSectionsByClub(clubId);
+	const sections = data?.data || [];
+
+	const totalCategories = sections.reduce((total, section) => {
+		return total + (Number(section.categoriesCount) || 0);
+	}, 0);
+
 	const deleteSectionMutation = useDeleteSection();
 	
 	const [deleteSection, setDeleteSection] = useState<Section | null>(null);
@@ -158,7 +163,7 @@ export function SectionsListPage() {
 										<p className="text-sm font-medium text-muted-foreground">
 											Total catégories
 										</p>
-										<p className="text-2xl font-bold">-</p>
+										<p className="text-2xl font-bold">{totalCategories}</p>
 									</div>
 								</div>
 							</CardContent>
@@ -262,12 +267,12 @@ export function SectionsListPage() {
 											{section.description || "Aucune description disponible"}
 										</CardDescription>
 										{/* Responsable de section */}
-										{section.managerFirstName && section.managerLastName ? (
+										{section.manager? (
 											<div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
 												<User className="h-3 w-3" />
 												<span>
-													Responsable: {section.managerFirstName}{" "}
-													{section.managerLastName}
+													Responsable: {section.manager.firstName}{" "}
+													{section.manager.lastName}
 												</span>
 											</div>
 										) : (

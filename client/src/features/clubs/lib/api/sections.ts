@@ -1,4 +1,4 @@
-import type { Section, SectionFilters, SectionsPaginatedResponse, CreateSectionData, UpdateSectionData } from "@/features/clubs/types/sections";
+import type { Section, SectionsPaginatedResponse, CreateSectionData, UpdateSectionData } from "@/features/clubs/types/sections";
 
 const API_BASE_URL = "/api";
 
@@ -17,25 +17,9 @@ export class SectionsApiClient {
 	 * Récupère toutes les sections avec pagination et filtres
 	 */
 	async getSections(
-		filters?: Partial<SectionFilters>,
 		options?: ApiOptions,
 	): Promise<SectionsPaginatedResponse> {
 		const queryParams = new URLSearchParams();
-
-		if (filters) {
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null && value !== "") {
-					queryParams.append(key, String(value));
-				}
-			}
-		}
-
-		if (!queryParams.has("page")) {
-			queryParams.append("page", "1");
-		}
-		if (!queryParams.has("limit")) {
-			queryParams.append("limit", "20");
-		}
 
 		const url = `${this.baseUrl}/sections?${queryParams}`;
 		const response = await fetch(url, {
@@ -70,7 +54,7 @@ export class SectionsApiClient {
 	/**
 	 * Récupère les sections d'un club spécifique
 	 */
-	async getSectionsByClubId(clubId: string, options?: ApiOptions): Promise<Section[]> {
+	async getSectionsByClubId(clubId: string, options?: ApiOptions): Promise<SectionsPaginatedResponse> {
 		const url = `${this.baseUrl}/sections/club/${clubId}`;
 		const response = await fetch(url, {
 			method: "GET",

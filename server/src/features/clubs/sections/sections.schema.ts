@@ -11,30 +11,5 @@ export const createSectionSchema = z.object({
 // Schema pour la modification d'une section
 export const updateSectionSchema = createSectionSchema.partial().omit({ clubId: true });
 
-// Schema pour les paramètres de requête
-export const sectionQuerySchema = z
-	.object({
-		page: z.string().optional(),
-		limit: z.string().optional(),
-		clubId: z.string().uuid().optional(),
-		search: z.string().optional(),
-		isActive: z.string().optional(),
-	})
-	.transform((data) => ({
-		page: Number.parseInt(data.page || "1", 10),
-		limit: Number.parseInt(data.limit || "20", 10),
-		clubId: data.clubId,
-		search: data.search,
-		isActive: data.isActive === "true" ? true : data.isActive === "false" ? false : undefined,
-	}));
-
-// Schema pour les paramètres d'URL
-export const sectionParamsSchema = z.object({
-	id: z.string().uuid("ID de section invalide"),
-	clubId: z.string().uuid("ID du club invalide").optional(),
-});
-
 export type CreateSectionData = z.infer<typeof createSectionSchema>;
 export type UpdateSectionData = z.infer<typeof updateSectionSchema>;
-export type SectionQueryData = z.infer<typeof sectionQuerySchema>;
-export type SectionParamsData = z.infer<typeof sectionParamsSchema>;
