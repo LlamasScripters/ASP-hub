@@ -20,11 +20,6 @@ export interface Section {
 		lastName: string;
 		email: string;
 	};
-	// Responsable de section
-	managerId?: string;
-	managerFirstName?: string;
-	managerLastName?: string;
-	managerEmail?: string;
 }
 
 export interface CreateSectionData {
@@ -40,17 +35,7 @@ export interface UpdateSectionData {
 	color?: string;
 }
 
-export interface SectionFilters {
-	page?: number;
-	limit?: number;
-	clubId?: string;
-	search?: string;
-	isActive?: boolean;
-}
-
 export interface SectionsPaginatedResponse {
 	data: Section[];
 	total: number;
-	page: number;
-	limit: number;
 }

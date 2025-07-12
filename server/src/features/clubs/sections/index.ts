@@ -11,21 +11,15 @@ export type {
 	UpdateSectionData,
 	SectionResponse,
 	SectionsPaginatedResponse,
-	SectionFilters,
-	SectionWithRelations,
 } from "./sections.types.js";
 
 // Export des schémas
 export {
 	createSectionSchema,
 	updateSectionSchema,
-	sectionQuerySchema,
-	sectionParamsSchema,
 } from "./sections.schema.js";
 
 export type {
 	CreateSectionData as CreateSectionSchemaData,
 	UpdateSectionData as UpdateSectionSchemaData,
-	SectionQueryData,
-	SectionParamsData,
 } from "./sections.schema.js";
