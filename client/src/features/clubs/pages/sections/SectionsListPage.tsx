@@ -43,6 +43,10 @@ export function SectionsListPage() {
 	const { data, isLoading } = useSectionsByClub(clubId);
 	const sections = data?.data || [];
 
+	const totalActiveSections = sections.reduce((total, section) => {
+		return total + (section.isActive ? 1 : 0);
+	}, 0);
+
 	const totalCategories = sections.reduce((total, section) => {
 		return total + (Number(section.categoriesCount) || 0);
 	}, 0);
@@ -178,7 +182,7 @@ export function SectionsListPage() {
 										<p className="text-sm font-medium text-muted-foreground">
 											Sections actives
 										</p>
-										<p className="text-2xl font-bold">{sections.length}</p>
+										<p className="text-2xl font-bold">{totalActiveSections}</p>
 									</div>
 								</div>
 							</CardContent>
@@ -243,18 +247,17 @@ export function SectionsListPage() {
 											</Badge>
 										</div>
 										{(() => {
-											const categoryCount = 0; // Sera implémenté plus tard
 											return (
 												<Badge
 													variant="outline"
 													className={`text-xs font-medium px-2.5 py-1 transition-colors ${
-														categoryCount > 0
+														(section.categoriesCount || 0) > 0
 															? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400"
 															: "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400"
 													}`}
 												>
-													{categoryCount} catégorie
-													{categoryCount > 1 ? "s" : ""}
+													{section.categoriesCount || 0} catégorie
+													{(section.categoriesCount || 0) > 1 ? "s" : ""}
 												</Badge>
 											);
 										})()}
