@@ -33,27 +33,6 @@ export const updateCategorySchema = baseCategorySchema.partial().omit({ sectionI
 	path: ["ageMax"],
 });
 
-// Schema pour les requêtes GET (filtres)
-export const getCategoriesSchema = z.object({
-	page: z.string().optional().transform(val => val ? Number.parseInt(val) : 1),
-	limit: z.string().optional().transform(val => val ? Number.parseInt(val) : 10),
-	sectionId: z.string().uuid().optional(),
-	clubId: z.string().uuid().optional(),
-	search: z.string().optional(),
-	isActive: z.string().optional().transform(val => val === "true"),
-	ageMin: z.string().optional().transform(val => val ? Number.parseInt(val) : undefined),
-	ageMax: z.string().optional().transform(val => val ? Number.parseInt(val) : undefined),
-});
-
-// Schema pour les paramètres d'URL
-export const categoryParamsSchema = z.object({
-	id: z.string().uuid("ID de catégorie invalide"),
-	sectionId: z.string().uuid("ID de section invalide").optional(),
-	clubId: z.string().uuid("ID du club invalide").optional(),
-});
-
 // Types générés
 export type CreateCategoryData = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryData = z.infer<typeof updateCategorySchema>;
-export type CategoryFilters = z.infer<typeof getCategoriesSchema>;
-export type CategoryParamsData = z.infer<typeof categoryParamsSchema>;

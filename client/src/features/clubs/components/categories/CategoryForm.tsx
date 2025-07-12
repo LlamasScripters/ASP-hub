@@ -31,7 +31,7 @@ import {
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useEligibleUsersForCategory, useAssignCategoryCoach, useRemoveCategoryCoach } from "../../hooks/useResponsibilities";
-import { useCategories, useCategory, useCreateCategory, useUpdateCategory } from "../../hooks/useCategories";
+import { useCategoriesBySection, useCategory, useCreateCategory, useUpdateCategory } from "../../hooks/useCategories";
 import type { Category, EligibleUser } from "../../types";
 
 const schema = z
@@ -106,7 +106,7 @@ export function CategoryForm({
 	const navigate = useNavigate();
 	
 	// Utilisation des hooks personnalisés
-	const { data: categoriesData } = useCategories({ sectionId });
+	const { data: categoriesData } = useCategoriesBySection(sectionId);
 	const existingCategories = categoriesData?.data || [];
 	const { data: categoryData } = useCategory(categoryId || "");
 	const createCategoryMutation = useCreateCategory();
@@ -117,7 +117,7 @@ export function CategoryForm({
 	const assignCoachMutation = useAssignCategoryCoach();
 	const removeCoachMutation = useRemoveCategoryCoach();
 	
-	const [form, setForm] = useState<Partial<Category>>({});
+	const [form, setForm] = useState<Partial<Category & { coachId?: string }>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	
 	const isLoading = createCategoryMutation.isPending || updateCategoryMutation.isPending;
@@ -136,7 +136,7 @@ export function CategoryForm({
 				description: category.description || "",
 				ageMin: category.ageMin,
 				ageMax: category.ageMax,
-				coachId: category.coachId || "none",
+				coachId: category.coach?.id || "none",
 			});
 		} else if (mode === "edit" && categoryData) {
 			// Use data from hook
@@ -145,7 +145,7 @@ export function CategoryForm({
 				description: categoryData.description || "",
 				ageMin: categoryData.ageMin,
 				ageMax: categoryData.ageMax,
-				coachId: categoryData.coachId || "none",
+				coachId: categoryData.coach?.id || "none",
 			});
 		}
 	}, [mode, category, categoryData]);
@@ -273,7 +273,7 @@ export function CategoryForm({
 			const actualCoachId = coachId === "none" ? "" : coachId;
 			// Pour la comparaison, utiliser le coachId original de la catégorie, pas l'état du formulaire
 			const originalCoachId =
-				mode === "edit" && category ? category.coachId || "" : "";
+				mode === "edit" && category ? category.coach?.id || "" : "";
 
 			if (targetCategoryId && actualCoachId) {
 				// Si un coach est sélectionné, l'assigner

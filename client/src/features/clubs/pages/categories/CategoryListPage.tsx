@@ -65,7 +65,8 @@ export function CategoriesListPage() {
 	});
 
 	// Hooks pour les données
-	const { data: categories = [], isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const { data, isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const categories = data?.data || [];
 	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
 	const { mutateAsync: deleteCategory } = useDeleteCategory();
 
@@ -429,11 +430,11 @@ export function CategoriesListPage() {
 												)}
 											</TableCell>
 											<TableCell>
-												{c.coachFirstName && c.coachLastName ? (
+												{c.coach ? (
 													<div className="flex items-center gap-2 text-sm">
 														<User className="h-3 w-3 text-muted-foreground" />
 														<span>
-															{c.coachFirstName} {c.coachLastName}
+															{c.coach.firstName} {c.coach.lastName}
 														</span>
 													</div>
 												) : (

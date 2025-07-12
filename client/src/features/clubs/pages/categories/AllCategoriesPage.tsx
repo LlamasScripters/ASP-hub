@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useSectionsByClub } from "../../hooks/useSections";
-import { useDeleteCategory } from "../../hooks/useCategories";
+import { useCategories, useDeleteCategory } from "../../hooks/useCategories";
 import { SectionSelectionModal } from "../../components/categories/SectionSelectionModal";
 import type { Category } from "../../types";
 
@@ -55,16 +55,17 @@ export function AllCategoriesPage() {
 	});
 
 	// Hooks pour récupérer les données
-	const { data: sections = [], isLoading } = useSectionsByClub(clubId);
+	const { data: sectionsResponse, isLoading: isLoadingSections } = useSectionsByClub(clubId);
+	const sections = sectionsResponse?.data || [];
+
+	const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories();
+	const categories = categoriesResponse?.data || [];
+
 	const { mutateAsync: deleteCategory } = useDeleteCategory();
 
 	const [showSectionModal, setShowSectionModal] = useState(false);
 	const [deleteCategoryState, setDeleteCategoryState] = useState<EnrichedCategory | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
-
-	// Pour l'instant, on utilise un tableau vide car cette page nécessite
-	// un refactoring plus complexe pour récupérer toutes les catégories de toutes les sections
-	// TODO: Implémenter une API pour récupérer toutes les catégories d'un club
 
 	const handleDeleteCategory = async () => {
 		if (!deleteCategoryState) return;
@@ -87,14 +88,16 @@ export function AllCategoriesPage() {
 		return "Non défini";
 	};
 
-	// Pour l'instant, on utilise un tableau vide car cette page nécessite
-	// un refactoring plus complexe pour récupérer toutes les catégories
-	const categories: EnrichedCategory[] = [];
 	const sectionsCount = sections.length;
-	const categoriesWithCoach = 0;
-	const avgAge = 0;
+	const categoriesWithCoach = categories.filter(cat => cat.coach?.firstName && cat.coach?.lastName).length;
+	const avgAge = categories.length > 0 
+		? Math.round(categories
+			.filter(cat => cat.ageMin && cat.ageMax)
+			.reduce((sum, cat) => sum + (((cat.ageMin || 0) + (cat.ageMax || 0)) / 2), 0) / 
+			categories.filter(cat => cat.ageMin && cat.ageMax).length || 0)
+		: 0;
 
-	if (isLoading) {
+	if (isLoadingSections || isLoadingCategories) {
 		return (
 			<div className="container mx-auto p-4 sm:p-6 space-y-8 max-w-7xl">
 				<div className="space-y-6">
@@ -331,24 +334,24 @@ export function AllCategoriesPage() {
 														<div
 															className="w-3 h-3 rounded-full border border-primary/20"
 															style={{
-																backgroundColor: cat.sectionColor || "#3b82f6",
+																backgroundColor: cat.section.color || "#3b82f6",
 															}}
 														/>
 														<Badge variant="secondary" className="text-xs">
-															{cat.sectionName}
+															{cat.section.name}
 														</Badge>
 													</div>
 												</TableCell>
 												<TableCell>
-													{cat.coachFirstName && cat.coachLastName ? (
+													{cat.coach?.firstName && cat.coach?.lastName ? (
 														<div className="flex items-center gap-2">
 															<User className="h-4 w-4 text-muted-foreground" />
 															<div className="flex flex-col">
 																<span className="text-sm font-medium">
-																	{cat.coachFirstName} {cat.coachLastName}
+																	{cat.coach.firstName} {cat.coach.lastName}
 																</span>
 																<span className="text-xs text-muted-foreground">
-																	{cat.coachEmail}
+																	{cat.coach.email}
 																</span>
 															</div>
 														</div>

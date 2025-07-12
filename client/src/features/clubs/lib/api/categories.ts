@@ -2,7 +2,6 @@ import type {
 	Category, 
 	CreateCategoryData, 
 	UpdateCategoryData, 
-	CategoryFilters, 
 	CategoriesPaginatedResponse 
 } from "../../types";
 
@@ -23,18 +22,9 @@ export class CategoriesApiClient {
 	 * Récupère toutes les catégories avec pagination et filtres
 	 */
 	async getCategories(
-		filters?: Partial<CategoryFilters>,
 		options?: ApiOptions,
 	): Promise<CategoriesPaginatedResponse> {
 		const url = new URL(`${this.baseUrl}/categories`, window.location.origin);
-		
-		if (filters) {
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					url.searchParams.append(key, String(value));
-				}
-			}
-		}
 
 		const response = await fetch(url.toString(), {
 			method: "GET",
@@ -76,7 +66,7 @@ export class CategoriesApiClient {
 	async getCategoriesBySection(
 		sectionId: string,
 		options?: ApiOptions,
-	): Promise<Category[]> {
+	): Promise<CategoriesPaginatedResponse> {
 		const response = await fetch(
 			`${this.baseUrl}/categories/section/${sectionId}`,
 			{

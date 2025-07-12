@@ -10,17 +10,22 @@ export interface Category {
 	createdAt?: string;
 	updatedAt?: string;
 	// Relations
-	section?: {
+	section: {
 		id: string;
 		name: string;
-		clubId: string;
+		color: string | null;
+		club: {
+			id: string;
+			name: string;
+		};
 	};
 	sessionsCount?: number;
-	// Coach de catégorie
-	coachId?: string;
-	coachFirstName?: string;
-	coachLastName?: string;
-	coachEmail?: string;
+	coach?: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string;
+	};
 }
 
 export interface CreateCategoryData {
@@ -38,20 +43,7 @@ export interface UpdateCategoryData {
 	ageMax?: number;
 }
 
-export interface CategoryFilters {
-	sectionId?: string;
-	ageMin?: number;
-	ageMax?: number;
-	search?: string;
-	isActive?: boolean;
-}
-
 export interface CategoriesPaginatedResponse {
 	data: Category[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		pages: number;
-	};
+	total: number;
 }

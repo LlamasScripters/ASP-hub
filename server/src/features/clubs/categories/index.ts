@@ -8,8 +8,6 @@ export { CategoriesService } from "./categories.service.js";
 export type {
 	CreateCategoryData,
 	UpdateCategoryData,
-	CategoryFilters,
-	CategoryWithRelations,
 	CategoryResponse,
 	CategoriesPaginatedResponse,
 } from "./categories.types.js";
@@ -18,6 +16,4 @@ export type {
 export {
 	createCategorySchema,
 	updateCategorySchema,
-	getCategoriesSchema,
-	categoryParamsSchema,
 } from "./categories.schema.js";

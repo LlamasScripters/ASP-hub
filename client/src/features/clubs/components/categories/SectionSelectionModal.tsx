@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useNavigate } from "@tanstack/react-router";
 import { FolderOpen } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { Section } from "../../types";
+import { useSectionsByClub } from "../../hooks/useSections";
 
 interface SectionSelectionModalProps {
 	isOpen: boolean;
@@ -25,19 +24,8 @@ export function SectionSelectionModal({
 	clubId,
 }: SectionSelectionModalProps) {
 	const navigate = useNavigate();
-	const [sections, setSections] = useState<Section[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-
-	useEffect(() => {
-		if (isOpen) {
-			setIsLoading(true);
-			fetch(`/api/clubs/${clubId}/sections`)
-				.then((res) => res.json())
-				.then(setSections)
-				.catch(console.error)
-				.finally(() => setIsLoading(false));
-		}
-	}, [isOpen, clubId]);
+	const { data: sectionsResponse, isLoading } = useSectionsByClub(clubId);
+	const sections = sectionsResponse?.data || [];
 
 	const handleSectionSelect = (sectionId: string) => {
 		navigate({
