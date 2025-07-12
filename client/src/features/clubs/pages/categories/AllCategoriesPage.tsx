@@ -17,6 +17,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -30,15 +38,20 @@ import { Link, useParams } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Calendar,
+	ChevronDown,
+	ChevronLeft,
+	ChevronRight,
+	ChevronUp,
 	Edit,
 	FolderOpen,
 	Plus,
+	Search,
 	Tag,
 	Trash2,
 	User,
 	Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSectionsByClub } from "../../hooks/useSections";
 import { useCategories, useDeleteCategory } from "../../hooks/useCategories";
 import { SectionSelectionModal } from "../../components/categories/SectionSelectionModal";
@@ -47,6 +60,16 @@ import type { Category } from "../../types";
 interface EnrichedCategory extends Category {
 	sectionName?: string;
 	sectionColor?: string;
+}
+
+type SortField = "name" | "sectionName" | "ageMin" | "ageMax" | "coach";
+type SortDirection = "asc" | "desc";
+
+interface Filters {
+	name: string;
+	sectionName: string;
+	ageRange: string;
+	coach: string;
 }
 
 export function AllCategoriesPage() {
@@ -66,6 +89,128 @@ export function AllCategoriesPage() {
 	const [showSectionModal, setShowSectionModal] = useState(false);
 	const [deleteCategoryState, setDeleteCategoryState] = useState<EnrichedCategory | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
+	
+	// Sorting and filtering state
+	const [sortField, setSortField] = useState<SortField>("name");
+	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+	const [filters, setFilters] = useState<Filters>({
+		name: "",
+		sectionName: "",
+		ageRange: "",
+		coach: "",
+	});
+	
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
+
+	const handleSort = (field: SortField) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	const handleFilterChange = (field: keyof Filters, value: string) => {
+		setFilters((prev) => ({ ...prev, [field]: value }));
+		setCurrentPage(1); // Reset to first page when filtering
+	};
+
+	const getSortIcon = (field: SortField) => {
+		if (sortField !== field) return null;
+		return sortDirection === "asc" ? (
+			<ChevronUp className="ml-1 h-4 w-4" />
+		) : (
+			<ChevronDown className="ml-1 h-4 w-4" />
+		);
+	};
+
+	const clearFilters = () => {
+		setFilters({
+			name: "",
+			sectionName: "",
+			ageRange: "",
+			coach: "",
+		});
+		setCurrentPage(1);
+	};
+
+	// Filter, sort and paginate categories
+	const filteredAndSortedCategories = useMemo(() => {
+		const filtered = categories.filter((category) => {
+			const nameMatch = category.name
+				.toLowerCase()
+				.includes(filters.name.toLowerCase());
+			const sectionMatch = 
+				filters.sectionName === "" ||
+				category.section.name
+					.toLowerCase()
+					.includes(filters.sectionName.toLowerCase());
+			const ageRangeMatch = 
+				filters.ageRange === "" ||
+				getAgeRangeText(category.ageMin, category.ageMax)
+					.toLowerCase()
+					.includes(filters.ageRange.toLowerCase());
+			const coachMatch = 
+				filters.coach === "" ||
+				(category.coach?.firstName && category.coach?.lastName && 
+				 `${category.coach.firstName} ${category.coach.lastName}`
+					.toLowerCase()
+					.includes(filters.coach.toLowerCase())) ||
+				(filters.coach.toLowerCase().includes("aucun") && !category.coach);
+
+			return nameMatch && sectionMatch && ageRangeMatch && coachMatch;
+		});
+
+		// Sort
+		filtered.sort((a, b) => {
+			let aValue: string | number;
+			let bValue: string | number;
+
+			switch (sortField) {
+				case "name":
+					aValue = a.name.toLowerCase();
+					bValue = b.name.toLowerCase();
+					break;
+				case "sectionName":
+					aValue = a.section.name.toLowerCase();
+					bValue = b.section.name.toLowerCase();
+					break;
+				case "ageMin":
+					aValue = a.ageMin || -1;
+					bValue = b.ageMin || -1;
+					break;
+				case "ageMax":
+					aValue = a.ageMax || -1;
+					bValue = b.ageMax || -1;
+					break;
+				case "coach":
+					aValue = a.coach ? `${a.coach.firstName} ${a.coach.lastName}`.toLowerCase() : "";
+					bValue = b.coach ? `${b.coach.firstName} ${b.coach.lastName}`.toLowerCase() : "";
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+
+		return filtered;
+	}, [categories, filters, sortField, sortDirection]);
+
+	// Pagination logic
+	const totalPages = Math.ceil(filteredAndSortedCategories.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedCategories = filteredAndSortedCategories.slice(startIndex, endIndex);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
 
 	const handleDeleteCategory = async () => {
 		if (!deleteCategoryState) return;
@@ -292,20 +437,127 @@ export function AllCategoriesPage() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Users className="h-5 w-5" />
-								Liste des catégories ({categories.length})
+								Liste des catégories ({filteredAndSortedCategories.length})
 							</CardTitle>
 							<CardDescription>
-								Toutes les catégories d'âge organisées par section
+								Affichage de {startIndex + 1} à {Math.min(endIndex, filteredAndSortedCategories.length)} sur {filteredAndSortedCategories.length} catégorie{filteredAndSortedCategories.length > 1 ? "s" : ""} filtrée{filteredAndSortedCategories.length > 1 ? "s" : ""}
+								{filteredAndSortedCategories.length !== categories.length && (
+									<> sur {categories.length} au total</>
+								)}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
+							{/* Filtres */}
+							<div className="mb-6 space-y-4">
+								<div className="flex items-center justify-between">
+									<h3 className="text-sm font-medium flex items-center gap-2">
+										<Search className="h-4 w-4" />
+										Filtres de recherche
+									</h3>
+									<Button
+										variant="outline"
+										className="hover:cursor-pointer"
+										size="sm"
+										onClick={clearFilters}
+									>
+										Effacer les filtres
+									</Button>
+								</div>
+								<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+									<div className="space-y-2">
+										<label
+											htmlFor="name"
+											className="text-xs font-medium text-muted-foreground"
+										>
+											Nom de la catégorie
+										</label>
+										<Input
+											id="name"
+											placeholder="Rechercher par nom..."
+											value={filters.name}
+											onChange={(e) => handleFilterChange("name", e.target.value)}
+											className="h-8"
+										/>
+									</div>
+									<div className="space-y-2">
+										<label
+											htmlFor="sectionName"
+											className="text-xs font-medium text-muted-foreground"
+										>
+											Section
+										</label>
+										<Input
+											id="sectionName"
+											placeholder="Filtrer par section..."
+											value={filters.sectionName}
+											onChange={(e) => handleFilterChange("sectionName", e.target.value)}
+											className="h-8"
+										/>
+									</div>
+									<div className="space-y-2">
+										<label
+											htmlFor="ageRange"
+											className="text-xs font-medium text-muted-foreground"
+										>
+											Tranche d'âge
+										</label>
+										<Input
+											id="ageRange"
+											placeholder="Ex: 12-18 ans"
+											value={filters.ageRange}
+											onChange={(e) => handleFilterChange("ageRange", e.target.value)}
+											className="h-8"
+										/>
+									</div>
+									<div className="space-y-2">
+										<label
+											htmlFor="coach"
+											className="text-xs font-medium text-muted-foreground"
+										>
+											Coach
+										</label>
+										<Input
+											id="coach"
+											placeholder="Nom du coach..."
+											value={filters.coach}
+											onChange={(e) => handleFilterChange("coach", e.target.value)}
+											className="h-8"
+										/>
+									</div>
+								</div>
+							</div>
+
 							<div className="rounded-md border">
 								<Table>
 									<TableHeader>
-										<TableRow>
-											<TableHead className="font-semibold">Nom</TableHead>
-											<TableHead className="font-semibold">Section</TableHead>
-											<TableHead className="font-semibold">Coach</TableHead>
+										<TableRow className="hover:bg-transparent">
+											<TableHead 
+												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+												onClick={() => handleSort("name")}
+											>
+												<div className="flex items-center">
+													Nom
+													{getSortIcon("name")}
+												</div>
+											</TableHead>
+											<TableHead 
+												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+												onClick={() => handleSort("sectionName")}
+											>
+												<div className="flex items-center">
+													Section
+													{getSortIcon("sectionName")}
+												</div>
+											</TableHead>
+											<TableHead 
+												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+												onClick={() => handleSort("coach")}
+											>
+												<div className="flex items-center">
+													Coach
+													{getSortIcon("coach")}
+												</div>
+											</TableHead>
 											<TableHead className="font-semibold">
 												Tranche d'âge
 											</TableHead>
@@ -318,7 +570,19 @@ export function AllCategoriesPage() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{categories.map((cat) => (
+										{paginatedCategories.length === 0 ? (
+											<TableRow>
+												<TableCell
+													colSpan={6}
+													className="h-24 text-center text-muted-foreground"
+												>
+													{categories.length === 0
+														? "Aucune catégorie trouvée. Créez votre première catégorie !"
+														: "Aucune catégorie ne correspond aux filtres appliqués."}
+												</TableCell>
+											</TableRow>
+										) : (
+											paginatedCategories.map((cat) => (
 											<TableRow
 												key={cat.id}
 												className="hover:bg-muted/30 transition-colors"
@@ -404,10 +668,88 @@ export function AllCategoriesPage() {
 													</div>
 												</TableCell>
 											</TableRow>
-										))}
+										))
+										)}
 									</TableBody>
 								</Table>
 							</div>
+							
+							{/* Pagination Controls */}
+							{filteredAndSortedCategories.length > 0 && (
+								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+									<div className="flex items-center gap-2">
+										<span className="text-sm text-muted-foreground">
+											Afficher :
+										</span>
+										<Select
+											value={itemsPerPage.toString()}
+											onValueChange={(value) => {
+												setItemsPerPage(Number(value));
+												setCurrentPage(1);
+											}}
+										>
+											<SelectTrigger className="w-16 h-8">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="5">5</SelectItem>
+												<SelectItem value="10">10</SelectItem>
+												<SelectItem value="20">20</SelectItem>
+												<SelectItem value="50">50</SelectItem>
+											</SelectContent>
+										</Select>
+										<span className="text-sm text-muted-foreground">
+											éléments par page
+										</span>
+									</div>
+									
+									<div className="flex items-center gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage - 1)}
+											disabled={currentPage === 1}
+										>
+											<ChevronLeft className="h-4 w-4" />
+											Précédent
+										</Button>
+										
+										<div className="flex items-center gap-1">
+											{Array.from({ length: totalPages }, (_, i) => i + 1)
+												.filter(page => 
+													page === 1 || 
+													page === totalPages || 
+													Math.abs(page - currentPage) <= 2
+												)
+												.map((page, index, array) => (
+													<div key={page} className="flex items-center">
+														{index > 0 && array[index - 1] !== page - 1 && (
+															<span className="px-2 text-muted-foreground">...</span>
+														)}
+														<Button
+															variant={currentPage === page ? "default" : "outline"}
+															size="sm"
+															onClick={() => handlePageChange(page)}
+															className="w-8 h-8 p-0"
+														>
+															{page}
+														</Button>
+													</div>
+												))}
+										</div>
+										
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage + 1)}
+											disabled={currentPage === totalPages}
+										>
+											Suivant
+											<ChevronRight className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				)}

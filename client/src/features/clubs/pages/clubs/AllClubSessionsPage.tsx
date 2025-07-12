@@ -39,6 +39,8 @@ import {
 	ArrowLeft,
 	Calendar,
 	ChevronDown,
+	ChevronLeft,
+	ChevronRight,
 	ChevronUp,
 	Clock,
 	Edit,
@@ -98,6 +100,10 @@ export function AllClubSessionsPage() {
 		null,
 	);
 	const [isDeleting, setIsDeleting] = useState(false);
+	
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
 	// Filter sessions for this club and enrich with additional data
 	const sessions = useMemo(() => {
@@ -124,6 +130,7 @@ export function AllClubSessionsPage() {
 
 	const handleFilterChange = (field: keyof Filters, value: string) => {
 		setFilters((prev) => ({ ...prev, [field]: value }));
+		setCurrentPage(1); // Reset to first page when filtering
 	};
 
 	const getSortIcon = (field: SortField) => {
@@ -252,6 +259,16 @@ export function AllClubSessionsPage() {
 		return filtered;
 	}, [sessions, filters, sortField, sortDirection]);
 
+	// Pagination logic
+	const totalPages = Math.ceil(filteredAndSortedSessions.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedSessions = filteredAndSortedSessions.slice(startIndex, endIndex);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
+
 	const clearFilters = () => {
 		setFilters({
 			title: "",
@@ -260,6 +277,7 @@ export function AllClubSessionsPage() {
 			type: "all",
 			status: "all",
 		});
+		setCurrentPage(1); // Reset to first page when clearing filters
 	};
 
 	const handleDeleteSession = async () => {
@@ -447,10 +465,10 @@ export function AllClubSessionsPage() {
 								Liste des sessions ({filteredAndSortedSessions.length})
 							</CardTitle>
 							<CardDescription>
-								{filteredAndSortedSessions.length} session
-								{filteredAndSortedSessions.length > 1 ? "s" : ""} affichée
-								{filteredAndSortedSessions.length > 1 ? "s" : ""} sur{" "}
-								{sessions.length} au total
+								Affichage de {startIndex + 1} à {Math.min(endIndex, filteredAndSortedSessions.length)} sur {filteredAndSortedSessions.length} session{filteredAndSortedSessions.length > 1 ? "s" : ""} filtrée{filteredAndSortedSessions.length > 1 ? "s" : ""} 
+								{filteredAndSortedSessions.length !== sessions.length && (
+									<> sur {sessions.length} au total</>
+								)}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -655,7 +673,7 @@ export function AllClubSessionsPage() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{filteredAndSortedSessions.length === 0 ? (
+										{paginatedSessions.length === 0 ? (
 											<TableRow>
 												<TableCell
 													colSpan={7}
@@ -667,7 +685,7 @@ export function AllClubSessionsPage() {
 												</TableCell>
 											</TableRow>
 										) : (
-											filteredAndSortedSessions.map((s) => (
+											paginatedSessions.map((s) => (
 												<TableRow
 													key={s.id}
 													className="hover:bg-muted/50 transition-colors"
@@ -766,6 +784,83 @@ export function AllClubSessionsPage() {
 									</TableBody>
 								</Table>
 							</div>
+							
+							{/* Pagination Controls */}
+							{filteredAndSortedSessions.length > 0 && (
+								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+									<div className="flex items-center gap-2">
+										<span className="text-sm text-muted-foreground">
+											Afficher :
+										</span>
+										<Select
+											value={itemsPerPage.toString()}
+											onValueChange={(value) => {
+												setItemsPerPage(Number(value));
+												setCurrentPage(1);
+											}}
+										>
+											<SelectTrigger className="w-16 h-8">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="5">5</SelectItem>
+												<SelectItem value="10">10</SelectItem>
+												<SelectItem value="20">20</SelectItem>
+												<SelectItem value="50">50</SelectItem>
+											</SelectContent>
+										</Select>
+										<span className="text-sm text-muted-foreground">
+											éléments par page
+										</span>
+									</div>
+									
+									<div className="flex items-center gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage - 1)}
+											disabled={currentPage === 1}
+										>
+											<ChevronLeft className="h-4 w-4" />
+											Précédent
+										</Button>
+										
+										<div className="flex items-center gap-1">
+											{Array.from({ length: totalPages }, (_, i) => i + 1)
+												.filter(page => 
+													page === 1 || 
+													page === totalPages || 
+													Math.abs(page - currentPage) <= 2
+												)
+												.map((page, index, array) => (
+													<div key={page} className="flex items-center">
+														{index > 0 && array[index - 1] !== page - 1 && (
+															<span className="px-2 text-muted-foreground">...</span>
+														)}
+														<Button
+															variant={currentPage === page ? "default" : "outline"}
+															size="sm"
+															onClick={() => handlePageChange(page)}
+															className="w-8 h-8 p-0"
+														>
+															{page}
+														</Button>
+													</div>
+												))}
+										</div>
+										
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage + 1)}
+											disabled={currentPage === totalPages}
+										>
+											Suivant
+											<ChevronRight className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				)}
