@@ -11,9 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { getLoggedInUserQueryOptions } from "../users/users.config";
 import { LoginWithGoogleButton } from "./LoginWithGoogleButton";
 
 const formSchema = z.object({
@@ -27,7 +29,8 @@ export function LoginForm() {
 	// const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { isPending: isPendingSession } = authClient.useSession();
+	const queryClient = useQueryClient();
+	const { isPending: isPendingSession, data } = authClient.useSession();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -38,27 +41,26 @@ export function LoginForm() {
 	});
 
 	const onSubmit = async (values: FormValues) => {
-		try {
-			const { error } = await authClient.signIn.email(
-				{
-					email: values.email,
-					password: values.password,
-				},
-				{
-					onSuccess: () => {
-						navigate({ to: location.search.redirect ?? "/dashboard" });
-					},
-				},
-			);
+		const { error } = await authClient.signIn.email({
+			email: values.email,
+			password: values.password,
+		});
 
-			if (error?.code) {
-				form.setError("root", { message: getAuthErrorMessage(error.code) });
-			}
-		} catch (err) {
-			form.setError("root", {
-				message: "Une erreur inattendue s'est produite",
-			});
+		if (error) {
+			const message = error.code
+				? getAuthErrorMessage(error.code)
+				: "Une erreur inattendue s'est produite";
+
+			form.setError("root", { message });
 		}
+
+		const { data } = await authClient.getSession();
+		queryClient.setQueryData(
+			getLoggedInUserQueryOptions().queryKey,
+			data?.user,
+		);
+
+		navigate({ to: location.search.redirect ?? "/dashboard" });
 	};
 
 	return (
