@@ -2,7 +2,6 @@ import type {
 	SessionSport, 
 	CreateSessionData, 
 	UpdateSessionData, 
-	SessionFilters, 
 	SessionsPaginatedResponse,
 	SessionStats,
 	SessionConflict,
@@ -23,23 +22,10 @@ export class SessionsApiClient {
 	}
 
 	/**
-	 * Récupère toutes les sessions avec pagination et filtres
+	 * Récupère toutes les sessions
 	 */
-	async getSessions(
-		filters?: Partial<SessionFilters>,
-		options?: ApiOptions,
-	): Promise<SessionsPaginatedResponse> {
-		const url = new URL(`${this.baseUrl}/sessions`, window.location.origin);
-		
-		if (filters) {
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					url.searchParams.append(key, String(value));
-				}
-			}
-		}
-
-		const response = await fetch(url.toString(), {
+	async getSessions(options?: ApiOptions): Promise<SessionsPaginatedResponse> {
+		const response = await fetch(`${this.baseUrl}/sessionsSport`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -58,7 +44,7 @@ export class SessionsApiClient {
 	 * Récupère une session par son ID
 	 */
 	async getSessionById(id: string, options?: ApiOptions): Promise<SessionSport> {
-		const response = await fetch(`${this.baseUrl}/sessions/${id}`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${id}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -77,7 +63,7 @@ export class SessionsApiClient {
 	 * Récupère les sessions d'une catégorie
 	 */
 	async getSessionsByCategory(categoryId: string, options?: ApiOptions): Promise<SessionSport[]> {
-		const response = await fetch(`${this.baseUrl}/sessions/category/${categoryId}`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/category/${categoryId}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -96,7 +82,7 @@ export class SessionsApiClient {
 	 * Récupère les statistiques des sessions
 	 */
 	async getSessionStats(categoryId?: string, options?: ApiOptions): Promise<SessionStats> {
-		const url = new URL(`${this.baseUrl}/sessions/stats`, window.location.origin);
+		const url = new URL(`${this.baseUrl}/sessionsSport/stats`, window.location.origin);
 		if (categoryId) {
 			url.searchParams.append("categoryId", categoryId);
 		}
@@ -123,7 +109,7 @@ export class SessionsApiClient {
 		sessionData: CreateSessionData,
 		options?: ApiOptions,
 	): Promise<{ hasConflicts: boolean; conflicts: SessionConflict[] }> {
-		const response = await fetch(`${this.baseUrl}/sessions/check-conflicts`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/check-conflicts`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -143,7 +129,7 @@ export class SessionsApiClient {
 	 * Crée une nouvelle session
 	 */
 	async createSession(data: CreateSessionData, options?: ApiOptions): Promise<SessionSport> {
-		const response = await fetch(`${this.baseUrl}/sessions`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -167,7 +153,7 @@ export class SessionsApiClient {
 		data: UpdateSessionData,
 		options?: ApiOptions,
 	): Promise<SessionSport> {
-		const response = await fetch(`${this.baseUrl}/sessions/${id}`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${id}`, {
 			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",
@@ -187,7 +173,7 @@ export class SessionsApiClient {
 	 * Supprime une session
 	 */
 	async deleteSession(id: string, options?: ApiOptions): Promise<void> {
-		const response = await fetch(`${this.baseUrl}/sessions/${id}`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${id}`, {
 			method: "DELETE",
 			signal: options?.signal,
 		});
@@ -205,7 +191,7 @@ export class SessionsApiClient {
 		action: ParticipantAction,
 		options?: ApiOptions,
 	): Promise<void> {
-		const response = await fetch(`${this.baseUrl}/sessions/${sessionId}/participants`, {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${sessionId}/participants`, {
 			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json",

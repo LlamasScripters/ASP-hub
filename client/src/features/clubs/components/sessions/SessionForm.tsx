@@ -28,10 +28,12 @@ import {
 	MapPin,
 	Save,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import type { Category, SessionSport } from "../../types";
+import type { SessionSport } from "../../types";
+import { useSessions, useSession, useCreateSession, useUpdateSession } from "../../hooks/useSessions";
+import { useCategoriesBySection } from "../../hooks/useCategories";
+import { useSection } from "../../hooks/useSections";
 
 const sessionSchema = z
 	.object({
@@ -107,24 +109,71 @@ export function SessionForm({
 	sessionId?: string;
 }) {
 	const navigate = useNavigate();
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [existingSessions, setExistingSessions] = useState<SessionSport[]>([]);
-	const [isLoadingExistingSessions, setIsLoadingExistingSessions] =
-		useState(true);
+	
+	// Use hooks for data fetching and mutations
+	const { data: allSessions } = useSessions();
+	const { data: existingSession, isLoading: isLoadingSession } = useSession(sessionId || "");
+	const { data: categoriesData } = useCategoriesBySection(sectionId);
+	const { data: sectionData } = useSection(sectionId);
+	const createSessionMutation = useCreateSession();
+	const updateSessionMutation = useUpdateSession();
+	
 	const [errors, setErrors] = useState<Record<string, string>>({});
-	const [isLoading, setIsLoading] = useState(false);
-	const [sectionName, setSectionName] = useState("");
 	const [dateValidation, setDateValidation] = useState<{
 		isValid: boolean;
 		message: string;
 		type: "error" | "warning" | "info" | null;
 	}>({ isValid: true, message: "", type: null });
 
-	const [form, setForm] = useState<Partial<SessionSport>>({
+	const [form, setForm] = useState<{
+		categoryId: string;
+		title: string;
+		description?: string;
+		type: "entrainement" | "match" | "stage" | "competition" | "autre";
+		status: "planifie" | "en_cours" | "termine" | "annule";
+		startDate: string;
+		endDate: string;
+		location?: string;
+		maxParticipants?: number;
+		notes?: string;
+	}>({
+		categoryId: categoryId,
+		title: "",
+		description: "",
 		type: "entrainement",
 		status: "planifie",
-		categoryId: categoryId,
+		startDate: "",
+		endDate: "",
+		location: "",
+		maxParticipants: undefined,
+		notes: "",
 	});
+
+	// Get existing sessions for duplicate validation
+	const existingSessions = useMemo(() => {
+		if (!allSessions?.data) return [];
+		return allSessions.data.filter(session => 
+			session.category?.section?.club?.id === clubId
+		);
+	}, [allSessions, clubId]);
+
+	// Load existing session data for edit mode
+	useEffect(() => {
+		if (mode === "edit" && existingSession) {
+			setForm({
+				categoryId: existingSession.categoryId,
+				title: existingSession.title,
+				description: existingSession.description || "",
+				type: existingSession.type,
+				status: existingSession.status,
+				startDate: formatDateForInput(existingSession.startDate.toString()),
+				endDate: formatDateForInput(existingSession.endDate.toString()),
+				location: existingSession.location || "",
+				maxParticipants: existingSession.maxParticipants || undefined,
+				notes: existingSession.notes || "",
+			});
+		}
+	}, [mode, existingSession]);
 
 	const validateDates = useCallback((startDate: string, endDate: string) => {
 		if (!startDate && !endDate) {
@@ -196,103 +245,6 @@ export function SessionForm({
 		}
 	}, []);
 
-	// récupération des sessions existantes au chargement
-	useEffect(() => {
-		const fetchExistingSessions = async () => {
-			try {
-				setIsLoadingExistingSessions(true);
-				const categoriesRes = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-				);
-				const categoriesData: Category[] = await categoriesRes.json();
-
-				const allSessions: SessionSport[] = [];
-				for (const cat of categoriesData) {
-					try {
-						const sessionsRes = await fetch(
-							`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`,
-						);
-						if (sessionsRes.ok) {
-							const sessionsData: SessionSport[] = await sessionsRes.json();
-							console.log(
-								`Sessions from API for category ${cat.name}:`,
-								JSON.stringify(sessionsData, null, 2),
-							);
-							const sessionsWithCategoryId = sessionsData.map((session) => ({
-								...session,
-								categoryId: cat.id,
-							}));
-							allSessions.push(...sessionsWithCategoryId);
-						}
-					} catch (error) {
-						console.error(
-							`Erreur lors du chargement des sessions pour la catégorie ${cat.id}:`,
-							error,
-						);
-					}
-				}
-
-				setExistingSessions(allSessions);
-			} catch (error) {
-				console.error("Erreur lors du chargement des sessions:", error);
-				toast.error("Erreur lors du chargement des sessions existantes");
-			} finally {
-				setIsLoadingExistingSessions(false);
-			}
-		};
-
-		fetchExistingSessions();
-	}, [clubId, sectionId]);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			if (isLoadingExistingSessions) return;
-
-			setIsLoading(true);
-			try {
-				// Fetch categories
-				const categoriesRes = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-				);
-				const categoriesData = await categoriesRes.json();
-				setCategories(categoriesData);
-
-				// Fetch section name
-				const sectionRes = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}`,
-				);
-				const sectionData = await sectionRes.json();
-				setSectionName(sectionData.name);
-
-				// Fetch session data for edit mode
-				if (mode === "edit" && sessionId) {
-					const sessionRes = await fetch(`/api/clubs/sessions/${sessionId}`);
-					const sessionData = await sessionRes.json();
-
-					// Ensure proper date formatting for datetime-local inputs
-					const formattedSessionData = {
-						...sessionData,
-						startDate: sessionData.startDate
-							? formatDateForInput(sessionData.startDate)
-							: "",
-						endDate: sessionData.endDate
-							? formatDateForInput(sessionData.endDate)
-							: "",
-						notes: sessionData.notes || "",
-					};
-
-					setForm(formattedSessionData);
-				}
-			} catch (error) {
-				setErrors({ general: "Erreur lors du chargement des données" });
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [mode, sessionId, clubId, sectionId, isLoadingExistingSessions]);
-
 	// validation pour les titres dupliqués
 	const validateDuplicateTitle = (
 		title: string,
@@ -300,37 +252,13 @@ export function SessionForm({
 	) => {
 		if (!title.trim() || !selectedCategoryId) return null;
 
-		console.log(
-			"Validation - Title:",
-			title,
-			"CategoryId:",
-			selectedCategoryId,
-		);
-		console.log("Existing sessions:", existingSessions);
-
 		const normalizedTitle = title.trim().toLowerCase();
-		console.log("Normalized title:", normalizedTitle);
-
-		// Log each session for debugging
-		existingSessions.forEach((session, index) => {
-			console.log(`Session ${index}:`, {
-				title: session.title,
-				normalizedTitle: session.title.trim().toLowerCase(),
-				categoryId: session.categoryId,
-				id: session.id,
-				titleMatch: session.title.trim().toLowerCase() === normalizedTitle,
-				categoryMatch: session.categoryId === selectedCategoryId,
-			});
-		});
-
 		const duplicateSession = existingSessions.find(
 			(session) =>
 				session.title.trim().toLowerCase() === normalizedTitle &&
 				session.categoryId === selectedCategoryId &&
 				session.id !== sessionId, // exclusion la session actuelle en mode édition
 		);
-
-		console.log("Duplicate found:", duplicateSession);
 
 		return duplicateSession
 			? "Une session avec ce titre existe déjà pour cette catégorie"
@@ -366,9 +294,6 @@ export function SessionForm({
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setErrors({});
-		setIsLoading(true);
-
-		console.log("Form submission started:", { mode, form }); // Debug log
 
 		// validation des titres dupliqués
 		const titleError = validateDuplicateTitle(
@@ -377,7 +302,6 @@ export function SessionForm({
 		);
 		if (titleError) {
 			setErrors({ title: titleError });
-			setIsLoading(false);
 			return;
 		}
 
@@ -386,7 +310,6 @@ export function SessionForm({
 			setErrors({
 				general: "Veuillez corriger les erreurs de dates avant de continuer",
 			});
-			setIsLoading(false);
 			return;
 		}
 
@@ -408,58 +331,29 @@ export function SessionForm({
 				formattedErrors[field] = error.message;
 			}
 			setErrors(formattedErrors);
-			setIsLoading(false);
 			return;
 		}
 
 		try {
-			const url =
-				mode === "create"
-					? `/api/clubs/${clubId}/sections/${sectionId}/categories/${categoryId}/sessions`
-					: `/api/clubs/sessions/${sessionId}`;
-
-			const method = mode === "create" ? "POST" : "PUT";
-
-			const response = await fetch(url, {
-				method,
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(parsed.data),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				if (
-					response.status === 409 ||
-					errorData.message?.includes("existe déjà")
-				) {
-					setErrors({
-						title: "Une session avec ce titre existe déjà pour cette catégorie",
-					});
-					setIsLoading(false);
-					return;
-				}
-				throw new Error(`Erreur lors de la sauvegarde: ${response.status}`);
+			if (mode === "create") {
+				await createSessionMutation.mutateAsync(parsed.data);
+			} else if (sessionId) {
+				await updateSessionMutation.mutateAsync({
+					id: sessionId,
+					data: parsed.data,
+				});
 			}
-
-			toast.success(
-				mode === "create"
-					? "Session créée avec succès !"
-					: "Session modifiée avec succès !",
-			);
 
 			// délai pour s'assurer que le toast s'affiche avant la navigation
 			setTimeout(() => {
 				navigate({
-					to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/sessions",
-					params: { clubId, sectionId },
+					to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions",
+					params: { clubId, sectionId, categoryId },
 				});
 			}, 500);
 		} catch (error) {
 			console.error("Erreur complète:", error);
-			toast.error("Erreur lors de la sauvegarde de la session");
 			setErrors({ general: "Erreur lors de la sauvegarde de la session" });
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -470,7 +364,7 @@ export function SessionForm({
 		});
 	};
 
-	if (isLoadingExistingSessions) {
+	if (isLoadingSession && mode === "edit") {
 		return (
 			<div className="p-6 max-w-4xl mx-auto">
 				<Card>
@@ -514,7 +408,7 @@ export function SessionForm({
 								<p className="text-sm text-muted-foreground">
 									Remplissez les informations ci-dessous pour créer une nouvelle
 									session dans la catégorie{" "}
-									<span className="font-medium">{sectionName}</span>
+									<span className="font-medium">{sectionData?.name}</span>
 								</p>
 							)}
 						</CardDescription>
@@ -535,7 +429,7 @@ export function SessionForm({
 										<Label htmlFor="categoryId" className="text-sm font-medium">
 											Catégorie <span className="text-destructive">*</span>
 										</Label>
-										{categories.length > 0 ? (
+										{categoriesData?.data && categoriesData.data.length > 0 ? (
 											<Select
 												value={form.categoryId || ""}
 												onValueChange={(value) => {
@@ -550,7 +444,7 @@ export function SessionForm({
 													<SelectValue placeholder="Choisir une catégorie" />
 												</SelectTrigger>
 												<SelectContent>
-													{categories.map((cat) => (
+													{categoriesData.data.map((cat) => (
 														<SelectItem key={cat.id} value={cat.id}>
 															{cat.name}
 														</SelectItem>
@@ -842,13 +736,14 @@ export function SessionForm({
 								<Button
 									type="submit"
 									disabled={
-										isLoading ||
+										createSessionMutation.isPending ||
+										updateSessionMutation.isPending ||
 										!dateValidation.isValid ||
 										!!duplicateTitleError
 									}
 									className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
-									{isLoading ? (
+									{createSessionMutation.isPending || updateSessionMutation.isPending ? (
 										<>
 											<Loader2 className="h-4 w-4 animate-spin" />
 											{mode === "create" ? "Création..." : "Modification..."}
@@ -864,7 +759,7 @@ export function SessionForm({
 									type="button"
 									variant="outline"
 									onClick={handleBack}
-									disabled={isLoading}
+									disabled={createSessionMutation.isPending || updateSessionMutation.isPending}
 									className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
 									<ArrowLeft className="h-4 w-4" />

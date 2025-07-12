@@ -41,7 +41,7 @@ server.use("/api/minibuses", minibusesRouter);
 server.use("/api/minibusReservations", minibusReservationsRouter);
 server.use("/api/clubs", clubsRouter);
 server.use("/api/categories", categoriesRouter);
-server.use("/api/sessions", sessionsRouter);
+server.use("/api/sessionsSport", sessionsRouter);
 server.use("/api/responsibilities", responsibilitiesRouter);
 server.use("/api/sections", sectionsRouter);
 server.use("/api/articles", articlesRouter);

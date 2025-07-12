@@ -1,220 +1,250 @@
 import type { 
-	SessionFilters, 
-	SessionWithRelations, 
+	SessionResponse, 
 	CreateSessionData, 
 	UpdateSessionData,
 	SessionStats,
 	SessionConflict,
-	ParticipantAction 
+	ParticipantAction, 
+	SessionsPaginatedResponse
 } from "./sessions.types.js";
+import type { ParticipantActionData } from "./sessions.schema.js";
 import { db } from "@/db/index.js";
-import { sessionsSport, categories, sections, clubs, users } from "@/db/schema.js";
-import { eq, and, like, count, sql, or, between } from "drizzle-orm";
-import type { SQL } from "drizzle-orm";
+import { sessionsSport, categories, sections, clubs, users, sectionResponsibilities, sessionParticipants } from "@/db/schema.js";
+import { eq, and, like, count, sql, or, between, gte, lte, desc } from "drizzle-orm";
 
 export class SessionsService {
 	/**
 	 * Récupère une session par son ID avec ses relations
 	 */
-	async getSessionById(sessionId: string): Promise<SessionWithRelations | null> {
-		const result = await db
-			.select()
+	async getSessionById(sessionId: string): Promise<SessionResponse | null> {
+		const [result] = await db
+			.select({
+				id: sessionsSport.id,
+				categoryId: sessionsSport.categoryId,
+				title: sessionsSport.title,
+				description: sessionsSport.description,
+				type: sessionsSport.type,
+				status: sessionsSport.status,
+				startDate: sessionsSport.startDate,
+				endDate: sessionsSport.endDate,
+				location: sessionsSport.location,
+				maxParticipants: sessionsSport.maxParticipants,
+				currentParticipants: sessionsSport.currentParticipants,
+				notes: sessionsSport.notes,
+				coachId: sessionsSport.coachId,
+				responsibleId: sessionsSport.responsibleId,
+				createdAt: sessionsSport.createdAt,
+				updatedAt: sessionsSport.updatedAt,
+				// Category relation
+				categoryName: categories.name,
+				categoryAgeMin: categories.ageMin,
+				categoryAgeMax: categories.ageMax,
+				// Section relation
+				sectionId: sections.id,
+				sectionName: sections.name,
+				sectionColor: sections.color,
+				// Club relation
+				clubId: clubs.id,
+				clubName: clubs.name,
+				// Coach relation
+				coachFirstName: users.firstName,
+				coachLastName: users.lastName,
+				coachEmail: users.email,
+			})
 			.from(sessionsSport)
 			.leftJoin(categories, eq(sessionsSport.categoryId, categories.id))
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(users, eq(sessionsSport.coachId, users.id))
-			.where(eq(sessionsSport.id, sessionId))
-			.limit(1);
+			.where(eq(sessionsSport.id, sessionId));
 
-		if (!result.length) return null;
+		if (!result) return null;
 
-		const row = result[0];
-		
-		// Compter les participants
-		const participantsCount = await db
+		// Count participants
+		const [participantsCount] = await db
 			.select({ count: count() })
-			.from(sql`session_members`)
-			.where(sql`session_id = ${sessionId}`);
+			.from(sessionParticipants)
+			.where(eq(sessionParticipants.sessionId, sessionId));
 
 		return {
-			...row.sessions_sport,
-			category: row.categories ? {
-				...row.categories,
-				section: row.sections ? {
-					...row.sections,
-					club: row.clubs ? row.clubs : undefined,
+			id: result.id,
+			categoryId: result.categoryId,
+			title: result.title,
+			description: result.description,
+			type: result.type,
+			status: result.status,
+			startDate: result.startDate,
+			endDate: result.endDate,
+			location: result.location,
+			maxParticipants: result.maxParticipants,
+			currentParticipants: result.currentParticipants || 0,
+			notes: result.notes,
+			coachId: result.coachId,
+			responsibleId: result.responsibleId,
+			createdAt: result.createdAt,
+			updatedAt: result.updatedAt,
+			category: {
+				id: result.categoryId,
+				name: result.categoryName || '',
+				ageMin: result.categoryAgeMin,
+				ageMax: result.categoryAgeMax,
+				section: result.sectionId ? {
+					id: result.sectionId,
+					name: result.sectionName || '',
+					color: result.sectionColor,
+					club: result.clubId ? {
+						id: result.clubId,
+						name: result.clubName || '',
+					} : undefined,
 				} : undefined,
+			},
+			coach: result.coachId ? {
+				id: result.coachId,
+				firstName: result.coachFirstName || '',
+				lastName: result.coachLastName || '',
+				email: result.coachEmail || '',
 			} : undefined,
-			coach: row.users ? {
-				id: row.users.id,
-				firstName: row.users.firstName,
-				lastName: row.users.lastName,
-				email: row.users.email,
-			} : undefined,
-			participantsCount: participantsCount[0]?.count || 0,
+			participantsCount: participantsCount?.count || 0,
 		};
 	}
 
 	/**
-	 * Récupère toutes les sessions avec pagination et filtres
+	 * Récupère toutes les sessions
 	 */
-	async getSessions(filters: SessionFilters = {}): Promise<{
-		data: SessionWithRelations[];
-		total: number;
-		page: number;
-		limit: number;
-	}> {
-		const { 
-			page = 1, 
-			limit = 10, 
-			categoryId, 
-			clubId, 
-			sectionId, 
-			type, 
-			status, 
-			coachId,
-			responsibleId,
-			startDate,
-			endDate,
-			search 
-		} = filters;
-		const offset = (page - 1) * limit;
-
-		// Construction des conditions WHERE
-		const whereConditions: SQL[] = [];
-
-		if (categoryId) {
-			whereConditions.push(eq(sessionsSport.categoryId, categoryId));
-		}
-
-		if (clubId) {
-			whereConditions.push(eq(clubs.id, clubId));
-		}
-
-		if (sectionId) {
-			whereConditions.push(eq(sections.id, sectionId));
-		}
-
-		if (type) {
-			whereConditions.push(eq(sessionsSport.type, type));
-		}
-
-		if (status) {
-			whereConditions.push(eq(sessionsSport.status, status));
-		}
-
-		if (coachId) {
-			whereConditions.push(eq(sessionsSport.coachId, coachId));
-		}
-
-		if (responsibleId) {
-			whereConditions.push(eq(sessionsSport.responsibleId, responsibleId));
-		}
-
-		if (startDate && endDate) {
-			whereConditions.push(
-				between(sessionsSport.startDate, startDate, endDate)
-			);
-		} else if (startDate) {
-			whereConditions.push(sql`${sessionsSport.startDate} >= ${startDate}`);
-		} else if (endDate) {
-			whereConditions.push(sql`${sessionsSport.startDate} <= ${endDate}`);
-		}
-
-		if (search) {
-			whereConditions.push(
-				like(sessionsSport.title, `%${search}%`)
-			);
-		}
-
+	async getSessions(): Promise<SessionsPaginatedResponse> {
 		// Requête pour les données
 		const data = await db
-			.select()
+			.select({
+				id: sessionsSport.id,
+				categoryId: sessionsSport.categoryId,
+				title: sessionsSport.title,
+				description: sessionsSport.description,
+				type: sessionsSport.type,
+				status: sessionsSport.status,
+				startDate: sessionsSport.startDate,
+				endDate: sessionsSport.endDate,
+				location: sessionsSport.location,
+				maxParticipants: sessionsSport.maxParticipants,
+				currentParticipants: sessionsSport.currentParticipants,
+				notes: sessionsSport.notes,
+				coachId: sessionsSport.coachId,
+				responsibleId: sessionsSport.responsibleId,
+				createdAt: sessionsSport.createdAt,
+				updatedAt: sessionsSport.updatedAt,
+				// Category relation
+				categoryName: categories.name,
+				categoryAgeMin: categories.ageMin,
+				categoryAgeMax: categories.ageMax,
+				// Section relation
+				sectionId: sections.id,
+				sectionName: sections.name,
+				sectionColor: sections.color,
+				// Club relation
+				clubId: clubs.id,
+				clubName: clubs.name,
+				// Coach relation
+				coachFirstName: users.firstName,
+				coachLastName: users.lastName,
+				coachEmail: users.email,
+			})
 			.from(sessionsSport)
 			.leftJoin(categories, eq(sessionsSport.categoryId, categories.id))
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(users, eq(sessionsSport.coachId, users.id))
-			.where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-			.orderBy(sessionsSport.startDate)
-			.offset(offset)
-			.limit(limit);
-
-		// Requête pour le total
-		const totalResult = await db
-			.select({ count: count() })
-			.from(sessionsSport)
-			.leftJoin(categories, eq(sessionsSport.categoryId, categories.id))
-			.leftJoin(sections, eq(categories.sectionId, sections.id))
-			.leftJoin(clubs, eq(sections.clubId, clubs.id))
-			.where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+			.orderBy(desc(sessionsSport.startDate));
 
 		// Transformation des données
-		const transformedData: SessionWithRelations[] = [];
+		const transformedData: SessionResponse[] = [];
 		for (const row of data) {
-			const participantsCount = await db
+			// Count participants for each session
+			const [participantsCount] = await db
 				.select({ count: count() })
-				.from(sql`session_members`)
-				.where(sql`session_id = ${row.sessions_sport.id}`);
+				.from(sessionParticipants)
+				.where(eq(sessionParticipants.sessionId, row.id));
 
 			transformedData.push({
-				...row.sessions_sport,
-				category: row.categories ? {
-					...row.categories,
-					section: row.sections ? {
-						...row.sections,
-						club: row.clubs ? row.clubs : undefined,
+				id: row.id,
+				categoryId: row.categoryId,
+				title: row.title,
+				description: row.description,
+				type: row.type,
+				status: row.status,
+				startDate: row.startDate,
+				endDate: row.endDate,
+				location: row.location,
+				maxParticipants: row.maxParticipants,
+				currentParticipants: row.currentParticipants || 0,
+				notes: row.notes,
+				coachId: row.coachId,
+				responsibleId: row.responsibleId,
+				createdAt: row.createdAt,
+				updatedAt: row.updatedAt,
+				category: {
+					id: row.categoryId,
+					name: row.categoryName || '',
+					ageMin: row.categoryAgeMin,
+					ageMax: row.categoryAgeMax,
+					section: row.sectionId ? {
+						id: row.sectionId,
+						name: row.sectionName || '',
+						color: row.sectionColor,
+						club: row.clubId ? {
+							id: row.clubId,
+							name: row.clubName || '',
+						} : undefined,
 					} : undefined,
+				},
+				coach: row.coachId ? {
+					id: row.coachId,
+					firstName: row.coachFirstName || '',
+					lastName: row.coachLastName || '',
+					email: row.coachEmail || '',
 				} : undefined,
-				coach: row.users ? {
-					id: row.users.id,
-					firstName: row.users.firstName,
-					lastName: row.users.lastName,
-					email: row.users.email,
-				} : undefined,
-				participantsCount: participantsCount[0]?.count || 0,
+				participantsCount: participantsCount?.count || 0,
 			});
 		}
 
 		return {
 			data: transformedData,
-			total: totalResult[0]?.count || 0,
-			page,
-			limit,
+			total: transformedData.length,
 		};
 	}
 
 	/**
 	 * Récupère les sessions d'une catégorie
 	 */
-	async getSessionsByCategory(categoryId: string): Promise<SessionWithRelations[]> {
-		return (await this.getSessions({ categoryId })).data;
+	async getSessionsByCategory(categoryId: string): Promise<SessionResponse[]> {
+		const result = await this.getSessions();
+		return result.data.filter(session => session.categoryId === categoryId);
 	}
 
 	/**
 	 * Récupère les sessions d'un coach
 	 */
-	async getSessionsByCoach(coachId: string): Promise<SessionWithRelations[]> {
-		return (await this.getSessions({ coachId })).data;
+	async getSessionsByCoach(coachId: string): Promise<SessionResponse[]> {
+		const result = await this.getSessions();
+		return result.data.filter(session => session.coachId === coachId);
 	}
 
 	/**
 	 * Récupère les sessions à venir
 	 */
-	async getUpcomingSessions(limit = 10): Promise<SessionWithRelations[]> {
+	async getUpcomingSessions(limit = 10): Promise<SessionResponse[]> {
 		const now = new Date();
-		return (await this.getSessions({ 
-			startDate: now,
-			status: "planifie",
-			limit 
-		})).data;
+		const result = await this.getSessions();
+		return result.data
+			.filter(session => 
+				new Date(session.startDate) > now && 
+				session.status === "planifie"
+			)
+			.slice(0, limit);
 	}
 
 	/**
 	 * Créer une nouvelle session
 	 */
-	async createSession(data: CreateSessionData): Promise<SessionWithRelations> {
+	async createSession(data: CreateSessionData): Promise<SessionResponse> {
 		// Vérifier les conflits potentiels
 		const conflicts = await this.checkSessionConflicts(data);
 		if (conflicts.length > 0) {
@@ -244,7 +274,25 @@ export class SessionsService {
 	/**
 	 * Mettre à jour une session
 	 */
-	async updateSession(id: string, data: UpdateSessionData): Promise<SessionWithRelations> {
+	async updateSession(id: string, data: UpdateSessionData): Promise<SessionResponse> {
+		// Vérifier que la session existe
+		const existingSession = await this.getSessionById(id);
+		if (!existingSession) {
+			throw new Error("Session non trouvée");
+		}
+
+		// Vérifier les conflits potentiels si les dates changent
+		if (data.startDate || data.endDate) {
+			const conflictData = {
+				...existingSession,
+				...data,
+			};
+			const conflicts = await this.checkSessionConflicts(conflictData, id);
+			if (conflicts.length > 0) {
+				throw new Error(`Conflits détectés: ${conflicts.map(c => c.conflictType).join(", ")}`);
+			}
+		}
+
 		const [updatedSession] = await db
 			.update(sessionsSport)
 			.set({
@@ -255,7 +303,7 @@ export class SessionsService {
 			.returning();
 
 		if (!updatedSession) {
-			throw new Error("Session non trouvée");
+			throw new Error("Erreur lors de la mise à jour");
 		}
 
 		// Récupérer la session mise à jour avec ses relations
@@ -281,6 +329,10 @@ export class SessionsService {
 			throw new Error("Impossible de supprimer une session en cours ou terminée");
 		}
 
+		// Supprimer d'abord les participants
+		await db.delete(sessionParticipants).where(eq(sessionParticipants.sessionId, id));
+		
+		// Puis supprimer la session
 		await db.delete(sessionsSport).where(eq(sessionsSport.id, id));
 	}
 
@@ -291,7 +343,7 @@ export class SessionsService {
 		id: string, 
 		status: "planifie" | "en_cours" | "termine" | "annule", 
 		notes?: string
-	): Promise<SessionWithRelations> {
+	): Promise<SessionResponse> {
 		const updateData: UpdateSessionData = { status };
 		if (notes) {
 			updateData.notes = notes;
@@ -303,21 +355,33 @@ export class SessionsService {
 	/**
 	 * Vérifier les conflits d'une session
 	 */
-	async checkSessionConflicts(sessionData: CreateSessionData | UpdateSessionData): Promise<SessionConflict[]> {
+	async checkSessionConflicts(sessionData: CreateSessionData | UpdateSessionData, excludeSessionId?: string): Promise<SessionConflict[]> {
 		const conflicts: SessionConflict[] = [];
 
 		// Vérifier les conflits temporels et de lieu
 		if (sessionData.startDate && sessionData.endDate) {
+			const whereConditions = [
+				sql`${sessionsSport.startDate} < ${sessionData.endDate}`,
+				sql`${sessionsSport.endDate} > ${sessionData.startDate}`,
+				sql`${sessionsSport.status} != 'annule'`
+			];
+
+			// Exclure la session en cours de modification
+			if (excludeSessionId) {
+				whereConditions.push(sql`${sessionsSport.id} != ${excludeSessionId}`);
+			}
+
 			const overlappingSessions = await db
-				.select()
+				.select({
+					id: sessionsSport.id,
+					title: sessionsSport.title,
+					startDate: sessionsSport.startDate,
+					endDate: sessionsSport.endDate,
+					location: sessionsSport.location,
+					coachId: sessionsSport.coachId,
+				})
 				.from(sessionsSport)
-				.where(
-					and(
-						sql`${sessionsSport.startDate} < ${sessionData.endDate}`,
-						sql`${sessionsSport.endDate} > ${sessionData.startDate}`,
-						sql`${sessionsSport.status} != 'annule'`
-					)
-				);
+				.where(and(...whereConditions));
 
 			for (const session of overlappingSessions) {
 				// Conflit de lieu
@@ -395,9 +459,9 @@ export class SessionsService {
 			.from(sessionsSport)
 			.where(
 				and(
-					whereCondition,
-					sql`${sessionsSport.startDate} > ${now}`,
-					sql`${sessionsSport.status} = 'planifie'`
+					whereCondition || sql`1=1`,
+					gte(sessionsSport.startDate, now),
+					eq(sessionsSport.status, "planifie")
 				)
 			);
 
@@ -406,8 +470,8 @@ export class SessionsService {
 			.from(sessionsSport)
 			.where(
 				and(
-					whereCondition,
-					sql`${sessionsSport.status} = 'termine'`
+					whereCondition || sql`1=1`,
+					eq(sessionsSport.status, "termine")
 				)
 			);
 
@@ -421,7 +485,7 @@ export class SessionsService {
 				acc[curr.status] = curr.count;
 				return acc;
 			}, {} as Record<string, number>),
-			averageParticipants: averageParticipants[0]?.avg || 0,
+			averageParticipants: Number(averageParticipants[0]?.avg) || 0,
 			upcomingSessions: upcomingSessions[0]?.count || 0,
 			completedSessions: completedSessions[0]?.count || 0,
 		};
@@ -436,32 +500,63 @@ export class SessionsService {
 			throw new Error("Session non trouvée");
 		}
 
-		// Vérifier la capacité maximale pour les ajouts
-		if (action.action === "add" && session.maxParticipants) {
-			const currentCount = session.participantsCount || 0;
-			if (currentCount + action.memberIds.length > session.maxParticipants) {
-				throw new Error("Capacité maximale atteinte");
+		if (action.action === "add") {
+			// Vérifier la capacité maximale pour les ajouts
+			if (session.maxParticipants) {
+				const currentCount = session.participantsCount || 0;
+				if (currentCount + action.memberIds.length > session.maxParticipants) {
+					throw new Error("Capacité maximale atteinte");
+				}
+			}
+
+			// Ajouter les participants
+			for (const memberId of action.memberIds) {
+				// Vérifier si déjà inscrit
+				const [existing] = await db
+					.select()
+					.from(sessionParticipants)
+					.where(
+						and(
+							eq(sessionParticipants.sessionId, sessionId),
+							eq(sessionParticipants.userId, memberId)
+						)
+					);
+
+				if (!existing) {
+					await db.insert(sessionParticipants).values({
+						id: crypto.randomUUID(),
+						sessionId,
+						userId: memberId,
+						registeredAt: new Date(),
+					});
+				}
+			}
+		} else if (action.action === "remove") {
+			// Retirer les participants
+			for (const memberId of action.memberIds) {
+				await db
+					.delete(sessionParticipants)
+					.where(
+						and(
+							eq(sessionParticipants.sessionId, sessionId),
+							eq(sessionParticipants.userId, memberId)
+						)
+					);
 			}
 		}
 
-		// Ici on devrait gérer la table session_members
-		// Pour l'instant, on met juste à jour le compteur
-		if (action.action === "add") {
-			await db
-				.update(sessionsSport)
-				.set({
-					currentParticipants: (session.currentParticipants || 0) + action.memberIds.length,
-					updatedAt: new Date(),
-				})
-				.where(eq(sessionsSport.id, sessionId));
-		} else {
-			await db
-				.update(sessionsSport)
-				.set({
-					currentParticipants: Math.max(0, (session.currentParticipants || 0) - action.memberIds.length),
-					updatedAt: new Date(),
-				})
-				.where(eq(sessionsSport.id, sessionId));
-		}
+		// Mettre à jour le compteur
+		const [newCount] = await db
+			.select({ count: count() })
+			.from(sessionParticipants)
+			.where(eq(sessionParticipants.sessionId, sessionId));
+
+		await db
+			.update(sessionsSport)
+			.set({
+				currentParticipants: newCount?.count || 0,
+				updatedAt: new Date(),
+			})
+			.where(eq(sessionsSport.id, sessionId));
 	}
 }
