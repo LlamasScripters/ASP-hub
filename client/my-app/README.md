@@ -1,12 +1,47 @@
-## Created with Capacitor Create App
+## Capacitor Mobile App
 
-This app was created using [`@capacitor/create-app`](https://github.com/ionic-team/create-capacitor-app),
-and comes with a very minimal shell for building an app.
+Cette application mobile utilise Capacitor et Vite.
 
-### Running this example
+### Prérequis
+- Node.js (>=16) et npm  
+- Android Studio (pour la plateforme Android)  
+- macOS & Xcode (pour la plateforme iOS)  
+- Capacitor CLI (global) : `npm install -g @capacitor/cli`
 
-To run the provided example, you can use `npm start` command.
-
+### Installation
 ```bash
-npm start
+cd client/my-app
+npm install
+npx cap sync
+```
+
+### Lancement
+
+- **Web (développement avec Vite)**  
+  ```bash
+  npm start
+  ```
+
+#### Android
+```bash
+npx cap open android
+# Ouvre Android Studio : build et run depuis l'IDE
+```
+
+ou directement en ligne de commande :
+```bash
+npx cap run android -l --external
+```
+
+> Le fichier `android/local.properties` (chemin SDK) n'est pas versionné ; Android Studio le crée automatiquement.
+
+#### iOS
+```bash
+npx cap open ios
+# Ouvre Xcode : build et run depuis l'IDE
+```
+
+ou directement :
+```bash
+npx cap run ios -l --external
 ```
