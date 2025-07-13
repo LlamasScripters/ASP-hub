@@ -3,8 +3,11 @@ import { fromNodeHeaders } from "better-auth/node";
 import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { reactionsService } from "./reactions.service.js";
+import { requireAuth } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 
 const reactionsRouter = Router();
+reactionsRouter.use(requireAuth);
 
 const articleReactionSchema = z.object({
 	articleId: z.string().uuid(),
@@ -19,6 +22,7 @@ const commentReactionSchema = z.object({
 // GET all reaction types
 reactionsRouter.get(
 	"/types",
+	requireMemberAccess(),
 	async (_req: Request, res: Response): Promise<void> => {
 		try {
 			const reactionTypes = await reactionsService.getAllReactionTypes();
@@ -36,6 +40,7 @@ reactionsRouter.get(
 // GET article reactions
 reactionsRouter.get(
 	"/articles/:articleId",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { articleId } = req.params;
@@ -63,6 +68,7 @@ reactionsRouter.get(
 // GET comment reactions
 reactionsRouter.get(
 	"/comments/:commentId",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { commentId } = req.params;
@@ -90,6 +96,7 @@ reactionsRouter.get(
 // GET user article reaction
 reactionsRouter.get(
 	"/articles/:articleId/user",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { articleId } = req.params;
@@ -132,6 +139,7 @@ reactionsRouter.get(
 // GET user comment reaction
 reactionsRouter.get(
 	"/comments/:commentId/user",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { commentId } = req.params;
@@ -174,6 +182,7 @@ reactionsRouter.get(
 // POST/Toggle article reaction
 reactionsRouter.post(
 	"/articles",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const session = await auth.api.getSession({
@@ -221,6 +230,7 @@ reactionsRouter.post(
 // POST/Toggle comment reaction
 reactionsRouter.post(
 	"/comments",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const session = await auth.api.getSession({

@@ -1,10 +1,14 @@
 import { type Request, type Response, Router } from "express";
 import { tagsService } from "./tags.service.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
+import { UserRole } from "@/lib/roles.js";
 
 const tagsRouter = Router();
+tagsRouter.use(requireAuth);
 
 // GET /api/tags - Get all tags
-tagsRouter.get("/", async (req: Request, res: Response): Promise<void> => {
+tagsRouter.get("/", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
 	try {
 		const tags = await tagsService.getAllTags();
 		res.json(tags);
@@ -17,6 +21,7 @@ tagsRouter.get("/", async (req: Request, res: Response): Promise<void> => {
 // GET /api/tags/search - Search tags
 tagsRouter.get(
 	"/search",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { q } = req.query;
@@ -35,7 +40,7 @@ tagsRouter.get(
 );
 
 // GET /api/tags/:id - Get tag by ID
-tagsRouter.get("/:id", async (req: Request, res: Response): Promise<void> => {
+tagsRouter.get("/:id", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
 	try {
 		const id = Number.parseInt(req.params.id);
 		if (Number.isNaN(id)) {
@@ -57,7 +62,7 @@ tagsRouter.get("/:id", async (req: Request, res: Response): Promise<void> => {
 });
 
 // POST /api/tags - Create new tag (admin only)
-tagsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
+tagsRouter.post("/", requireRole(UserRole.ADMIN), async (req: Request, res: Response): Promise<void> => {
 	try {
 		const { name } = req.body;
 		if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -90,7 +95,7 @@ tagsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
 });
 
 // PUT /api/tags/:id - Update tag (admin only)
-tagsRouter.put("/:id", async (req: Request, res: Response): Promise<void> => {
+tagsRouter.put("/:id", requireRole(UserRole.ADMIN), async (req: Request, res: Response): Promise<void> => {
 	try {
 		const id = Number.parseInt(req.params.id);
 		if (Number.isNaN(id)) {
@@ -136,6 +141,7 @@ tagsRouter.put("/:id", async (req: Request, res: Response): Promise<void> => {
 // DELETE /api/tags/:id - Delete tag (admin only)
 tagsRouter.delete(
 	"/:id",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const id = Number.parseInt(req.params.id);
