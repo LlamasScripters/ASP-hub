@@ -26,6 +26,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { API_CONFIG } from "@/lib/config";
 
 export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/dashboard/clubs/$clubId/",
@@ -39,7 +40,7 @@ function ClubOverviewPage() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		fetch(`/api/clubs/${clubId}`)
+		fetch(`${API_CONFIG.FULL_URL}/clubs/${clubId}`)
 			.then((res) => res.json())
 			.then((data) => {
 				setClub(data);
