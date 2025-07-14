@@ -196,6 +196,49 @@ export function useCreateSessionWithRoomReservation() {
 	});
 }
 
+export function useCreateSessionWithRoomReservation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (data: CreateSessionWithRoomData) => sessionsApi.createSessionWithRoomReservation(data),
+		onSuccess: (newSession) => {
+			// Invalidate all sessions lists
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
+			
+			// Invalidate sessions by category
+			if (newSession.categoryId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...sessionsQueryKeys.all, 'category', newSession.categoryId] 
+				});
+			}
+			
+			// Invalidate stats
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
+			
+			// Invalidate categories (for session count)
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			
+			// Invalidate room reservations
+			queryClient.invalidateQueries({ queryKey: ['roomReservations'] });
+			
+			// Optimistically update the cache
+			queryClient.setQueryData(
+				sessionsQueryKeys.detail(newSession.id),
+				newSession
+			);
+			
+			toast.success("Session créée avec réservation de salle avec succès");
+		},
+		onError: (error) => {
+			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création";
+			toast.error(errorMessage);
+		},
+	});
+}
+
 export function useUpdateSession() {
 	const queryClient = useQueryClient();
 
@@ -344,6 +387,44 @@ export function useUnlinkSessionFromRoomReservation() {
 			queryClient.invalidateQueries({ queryKey: ['roomReservations'] });
 			
 			toast.success("Session supprimée avec succès");
+		},
+		onError: (error) => {
+			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la liaison";
+			toast.error(errorMessage);
+		},
+	});
+}
+
+export function useUnlinkSessionFromRoomReservation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (sessionId: string) =>
+			sessionsApi.unlinkSessionFromRoomReservation(sessionId),
+		onSuccess: (updatedSession, sessionId) => {
+			// Update the specific session in the cache
+			queryClient.setQueryData(
+				sessionsQueryKeys.detail(sessionId),
+				updatedSession
+			);
+			
+			// Invalidate all sessions lists
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
+			
+			// Invalidate all sessions queries
+			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
+			
+			// Invalidate sessions by category
+			if (updatedSession.categoryId) {
+				queryClient.invalidateQueries({ 
+					queryKey: [...sessionsQueryKeys.all, 'category', updatedSession.categoryId] 
+				});
+			}
+			
+			// Invalidate room reservations
+			queryClient.invalidateQueries({ queryKey: ['roomReservations'] });
+			
+			toast.success("Session déliée de la réservation de salle avec succès");
 		},
 		onError: (error) => {
 			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la déliason";
