@@ -295,6 +295,75 @@ export class SessionsApiClient {
 
 		return response.json();
 	}
+
+	/**
+	 * Crée une session avec réservation de salle automatique
+	 */
+	async createSessionWithRoomReservation(
+		data: CreateSessionWithRoomData,
+		options?: ApiOptions,
+	): Promise<SessionSport> {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/with-room-reservation`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Lie une session existante à une réservation de salle
+	 */
+	async linkSessionToRoomReservation(
+		sessionId: string,
+		roomReservationId: string,
+		options?: ApiOptions,
+	): Promise<SessionSport> {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${sessionId}/link-room-reservation`, {
+			method: "PATCH",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ roomReservationId }),
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Délie une session d'une réservation de salle
+	 */
+	async unlinkSessionFromRoomReservation(
+		sessionId: string,
+		options?: ApiOptions,
+	): Promise<SessionSport> {
+		const response = await fetch(`${this.baseUrl}/sessionsSport/${sessionId}/unlink-room-reservation`, {
+			method: "PATCH",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			signal: options?.signal,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
 }
 
 // Instance partagée

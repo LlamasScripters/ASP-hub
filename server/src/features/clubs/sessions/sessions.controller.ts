@@ -276,6 +276,73 @@ sessionsRouter.post("/with-room-reservation", requireSessionManagement(), async 
 });
 
 /**
+ * @route POST /api/sessions/with-room-reservation
+ * @description Créer une session avec réservation de salle automatique
+ */
+sessionsRouter.post("/with-room-reservation", requireSessionManagement(), async (req: Request, res: Response) => {
+	try {
+		const sessionValidation = createSessionSchema.safeParse(req.body);
+		
+		if (!sessionValidation.success) {
+			res.status(400).json({ 
+				error: "Données de session invalides", 
+				details: sessionValidation.error.issues 
+			});
+			return;
+		}
+
+		const { roomId, bookerId } = req.body;
+		
+		if (!roomId || !bookerId) {
+			res.status(400).json({ 
+				error: "roomId et bookerId sont requis pour créer une réservation de salle" 
+			});
+			return;
+		}
+
+		// Validation des UUIDs
+		const roomIdSchema = z.string().uuid();
+		const bookerIdSchema = z.string().uuid();
+		
+		const roomIdResult = roomIdSchema.safeParse(roomId);
+		const bookerIdResult = bookerIdSchema.safeParse(bookerId);
+		
+		if (!roomIdResult.success || !bookerIdResult.success) {
+			res.status(400).json({ 
+				error: "Format d'ID invalide pour roomId ou bookerId" 
+			});
+			return;
+		}
+
+		const sessionData = sessionValidation.data;
+		const newSession = await sessionsService.createSessionWithRoomReservation(
+			sessionData,
+			roomIdResult.data,
+			bookerIdResult.data
+		);
+		
+		res.status(201).json(newSession);
+	} catch (error) {
+		console.error("Erreur lors de la création de la session avec réservation:", error);
+		
+		if (error instanceof Error) {
+			if (error.message.includes("Conflits détectés")) {
+				res.status(409).json({ error: error.message });
+				return;
+			}
+			
+			if (error.message.includes("Salle non trouvée") || 
+				error.message.includes("Utilisateur non trouvé")) {
+				res.status(404).json({ error: error.message });
+				return;
+			}
+		}
+		
+		res.status(500).json({ error: "Erreur serveur" });
+	}
+});
+
+/**
  * @route PUT /api/sessions/:id
  * @description Mettre à jour une session
  */
@@ -314,6 +381,81 @@ sessionsRouter.put(
 		}
 	},
 );
+
+/**
+ * @route PATCH /api/sessions/:id/link-room-reservation
+ * @description Lier une session existante à une réservation de salle
+ */
+sessionsRouter.patch("/:id/link-room-reservation", requireSessionManagement(), async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const { roomReservationId } = req.body;
+		
+		if (!roomReservationId) {
+			res.status(400).json({ 
+				error: "roomReservationId est requis" 
+			});
+			return;
+		}
+
+		const roomReservationIdSchema = z.string().uuid();
+		const roomReservationIdResult = roomReservationIdSchema.safeParse(roomReservationId);
+		
+		if (!roomReservationIdResult.success) {
+			res.status(400).json({ 
+				error: "Format d'ID invalide pour roomReservationId" 
+			});
+			return;
+		}
+
+		const updatedSession = await sessionsService.linkSessionToRoomReservation(
+			id,
+			roomReservationIdResult.data
+		);
+		
+		res.json(updatedSession);
+	} catch (error) {
+		console.error("Erreur lors de la liaison session-réservation:", error);
+		
+		if (error instanceof Error) {
+			if (error.message === "Session non trouvée" || 
+				error.message === "Réservation de salle non trouvée") {
+				res.status(404).json({ error: error.message });
+				return;
+			}
+			
+			if (error.message.includes("Les horaires")) {
+				res.status(400).json({ error: error.message });
+				return;
+			}
+		}
+		
+		res.status(500).json({ error: "Erreur serveur" });
+	}
+});
+
+/**
+ * @route PATCH /api/sessions/:id/unlink-room-reservation
+ * @description Délier une session d'une réservation de salle
+ */
+sessionsRouter.patch("/:id/unlink-room-reservation", requireSessionManagement(), async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		
+		const updatedSession = await sessionsService.unlinkSessionFromRoomReservation(id);
+		
+		res.json(updatedSession);
+	} catch (error) {
+		console.error("Erreur lors de la déliason session-réservation:", error);
+		
+		if (error instanceof Error && error.message === "Session non trouvée") {
+			res.status(404).json({ error: error.message });
+			return;
+		}
+		
+		res.status(500).json({ error: "Erreur serveur" });
+	}
+});
 
 /**
  * @route PATCH /api/sessions/:id/link-room-reservation
