@@ -27,88 +27,37 @@ import {
 	FolderOpen,
 	Plus,
 	Trash2,
+	User,
 	Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section } from "../../types";
-
-interface EnrichedSection extends Section {
-	categoriesCount?: number;
-}
+import { useState } from "react";
+import { useSectionsByClub, useDeleteSection } from "../../hooks/useSections";
+import type { Section } from "../../types";
 
 export function SectionsListPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/",
 	});
 	const navigate = useNavigate();
-	const [sections, setSections] = useState<EnrichedSection[]>([]);
-	const [allCategories, setAllCategories] = useState<Category[]>([]);
-	const [categoriesCountBySection, setCategoriesCountBySection] = useState<
-		Record<string, number>
-	>({});
-	const [isLoading, setIsLoading] = useState(true);
-	const [deleteSection, setDeleteSection] = useState<EnrichedSection | null>(
-		null,
-	);
+	
+	const { data, isLoading } = useSectionsByClub(clubId);
+	const sections = data?.data || [];
+
+	const totalActiveSections = sections.reduce((total, section) => {
+		return total + (section.isActive ? 1 : 0);
+	}, 0);
+
+	const totalCategories = sections.reduce((total, section) => {
+		return total + (Number(section.categoriesCount) || 0);
+	}, 0);
+
+	const deleteSectionMutation = useDeleteSection();
+	
+	const [deleteSection, setDeleteSection] = useState<Section | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleGoBack = () => {
 		navigate({ to: ".." });
-	};
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const sectionsRes = await fetch(`/api/clubs/${clubId}/sections`);
-				if (!sectionsRes.ok)
-					throw new Error("Erreur lors du chargement des sections");
-				const sectionsData = await sectionsRes.json();
-				setSections(sectionsData);
-
-				const allCategoriesData: Category[] = [];
-				const countBySection: Record<string, number> = {};
-
-				for (const section of sectionsData) {
-					try {
-						const cats = await fetch(
-							`/api/clubs/${clubId}/sections/${section.id}/categories`,
-						);
-						if (cats.ok) {
-							const categoriesData = await cats.json();
-							console.log(
-								`Section ${section.name} (${section.id}):`,
-								categoriesData,
-							);
-							allCategoriesData.push(...categoriesData);
-							countBySection[section.id] = categoriesData.length;
-						} else {
-							countBySection[section.id] = 0;
-						}
-					} catch (error) {
-						console.error(
-							`Erreur lors du chargement des catégories pour la section ${section.id}:`,
-							error,
-						);
-						countBySection[section.id] = 0;
-					}
-				}
-
-				setAllCategories(allCategoriesData);
-				setCategoriesCountBySection(countBySection);
-			} catch (error) {
-				console.error("Erreur:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [clubId]);
-
-	// Fonction pour obtenir le nombre de catégories par section
-	const getCategoriesCountForSection = (sectionId: string) => {
-		return categoriesCountBySection[sectionId] || 0;
 	};
 
 	const handleDeleteSection = async () => {
@@ -116,36 +65,10 @@ export function SectionsListPage() {
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(
-				`/api/clubs/${clubId}/sections/${deleteSection.id}`,
-				{
-					method: "DELETE",
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la section de la liste
-			setSections((prev) =>
-				prev.filter((section) => section.id !== deleteSection.id),
-			);
-			// Mettre à jour les compteurs
-			setCategoriesCountBySection((prev) => {
-				const newCount = { ...prev };
-				delete newCount[deleteSection.id];
-				return newCount;
-			});
-			// Retirer les catégories de cette section
-			setAllCategories((prev) =>
-				prev.filter((cat) => cat.sectionId !== deleteSection.id),
-			);
+			await deleteSectionMutation.mutateAsync(deleteSection.id);
 			setDeleteSection(null);
-			toast.success("Section supprimée avec succès");
 		} catch (error) {
 			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la section");
 		} finally {
 			setIsDeleting(false);
 		}
@@ -244,7 +167,7 @@ export function SectionsListPage() {
 										<p className="text-sm font-medium text-muted-foreground">
 											Total catégories
 										</p>
-										<p className="text-2xl font-bold">{allCategories.length}</p>
+										<p className="text-2xl font-bold">{totalCategories}</p>
 									</div>
 								</div>
 							</CardContent>
@@ -259,7 +182,7 @@ export function SectionsListPage() {
 										<p className="text-sm font-medium text-muted-foreground">
 											Sections actives
 										</p>
-										<p className="text-2xl font-bold">{sections.length}</p>
+										<p className="text-2xl font-bold">{totalActiveSections}</p>
 									</div>
 								</div>
 							</CardContent>
@@ -324,20 +247,17 @@ export function SectionsListPage() {
 											</Badge>
 										</div>
 										{(() => {
-											const categoryCount = getCategoriesCountForSection(
-												section.id,
-											);
 											return (
 												<Badge
 													variant="outline"
 													className={`text-xs font-medium px-2.5 py-1 transition-colors ${
-														categoryCount > 0
+														(section.categoriesCount || 0) > 0
 															? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-800 dark:text-green-400"
 															: "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400"
 													}`}
 												>
-													{categoryCount} catégorie
-													{categoryCount !== 1 ? "s" : ""}
+													{section.categoriesCount || 0} catégorie
+													{(section.categoriesCount || 0) > 1 ? "s" : ""}
 												</Badge>
 											);
 										})()}
@@ -349,6 +269,21 @@ export function SectionsListPage() {
 										<CardDescription className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
 											{section.description || "Aucune description disponible"}
 										</CardDescription>
+										{/* Responsable de section */}
+										{section.manager? (
+											<div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+												<User className="h-3 w-3" />
+												<span>
+													Responsable: {section.manager.firstName}{" "}
+													{section.manager.lastName}
+												</span>
+											</div>
+										) : (
+											<div className="flex items-center gap-2 text-xs text-muted-foreground/60 mt-2">
+												<User className="h-3 w-3" />
+												<span>Aucun responsable assigné</span>
+											</div>
+										)}
 									</div>
 								</CardHeader>
 

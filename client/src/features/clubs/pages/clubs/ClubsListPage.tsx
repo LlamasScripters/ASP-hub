@@ -26,10 +26,11 @@ import {
 import { useClubs } from "../../hooks/useClubs";
 
 export function ClubsListPage() {
-	const { clubs, loading } = useClubs();
+	const { data, isLoading } = useClubs();
+	const clubs = data?.data || [];
 	const mainClub = clubs.length > 0 ? clubs[0] : null;
 
-	if (loading) {
+	if (isLoading) {
 		return (
 			<div className="container mx-auto p-4 sm:p-6 space-y-8 max-w-7xl">
 				<div className="space-y-6">

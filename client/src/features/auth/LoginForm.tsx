@@ -9,10 +9,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { usePostLoginRedirection } from "@/features/first-login/hooks/use-post-login-redirection";
 import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getLoggedInUserQueryOptions } from "../users/users.config";
@@ -26,11 +27,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
-	// const [isLoading, setIsLoading] = useState(false);
-	const navigate = useNavigate();
 	const location = useLocation();
 	const queryClient = useQueryClient();
-	const { isPending: isPendingSession, data } = authClient.useSession();
+	const { handlePostLoginRedirection } = usePostLoginRedirection();
+	const { isPending: isPendingSession } = authClient.useSession();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -41,17 +41,29 @@ export function LoginForm() {
 	});
 
 	const onSubmit = async (values: FormValues) => {
-		const { error } = await authClient.signIn.email({
-			email: values.email,
-			password: values.password,
-		});
+		try {
+			const { error } = await authClient.signIn.email({
+				email: values.email,
+				password: values.password,
+			});
+			if (error?.code) {
+				form.setError("root", { message: getAuthErrorMessage(error.code) });
+				return;
+			}
 
-		if (error) {
-			const message = error.code
-				? getAuthErrorMessage(error.code)
-				: "Une erreur inattendue s'est produite";
+			await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
 
-			form.setError("root", { message });
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			const { data: session } = await authClient.getSession();
+
+			const defaultRedirect = location.search.redirect ?? "/dashboard";
+
+			await handlePostLoginRedirection(session?.user ?? null, defaultRedirect);
+		} catch (err) {
+			form.setError("root", {
+				message: "Une erreur inattendue s'est produite",
+			});
 		}
 
 		const { data } = await authClient.getSession();

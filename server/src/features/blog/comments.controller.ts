@@ -4,12 +4,17 @@ import {
 	type UpdateCommentData,
 	commentsService,
 } from "./comments.service.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
+import { UserRole } from "@/lib/roles.js";
 
 const commentsRouter = Router();
+commentsRouter.use(requireAuth);
 
 // GET /api/comments/article/:articleId - Get all comments for an article
 commentsRouter.get(
 	"/article/:articleId",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { articleId } = req.params;
@@ -25,6 +30,7 @@ commentsRouter.get(
 // GET /api/comments/:id - Get comment by ID
 commentsRouter.get(
 	"/:id",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { id } = req.params;
@@ -44,7 +50,7 @@ commentsRouter.get(
 );
 
 // POST /api/comments - Create new comment
-commentsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
+commentsRouter.post("/", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
 	try {
 		const { articleId, authorId, content }: CreateCommentData = req.body;
 
@@ -87,6 +93,7 @@ commentsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
 // PUT /api/comments/:id - Update comment
 commentsRouter.put(
 	"/:id",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { id } = req.params;
@@ -138,6 +145,7 @@ commentsRouter.put(
 // DELETE /api/comments/:id - Delete comment (soft delete)
 commentsRouter.delete(
 	"/:id",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { id } = req.params;
@@ -159,6 +167,7 @@ commentsRouter.delete(
 // GET /api/comments/article/:articleId/count - Get comments count for an article
 commentsRouter.get(
 	"/article/:articleId/count",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { articleId } = req.params;
@@ -177,6 +186,7 @@ commentsRouter.get(
 // GET /api/comments/admin/article/:articleId - Get ALL comments for an article (including archived) - ADMIN ONLY
 commentsRouter.get(
 	"/admin/article/:articleId",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { articleId } = req.params;
@@ -196,6 +206,7 @@ commentsRouter.get(
 // PUT /api/comments/admin/:id/hide - Hide comment (set state to archived) - ADMIN ONLY
 commentsRouter.put(
 	"/admin/:id/hide",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { id } = req.params;
@@ -219,6 +230,7 @@ commentsRouter.put(
 // PUT /api/comments/admin/:id/show - Show comment (set state to published) - ADMIN ONLY
 commentsRouter.put(
 	"/admin/:id/show",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const { id } = req.params;
@@ -242,6 +254,7 @@ commentsRouter.put(
 // GET /api/comments/admin/all - Get ALL comments across all articles - ADMIN ONLY
 commentsRouter.get(
 	"/admin/all",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		try {
 			const comments = await commentsService.getAllComments();

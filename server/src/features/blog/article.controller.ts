@@ -1,10 +1,14 @@
 import { type Request, type Response, Router } from "express";
 import { articleService } from "./article.service.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
+import { UserRole } from "@/lib/roles.js";
 
 const articleRouter = Router();
+articleRouter.use(requireAuth);
 
 // GET all articles (admin only)
-articleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
+articleRouter.get("/", requireRole(UserRole.ADMIN),  async (req: Request, res: Response): Promise<void> => {
 	const articles = await articleService.getAll();
 	res.json(articles);
 });
@@ -12,6 +16,7 @@ articleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
 // GET published articles only (public)
 articleRouter.get(
 	"/public",
+	requireMemberAccess(),
 	async (_req: Request, res: Response): Promise<void> => {
 		const articles = await articleService.getPublishedArticles();
 		res.json(articles);
@@ -21,6 +26,7 @@ articleRouter.get(
 // GET single published article (public)
 articleRouter.get(
 	"/public/:id",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		const article = await articleService.getById(req.params.id);
 		if (!article || article.state !== "published") {
@@ -34,6 +40,7 @@ articleRouter.get(
 // GET one article
 articleRouter.get(
 	"/:id",
+	requireMemberAccess(),
 	async (req: Request, res: Response): Promise<void> => {
 		const article = await articleService.getById(req.params.id);
 		if (!article) {
@@ -45,7 +52,7 @@ articleRouter.get(
 );
 
 // CREATE article
-articleRouter.post("/", async (req: Request, res: Response): Promise<void> => {
+articleRouter.post("/", requireRole(UserRole.ADMIN), async (req: Request, res: Response): Promise<void> => {
 	const {
 		title,
 		content,
@@ -74,6 +81,7 @@ articleRouter.post("/", async (req: Request, res: Response): Promise<void> => {
 // UPDATE article
 articleRouter.put(
 	"/:id",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		const updated = await articleService.update(req.params.id, req.body);
 		if (!updated) {
@@ -87,6 +95,7 @@ articleRouter.put(
 // DELETE article
 articleRouter.delete(
 	"/:id",
+	requireRole(UserRole.ADMIN),
 	async (req: Request, res: Response): Promise<void> => {
 		await articleService.delete(req.params.id);
 		res.status(204).send();

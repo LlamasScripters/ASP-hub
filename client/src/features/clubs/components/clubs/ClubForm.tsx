@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -39,7 +38,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { Club } from "../../types";
+import { useClub, useCreateClub, useUpdateClub } from "../../hooks/useClubs";
 
 const clubSchema = z.object({
 	name: z
@@ -74,9 +73,14 @@ export function ClubForm({
 	clubId,
 }: { mode: "create" | "edit"; clubId?: string }) {
 	const navigate = useNavigate();
-	const [isLoading, setIsLoading] = useState(false);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	const [initialClub, setInitialClub] = useState<Club | null>(null);
+
+	// Utilisation des hooks personnalisés
+	const { data: club, isLoading: isLoadingClub } = useClub(clubId || "");
+	const createClubMutation = useCreateClub();
+	const updateClubMutation = useUpdateClub();
+
+	const isLoading = isLoadingClub || createClubMutation.isPending || updateClubMutation.isPending;
 
 	const form = useForm<ClubFormData>({
 		resolver: zodResolver(clubSchema),
@@ -91,34 +95,19 @@ export function ClubForm({
 	});
 
 	useEffect(() => {
-		if (mode === "edit" && clubId) {
-			setIsLoading(true);
-			fetch(`/api/clubs/${clubId}`)
-				.then((res) => {
-					if (!res.ok) throw new Error("Erreur lors du chargement du club");
-					return res.json();
-				})
-				.then((club: Club) => {
-					setInitialClub(club);
-					form.reset({
-						name: club.name || "",
-						description: club.description || "",
-						address: club.address || "",
-						email: club.email || "",
-						phone: club.phone || "",
-						website: club.website || "",
-					});
-				})
-				.catch((error) => {
-					console.error("Erreur:", error);
-					toast.error("Erreur lors du chargement du club");
-				})
-				.finally(() => setIsLoading(false));
+		if (mode === "edit" && club) {
+			form.reset({
+				name: club.name || "",
+				description: club.description || "",
+				address: club.address || "",
+				email: club.email || "",
+				phone: club.phone || "",
+				website: club.website || "",
+			});
 		}
-	}, [mode, clubId, form]);
+	}, [mode, club, form]);
 
 	const onSubmit = async (data: ClubFormData) => {
-		setIsLoading(true);
 		try {
 			const cleanData = {
 				...data,
@@ -129,20 +118,14 @@ export function ClubForm({
 				address: data.address || undefined,
 			};
 
-			const url = mode === "create" ? "/api/clubs" : `/api/clubs/${clubId}`;
-			const method = mode === "create" ? "POST" : "PUT";
-
-			const response = await fetch(url, {
-				method,
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(cleanData),
-			});
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la sauvegarde");
-			}
-
-			if (mode === "edit") {
+			if (mode === "create") {
+				await createClubMutation.mutateAsync(cleanData);
+				navigate({ to: "..", replace: true });
+			} else {
+				await updateClubMutation.mutateAsync({
+					id: clubId || "",
+					data: cleanData,
+				});
 				setShowSuccessAlert(true);
 				setTimeout(() => {
 					setShowSuccessAlert(false);
@@ -150,15 +133,10 @@ export function ClubForm({
 				setTimeout(() => {
 					navigate({ to: "..", replace: true });
 				}, 1500);
-			} else {
-				toast.success("Club créé avec succès !");
-				navigate({ to: "..", replace: true });
 			}
 		} catch (error) {
 			console.error("Erreur:", error);
-			toast.error("Une erreur est survenue lors de la sauvegarde");
-		} finally {
-			setIsLoading(false);
+			// Les erreurs sont gérées par les hooks de mutation
 		}
 	};
 
@@ -201,7 +179,7 @@ export function ClubForm({
 					<p className="text-muted-foreground">
 						{mode === "create"
 							? "Remplissez les informations ci-dessous pour créer votre club"
-							: `Modifiez les informations du club "${initialClub?.name || ""}"`}
+							: `Modifiez les informations du club "${club?.name || ""}"`}
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
@@ -225,7 +203,7 @@ export function ClubForm({
 			)}
 
 			{/* Informations du club actuel (mode édition) */}
-			{mode === "edit" && initialClub && (
+			{mode === "edit" && club && (
 				<Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-green-900 dark:text-green-100">
@@ -243,67 +221,67 @@ export function ClubForm({
 									Nom :
 								</span>
 								<span className="ml-2 text-green-800 dark:text-green-200">
-									{initialClub.name}
+									{club.name}
 								</span>
 							</div>
-							{initialClub.email && (
+							{club.email && (
 								<div>
 									<span className="font-medium text-green-900 dark:text-green-100">
 										Email :
 									</span>
 									<span className="ml-2 text-green-800 dark:text-green-200">
-										{initialClub.email}
+										{club.email}
 									</span>
 								</div>
 							)}
-							{initialClub.phone && (
+							{club.phone && (
 								<div>
 									<span className="font-medium text-green-900 dark:text-green-100">
 										Téléphone :
 									</span>
 									<span className="ml-2 text-green-800 dark:text-green-200">
-										{initialClub.phone}
+										{club.phone}
 									</span>
 								</div>
 							)}
-							{initialClub.website && (
+							{club.website && (
 								<div>
 									<span className="font-medium text-green-900 dark:text-green-100">
 										Site web :
 									</span>
 									<span className="ml-2 text-green-800 dark:text-green-200">
-										{initialClub.website}
+										{club.website}
 									</span>
 								</div>
 							)}
-							{initialClub.updatedAt && (
+							{club.updatedAt && (
 								<div>
 									<span className="font-medium text-green-900 dark:text-green-100">
 										Dernière modification :
 									</span>
 									<span className="ml-2 text-green-800 dark:text-green-200">
-										{fmt(initialClub.updatedAt)}
+										{fmt(club.updatedAt)}
 									</span>
 								</div>
 							)}
 						</div>
-						{initialClub.description && (
+						{club.description && (
 							<div className="mt-4">
 								<span className="font-medium text-green-900 dark:text-green-100">
 									Description :
 								</span>
 								<p className="ml-2 text-green-800 dark:text-green-200 mt-1">
-									{initialClub.description}
+									{club.description}
 								</p>
 							</div>
 						)}
-						{initialClub.address && (
+						{club.address && (
 							<div>
 								<span className="font-medium text-green-900 dark:text-green-100">
 									Adresse :
 								</span>
 								<p className="ml-2 text-green-800 dark:text-green-200 mt-1">
-									{initialClub.address}
+									{club.address}
 								</p>
 							</div>
 						)}

@@ -34,12 +34,15 @@ import {
 	Edit,
 	Search,
 	Trash2,
+	User,
 	Users,
 } from "lucide-react";
-// client/src/features/clubs/pages/CategoriesListPage.tsx
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section } from "../../types";
+
+import { useMemo, useState } from "react";
+import { useCategoriesBySection } from "../../hooks/useCategories";
+import { useSection } from "../../hooks/useSections";
+import { useDeleteCategory } from "../../hooks/useCategories";
+import type { Category } from "../../types";
 
 type SortField = "name" | "ageMin" | "ageMax";
 type SortDirection = "asc" | "desc";
@@ -51,7 +54,6 @@ interface Filters {
 	ageRange: string;
 }
 
-// fonction pour vérifier si un âge est valide
 const isValidAge = (age: number | undefined | null): age is number => {
 	return age !== undefined && age !== null && age >= 0;
 };
@@ -60,8 +62,12 @@ export function CategoriesListPage() {
 	const { clubId, sectionId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/",
 	});
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [sectionName, setSectionName] = useState("");
+
+	const { data, isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const categories = data?.data || [];
+	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
+	const { mutateAsync: deleteCategory } = useDeleteCategory();
+
 	const [sortField, setSortField] = useState<SortField>("name");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 	const [filters, setFilters] = useState<Filters>({
@@ -70,28 +76,11 @@ export function CategoriesListPage() {
 		ageMax: "",
 		ageRange: "",
 	});
-	const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+	const [deleteCategoryState, setDeleteCategoryState] = useState<Category | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			// Fetch categories
-			const categoriesRes = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-			);
-			const categoriesData = await categoriesRes.json();
-			setCategories(categoriesData);
-
-			// Fetch section name for better context
-			const sectionRes = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}`,
-			);
-			const sectionData: Section = await sectionRes.json();
-			setSectionName(sectionData.name);
-		};
-
-		fetchData();
-	}, [clubId, sectionId]);
+	const sectionName = section?.name || "";
+	const isLoading = categoriesLoading || sectionLoading;
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -149,7 +138,6 @@ export function CategoriesListPage() {
 			return nameMatch && ageMinMatch && ageMaxMatch && ageRangeMatch;
 		});
 
-		// Sort
 		filtered.sort((a, b) => {
 			let aValue: string | number;
 			let bValue: string | number;
@@ -189,34 +177,26 @@ export function CategoriesListPage() {
 	};
 
 	const handleDeleteCategory = async () => {
-		if (!deleteCategory) return;
+		if (!deleteCategoryState) return;
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories/${deleteCategory.id}`,
-				{
-					method: "DELETE",
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la catégorie de la liste
-			setCategories((prev) =>
-				prev.filter((cat) => cat.id !== deleteCategory.id),
-			);
-			setDeleteCategory(null);
-			toast.success("Catégorie supprimée avec succès");
+			await deleteCategory(deleteCategoryState.id);
+			setDeleteCategoryState(null);
 		} catch (error) {
 			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la catégorie");
 		} finally {
 			setIsDeleting(false);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="container mx-auto p-6">
+				<div className="text-center">Chargement...</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto p-6 space-y-8">
@@ -382,6 +362,7 @@ export function CategoriesListPage() {
 										</div>
 									</TableHead>
 									<TableHead className="font-semibold">Tranche d'âge</TableHead>
+									<TableHead className="font-semibold">Coach</TableHead>
 									<TableHead className="font-semibold text-right">
 										Actions
 									</TableHead>
@@ -391,7 +372,7 @@ export function CategoriesListPage() {
 								{filteredAndSortedCategories.length === 0 ? (
 									<TableRow>
 										<TableCell
-											colSpan={5}
+											colSpan={6}
 											className="h-24 text-center text-muted-foreground"
 										>
 											{categories.length === 0
@@ -445,6 +426,20 @@ export function CategoriesListPage() {
 													</Badge>
 												)}
 											</TableCell>
+											<TableCell>
+												{c.coach ? (
+													<div className="flex items-center gap-2 text-sm">
+														<User className="h-3 w-3 text-muted-foreground" />
+														<span>
+															{c.coach.firstName} {c.coach.lastName}
+														</span>
+													</div>
+												) : (
+													<span className="text-muted-foreground text-sm">
+														Aucun coach
+													</span>
+												)}
+											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
 													<Button
@@ -469,7 +464,7 @@ export function CategoriesListPage() {
 														variant="ghost"
 														size="sm"
 														className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-														onClick={() => setDeleteCategory(c)}
+														onClick={() => setDeleteCategoryState(c)}
 													>
 														<Trash2 className="mr-1 h-3 w-3" />
 														Supprimer
@@ -487,15 +482,15 @@ export function CategoriesListPage() {
 
 			{/* Modal de confirmation de suppression */}
 			<AlertDialog
-				open={!!deleteCategory}
-				onOpenChange={() => setDeleteCategory(null)}
+				open={!!deleteCategoryState}
+				onOpenChange={() => setDeleteCategoryState(null)}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Supprimer la catégorie</AlertDialogTitle>
 						<AlertDialogDescription>
 							Êtes-vous sûr de vouloir supprimer la catégorie{" "}
-							<strong>"{deleteCategory?.name}"</strong> ?
+							<strong>"{deleteCategoryState?.name}"</strong> ?
 							<br />
 							<br />
 							<span className="text-destructive font-medium">
