@@ -25,6 +25,7 @@ export interface SessionResponse {
 	notes: string | null;
 	coachId: string | null;
 	responsibleId: string | null;
+	roomReservationId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 	// Relations
@@ -49,18 +50,26 @@ export interface SessionResponse {
 		lastName: string;
 		email: string;
 	};
-	responsible?: {
+	roomReservation?: {
 		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
+		title: string;
+		startAt: Date;
+		endAt: Date;
+		room: {
+			id: string;
+			name: string;
+			description: string;
+			sportType: string;
+			complex: {
+				id: string;
+				name: string;
+				description: string;
+				street: string;
+				city: string;
+				postalCode: string;
+			};
+		};
 	};
-	participants?: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
-	}[];
 	participantsCount?: number;
 }
 

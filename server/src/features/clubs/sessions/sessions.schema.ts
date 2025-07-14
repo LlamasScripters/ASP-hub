@@ -18,6 +18,7 @@ const baseSessionSchema = z.object({
 	notes: z.string().max(1000, "Les notes sont trop longues").optional(),
 	coachId: z.string().uuid("ID du coach invalide").optional(),
 	responsibleId: z.string().uuid("ID du responsable invalide").optional(),
+	roomReservationId: z.string().uuid("ID de la réservation de salle invalide").optional(),
 });
 
 // Schema pour la création d'une session avec validations personnalisées
