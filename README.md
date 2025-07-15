@@ -159,6 +159,53 @@ npm run dev
   docker compose -f compose.dev.yml exec server npm run db:generate
   ```
 
+## Application mobile
+
+L'application mobile est située dans `client/my-app`.
+
+### Prérequis
+
+ - Node.js et npm
+ - Android Studio (pour la plateforme Android)
+ - macOS & Xcode (pour la plateforme iOS)
+ - Capacitor CLI (global) : `npm install -g @capacitor/cli`
+
+### Installation
+
+```bash
+cd client/my-app
+npm install
+npx cap sync
+```
+
+### Lancement
+
+ - Web (aperçu en développement) :
+   ```bash
+   npm start
+   ```
+
+ - Android :
+   ```bash
+   npx cap open android
+   # Construire et lancer depuis Android Studio
+   ```
+  ou directement :
+   ```bash
+   npx cap run android -l --external
+   ```
+
+> Le fichier `android/local.properties` (chemin SDK) n'est pas versionné et est généré automatiquement.
+
+- iOS :
+  ```bash
+  npx cap open ios
+  # Construire et lancer depuis Xcode
+  ```
+  ou directement :
+  ```bash
+  npx cap run ios -l --external
+  ```
   
 #### Tests serveur
 
@@ -193,3 +240,4 @@ npx playwright test
 ### Google Drive (autorisations nécessaires)
 
 Lien du Drive contenant les documents du projet : https://drive.google.com/drive/folders/1ZqHodTuhoczDxv4GG3eN2YHtUHpXcVXY
+

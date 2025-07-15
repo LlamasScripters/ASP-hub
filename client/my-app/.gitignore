@@ -1,0 +1,20 @@
+.idea/
+node_modules/
+.vscode/
+*.map
+.DS_Store
+.sourcemaps
+dist/
+# Android native builds
+/android/.gradle/
+/android/build/
+/android/gradle/
+/android/app/build/
+/android/local.properties
+# iOS native builds
+/ios/Pods/
+/ios/build/
+/**/*.xcworkspace
+/ios/DerivedData/
+/ios/*.xcuserdata
+/.DS_Store

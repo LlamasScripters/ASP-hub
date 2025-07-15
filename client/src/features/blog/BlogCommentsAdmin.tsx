@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { API_CONFIG } from "@/lib/config";
 
 interface Comment {
 	id: string;
@@ -46,7 +47,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 	const fetchComments = useCallback(async () => {
 		try {
 			setLoading(true);
-			const response = await fetch(`/api/comments/admin/article/${blogId}`);
+			const response = await fetch(`${API_CONFIG.FULL_URL}/comments/admin/article/${blogId}`);
 			if (!response.ok) {
 				throw new Error("Erreur lors du chargement des commentaires");
 			}
@@ -69,7 +70,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 
 			const action = currentState === "published" ? "hide" : "show";
 			const response = await fetch(
-				`/api/comments/admin/${commentId}/${action}`,
+				`${API_CONFIG.FULL_URL}/comments/admin/${commentId}/${action}`,
 				{
 					method: "PUT",
 					headers: {

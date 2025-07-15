@@ -13,7 +13,7 @@ import { usePostLoginRedirection } from "@/features/first-login/hooks/use-post-l
 import { authClient, getAuthErrorMessage } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getLoggedInUserQueryOptions } from "../users/users.config";
@@ -29,6 +29,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function LoginForm() {
 	const location = useLocation();
 	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 	const { handlePostLoginRedirection } = usePostLoginRedirection();
 	const { isPending: isPendingSession } = authClient.useSession();
 
