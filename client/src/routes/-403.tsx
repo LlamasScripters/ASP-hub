@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -31,6 +32,7 @@ export default function ForbiddenPage() {
 					</CardContent>
 				</Card>
 			</div>
+			<Footer />
 		</div>
 	);
 }

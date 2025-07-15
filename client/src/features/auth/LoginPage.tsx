@@ -1,3 +1,4 @@
+import AuthFooter from "@/components/AuthFooter";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ export default function LoginPage() {
 					</CardContent>
 				</Card>
 			</div>
+			<AuthFooter />
 		</div>
 	);
 }

@@ -1,3 +1,5 @@
+import Footer from "@/components/Footer";
+import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import {
@@ -16,8 +18,8 @@ export default function HomePage() {
 			<header className="bg-white border-b border-gray-200 dark:bg-gray-950 dark:border-gray-800">
 				<div className="container flex items-center justify-between h-16 px-4 mx-auto sm:px-6">
 					<div className="flex items-center">
-						<Shield className="w-8 h-8 text-emerald-600" />
-						<span className="ml-2 text-xl font-bold">ASOPS</span>
+						<Logo className="w-8 h-8" />
+						<span className="ml-2 text-xl font-bold">AS Pierrefitte</span>
 					</div>
 					<nav className="hidden space-x-6 md:flex">
 						<Link
@@ -87,7 +89,7 @@ export default function HomePage() {
 								<div className="relative w-full h-64 overflow-hidden rounded-lg shadow-xl sm:h-80 md:h-96 lg:h-full">
 									<div className="absolute inset-0 bg-emerald-600 opacity-10" />
 									<div className="absolute inset-0 flex items-center justify-center">
-										<Shield className="w-32 h-32 text-emerald-600" />
+										<Logo className="w-32 h-32" />
 									</div>
 								</div>
 							</div>
@@ -208,20 +210,7 @@ export default function HomePage() {
 					</div>
 				</section>
 			</main>
-			<footer className="py-8 bg-gray-900 dark:bg-black">
-				<div className="container px-4 mx-auto sm:px-6">
-					<div className="flex flex-col items-center justify-between md:flex-row">
-						<div className="flex items-center mb-4 md:mb-0">
-							<Shield className="w-6 h-6 text-emerald-500" />
-							<span className="ml-2 text-lg font-bold text-white">ASOPS</span>
-						</div>
-						<div className="text-sm text-gray-400">
-							© {new Date().getFullYear()} Association Sportive Omnisports de
-							Pierrefitte-sur-Seine. Tous droits réservés.
-						</div>
-					</div>
-				</div>
-			</footer>
+			<Footer />
 		</div>
 	);
 }
