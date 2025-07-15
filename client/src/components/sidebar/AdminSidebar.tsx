@@ -13,6 +13,7 @@ import {
 	HomeIcon,
 	RssIcon,
 	ShieldIcon,
+	UserCheckIcon,
 	UsersIcon,
 } from "lucide-react";
 import type * as React from "react";
@@ -31,6 +32,11 @@ const navigationItems: NavItemProps[] = [
 		url: "/admin/users",
 		title: "Utilisateurs",
 		IconComponent: UsersIcon,
+	},
+	{
+		url: "/admin/applications",
+		title: "Candidatures",
+		IconComponent: UserCheckIcon,
 	},
 	{
 		url: "/admin/facilities/complexes",

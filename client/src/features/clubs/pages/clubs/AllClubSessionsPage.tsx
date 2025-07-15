@@ -39,6 +39,8 @@ import {
 	ArrowLeft,
 	Calendar,
 	ChevronDown,
+	ChevronLeft,
+	ChevronRight,
 	ChevronUp,
 	Clock,
 	Edit,
@@ -47,9 +49,10 @@ import {
 	Trash2,
 	Users,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section, SessionSport } from "../../types";
+import { useMemo, useState } from "react";
+
+import { useDeleteSession, useSessions } from "../../hooks/useSessions";
+import type { SessionSport } from "../../types";
 
 type SortField =
 	| "title"
@@ -79,9 +82,11 @@ export function AllClubSessionsPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/",
 	});
-	const [sessions, setSessions] = useState<EnrichedSession[]>([]);
-	const [, setSections] = useState<Section[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+
+	// Use the sessions hook
+	const { data: allSessions, isLoading } = useSessions();
+	const deleteSessionMutation = useDeleteSession();
+
 	const [sortField, setSortField] = useState<SortField>("startDate");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 	const [filters, setFilters] = useState<Filters>({
@@ -96,60 +101,23 @@ export function AllClubSessionsPage() {
 	);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	useEffect(() => {
-		const fetchSessions = async () => {
-			try {
-				const sectionsData: Section[] = await fetch(
-					`/api/clubs/${clubId}/sections`,
-				).then((res) => {
-					if (!res.ok)
-						throw new Error("Erreur lors du chargement des sections");
-					return res.json();
-				});
-				setSections(sectionsData);
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
-				const result: EnrichedSession[] = [];
+	// Filter sessions for this club and enrich with additional data
+	const sessions = useMemo(() => {
+		if (!allSessions?.data) return [];
 
-				for (const section of sectionsData) {
-					const categories: Category[] = await fetch(
-						`/api/clubs/${clubId}/sections/${section.id}/categories`,
-					).then((res) => {
-						if (!res.ok)
-							throw new Error("Erreur lors du chargement des catégories");
-						return res.json();
-					});
-
-					for (const cat of categories) {
-						const catSessions: SessionSport[] = await fetch(
-							`/api/clubs/${clubId}/sections/${section.id}/categories/${cat.id}/sessions`,
-						).then((res) => {
-							if (!res.ok)
-								throw new Error("Erreur lors du chargement des sessions");
-							return res.json();
-						});
-						result.push(
-							...catSessions.map((s) => ({
-								...s,
-								categoryName: cat.name,
-								sectionName: section.name,
-								categoryId: cat.id,
-								sectionId: section.id,
-							})),
-						);
-					}
-				}
-
-				setSessions(result);
-			} catch (error) {
-				console.error("Erreur:", error);
-				toast.error("Erreur lors du chargement des sessions");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSessions();
-	}, [clubId]);
+		return allSessions.data
+			.filter((session) => session.category?.section?.club?.id === clubId)
+			.map((session) => ({
+				...session,
+				categoryName: session.category?.name || "",
+				sectionName: session.category?.section?.name || "",
+				sectionId: session.category?.section?.id || "",
+			}));
+	}, [allSessions, clubId]);
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -162,6 +130,7 @@ export function AllClubSessionsPage() {
 
 	const handleFilterChange = (field: keyof Filters, value: string) => {
 		setFilters((prev) => ({ ...prev, [field]: value }));
+		setCurrentPage(1); // Reset to first page when filtering
 	};
 
 	const getSortIcon = (field: SortField) => {
@@ -290,6 +259,19 @@ export function AllClubSessionsPage() {
 		return filtered;
 	}, [sessions, filters, sortField, sortDirection]);
 
+	// Pagination logic
+	const totalPages = Math.ceil(filteredAndSortedSessions.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedSessions = filteredAndSortedSessions.slice(
+		startIndex,
+		endIndex,
+	);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
+
 	const clearFilters = () => {
 		setFilters({
 			title: "",
@@ -298,6 +280,7 @@ export function AllClubSessionsPage() {
 			type: "all",
 			status: "all",
 		});
+		setCurrentPage(1); // Reset to first page when clearing filters
 	};
 
 	const handleDeleteSession = async () => {
@@ -305,23 +288,10 @@ export function AllClubSessionsPage() {
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(`/api/clubs/sessions/${deleteSession.id}`, {
-				method: "DELETE",
-			});
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la session de la liste
-			setSessions((prev) =>
-				prev.filter((session) => session.id !== deleteSession.id),
-			);
+			await deleteSessionMutation.mutateAsync(deleteSession.id);
 			setDeleteSession(null);
-			toast.success("Session supprimée avec succès");
 		} catch (error) {
-			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression de la session");
+			// Error is already handled by the mutation
 		} finally {
 			setIsDeleting(false);
 		}
@@ -498,10 +468,14 @@ export function AllClubSessionsPage() {
 								Liste des sessions ({filteredAndSortedSessions.length})
 							</CardTitle>
 							<CardDescription>
+								Affichage de {startIndex + 1} à{" "}
+								{Math.min(endIndex, filteredAndSortedSessions.length)} sur{" "}
 								{filteredAndSortedSessions.length} session
-								{filteredAndSortedSessions.length > 1 ? "s" : ""} affichée
-								{filteredAndSortedSessions.length > 1 ? "s" : ""} sur{" "}
-								{sessions.length} au total
+								{filteredAndSortedSessions.length > 1 ? "s" : ""} filtrée
+								{filteredAndSortedSessions.length > 1 ? "s" : ""}
+								{filteredAndSortedSessions.length !== sessions.length && (
+									<> sur {sessions.length} au total</>
+								)}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -706,7 +680,7 @@ export function AllClubSessionsPage() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{filteredAndSortedSessions.length === 0 ? (
+										{paginatedSessions.length === 0 ? (
 											<TableRow>
 												<TableCell
 													colSpan={7}
@@ -718,7 +692,7 @@ export function AllClubSessionsPage() {
 												</TableCell>
 											</TableRow>
 										) : (
-											filteredAndSortedSessions.map((s) => (
+											paginatedSessions.map((s) => (
 												<TableRow
 													key={s.id}
 													className="hover:bg-muted/50 transition-colors"
@@ -817,6 +791,88 @@ export function AllClubSessionsPage() {
 									</TableBody>
 								</Table>
 							</div>
+
+							{/* Pagination Controls */}
+							{filteredAndSortedSessions.length > 0 && (
+								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+									<div className="flex items-center gap-2">
+										<span className="text-sm text-muted-foreground">
+											Afficher :
+										</span>
+										<Select
+											value={itemsPerPage.toString()}
+											onValueChange={(value) => {
+												setItemsPerPage(Number(value));
+												setCurrentPage(1);
+											}}
+										>
+											<SelectTrigger className="w-16 h-8">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="5">5</SelectItem>
+												<SelectItem value="10">10</SelectItem>
+												<SelectItem value="20">20</SelectItem>
+												<SelectItem value="50">50</SelectItem>
+											</SelectContent>
+										</Select>
+										<span className="text-sm text-muted-foreground">
+											éléments par page
+										</span>
+									</div>
+
+									<div className="flex items-center gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage - 1)}
+											disabled={currentPage === 1}
+										>
+											<ChevronLeft className="h-4 w-4" />
+											Précédent
+										</Button>
+
+										<div className="flex items-center gap-1">
+											{Array.from({ length: totalPages }, (_, i) => i + 1)
+												.filter(
+													(page) =>
+														page === 1 ||
+														page === totalPages ||
+														Math.abs(page - currentPage) <= 2,
+												)
+												.map((page, index, array) => (
+													<div key={page} className="flex items-center">
+														{index > 0 && array[index - 1] !== page - 1 && (
+															<span className="px-2 text-muted-foreground">
+																...
+															</span>
+														)}
+														<Button
+															variant={
+																currentPage === page ? "default" : "outline"
+															}
+															size="sm"
+															onClick={() => handlePageChange(page)}
+															className="w-8 h-8 p-0"
+														>
+															{page}
+														</Button>
+													</div>
+												))}
+										</div>
+
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handlePageChange(currentPage + 1)}
+											disabled={currentPage === totalPages}
+										>
+											Suivant
+											<ChevronRight className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				)}

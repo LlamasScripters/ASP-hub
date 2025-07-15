@@ -8,6 +8,13 @@
 			"when": 1752141085448,
 			"tag": "0000_outstanding_eternity",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1752582440556,
+			"tag": "0001_keen_imperial_guard",
+			"breakpoints": true
 		}
 	]
 }

@@ -1,148 +1,143 @@
-import { useCallback, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Section } from "../types";
+import { sectionsApi } from "./../lib/api";
+import type { CreateSectionData, UpdateSectionData } from "./../types";
 
-interface UseSectionsProps {
-	clubId: string;
-	initialData?: Section[];
+// Query keys
+export const sectionsQueryKeys = {
+	all: ["sections"] as const,
+	lists: () => [...sectionsQueryKeys.all, "list"] as const,
+	list: () => [...sectionsQueryKeys.lists()] as const,
+	details: () => [...sectionsQueryKeys.all, "detail"] as const,
+	detail: (id: string) => [...sectionsQueryKeys.details(), id] as const,
+	byClub: (clubId: string) =>
+		[...sectionsQueryKeys.all, "byClub", clubId] as const,
+};
+
+// Query hooks
+export function useSections() {
+	return useQuery({
+		queryKey: sectionsQueryKeys.list(),
+		queryFn: () => sectionsApi.getSections(),
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
+	});
 }
 
-interface UseSectionsReturn {
-	sections: Section[];
-	loading: boolean;
-	error: string | null;
-	createSection: (
-		data: Omit<Section, "id" | "createdAt" | "updatedAt">,
-	) => Promise<Section | null>;
-	updateSection: (
-		id: string,
-		data: Partial<Section>,
-	) => Promise<Section | null>;
-	deleteSection: (id: string) => Promise<boolean>;
-	refresh: () => Promise<void>;
+export function useSection(id: string) {
+	return useQuery({
+		queryKey: sectionsQueryKeys.detail(id),
+		queryFn: () => sectionsApi.getSectionById(id),
+		enabled: !!id,
+		staleTime: 5 * 60 * 1000,
+	});
 }
 
-export function useSections({
-	clubId,
-	initialData = [],
-}: UseSectionsProps): UseSectionsReturn {
-	const [sections, setSections] = useState<Section[]>(initialData);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+export function useSectionsByClub(clubId: string) {
+	return useQuery({
+		queryKey: sectionsQueryKeys.byClub(clubId),
+		queryFn: () => sectionsApi.getSectionsByClubId(clubId),
+		enabled: !!clubId,
+		staleTime: 5 * 60 * 1000,
+	});
+}
 
-	const refresh = useCallback(async () => {
-		setLoading(true);
-		setError(null);
-		try {
-			const response = await fetch(`/api/clubs/${clubId}/sections`);
-			if (!response.ok) {
-				throw new Error("Erreur lors du chargement des sections");
+// Mutation hooks
+export function useCreateSection() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (data: CreateSectionData) => sectionsApi.createSection(data),
+		onSuccess: (newSection) => {
+			// Invalidate all sections lists
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.lists() });
+
+			// Invalidate sections by club
+			if (newSection.clubId) {
+				queryClient.invalidateQueries({
+					queryKey: sectionsQueryKeys.byClub(newSection.clubId),
+				});
 			}
-			const data = await response.json();
-			setSections(data);
-		} catch (err) {
+
+			// Invalidate all sections
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.all });
+
+			// Optimistically update the cache
+			queryClient.setQueryData(
+				sectionsQueryKeys.detail(newSection.id),
+				newSection,
+			);
+
+			toast.success("Section créée avec succès");
+		},
+		onError: (error) => {
 			const errorMessage =
-				err instanceof Error ? err.message : "Erreur inconnue";
-			setError(errorMessage);
+				error instanceof Error ? error.message : "Erreur lors de la création";
 			toast.error(errorMessage);
-		} finally {
-			setLoading(false);
-		}
-	}, [clubId]);
-
-	const createSection = useCallback(
-		async (data: Omit<Section, "id" | "createdAt" | "updatedAt">) => {
-			setError(null);
-			try {
-				const response = await fetch(`/api/clubs/${clubId}/sections`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ ...data, clubId }),
-				});
-
-				if (!response.ok) {
-					throw new Error("Erreur lors de la création de la section");
-				}
-
-				const newSection = await response.json();
-				setSections((prev) => [...prev, newSection]);
-				toast.success("Section créée avec succès");
-				return newSection;
-			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : "Erreur lors de la création";
-				setError(errorMessage);
-				toast.error(errorMessage);
-				return null;
-			}
 		},
-		[clubId],
-	);
+	});
+}
 
-	const updateSection = useCallback(
-		async (id: string, data: Partial<Section>) => {
-			setError(null);
-			try {
-				const response = await fetch(`/api/clubs/${clubId}/sections/${id}`, {
-					method: "PUT",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
+export function useUpdateSection() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, data }: { id: string; data: UpdateSectionData }) =>
+			sectionsApi.updateSection(id, data),
+		onSuccess: (updatedSection, { id }) => {
+			// Update the specific section in the cache
+			queryClient.setQueryData(sectionsQueryKeys.detail(id), updatedSection);
+
+			// Invalidate all sections lists
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.lists() });
+
+			// Invalidate sections by club
+			if (updatedSection.clubId) {
+				queryClient.invalidateQueries({
+					queryKey: sectionsQueryKeys.byClub(updatedSection.clubId),
 				});
-
-				if (!response.ok) {
-					throw new Error("Erreur lors de la modification de la section");
-				}
-
-				const updatedSection = await response.json();
-				setSections((prev) =>
-					prev.map((section) => (section.id === id ? updatedSection : section)),
-				);
-				toast.success("Section modifiée avec succès");
-				return updatedSection;
-			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : "Erreur lors de la modification";
-				setError(errorMessage);
-				toast.error(errorMessage);
-				return null;
 			}
+
+			// Invalidate all sections
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.all });
+
+			toast.success("Section modifiée avec succès");
 		},
-		[clubId],
-	);
-
-	const deleteSection = useCallback(
-		async (id: string) => {
-			setError(null);
-			try {
-				const response = await fetch(`/api/clubs/${clubId}/sections/${id}`, {
-					method: "DELETE",
-				});
-
-				if (!response.ok) {
-					throw new Error("Erreur lors de la suppression de la section");
-				}
-
-				setSections((prev) => prev.filter((section) => section.id !== id));
-				toast.success("Section supprimée avec succès");
-				return true;
-			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : "Erreur lors de la suppression";
-				setError(errorMessage);
-				toast.error(errorMessage);
-				return false;
-			}
+		onError: (error) => {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification";
+			toast.error(errorMessage);
 		},
-		[clubId],
-	);
+	});
+}
 
-	return {
-		sections,
-		loading,
-		error,
-		createSection,
-		updateSection,
-		deleteSection,
-		refresh,
-	};
+export function useDeleteSection() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (id: string) => sectionsApi.deleteSection(id),
+		onSuccess: (_, id) => {
+			// Remove the section from the cache
+			queryClient.removeQueries({ queryKey: sectionsQueryKeys.detail(id) });
+
+			// Invalidate lists to ensure consistency
+			queryClient.invalidateQueries({ queryKey: sectionsQueryKeys.lists() });
+
+			// Invalidate all sections by club (we don't know which club it belonged to)
+			queryClient.invalidateQueries({
+				queryKey: [...sectionsQueryKeys.all, "byClub"],
+			});
+
+			toast.success("Section supprimée avec succès");
+		},
+		onError: (error) => {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression";
+			toast.error(errorMessage);
+		},
+	});
 }

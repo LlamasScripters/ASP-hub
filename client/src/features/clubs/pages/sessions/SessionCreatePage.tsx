@@ -2,21 +2,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
 import { SessionForm } from "../../components/sessions/SessionForm";
-import type { Section } from "../../types";
+import { useSection } from "../../hooks/useSections";
 
 export function SessionCreatePage() {
 	const { clubId, sectionId, categoryId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/sessions/create",
 	});
-	const [section, setSection] = useState<Section | null>(null);
 
-	useEffect(() => {
-		fetch(`/api/clubs/${clubId}/sections/${sectionId}`)
-			.then((res) => res.json())
-			.then(setSection);
-	}, [clubId, sectionId]);
+	// Utilisation du hook pour récupérer la section
+	const { data: section } = useSection(sectionId);
 
 	return (
 		<div className="space-y-6">

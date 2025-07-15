@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle candidature d'adhésion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background-color: #fcfcfd;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+            color: #ffffff;
+            padding: 32px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .content {
+            padding: 32px;
+        }
+        .highlight {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+            border-left: 4px solid #7c3aed;
+        }
+        .highlight h3 {
+            margin-top: 0;
+            color: #5b21b6;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .highlight ul {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+        .highlight li {
+            margin: 8px 0;
+            color: #6b21a8;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+            color: #ffffff;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 24px 0;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .priority-badge {
+            display: inline-block;
+            background-color: #ef4444;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .section-info {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Nouvelle candidature d'adhésion</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour <strong>{{ params.MANAGER_NAME }}</strong>,</p>
+            
+            <p>Une nouvelle candidature d'adhésion vient d'être soumise et nécessite votre attention.</p>
+            
+            <div class="highlight">
+                <h3>👤 Informations du candidat</h3>
+                <ul>
+                    <li><strong>Nom :</strong> {{ params.APPLICANT_NAME }}</li>
+                    <li><strong>Section demandée :</strong> {{ params.SECTION_NAME }}</li>
+                    <li><strong>Catégorie :</strong> {{ params.CATEGORY_NAME }}</li>
+                    <li><strong>Statut :</strong> <span class="priority-badge">À examiner</span></li>
+                </ul>
+            </div>
+            
+            <div class="section-info">
+                <p><strong>📋 Action requise :</strong><br>
+                En tant que responsable de section, vous devez examiner cette candidature et prendre une décision (accepter ou refuser) dans les plus brefs délais.</p>
+            </div>
+            
+            <p>Merci de consulter les détails complets de la candidature et de procéder à l'examen :</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ params.REVIEW_URL }}" class="button">🔍 Examiner la candidature</a>
+            </div>
+            
+            <p>Si vous avez des questions ou besoin d'assistance, n'hésitez pas à contacter l'équipe administrative.</p>
+            
+            <p>Cordialement,<br>
+            <strong>Système de gestion du club sportif</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Ce message a été envoyé automatiquement, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html>

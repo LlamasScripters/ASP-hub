@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from "./routes/__root"
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as IndexRouteImport } from "./routes/index"
+import { Route as AuthenticatedFirstLoginSetupRouteImport } from "./routes/_authenticated/first-login/setup"
 import { Route as AuthenticatedAdminAdminRouteImport } from "./routes/_authenticated/admin/_admin"
 import { Route as AuthenticatednonadminNonadminRouteImport } from "./routes/_authenticated/(nonadmin)/_nonadmin"
 import { Route as AuthAuthSendVerificationEmailRouteImport } from "./routes/_auth/auth/send-verification-email"
@@ -25,6 +26,7 @@ import { Route as AuthAuthAccountCreatedRouteImport } from "./routes/_auth/auth/
 import { Route as AuthenticatedAdminAdminIndexRouteImport } from "./routes/_authenticated/admin/_admin.index"
 import { Route as AuthAuthVerifyIndexRouteImport } from "./routes/_auth/auth/verify/index"
 import { Route as AuthenticatedAdminAdminUsersRouteImport } from "./routes/_authenticated/admin/_admin.users"
+import { Route as AuthenticatedAdminAdminApplicationsRouteImport } from "./routes/_authenticated/admin/_admin.applications"
 import { Route as AuthAuthVerifyVerifyRouteImport } from "./routes/_auth/auth/verify/_verify"
 import { Route as AuthenticatedAdminAdminBlogIndexRouteImport } from "./routes/_authenticated/admin/_admin/blog/index"
 import { Route as AuthenticatednonadminNonadminDashboardIndexRouteImport } from "./routes/_authenticated/(nonadmin)/_nonadmin/dashboard/index"
@@ -111,6 +113,12 @@ const AuthAuthVerifyRoute = AuthAuthVerifyRouteImport.update({
   path: "/auth/verify",
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthenticatedFirstLoginSetupRoute =
+  AuthenticatedFirstLoginSetupRouteImport.update({
+    id: "/first-login/setup",
+    path: "/first-login/setup",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminAdminRoute = AuthenticatedAdminAdminRouteImport.update({
   id: "/_admin",
   getParentRoute: () => AuthenticatedAdminRoute,
@@ -172,6 +180,12 @@ const AuthenticatedAdminAdminUsersRoute =
   AuthenticatedAdminAdminUsersRouteImport.update({
     id: "/users",
     path: "/users",
+    getParentRoute: () => AuthenticatedAdminAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminApplicationsRoute =
+  AuthenticatedAdminAdminApplicationsRouteImport.update({
+    id: "/applications",
+    path: "/applications",
     getParentRoute: () => AuthenticatedAdminAdminRoute,
   } as any)
 const AuthAuthVerifyVerifyRoute = AuthAuthVerifyVerifyRouteImport.update({
@@ -503,7 +517,9 @@ export interface FileRoutesByFullPath {
   "/auth/reset-password": typeof AuthAuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/auth/verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -565,7 +581,9 @@ export interface FileRoutesByTo {
   "/auth/reset-password": typeof AuthAuthResetPasswordRoute
   "/auth/send-verification-email": typeof AuthAuthSendVerificationEmailRoute
   "/admin": typeof AuthenticatedAdminAdminIndexRoute
+  "/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/auth/verify": typeof AuthAuthVerifyIndexRoute
+  "/admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/auth/verify/error": typeof AuthAuthVerifyVerifyErrorRoute
   "/auth/verify/success": typeof AuthAuthVerifyVerifySuccessRoute
@@ -631,8 +649,10 @@ export interface FileRoutesById {
   "/_authenticated/(nonadmin)/_nonadmin": typeof AuthenticatednonadminNonadminRouteWithChildren
   "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren
   "/_authenticated/admin/_admin": typeof AuthenticatedAdminAdminRouteWithChildren
+  "/_authenticated/first-login/setup": typeof AuthenticatedFirstLoginSetupRoute
   "/_auth/auth/verify": typeof AuthAuthVerifyRouteWithChildren
   "/_auth/auth/verify/_verify": typeof AuthAuthVerifyVerifyRouteWithChildren
+  "/_authenticated/admin/_admin/applications": typeof AuthenticatedAdminAdminApplicationsRoute
   "/_authenticated/admin/_admin/users": typeof AuthenticatedAdminAdminUsersRoute
   "/_auth/auth/verify/": typeof AuthAuthVerifyIndexRoute
   "/_authenticated/admin/_admin/": typeof AuthenticatedAdminAdminIndexRoute
@@ -697,7 +717,9 @@ export interface FileRouteTypes {
     | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/admin"
+    | "/first-login/setup"
     | "/auth/verify"
+    | "/admin/applications"
     | "/admin/users"
     | "/auth/verify/"
     | "/admin/"
@@ -759,7 +781,9 @@ export interface FileRouteTypes {
     | "/auth/reset-password"
     | "/auth/send-verification-email"
     | "/admin"
+    | "/first-login/setup"
     | "/auth/verify"
+    | "/admin/applications"
     | "/admin/users"
     | "/auth/verify/error"
     | "/auth/verify/success"
@@ -824,8 +848,10 @@ export interface FileRouteTypes {
     | "/_authenticated/(nonadmin)/_nonadmin"
     | "/_authenticated/admin"
     | "/_authenticated/admin/_admin"
+    | "/_authenticated/first-login/setup"
     | "/_auth/auth/verify"
     | "/_auth/auth/verify/_verify"
+    | "/_authenticated/admin/_admin/applications"
     | "/_authenticated/admin/_admin/users"
     | "/_auth/auth/verify/"
     | "/_authenticated/admin/_admin/"
@@ -930,6 +956,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthAuthVerifyRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/_authenticated/first-login/setup": {
+      id: "/_authenticated/first-login/setup"
+      path: "/first-login/setup"
+      fullPath: "/first-login/setup"
+      preLoaderRoute: typeof AuthenticatedFirstLoginSetupRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     "/_authenticated/admin/_admin": {
       id: "/_authenticated/admin/_admin"
       path: "/admin"
@@ -1012,6 +1045,13 @@ declare module "@tanstack/react-router" {
       path: "/users"
       fullPath: "/admin/users"
       preLoaderRoute: typeof AuthenticatedAdminAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminAdminRoute
+    }
+    "/_authenticated/admin/_admin/applications": {
+      id: "/_authenticated/admin/_admin/applications"
+      path: "/applications"
+      fullPath: "/admin/applications"
+      preLoaderRoute: typeof AuthenticatedAdminAdminApplicationsRouteImport
       parentRoute: typeof AuthenticatedAdminAdminRoute
     }
     "/_auth/auth/verify/_verify": {
@@ -1490,6 +1530,7 @@ const AuthenticatednonadminRouteWithChildren =
   )
 
 interface AuthenticatedAdminAdminRouteChildren {
+  AuthenticatedAdminAdminApplicationsRoute: typeof AuthenticatedAdminAdminApplicationsRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminBlogCreateRoute: typeof AuthenticatedAdminAdminBlogCreateRoute
@@ -1533,6 +1574,8 @@ interface AuthenticatedAdminAdminRouteChildren {
 
 const AuthenticatedAdminAdminRouteChildren: AuthenticatedAdminAdminRouteChildren =
   {
+    AuthenticatedAdminAdminApplicationsRoute:
+      AuthenticatedAdminAdminApplicationsRoute,
     AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
     AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
     AuthenticatedAdminAdminBlogCreateRoute:
@@ -1630,11 +1673,13 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatednonadminRoute: typeof AuthenticatednonadminRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedFirstLoginSetupRoute: typeof AuthenticatedFirstLoginSetupRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatednonadminRoute: AuthenticatednonadminRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedFirstLoginSetupRoute: AuthenticatedFirstLoginSetupRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
