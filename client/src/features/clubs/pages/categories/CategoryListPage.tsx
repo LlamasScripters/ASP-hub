@@ -40,8 +40,8 @@ import {
 
 import { useMemo, useState } from "react";
 import { useCategoriesBySection } from "../../hooks/useCategories";
-import { useSection } from "../../hooks/useSections";
 import { useDeleteCategory } from "../../hooks/useCategories";
+import { useSection } from "../../hooks/useSections";
 import type { Category } from "../../types";
 
 type SortField = "name" | "ageMin" | "ageMax";
@@ -63,7 +63,8 @@ export function CategoriesListPage() {
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/categories/",
 	});
 
-	const { data, isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const { data, isLoading: categoriesLoading } =
+		useCategoriesBySection(sectionId);
 	const categories = data?.data || [];
 	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
 	const { mutateAsync: deleteCategory } = useDeleteCategory();
@@ -76,7 +77,8 @@ export function CategoriesListPage() {
 		ageMax: "",
 		ageRange: "",
 	});
-	const [deleteCategoryState, setDeleteCategoryState] = useState<Category | null>(null);
+	const [deleteCategoryState, setDeleteCategoryState] =
+		useState<Category | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	const sectionName = section?.name || "";

@@ -1,18 +1,28 @@
-import type { 
-	CategoryResponse,
-	CategoriesPaginatedResponse,
-	CreateCategoryData, 
-	UpdateCategoryData 
-} from "./categories.types.js";
 import { db } from "@/db/index.js";
-import { categories, sections, clubs, sessionsSport, sectionResponsibilities, users, type SelectCategory, } from "@/db/schema.js";
-import { eq, and, asc, count, sql } from "drizzle-orm";
+import {
+	type SelectCategory,
+	categories,
+	clubs,
+	sectionResponsibilities,
+	sections,
+	sessionsSport,
+	users,
+} from "@/db/schema.js";
+import { and, asc, count, eq, sql } from "drizzle-orm";
+import type {
+	CategoriesPaginatedResponse,
+	CategoryResponse,
+	CreateCategoryData,
+	UpdateCategoryData,
+} from "./categories.types.js";
 
 export class CategoriesService {
 	/**
 	 * Récupère une catégorie par son ID avec ses relations
 	 */
-	async getCategoryById(categoryId: string): Promise<CategoryResponse | undefined> {
+	async getCategoryById(
+		categoryId: string,
+	): Promise<CategoryResponse | undefined> {
 		const [result] = await db
 			.select({
 				id: categories.id,
@@ -28,7 +38,9 @@ export class CategoriesService {
 				sectionName: sections.name,
 				sectionColor: sections.color,
 				// Session relation
-				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('sessionsCount'),
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as(
+					"sessionsCount",
+				),
 				// Club relation
 				clubId: clubs.id,
 				clubName: clubs.name,
@@ -42,13 +54,14 @@ export class CategoriesService {
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
-			.leftJoin(sectionResponsibilities,
+			.leftJoin(
+				sectionResponsibilities,
 				and(
 					eq(sectionResponsibilities.sectionId, sections.id),
 					eq(sectionResponsibilities.categoryId, categories.id),
 					eq(sectionResponsibilities.role, "coach"),
-					eq(sectionResponsibilities.isActive, true)
-				)
+					eq(sectionResponsibilities.isActive, true),
+				),
 			)
 			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.where(eq(categories.id, categoryId))
@@ -67,21 +80,23 @@ export class CategoriesService {
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
 			section: {
-				id: result.sectionId || '',
-				name: result.sectionName || '',
+				id: result.sectionId || "",
+				name: result.sectionName || "",
 				color: result.sectionColor || null,
 				club: {
-					id: result.clubId || '',
-					name: result.clubName || '',
+					id: result.clubId || "",
+					name: result.clubName || "",
 				},
 			},
 			sessionsCount: result.sessionsCount ?? 0,
-			coach: result.coachId ? {
-				id: result.coachId,
-				firstName: result.coachFirstName ?? "",
-				lastName: result.coachLastName ?? "",
-				email: result.coachEmail ?? "",
-			} : undefined,
+			coach: result.coachId
+				? {
+						id: result.coachId,
+						firstName: result.coachFirstName ?? "",
+						lastName: result.coachLastName ?? "",
+						email: result.coachEmail ?? "",
+					}
+				: undefined,
 		};
 	}
 
@@ -104,7 +119,9 @@ export class CategoriesService {
 				sectionName: sections.name,
 				sectionColor: sections.color,
 				// Session relation
-				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('categoriesCount'),
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as(
+					"categoriesCount",
+				),
 				// Club relation
 				clubId: clubs.id,
 				clubName: clubs.name,
@@ -118,25 +135,25 @@ export class CategoriesService {
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
-			.leftJoin(sectionResponsibilities,
+			.leftJoin(
+				sectionResponsibilities,
 				and(
 					eq(sectionResponsibilities.sectionId, sections.id),
 					eq(sectionResponsibilities.categoryId, categories.id),
 					eq(sectionResponsibilities.role, "coach"),
-					eq(sectionResponsibilities.isActive, true)
-				)
+					eq(sectionResponsibilities.isActive, true),
+				),
 			)
 			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.groupBy(categories.id, sections.id, clubs.id, users.id)
 			.orderBy(asc(categories.name));
-
 
 		// Comptage total
 		const [{ count }] = await db
 			.select({ count: sql<number>`count(*)` })
 			.from(categories);
 
-		const formattedData = data.map(row => ({
+		const formattedData = data.map((row) => ({
 			id: row.id,
 			sectionId: row.sectionId,
 			name: row.name,
@@ -147,21 +164,23 @@ export class CategoriesService {
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
 			section: {
-				id: row.sectionId || '',
-				name: row.sectionName || '',
+				id: row.sectionId || "",
+				name: row.sectionName || "",
 				color: row.sectionColor || null,
 				club: {
-					id: row.clubId || '',
-					name: row.clubName || '',
+					id: row.clubId || "",
+					name: row.clubName || "",
 				},
 			},
 			sessionsCount: row.sessionsCount || 0,
-			coach: row.coachId ? {
-				id: row.coachId,
-				firstName: row.coachFirstName || "",
-				lastName: row.coachLastName || "",
-				email: row.coachEmail || "",
-			} : undefined,
+			coach: row.coachId
+				? {
+						id: row.coachId,
+						firstName: row.coachFirstName || "",
+						lastName: row.coachLastName || "",
+						email: row.coachEmail || "",
+					}
+				: undefined,
 		}));
 
 		return {
@@ -173,7 +192,9 @@ export class CategoriesService {
 	/**
 	 * Récupère les catégories d'une section
 	 */
-	async getCategoriesBySection(sectionId: string): Promise<CategoriesPaginatedResponse> {
+	async getCategoriesBySection(
+		sectionId: string,
+	): Promise<CategoriesPaginatedResponse> {
 		const data = await db
 			.select({
 				id: categories.id,
@@ -189,7 +210,9 @@ export class CategoriesService {
 				sectionName: sections.name,
 				sectionColor: sections.color,
 				// Session relation
-				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as('categoriesCount'),
+				sessionsCount: sql<number>`count(distinct ${sessionsSport.id})`.as(
+					"categoriesCount",
+				),
 				// Club relation
 				clubId: clubs.id,
 				clubName: clubs.name,
@@ -203,19 +226,19 @@ export class CategoriesService {
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(sessionsSport, eq(sessionsSport.categoryId, categories.id))
-			.leftJoin(sectionResponsibilities,
+			.leftJoin(
+				sectionResponsibilities,
 				and(
 					eq(sectionResponsibilities.sectionId, sections.id),
 					eq(sectionResponsibilities.categoryId, categories.id),
 					eq(sectionResponsibilities.role, "coach"),
-					eq(sectionResponsibilities.isActive, true)
-				)
+					eq(sectionResponsibilities.isActive, true),
+				),
 			)
 			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.where(eq(categories.sectionId, sectionId))
 			.groupBy(categories.id, sections.id, clubs.id, users.id)
 			.orderBy(asc(categories.name));
-
 
 		// Comptage total
 		const [{ count }] = await db
@@ -223,7 +246,7 @@ export class CategoriesService {
 			.from(categories)
 			.where(eq(categories.sectionId, sectionId));
 
-		const formattedData = data.map(row => ({
+		const formattedData = data.map((row) => ({
 			id: row.id,
 			sectionId: row.sectionId,
 			name: row.name,
@@ -234,21 +257,23 @@ export class CategoriesService {
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
 			section: {
-				id: row.sectionId || '',
-				name: row.sectionName || '',
+				id: row.sectionId || "",
+				name: row.sectionName || "",
 				color: row.sectionColor || null,
 				club: {
-					id: row.clubId || '',
-					name: row.clubName || '',
+					id: row.clubId || "",
+					name: row.clubName || "",
 				},
 			},
 			sessionsCount: row.sessionsCount || 0,
-			coach: row.coachId ? {
-				id: row.coachId,
-				firstName: row.coachFirstName || "",
-				lastName: row.coachLastName || "",
-				email: row.coachEmail || "",
-			} : undefined,
+			coach: row.coachId
+				? {
+						id: row.coachId,
+						firstName: row.coachFirstName || "",
+						lastName: row.coachLastName || "",
+						email: row.coachEmail || "",
+					}
+				: undefined,
 		}));
 
 		return {
@@ -286,7 +311,10 @@ export class CategoriesService {
 	/**
 	 * Mettre à jour une catégorie
 	 */
-	async updateCategory(id: string, data: UpdateCategoryData): Promise<SelectCategory | undefined> {
+	async updateCategory(
+		id: string,
+		data: UpdateCategoryData,
+	): Promise<SelectCategory | undefined> {
 		const [updatedCategory] = await db
 			.update(categories)
 			.set({
@@ -320,7 +348,9 @@ export class CategoriesService {
 		}
 
 		if (category.sessionsCount && category.sessionsCount > 0) {
-			throw new Error("Impossible de supprimer une catégorie qui contient des sessions");
+			throw new Error(
+				"Impossible de supprimer une catégorie qui contient des sessions",
+			);
 		}
 
 		await db.delete(categories).where(eq(categories.id, id));
@@ -329,7 +359,10 @@ export class CategoriesService {
 	/**
 	 * Désactiver/Activer une catégorie
 	 */
-	async toggleCategoryStatus(id: string, isActive: boolean): Promise<SelectCategory | undefined> {
+	async toggleCategoryStatus(
+		id: string,
+		isActive: boolean,
+	): Promise<SelectCategory | undefined> {
 		return await this.updateCategory(id, { isActive });
 	}
 
@@ -360,8 +393,8 @@ export class CategoriesService {
 			.where(
 				and(
 					eq(sessionsSport.categoryId, id),
-					sql`${sessionsSport.status} != 'annule'`
-				)
+					sql`${sessionsSport.status} != 'annule'`,
+				),
 			);
 
 		// Pour les membres, on devrait avoir une table session_members

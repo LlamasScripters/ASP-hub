@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/lib/config";
 import {
 	type Complex,
 	type ComplexFilters,
@@ -7,7 +8,6 @@ import {
 	complexSchema,
 	complexesPaginatedResponseSchema,
 } from "@room-booking/hooks/useComplexes";
-import { API_BASE_URL } from "../../../../lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;

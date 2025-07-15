@@ -1,5 +1,9 @@
 import { db } from "@/db/index.js";
-import { membershipApplications, sectionResponsibilities, users } from "@/db/schema.js";
+import {
+	membershipApplications,
+	sectionResponsibilities,
+	users,
+} from "@/db/schema.js";
 import { and, eq } from "drizzle-orm";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 
@@ -14,9 +18,12 @@ import type { ExtractTablesWithRelations } from "drizzle-orm";
  * @param transaction - Transaction optionnelle pour assurer la cohérence
  * @returns "member" si l'utilisateur a une candidature approuvée, "user" sinon
  */
-export async function getUserBaseRole(userId: string, transaction?: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0]): Promise<"member" | "user"> {
+export async function getUserBaseRole(
+	userId: string,
+	transaction?: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<"member" | "user"> {
 	const dbInstance = transaction || db;
-	
+
 	// Vérifier s'il a une candidature approuvée
 	const [approvedApplication] = await dbInstance
 		.select()
@@ -37,9 +44,12 @@ export async function getUserBaseRole(userId: string, transaction?: typeof db | 
  * @param transaction - Transaction optionnelle pour assurer la cohérence
  * @returns Le nouveau rôle de l'utilisateur
  */
-export async function updateUserRole(userId: string, transaction?: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0]): Promise<"admin" | "section_manager" | "coach" | "member" | "user"> {
+export async function updateUserRole(
+	userId: string,
+	transaction?: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<"admin" | "section_manager" | "coach" | "member" | "user"> {
 	const dbInstance = transaction || db;
-	
+
 	// Vérifier les responsabilités actives
 	const responsibilities = await dbInstance
 		.select()
@@ -55,9 +65,13 @@ export async function updateUserRole(userId: string, transaction?: typeof db | P
 		"user";
 
 	// Déterminer le rôle en fonction des responsabilités (ordre de priorité)
-	if (responsibilities.some((r: { role: string }) => r.role === "section_manager")) {
+	if (
+		responsibilities.some((r: { role: string }) => r.role === "section_manager")
+	) {
 		newRole = "section_manager";
-	} else if (responsibilities.some((r: { role: string }) => r.role === "coach")) {
+	} else if (
+		responsibilities.some((r: { role: string }) => r.role === "coach")
+	) {
 		newRole = "coach";
 	} else {
 		// Pas de responsabilités, déterminer le rôle de base
@@ -65,7 +79,10 @@ export async function updateUserRole(userId: string, transaction?: typeof db | P
 	}
 
 	// Mettre à jour le rôle dans la table users
-	await dbInstance.update(users).set({ role: newRole }).where(eq(users.id, userId));
+	await dbInstance
+		.update(users)
+		.set({ role: newRole })
+		.where(eq(users.id, userId));
 
 	return newRole;
 }

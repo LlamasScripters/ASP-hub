@@ -1,22 +1,26 @@
-import { type Request, type Response, Router } from "express";
-import { tagsService } from "./tags.service.js";
+import { UserRole } from "@/lib/roles.js";
 import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
 import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
-import { UserRole } from "@/lib/roles.js";
+import { type Request, type Response, Router } from "express";
+import { tagsService } from "./tags.service.js";
 
 const tagsRouter = Router();
 tagsRouter.use(requireAuth);
 
 // GET /api/tags - Get all tags
-tagsRouter.get("/", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
-	try {
-		const tags = await tagsService.getAllTags();
-		res.json(tags);
-	} catch (error) {
-		console.error("Erreur lors de la récupération des tags:", error);
-		res.status(500).json({ error: "Erreur interne du serveur" });
-	}
-});
+tagsRouter.get(
+	"/",
+	requireMemberAccess(),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const tags = await tagsService.getAllTags();
+			res.json(tags);
+		} catch (error) {
+			console.error("Erreur lors de la récupération des tags:", error);
+			res.status(500).json({ error: "Erreur interne du serveur" });
+		}
+	},
+);
 
 // GET /api/tags/search - Search tags
 tagsRouter.get(
@@ -40,103 +44,115 @@ tagsRouter.get(
 );
 
 // GET /api/tags/:id - Get tag by ID
-tagsRouter.get("/:id", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
-	try {
-		const id = Number.parseInt(req.params.id);
-		if (Number.isNaN(id)) {
-			res.status(400).json({ error: "ID de tag invalide" });
-			return;
-		}
+tagsRouter.get(
+	"/:id",
+	requireMemberAccess(),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const id = Number.parseInt(req.params.id);
+			if (Number.isNaN(id)) {
+				res.status(400).json({ error: "ID de tag invalide" });
+				return;
+			}
 
-		const tag = await tagsService.getTagById(id);
-		if (!tag) {
-			res.status(404).json({ error: "Tag non trouvé" });
-			return;
-		}
+			const tag = await tagsService.getTagById(id);
+			if (!tag) {
+				res.status(404).json({ error: "Tag non trouvé" });
+				return;
+			}
 
-		res.json(tag);
-	} catch (error) {
-		console.error("Erreur lors de la récupération du tag:", error);
-		res.status(500).json({ error: "Erreur interne du serveur" });
-	}
-});
+			res.json(tag);
+		} catch (error) {
+			console.error("Erreur lors de la récupération du tag:", error);
+			res.status(500).json({ error: "Erreur interne du serveur" });
+		}
+	},
+);
 
 // POST /api/tags - Create new tag (admin only)
-tagsRouter.post("/", requireRole(UserRole.ADMIN), async (req: Request, res: Response): Promise<void> => {
-	try {
-		const { name } = req.body;
-		if (!name || typeof name !== "string" || name.trim().length === 0) {
-			res.status(400).json({ error: "Nom du tag requis" });
-			return;
-		}
+tagsRouter.post(
+	"/",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const { name } = req.body;
+			if (!name || typeof name !== "string" || name.trim().length === 0) {
+				res.status(400).json({ error: "Nom du tag requis" });
+				return;
+			}
 
-		if (name.trim().length > 50) {
-			res
-				.status(400)
-				.json({ error: "Le nom du tag ne peut pas dépasser 50 caractères" });
-			return;
-		}
+			if (name.trim().length > 50) {
+				res
+					.status(400)
+					.json({ error: "Le nom du tag ne peut pas dépasser 50 caractères" });
+				return;
+			}
 
-		const tag = await tagsService.createTag({ name: name.trim() });
-		res.status(201).json(tag);
-	} catch (error) {
-		console.error("Erreur lors de la création du tag:", error);
-		if (
-			error &&
-			typeof error === "object" &&
-			"code" in error &&
-			error.code === "23505"
-		) {
-			res.status(409).json({ error: "Ce nom de tag existe déjà" });
-			return;
+			const tag = await tagsService.createTag({ name: name.trim() });
+			res.status(201).json(tag);
+		} catch (error) {
+			console.error("Erreur lors de la création du tag:", error);
+			if (
+				error &&
+				typeof error === "object" &&
+				"code" in error &&
+				error.code === "23505"
+			) {
+				res.status(409).json({ error: "Ce nom de tag existe déjà" });
+				return;
+			}
+			res.status(500).json({ error: "Erreur interne du serveur" });
 		}
-		res.status(500).json({ error: "Erreur interne du serveur" });
-	}
-});
+	},
+);
 
 // PUT /api/tags/:id - Update tag (admin only)
-tagsRouter.put("/:id", requireRole(UserRole.ADMIN), async (req: Request, res: Response): Promise<void> => {
-	try {
-		const id = Number.parseInt(req.params.id);
-		if (Number.isNaN(id)) {
-			res.status(400).json({ error: "ID de tag invalide" });
-			return;
-		}
+tagsRouter.put(
+	"/:id",
+	requireRole(UserRole.ADMIN),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const id = Number.parseInt(req.params.id);
+			if (Number.isNaN(id)) {
+				res.status(400).json({ error: "ID de tag invalide" });
+				return;
+			}
 
-		const { name } = req.body;
-		if (!name || typeof name !== "string" || name.trim().length === 0) {
-			res.status(400).json({ error: "Nom du tag requis" });
-			return;
-		}
+			const { name } = req.body;
+			if (!name || typeof name !== "string" || name.trim().length === 0) {
+				res.status(400).json({ error: "Nom du tag requis" });
+				return;
+			}
 
-		if (name.trim().length > 50) {
-			res
-				.status(400)
-				.json({ error: "Le nom du tag ne peut pas dépasser 50 caractères" });
-			return;
-		}
+			if (name.trim().length > 50) {
+				res
+					.status(400)
+					.json({ error: "Le nom du tag ne peut pas dépasser 50 caractères" });
+				return;
+			}
 
-		const tag = await tagsService.updateTag(id, { name: name.trim() });
-		if (!tag) {
-			res.status(404).json({ error: "Tag non trouvé" });
-			return;
-		}
+			const tag = await tagsService.updateTag(id, { name: name.trim() });
+			if (!tag) {
+				res.status(404).json({ error: "Tag non trouvé" });
+				return;
+			}
 
-		res.json(tag);
-	} catch (error) {
-		console.error("Erreur lors de la mise à jour du tag:", error);
-		if (
-			error &&
-			typeof error === "object" &&
-			"code" in error &&
-			error.code === "23505"
-		) {
-			res.status(409).json({ error: "Ce nom de tag existe déjà" });
-			return;
+			res.json(tag);
+		} catch (error) {
+			console.error("Erreur lors de la mise à jour du tag:", error);
+			if (
+				error &&
+				typeof error === "object" &&
+				"code" in error &&
+				error.code === "23505"
+			) {
+				res.status(409).json({ error: "Ce nom de tag existe déjà" });
+				return;
+			}
+			res.status(500).json({ error: "Erreur interne du serveur" });
 		}
-		res.status(500).json({ error: "Erreur interne du serveur" });
-	}
-});
+	},
+);
 
 // DELETE /api/tags/:id - Delete tag (admin only)
 tagsRouter.delete(

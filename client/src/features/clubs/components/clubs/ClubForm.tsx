@@ -80,7 +80,10 @@ export function ClubForm({
 	const createClubMutation = useCreateClub();
 	const updateClubMutation = useUpdateClub();
 
-	const isLoading = isLoadingClub || createClubMutation.isPending || updateClubMutation.isPending;
+	const isLoading =
+		isLoadingClub ||
+		createClubMutation.isPending ||
+		updateClubMutation.isPending;
 
 	const form = useForm<ClubFormData>({
 		resolver: zodResolver(clubSchema),

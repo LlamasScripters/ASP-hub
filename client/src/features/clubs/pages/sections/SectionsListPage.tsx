@@ -31,7 +31,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
-import { useSectionsByClub, useDeleteSection } from "../../hooks/useSections";
+import { useDeleteSection, useSectionsByClub } from "../../hooks/useSections";
 import type { Section } from "../../types";
 
 export function SectionsListPage() {
@@ -39,7 +39,7 @@ export function SectionsListPage() {
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/",
 	});
 	const navigate = useNavigate();
-	
+
 	const { data, isLoading } = useSectionsByClub(clubId);
 	const sections = data?.data || [];
 
@@ -52,7 +52,7 @@ export function SectionsListPage() {
 	}, 0);
 
 	const deleteSectionMutation = useDeleteSection();
-	
+
 	const [deleteSection, setDeleteSection] = useState<Section | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
@@ -270,7 +270,7 @@ export function SectionsListPage() {
 											{section.description || "Aucune description disponible"}
 										</CardDescription>
 										{/* Responsable de section */}
-										{section.manager? (
+										{section.manager ? (
 											<div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
 												<User className="h-3 w-3" />
 												<span>

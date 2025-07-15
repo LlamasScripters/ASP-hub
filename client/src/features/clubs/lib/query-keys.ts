@@ -38,7 +38,8 @@ export const sectionsQueryKeys = {
 	all: ["sections"] as const,
 	lists: () => [...sectionsQueryKeys.all, "list"] as const,
 	list: (filters = {}) => [...sectionsQueryKeys.lists(), filters] as const,
-	byClub: (clubId: string) => [...sectionsQueryKeys.lists(), "by-club", clubId] as const,
+	byClub: (clubId: string) =>
+		[...sectionsQueryKeys.lists(), "by-club", clubId] as const,
 	details: () => [...sectionsQueryKeys.all, "detail"] as const,
 	detail: (id: string) => [...sectionsQueryKeys.details(), id] as const,
 } as const;

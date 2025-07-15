@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useSection } from "../../hooks/useSections";
 import { SectionForm } from "../../components/sections/SectionForm";
+import { useSection } from "../../hooks/useSections";
 
 export function SectionEditPage() {
 	const { clubId, sectionId } = useParams({
@@ -56,7 +56,9 @@ export function SectionEditPage() {
 				</div>
 				<Alert variant="destructive">
 					<AlertCircle className="h-4 w-4" />
-					<AlertDescription>{error?.message || "Section non trouvée"}</AlertDescription>
+					<AlertDescription>
+						{error?.message || "Section non trouvée"}
+					</AlertDescription>
 				</Alert>
 			</div>
 		);

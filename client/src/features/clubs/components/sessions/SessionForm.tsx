@@ -30,10 +30,15 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import type { SessionSport } from "../../types";
-import { useSessions, useSession, useCreateSession, useUpdateSession } from "../../hooks/useSessions";
 import { useCategoriesBySection } from "../../hooks/useCategories";
 import { useSection } from "../../hooks/useSections";
+import {
+	useCreateSession,
+	useSession,
+	useSessions,
+	useUpdateSession,
+} from "../../hooks/useSessions";
+import type { SessionSport } from "../../types";
 
 const sessionSchema = z
 	.object({
@@ -109,15 +114,17 @@ export function SessionForm({
 	sessionId?: string;
 }) {
 	const navigate = useNavigate();
-	
+
 	// Use hooks for data fetching and mutations
 	const { data: allSessions } = useSessions();
-	const { data: existingSession, isLoading: isLoadingSession } = useSession(sessionId || "");
+	const { data: existingSession, isLoading: isLoadingSession } = useSession(
+		sessionId || "",
+	);
 	const { data: categoriesData } = useCategoriesBySection(sectionId);
 	const { data: sectionData } = useSection(sectionId);
 	const createSessionMutation = useCreateSession();
 	const updateSessionMutation = useUpdateSession();
-	
+
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [dateValidation, setDateValidation] = useState<{
 		isValid: boolean;
@@ -152,8 +159,8 @@ export function SessionForm({
 	// Get existing sessions for duplicate validation
 	const existingSessions = useMemo(() => {
 		if (!allSessions?.data) return [];
-		return allSessions.data.filter(session => 
-			session.category?.section?.club?.id === clubId
+		return allSessions.data.filter(
+			(session) => session.category?.section?.club?.id === clubId,
 		);
 	}, [allSessions, clubId]);
 
@@ -743,7 +750,8 @@ export function SessionForm({
 									}
 									className="flex items-center gap-2 flex-1 sm:flex-none hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
-									{createSessionMutation.isPending || updateSessionMutation.isPending ? (
+									{createSessionMutation.isPending ||
+									updateSessionMutation.isPending ? (
 										<>
 											<Loader2 className="h-4 w-4 animate-spin" />
 											{mode === "create" ? "Création..." : "Modification..."}
@@ -759,7 +767,10 @@ export function SessionForm({
 									type="button"
 									variant="outline"
 									onClick={handleBack}
-									disabled={createSessionMutation.isPending || updateSessionMutation.isPending}
+									disabled={
+										createSessionMutation.isPending ||
+										updateSessionMutation.isPending
+									}
 									className="flex items-center gap-2 hover:cursor-pointer hover:opacity-90 transition-opacity"
 								>
 									<ArrowLeft className="h-4 w-4" />

@@ -1,5 +1,10 @@
 // Énumérations des types et statuts
-export type SessionType = "entrainement" | "match" | "stage" | "competition" | "autre";
+export type SessionType =
+	| "entrainement"
+	| "match"
+	| "stage"
+	| "competition"
+	| "autre";
 export type SessionStatus = "planifie" | "en_cours" | "termine" | "annule";
 
 // Types pour les sessions côté client

@@ -1,60 +1,67 @@
-import type { 
-	SectionResponsibility, 
-	ResponsibilityWithUser, 
-	ResponsibilityAssignmentResult, 
-	ResponsibilityFilters,
-	UserResponsibilityWithDetails 
-} from "./responsibilities.types.js";
 import { db } from "@/db/index.js";
-import { sectionResponsibilities, users, sections, categories } from "@/db/schema.js";
-import { eq, and, ne, isNull, asc } from "drizzle-orm";
+import {
+	categories,
+	sectionResponsibilities,
+	sections,
+	users,
+} from "@/db/schema.js";
+import { and, asc, eq, isNull, ne } from "drizzle-orm";
 import { updateUserRole } from "../shared/membership-helpers.js";
+import type {
+	ResponsibilityAssignmentResult,
+	ResponsibilityFilters,
+	ResponsibilityWithUser,
+	SectionResponsibility,
+	UserResponsibilityWithDetails,
+} from "./responsibilities.types.js";
 
 export class ResponsibilitiesService {
 	/**
 	 * Récupère les responsabilités avec filtres
 	 */
-	async getResponsibilities(filters: ResponsibilityFilters = {}): Promise<ResponsibilityWithUser[]> {
+	async getResponsibilities(
+		filters: ResponsibilityFilters = {},
+	): Promise<ResponsibilityWithUser[]> {
 		const { sectionId, categoryId, role, isActive, userId } = filters;
-		
+
 		// Construction des conditions WHERE
 		const whereConditions = [];
-		
+
 		if (sectionId) {
 			whereConditions.push(eq(sectionResponsibilities.sectionId, sectionId));
 		}
-		
+
 		if (categoryId) {
 			whereConditions.push(eq(sectionResponsibilities.categoryId, categoryId));
 		}
-		
+
 		if (role) {
 			whereConditions.push(eq(sectionResponsibilities.role, role));
 		}
-		
+
 		if (isActive !== undefined) {
 			whereConditions.push(eq(sectionResponsibilities.isActive, isActive));
 		}
-		
+
 		if (userId) {
 			whereConditions.push(eq(sectionResponsibilities.userId, userId));
 		}
-		
+
 		const result = await db
 			.select()
 			.from(sectionResponsibilities)
 			.leftJoin(users, eq(sectionResponsibilities.userId, users.id))
 			.where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
 			.orderBy(sectionResponsibilities.assignedAt);
-		
-		return result.map(row => ({
+
+		return result.map((row) => ({
 			...row.section_responsibilities,
 			user: {
 				id: row.users?.id || "",
 				firstName: row.users?.firstName || "",
 				lastName: row.users?.lastName || "",
 				email: row.users?.email || "",
-			}
+			},
 		})) as ResponsibilityWithUser[];
 	}
 
@@ -77,7 +84,10 @@ export class ResponsibilitiesService {
 	/**
 	 * Assigne un responsable de section
 	 */
-	async assignSectionManager(sectionId: string, userId: string): Promise<ResponsibilityAssignmentResult> {
+	async assignSectionManager(
+		sectionId: string,
+		userId: string,
+	): Promise<ResponsibilityAssignmentResult> {
 		// Validation des paramètres d'entrée
 		if (!sectionId || !userId) {
 			throw new Error("Section ID and User ID are required");
@@ -184,7 +194,10 @@ export class ResponsibilitiesService {
 	/**
 	 * Assigne un coach à une catégorie
 	 */
-	async assignCategoryCoach(categoryId: string, userId: string): Promise<ResponsibilityAssignmentResult> {
+	async assignCategoryCoach(
+		categoryId: string,
+		userId: string,
+	): Promise<ResponsibilityAssignmentResult> {
 		// Validation des paramètres d'entrée
 		if (!categoryId || !userId) {
 			throw new Error("Category ID and User ID are required");
@@ -292,7 +305,9 @@ export class ResponsibilitiesService {
 	/**
 	 * Récupère les responsabilités d'un utilisateur
 	 */
-	async getUserResponsibilities(userId: string): Promise<UserResponsibilityWithDetails[]> {
+	async getUserResponsibilities(
+		userId: string,
+	): Promise<UserResponsibilityWithDetails[]> {
 		const results = await db
 			.select({
 				id: sectionResponsibilities.id,
@@ -324,14 +339,18 @@ export class ResponsibilitiesService {
 	/**
 	 * Récupère les responsabilités d'une section
 	 */
-	async getSectionResponsibilities(sectionId: string): Promise<ResponsibilityWithUser[]> {
+	async getSectionResponsibilities(
+		sectionId: string,
+	): Promise<ResponsibilityWithUser[]> {
 		return this.getResponsibilities({ sectionId, isActive: true });
 	}
 
 	/**
 	 * Récupère les responsabilités d'une catégorie
 	 */
-	async getCategoryResponsibilities(categoryId: string): Promise<ResponsibilityWithUser[]> {
+	async getCategoryResponsibilities(
+		categoryId: string,
+	): Promise<ResponsibilityWithUser[]> {
 		return this.getResponsibilities({ categoryId, isActive: true });
 	}
 

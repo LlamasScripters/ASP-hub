@@ -1,6 +1,6 @@
 import ky from "ky";
-import { API_CONFIG } from "./config";
+import { API_BASE_URL } from "./config";
 
 export const api = ky.create({
-	prefixUrl: API_CONFIG.FULL_URL,
+	prefixUrl: API_BASE_URL,
 });

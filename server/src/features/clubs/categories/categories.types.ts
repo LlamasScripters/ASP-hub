@@ -39,4 +39,3 @@ export interface CategoriesPaginatedResponse {
 	data: CategoryResponse[];
 	total: number;
 }
-

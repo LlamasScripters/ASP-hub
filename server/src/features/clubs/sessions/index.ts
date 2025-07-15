@@ -5,10 +5,10 @@ export { SessionsService } from "./sessions.service.js";
 export { default as sessionsRouter } from "./sessions.controller.js";
 
 // Export des types
-export type { 
-	SessionStats, 
-	SessionConflict, 
-	ParticipantAction 
+export type {
+	SessionStats,
+	SessionConflict,
+	ParticipantAction,
 } from "./sessions.types.js";
 
 // Export des schémas

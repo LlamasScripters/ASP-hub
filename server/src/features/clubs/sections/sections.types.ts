@@ -33,4 +33,3 @@ export interface SectionsPaginatedResponse {
 	data: SectionResponse[];
 	total: number;
 }
-

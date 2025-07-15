@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useCategory } from "../../hooks/useCategories";
 import { CategoryForm } from "../../components/categories/CategoryForm";
+import { useCategory } from "../../hooks/useCategories";
 
 export function CategoryEditPage() {
 	const { clubId, sectionId, categoryId } = useParams({

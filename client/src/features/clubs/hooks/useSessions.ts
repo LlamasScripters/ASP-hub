@@ -1,20 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { sessionsApi } from "./../lib/api";
-import type { 
-	CreateSessionData, 
-	UpdateSessionData, 
-	ParticipantAction 
+import type {
+	CreateSessionData,
+	ParticipantAction,
+	UpdateSessionData,
 } from "./../types";
 
 // Query keys
 export const sessionsQueryKeys = {
-	all: ['sessions'] as const,
-	lists: () => [...sessionsQueryKeys.all, 'list'] as const,
-	details: () => [...sessionsQueryKeys.all, 'detail'] as const,
+	all: ["sessions"] as const,
+	lists: () => [...sessionsQueryKeys.all, "list"] as const,
+	details: () => [...sessionsQueryKeys.all, "detail"] as const,
 	detail: (id: string) => [...sessionsQueryKeys.details(), id] as const,
-	stats: () => [...sessionsQueryKeys.all, 'stats'] as const,
-	conflicts: (data: CreateSessionData) => [...sessionsQueryKeys.all, 'conflicts', data] as const,
+	stats: () => [...sessionsQueryKeys.all, "stats"] as const,
+	conflicts: (data: CreateSessionData) =>
+		[...sessionsQueryKeys.all, "conflicts", data] as const,
 };
 
 // Query hooks
@@ -46,7 +47,7 @@ export function useSessionStats() {
 
 export function useSessionsByCategory(categoryId: string) {
 	return useQuery({
-		queryKey: [...sessionsQueryKeys.all, 'category', categoryId],
+		queryKey: [...sessionsQueryKeys.all, "category", categoryId],
 		queryFn: () => sessionsApi.getSessionsByCategory(categoryId),
 		enabled: !!categoryId,
 		staleTime: 2 * 60 * 1000,
@@ -71,33 +72,38 @@ export function useCreateSession() {
 		onSuccess: (newSession) => {
 			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
-			
+
 			// Invalidate all sessions queries
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
-			
+
 			// Invalidate sessions by category
 			if (newSession.categoryId) {
-				queryClient.invalidateQueries({ 
-					queryKey: [...sessionsQueryKeys.all, 'category', newSession.categoryId] 
+				queryClient.invalidateQueries({
+					queryKey: [
+						...sessionsQueryKeys.all,
+						"category",
+						newSession.categoryId,
+					],
 				});
 			}
-			
+
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
-			
+
 			// Invalidate categories (for session count)
-			queryClient.invalidateQueries({ queryKey: ['categories'] });
-			
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+
 			// Optimistically update the cache
 			queryClient.setQueryData(
 				sessionsQueryKeys.detail(newSession.id),
-				newSession
+				newSession,
 			);
-			
+
 			toast.success("Session créée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création";
+			const errorMessage =
+				error instanceof Error ? error.message : "Erreur lors de la création";
 			toast.error(errorMessage);
 		},
 	});
@@ -111,34 +117,38 @@ export function useUpdateSession() {
 			sessionsApi.updateSession(id, data),
 		onSuccess: (updatedSession, { id }) => {
 			// Update the specific session in the cache
-			queryClient.setQueryData(
-				sessionsQueryKeys.detail(id),
-				updatedSession
-			);
-			
+			queryClient.setQueryData(sessionsQueryKeys.detail(id), updatedSession);
+
 			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
-			
+
 			// Invalidate all sessions queries
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
-			
+
 			// Invalidate sessions by category
 			if (updatedSession.categoryId) {
-				queryClient.invalidateQueries({ 
-					queryKey: [...sessionsQueryKeys.all, 'category', updatedSession.categoryId] 
+				queryClient.invalidateQueries({
+					queryKey: [
+						...sessionsQueryKeys.all,
+						"category",
+						updatedSession.categoryId,
+					],
 				});
 			}
-			
+
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
-			
+
 			// Invalidate categories (for session count)
-			queryClient.invalidateQueries({ queryKey: ['categories'] });
-			
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+
 			toast.success("Session modifiée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la modification";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification";
 			toast.error(errorMessage);
 		},
 	});
@@ -152,28 +162,31 @@ export function useDeleteSession() {
 		onSuccess: (_, id) => {
 			// Remove the session from the cache
 			queryClient.removeQueries({ queryKey: sessionsQueryKeys.detail(id) });
-			
+
 			// Invalidate all sessions lists
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
-			
+
 			// Invalidate all sessions queries
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
-			
+
 			// Invalidate all sessions by category queries
-			queryClient.invalidateQueries({ 
-				queryKey: [...sessionsQueryKeys.all, 'category'] 
+			queryClient.invalidateQueries({
+				queryKey: [...sessionsQueryKeys.all, "category"],
 			});
-			
+
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
-			
+
 			// Invalidate categories (for session count)
-			queryClient.invalidateQueries({ queryKey: ['categories'] });
-			
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+
 			toast.success("Session supprimée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la suppression";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression";
 			toast.error(errorMessage);
 		},
 	});
@@ -183,28 +196,34 @@ export function useManageParticipants() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ sessionId, action }: { sessionId: string; action: ParticipantAction }) =>
+		mutationFn: ({
+			sessionId,
+			action,
+		}: { sessionId: string; action: ParticipantAction }) =>
 			sessionsApi.manageParticipants(sessionId, action),
 		onSuccess: (_, { sessionId, action }) => {
 			// Invalidate the specific session to refresh participant data
-			queryClient.invalidateQueries({ 
-				queryKey: sessionsQueryKeys.detail(sessionId) 
+			queryClient.invalidateQueries({
+				queryKey: sessionsQueryKeys.detail(sessionId),
 			});
-			
+
 			// Invalidate all sessions lists to update participant counts
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.lists() });
-			
+
 			// Invalidate all sessions queries
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.all });
-			
+
 			// Invalidate stats
 			queryClient.invalidateQueries({ queryKey: sessionsQueryKeys.stats() });
-			
-			const actionText = action.action === 'add' ? 'rejoint' : 'quitté';
+
+			const actionText = action.action === "add" ? "rejoint" : "quitté";
 			toast.success(`Vous avez ${actionText} la session avec succès`);
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la gestion des participants";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la gestion des participants";
 			toast.error(errorMessage);
 		},
 	});

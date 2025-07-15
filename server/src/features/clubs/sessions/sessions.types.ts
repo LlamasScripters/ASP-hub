@@ -2,11 +2,21 @@ import type { InsertSessionSport, SelectSessionSport } from "@/db/schema.js";
 
 // Types pour les sessions
 export type Session = SelectSessionSport;
-export type CreateSessionData = Omit<InsertSessionSport, 'id' | 'createdAt' | 'updatedAt' | 'currentParticipants'>;
-export type UpdateSessionData = Partial<Omit<InsertSessionSport, 'id' | 'createdAt' | 'categoryId'>>;
+export type CreateSessionData = Omit<
+	InsertSessionSport,
+	"id" | "createdAt" | "updatedAt" | "currentParticipants"
+>;
+export type UpdateSessionData = Partial<
+	Omit<InsertSessionSport, "id" | "createdAt" | "categoryId">
+>;
 
 // Énumérations des types et statuts
-export type SessionType = "entrainement" | "match" | "stage" | "competition" | "autre";
+export type SessionType =
+	| "entrainement"
+	| "match"
+	| "stage"
+	| "competition"
+	| "autre";
 export type SessionStatus = "planifie" | "en_cours" | "termine" | "annule";
 
 // Types pour les réponses API avec relations

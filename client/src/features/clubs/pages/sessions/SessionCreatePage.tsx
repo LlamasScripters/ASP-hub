@@ -2,8 +2,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useSection } from "../../hooks/useSections";
 import { SessionForm } from "../../components/sessions/SessionForm";
+import { useSection } from "../../hooks/useSections";
 
 export function SessionCreatePage() {
 	const { clubId, sectionId, categoryId } = useParams({

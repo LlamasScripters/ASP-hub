@@ -16,11 +16,15 @@ export const assignResponsibilitySchema = z.object({
 	sectionId: z.string().uuid("ID section invalide").optional(),
 	categoryId: z.string().uuid("ID catégorie invalide").optional(),
 	role: z.enum(["section_manager", "coach"], {
-		errorMap: () => ({ message: "Rôle invalide" })
+		errorMap: () => ({ message: "Rôle invalide" }),
 	}),
 });
 
 // Types d'export
-export type AssignSectionManagerData = z.infer<typeof assignSectionManagerSchema>;
+export type AssignSectionManagerData = z.infer<
+	typeof assignSectionManagerSchema
+>;
 export type AssignCategoryCoachData = z.infer<typeof assignCategoryCoachSchema>;
-export type AssignResponsibilityData = z.infer<typeof assignResponsibilitySchema>;
+export type AssignResponsibilityData = z.infer<
+	typeof assignResponsibilitySchema
+>;

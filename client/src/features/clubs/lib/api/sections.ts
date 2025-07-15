@@ -1,6 +1,11 @@
-import type { Section, SectionsPaginatedResponse, CreateSectionData, UpdateSectionData } from "@/features/clubs/types/sections";
+import type {
+	CreateSectionData,
+	Section,
+	SectionsPaginatedResponse,
+	UpdateSectionData,
+} from "@/features/clubs/types/sections";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;
@@ -16,9 +21,7 @@ export class SectionsApiClient {
 	/**
 	 * Récupère toutes les sections avec pagination et filtres
 	 */
-	async getSections(
-		options?: ApiOptions,
-	): Promise<SectionsPaginatedResponse> {
+	async getSections(options?: ApiOptions): Promise<SectionsPaginatedResponse> {
 		const queryParams = new URLSearchParams();
 
 		const url = `${this.baseUrl}/sections?${queryParams}`;
@@ -54,7 +57,10 @@ export class SectionsApiClient {
 	/**
 	 * Récupère les sections d'un club spécifique
 	 */
-	async getSectionsByClubId(clubId: string, options?: ApiOptions): Promise<SectionsPaginatedResponse> {
+	async getSectionsByClubId(
+		clubId: string,
+		options?: ApiOptions,
+	): Promise<SectionsPaginatedResponse> {
 		const url = `${this.baseUrl}/sections/club/${clubId}`;
 		const response = await fetch(url, {
 			method: "GET",
@@ -71,7 +77,10 @@ export class SectionsApiClient {
 	/**
 	 * Crée une nouvelle section
 	 */
-	async createSection(data: CreateSectionData, options?: ApiOptions): Promise<Section> {
+	async createSection(
+		data: CreateSectionData,
+		options?: ApiOptions,
+	): Promise<Section> {
 		const url = `${this.baseUrl}/sections`;
 		const response = await fetch(url, {
 			method: "POST",
@@ -92,7 +101,11 @@ export class SectionsApiClient {
 	/**
 	 * Met à jour une section
 	 */
-	async updateSection(id: string, data: UpdateSectionData, options?: ApiOptions): Promise<Section> {
+	async updateSection(
+		id: string,
+		data: UpdateSectionData,
+		options?: ApiOptions,
+	): Promise<Section> {
 		const url = `${this.baseUrl}/sections/${id}`;
 		const response = await fetch(url, {
 			method: "PUT",

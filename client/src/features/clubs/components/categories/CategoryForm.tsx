@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import {
 	ArrowLeft,
 	Calendar,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -41,8 +41,17 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useEligibleUsersForCategory, useAssignCategoryCoachSilent, useRemoveCategoryCoachSilent } from "../../hooks/useResponsibilities";
-import { useCategoriesBySection, useCategory, useCreateCategory, useUpdateCategory } from "../../hooks/useCategories";
+import {
+	useCategoriesBySection,
+	useCategory,
+	useCreateCategory,
+	useUpdateCategory,
+} from "../../hooks/useCategories";
+import {
+	useAssignCategoryCoachSilent,
+	useEligibleUsersForCategory,
+	useRemoveCategoryCoachSilent,
+} from "../../hooks/useResponsibilities";
 import type { Category, EligibleUser } from "../../types";
 
 export function CategoryForm({
@@ -59,21 +68,21 @@ export function CategoryForm({
 	category?: Category;
 }) {
 	const navigate = useNavigate();
-	
+
 	// Utilisation des hooks personnalisés
 	const { data: categoriesData } = useCategoriesBySection(sectionId);
 	const existingCategories = categoriesData?.data || [];
 	const { data: categoryData } = useCategory(categoryId || "");
 	const createCategoryMutation = useCreateCategory();
 	const updateCategoryMutation = useUpdateCategory();
-	
+
 	const { data: eligibleUsers = [], isLoading: isLoadingUsers } =
 		useEligibleUsersForCategory(categoryId);
 	const assignCoachMutation = useAssignCategoryCoachSilent();
 	const removeCoachMutation = useRemoveCategoryCoachSilent();
-	
-	const isLoading = 
-		createCategoryMutation.isPending || 
+
+	const isLoading =
+		createCategoryMutation.isPending ||
 		updateCategoryMutation.isPending ||
 		assignCoachMutation.isPending ||
 		removeCoachMutation.isPending;
@@ -85,51 +94,53 @@ export function CategoryForm({
 		existingCategories: Category[],
 		currentCategoryId?: string,
 	) => {
-		return z.object({
-			name: z
-				.string()
-				.min(1, "Le nom est requis")
-				.max(100, "Le nom ne peut pas dépasser 100 caractères")
-				.refine((name) => {
-					// Normalisation du nom pour la comparaison
-					const normalizedName = name.trim().toLowerCase();
+		return z
+			.object({
+				name: z
+					.string()
+					.min(1, "Le nom est requis")
+					.max(100, "Le nom ne peut pas dépasser 100 caractères")
+					.refine((name) => {
+						// Normalisation du nom pour la comparaison
+						const normalizedName = name.trim().toLowerCase();
 
-					// Vérifie si une catégorie avec ce nom existe déjà
-					const duplicateCategory = existingCategories.find(
-						(category) =>
-							category.name.trim().toLowerCase() === normalizedName &&
-							category.id !== currentCategoryId, // Exclusion la catégorie actuelle en mode édition
-					);
+						// Vérifie si une catégorie avec ce nom existe déjà
+						const duplicateCategory = existingCategories.find(
+							(category) =>
+								category.name.trim().toLowerCase() === normalizedName &&
+								category.id !== currentCategoryId, // Exclusion la catégorie actuelle en mode édition
+						);
 
-					return !duplicateCategory;
-				}, "Une catégorie avec ce nom existe déjà dans cette section"),
-			description: z.string().optional(),
-			ageMin: z.number().int().nonnegative().optional(),
-			ageMax: z.number().int().nonnegative().optional(),
-			coachId: z.string().optional(),
-		})
-		.refine(
-			(data) => {
-				// Si un âge est défini, l'autre doit l'être aussi
-				if ((data.ageMin !== undefined) !== (data.ageMax !== undefined)) {
-					return false;
-				}
-				// Si les deux sont définis, âge min doit être inférieur à âge max
-				if (data.ageMin !== undefined && data.ageMax !== undefined) {
-					if (data.ageMin > data.ageMax) {
+						return !duplicateCategory;
+					}, "Une catégorie avec ce nom existe déjà dans cette section"),
+				description: z.string().optional(),
+				ageMin: z.number().int().nonnegative().optional(),
+				ageMax: z.number().int().nonnegative().optional(),
+				coachId: z.string().optional(),
+			})
+			.refine(
+				(data) => {
+					// Si un âge est défini, l'autre doit l'être aussi
+					if ((data.ageMin !== undefined) !== (data.ageMax !== undefined)) {
 						return false;
 					}
-					if (data.ageMin === data.ageMax) {
-						return false;
+					// Si les deux sont définis, âge min doit être inférieur à âge max
+					if (data.ageMin !== undefined && data.ageMax !== undefined) {
+						if (data.ageMin > data.ageMax) {
+							return false;
+						}
+						if (data.ageMin === data.ageMax) {
+							return false;
+						}
 					}
-				}
-				return true;
-			},
-			{
-				message: "Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum, et l'âge minimum doit être inférieur à l'âge maximum",
-				path: ["ageMin"],
-			},
-		);
+					return true;
+				},
+				{
+					message:
+						"Si vous définissez une limite d'âge, vous devez remplir à la fois l'âge minimum et maximum, et l'âge minimum doit être inférieur à l'âge maximum",
+					path: ["ageMin"],
+				},
+			);
 	};
 
 	const categorySchema = createCategorySchema(existingCategories, categoryId);
@@ -190,7 +201,8 @@ export function CategoryForm({
 					const currentError = form.formState.errors.name;
 					if (
 						currentError &&
-						currentError.message === "Une catégorie avec ce nom existe déjà dans cette section"
+						currentError.message ===
+							"Une catégorie avec ce nom existe déjà dans cette section"
 					) {
 						form.clearErrors("name");
 					}
@@ -221,7 +233,8 @@ export function CategoryForm({
 		try {
 			let createdCategory: Category | null = null;
 			const { coachId, ...categoryData } = data;
-			const actualCoachId = coachId && coachId !== "" && coachId !== "none" ? coachId : "";
+			const actualCoachId =
+				coachId && coachId !== "" && coachId !== "none" ? coachId : "";
 
 			// Étape 1: Créer ou mettre à jour la catégorie
 			if (mode === "create") {
@@ -254,7 +267,8 @@ export function CategoryForm({
 						console.error("Erreur lors de l'assignation du coach:", coachError);
 						form.setError("coachId", {
 							type: "manual",
-							message: "Catégorie créée/modifiée mais erreur lors de l'assignation du coach",
+							message:
+								"Catégorie créée/modifiée mais erreur lors de l'assignation du coach",
 						});
 						return; // Arrêter ici, ne pas naviguer
 					}
@@ -267,16 +281,20 @@ export function CategoryForm({
 					console.error("Erreur lors de la suppression du coach:", coachError);
 					form.setError("coachId", {
 						type: "manual",
-						message: "Catégorie créée/modifiée mais erreur lors de la suppression du coach",
+						message:
+							"Catégorie créée/modifiée mais erreur lors de la suppression du coach",
 					});
 					return; // Arrêter ici, ne pas naviguer
 				}
 			}
 
 			// Étape 3: Navigation seulement si tout s'est bien passé
-			const successMessage = mode === "create" ? "Catégorie créée avec succès" : "Catégorie modifiée avec succès";
+			const successMessage =
+				mode === "create"
+					? "Catégorie créée avec succès"
+					: "Catégorie modifiée avec succès";
 			toast.success(successMessage);
-			
+
 			navigate({
 				to: "/admin/dashboard/clubs/$clubId/sections/$sectionId/categories",
 				params: { clubId, sectionId },
@@ -297,8 +315,12 @@ export function CategoryForm({
 	// Valeurs des champs d'âge pour la validation et l'affichage
 	const ageMinValue = form.watch("ageMin");
 	const ageMaxValue = form.watch("ageMax");
-	const hasPartialAge = (ageMinValue !== undefined) !== (ageMaxValue !== undefined);
-	const isValidAgeRange = ageMinValue !== undefined && ageMaxValue !== undefined && ageMinValue < ageMaxValue;
+	const hasPartialAge =
+		(ageMinValue !== undefined) !== (ageMaxValue !== undefined);
+	const isValidAgeRange =
+		ageMinValue !== undefined &&
+		ageMaxValue !== undefined &&
+		ageMinValue < ageMaxValue;
 
 	if (isLoading && mode === "edit") {
 		return (
@@ -363,7 +385,8 @@ export function CategoryForm({
 												/>
 											</FormControl>
 											<FormDescription>
-												Choisissez un nom clair et descriptif pour votre catégorie.
+												Choisissez un nom clair et descriptif pour votre
+												catégorie.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -388,7 +411,8 @@ export function CategoryForm({
 												/>
 											</FormControl>
 											<FormDescription>
-												Ajoutez des détails sur cette catégorie (objectifs, niveau requis, etc.)
+												Ajoutez des détails sur cette catégorie (objectifs,
+												niveau requis, etc.)
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -423,7 +447,9 @@ export function CategoryForm({
 															max="100"
 															value={field.value ?? ""}
 															onChange={(e) => {
-																const value = e.target.value ? Number(e.target.value) : undefined;
+																const value = e.target.value
+																	? Number(e.target.value)
+																	: undefined;
 																field.onChange(value);
 															}}
 															className="h-11"
@@ -451,7 +477,9 @@ export function CategoryForm({
 															max="100"
 															value={field.value ?? ""}
 															onChange={(e) => {
-																const value = e.target.value ? Number(e.target.value) : undefined;
+																const value = e.target.value
+																	? Number(e.target.value)
+																	: undefined;
 																field.onChange(value);
 															}}
 															className="h-11"
@@ -470,8 +498,7 @@ export function CategoryForm({
 												✅ Cette catégorie acceptera les participants âgés de{" "}
 												<span className="font-semibold">
 													{ageMinValue} à {ageMaxValue} ans
-												</span>
-												{" "}
+												</span>{" "}
 												({ageMaxValue - ageMinValue + 1} années couvertes)
 											</p>
 										</div>
@@ -483,8 +510,8 @@ export function CategoryForm({
 											<p className="text-sm text-orange-700">
 												⚠️ <strong>Attention :</strong> Vous devez remplir à la
 												fois l'âge minimum et maximum pour définir une limite
-												d'âge, ou laisser les deux champs vides pour une catégorie
-												sans restriction.
+												d'âge, ou laisser les deux champs vides pour une
+												catégorie sans restriction.
 											</p>
 										</div>
 									)}
@@ -562,7 +589,9 @@ export function CategoryForm({
 										) : (
 											<>
 												<Save className="h-4 w-4" />
-												{mode === "create" ? "Créer la catégorie" : "Sauvegarder"}
+												{mode === "create"
+													? "Créer la catégorie"
+													: "Sauvegarder"}
 											</>
 										)}
 									</Button>

@@ -1,16 +1,35 @@
-import type { 
-	SessionResponse, 
-	CreateSessionData, 
-	UpdateSessionData,
-	SessionStats,
-	SessionConflict,
-	ParticipantAction, 
-	SessionsPaginatedResponse
-} from "./sessions.types.js";
-import type { ParticipantActionData } from "./sessions.schema.js";
 import { db } from "@/db/index.js";
-import { sessionsSport, categories, sections, clubs, users, sectionResponsibilities, sessionParticipants } from "@/db/schema.js";
-import { eq, and, like, count, sql, or, between, gte, lte, desc } from "drizzle-orm";
+import {
+	categories,
+	clubs,
+	sectionResponsibilities,
+	sections,
+	sessionParticipants,
+	sessionsSport,
+	users,
+} from "@/db/schema.js";
+import {
+	and,
+	between,
+	count,
+	desc,
+	eq,
+	gte,
+	like,
+	lte,
+	or,
+	sql,
+} from "drizzle-orm";
+import type { ParticipantActionData } from "./sessions.schema.js";
+import type {
+	CreateSessionData,
+	ParticipantAction,
+	SessionConflict,
+	SessionResponse,
+	SessionStats,
+	SessionsPaginatedResponse,
+	UpdateSessionData,
+} from "./sessions.types.js";
 
 export class SessionsService {
 	/**
@@ -85,25 +104,31 @@ export class SessionsService {
 			updatedAt: result.updatedAt,
 			category: {
 				id: result.categoryId,
-				name: result.categoryName || '',
+				name: result.categoryName || "",
 				ageMin: result.categoryAgeMin,
 				ageMax: result.categoryAgeMax,
-				section: result.sectionId ? {
-					id: result.sectionId,
-					name: result.sectionName || '',
-					color: result.sectionColor,
-					club: result.clubId ? {
-						id: result.clubId,
-						name: result.clubName || '',
-					} : undefined,
-				} : undefined,
+				section: result.sectionId
+					? {
+							id: result.sectionId,
+							name: result.sectionName || "",
+							color: result.sectionColor,
+							club: result.clubId
+								? {
+										id: result.clubId,
+										name: result.clubName || "",
+									}
+								: undefined,
+						}
+					: undefined,
 			},
-			coach: result.coachId ? {
-				id: result.coachId,
-				firstName: result.coachFirstName || '',
-				lastName: result.coachLastName || '',
-				email: result.coachEmail || '',
-			} : undefined,
+			coach: result.coachId
+				? {
+						id: result.coachId,
+						firstName: result.coachFirstName || "",
+						lastName: result.coachLastName || "",
+						email: result.coachEmail || "",
+					}
+				: undefined,
 			participantsCount: participantsCount?.count || 0,
 		};
 	}
@@ -182,25 +207,31 @@ export class SessionsService {
 				updatedAt: row.updatedAt,
 				category: {
 					id: row.categoryId,
-					name: row.categoryName || '',
+					name: row.categoryName || "",
 					ageMin: row.categoryAgeMin,
 					ageMax: row.categoryAgeMax,
-					section: row.sectionId ? {
-						id: row.sectionId,
-						name: row.sectionName || '',
-						color: row.sectionColor,
-						club: row.clubId ? {
-							id: row.clubId,
-							name: row.clubName || '',
-						} : undefined,
-					} : undefined,
+					section: row.sectionId
+						? {
+								id: row.sectionId,
+								name: row.sectionName || "",
+								color: row.sectionColor,
+								club: row.clubId
+									? {
+											id: row.clubId,
+											name: row.clubName || "",
+										}
+									: undefined,
+							}
+						: undefined,
 				},
-				coach: row.coachId ? {
-					id: row.coachId,
-					firstName: row.coachFirstName || '',
-					lastName: row.coachLastName || '',
-					email: row.coachEmail || '',
-				} : undefined,
+				coach: row.coachId
+					? {
+							id: row.coachId,
+							firstName: row.coachFirstName || "",
+							lastName: row.coachLastName || "",
+							email: row.coachEmail || "",
+						}
+					: undefined,
 				participantsCount: participantsCount?.count || 0,
 			});
 		}
@@ -216,7 +247,7 @@ export class SessionsService {
 	 */
 	async getSessionsByCategory(categoryId: string): Promise<SessionResponse[]> {
 		const result = await this.getSessions();
-		return result.data.filter(session => session.categoryId === categoryId);
+		return result.data.filter((session) => session.categoryId === categoryId);
 	}
 
 	/**
@@ -224,7 +255,7 @@ export class SessionsService {
 	 */
 	async getSessionsByCoach(coachId: string): Promise<SessionResponse[]> {
 		const result = await this.getSessions();
-		return result.data.filter(session => session.coachId === coachId);
+		return result.data.filter((session) => session.coachId === coachId);
 	}
 
 	/**
@@ -234,9 +265,9 @@ export class SessionsService {
 		const now = new Date();
 		const result = await this.getSessions();
 		return result.data
-			.filter(session => 
-				new Date(session.startDate) > now && 
-				session.status === "planifie"
+			.filter(
+				(session) =>
+					new Date(session.startDate) > now && session.status === "planifie",
 			)
 			.slice(0, limit);
 	}
@@ -248,7 +279,9 @@ export class SessionsService {
 		// Vérifier les conflits potentiels
 		const conflicts = await this.checkSessionConflicts(data);
 		if (conflicts.length > 0) {
-			throw new Error(`Conflits détectés: ${conflicts.map(c => c.conflictType).join(", ")}`);
+			throw new Error(
+				`Conflits détectés: ${conflicts.map((c) => c.conflictType).join(", ")}`,
+			);
 		}
 
 		const [createdSession] = await db
@@ -274,7 +307,10 @@ export class SessionsService {
 	/**
 	 * Mettre à jour une session
 	 */
-	async updateSession(id: string, data: UpdateSessionData): Promise<SessionResponse> {
+	async updateSession(
+		id: string,
+		data: UpdateSessionData,
+	): Promise<SessionResponse> {
 		// Vérifier que la session existe
 		const existingSession = await this.getSessionById(id);
 		if (!existingSession) {
@@ -289,7 +325,9 @@ export class SessionsService {
 			};
 			const conflicts = await this.checkSessionConflicts(conflictData, id);
 			if (conflicts.length > 0) {
-				throw new Error(`Conflits détectés: ${conflicts.map(c => c.conflictType).join(", ")}`);
+				throw new Error(
+					`Conflits détectés: ${conflicts.map((c) => c.conflictType).join(", ")}`,
+				);
 			}
 		}
 
@@ -326,12 +364,16 @@ export class SessionsService {
 
 		// Empêcher la suppression de sessions en cours ou terminées
 		if (session.status === "en_cours" || session.status === "termine") {
-			throw new Error("Impossible de supprimer une session en cours ou terminée");
+			throw new Error(
+				"Impossible de supprimer une session en cours ou terminée",
+			);
 		}
 
 		// Supprimer d'abord les participants
-		await db.delete(sessionParticipants).where(eq(sessionParticipants.sessionId, id));
-		
+		await db
+			.delete(sessionParticipants)
+			.where(eq(sessionParticipants.sessionId, id));
+
 		// Puis supprimer la session
 		await db.delete(sessionsSport).where(eq(sessionsSport.id, id));
 	}
@@ -340,9 +382,9 @@ export class SessionsService {
 	 * Changer le statut d'une session
 	 */
 	async updateSessionStatus(
-		id: string, 
-		status: "planifie" | "en_cours" | "termine" | "annule", 
-		notes?: string
+		id: string,
+		status: "planifie" | "en_cours" | "termine" | "annule",
+		notes?: string,
 	): Promise<SessionResponse> {
 		const updateData: UpdateSessionData = { status };
 		if (notes) {
@@ -355,7 +397,10 @@ export class SessionsService {
 	/**
 	 * Vérifier les conflits d'une session
 	 */
-	async checkSessionConflicts(sessionData: CreateSessionData | UpdateSessionData, excludeSessionId?: string): Promise<SessionConflict[]> {
+	async checkSessionConflicts(
+		sessionData: CreateSessionData | UpdateSessionData,
+		excludeSessionId?: string,
+	): Promise<SessionConflict[]> {
 		const conflicts: SessionConflict[] = [];
 
 		// Vérifier les conflits temporels et de lieu
@@ -363,7 +408,7 @@ export class SessionsService {
 			const whereConditions = [
 				sql`${sessionsSport.startDate} < ${sessionData.endDate}`,
 				sql`${sessionsSport.endDate} > ${sessionData.startDate}`,
-				sql`${sessionsSport.status} != 'annule'`
+				sql`${sessionsSport.status} != 'annule'`,
 			];
 
 			// Exclure la session en cours de modification
@@ -419,7 +464,7 @@ export class SessionsService {
 	 * Récupérer les statistiques des sessions
 	 */
 	async getSessionStats(categoryId?: string): Promise<SessionStats> {
-		const whereCondition = categoryId 
+		const whereCondition = categoryId
 			? eq(sessionsSport.categoryId, categoryId)
 			: undefined;
 
@@ -429,26 +474,26 @@ export class SessionsService {
 			.where(whereCondition);
 
 		const sessionsByType = await db
-			.select({ 
+			.select({
 				type: sessionsSport.type,
-				count: count() 
+				count: count(),
 			})
 			.from(sessionsSport)
 			.where(whereCondition)
 			.groupBy(sessionsSport.type);
 
 		const sessionsByStatus = await db
-			.select({ 
+			.select({
 				status: sessionsSport.status,
-				count: count() 
+				count: count(),
 			})
 			.from(sessionsSport)
 			.where(whereCondition)
 			.groupBy(sessionsSport.status);
 
 		const averageParticipants = await db
-			.select({ 
-				avg: sql<number>`AVG(${sessionsSport.currentParticipants})` 
+			.select({
+				avg: sql<number>`AVG(${sessionsSport.currentParticipants})`,
 			})
 			.from(sessionsSport)
 			.where(whereCondition);
@@ -461,30 +506,33 @@ export class SessionsService {
 				and(
 					whereCondition || sql`1=1`,
 					gte(sessionsSport.startDate, now),
-					eq(sessionsSport.status, "planifie")
-				)
+					eq(sessionsSport.status, "planifie"),
+				),
 			);
 
 		const completedSessions = await db
 			.select({ count: count() })
 			.from(sessionsSport)
 			.where(
-				and(
-					whereCondition || sql`1=1`,
-					eq(sessionsSport.status, "termine")
-				)
+				and(whereCondition || sql`1=1`, eq(sessionsSport.status, "termine")),
 			);
 
 		return {
 			totalSessions: totalSessions[0]?.count || 0,
-			sessionsByType: sessionsByType.reduce((acc, curr) => {
-				acc[curr.type] = curr.count;
-				return acc;
-			}, {} as Record<string, number>),
-			sessionsByStatus: sessionsByStatus.reduce((acc, curr) => {
-				acc[curr.status] = curr.count;
-				return acc;
-			}, {} as Record<string, number>),
+			sessionsByType: sessionsByType.reduce(
+				(acc, curr) => {
+					acc[curr.type] = curr.count;
+					return acc;
+				},
+				{} as Record<string, number>,
+			),
+			sessionsByStatus: sessionsByStatus.reduce(
+				(acc, curr) => {
+					acc[curr.status] = curr.count;
+					return acc;
+				},
+				{} as Record<string, number>,
+			),
 			averageParticipants: Number(averageParticipants[0]?.avg) || 0,
 			upcomingSessions: upcomingSessions[0]?.count || 0,
 			completedSessions: completedSessions[0]?.count || 0,
@@ -494,7 +542,10 @@ export class SessionsService {
 	/**
 	 * Gérer les participants d'une session
 	 */
-	async manageParticipants(sessionId: string, action: ParticipantAction): Promise<void> {
+	async manageParticipants(
+		sessionId: string,
+		action: ParticipantAction,
+	): Promise<void> {
 		const session = await this.getSessionById(sessionId);
 		if (!session) {
 			throw new Error("Session non trouvée");
@@ -518,8 +569,8 @@ export class SessionsService {
 					.where(
 						and(
 							eq(sessionParticipants.sessionId, sessionId),
-							eq(sessionParticipants.userId, memberId)
-						)
+							eq(sessionParticipants.userId, memberId),
+						),
 					);
 
 				if (!existing) {
@@ -539,8 +590,8 @@ export class SessionsService {
 					.where(
 						and(
 							eq(sessionParticipants.sessionId, sessionId),
-							eq(sessionParticipants.userId, memberId)
-						)
+							eq(sessionParticipants.userId, memberId),
+						),
 					);
 			}
 		}

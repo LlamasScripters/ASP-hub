@@ -1,6 +1,11 @@
-import type { Club, CreateClubData, UpdateClubData, ClubsResponse } from "@/features/clubs/types/clubs";
+import type {
+	Club,
+	ClubsResponse,
+	CreateClubData,
+	UpdateClubData,
+} from "@/features/clubs/types/clubs";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;
@@ -16,9 +21,7 @@ export class ClubsApiClient {
 	/**
 	 * Récupère tous les clubs avec pagination et filtres
 	 */
-	async getClubs(
-		options?: ApiOptions,
-	): Promise<ClubsResponse> {
+	async getClubs(options?: ApiOptions): Promise<ClubsResponse> {
 		const queryParams = new URLSearchParams();
 
 		const url = `${this.baseUrl}/clubs?${queryParams}`;
@@ -75,7 +78,11 @@ export class ClubsApiClient {
 	/**
 	 * Met à jour un club
 	 */
-	async updateClub(id: string, data: UpdateClubData, options?: ApiOptions): Promise<Club> {
+	async updateClub(
+		id: string,
+		data: UpdateClubData,
+		options?: ApiOptions,
+	): Promise<Club> {
 		const url = `${this.baseUrl}/clubs/${id}`;
 		const response = await fetch(url, {
 			method: "PUT",

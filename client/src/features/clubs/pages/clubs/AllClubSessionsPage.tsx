@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { useSessions, useDeleteSession } from "../../hooks/useSessions";
+import { useDeleteSession, useSessions } from "../../hooks/useSessions";
 import type { SessionSport } from "../../types";
 
 type SortField =
@@ -82,11 +82,11 @@ export function AllClubSessionsPage() {
 	const { clubId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sessions/",
 	});
-	
+
 	// Use the sessions hook
 	const { data: allSessions, isLoading } = useSessions();
 	const deleteSessionMutation = useDeleteSession();
-	
+
 	const [sortField, setSortField] = useState<SortField>("startDate");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 	const [filters, setFilters] = useState<Filters>({
@@ -100,7 +100,7 @@ export function AllClubSessionsPage() {
 		null,
 	);
 	const [isDeleting, setIsDeleting] = useState(false);
-	
+
 	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -108,14 +108,14 @@ export function AllClubSessionsPage() {
 	// Filter sessions for this club and enrich with additional data
 	const sessions = useMemo(() => {
 		if (!allSessions?.data) return [];
-		
+
 		return allSessions.data
-			.filter(session => session.category?.section?.club?.id === clubId)
-			.map(session => ({
+			.filter((session) => session.category?.section?.club?.id === clubId)
+			.map((session) => ({
 				...session,
-				categoryName: session.category?.name || '',
-				sectionName: session.category?.section?.name || '',
-				sectionId: session.category?.section?.id || '',
+				categoryName: session.category?.name || "",
+				sectionName: session.category?.section?.name || "",
+				sectionId: session.category?.section?.id || "",
 			}));
 	}, [allSessions, clubId]);
 
@@ -263,7 +263,10 @@ export function AllClubSessionsPage() {
 	const totalPages = Math.ceil(filteredAndSortedSessions.length / itemsPerPage);
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const endIndex = startIndex + itemsPerPage;
-	const paginatedSessions = filteredAndSortedSessions.slice(startIndex, endIndex);
+	const paginatedSessions = filteredAndSortedSessions.slice(
+		startIndex,
+		endIndex,
+	);
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
@@ -465,7 +468,11 @@ export function AllClubSessionsPage() {
 								Liste des sessions ({filteredAndSortedSessions.length})
 							</CardTitle>
 							<CardDescription>
-								Affichage de {startIndex + 1} à {Math.min(endIndex, filteredAndSortedSessions.length)} sur {filteredAndSortedSessions.length} session{filteredAndSortedSessions.length > 1 ? "s" : ""} filtrée{filteredAndSortedSessions.length > 1 ? "s" : ""} 
+								Affichage de {startIndex + 1} à{" "}
+								{Math.min(endIndex, filteredAndSortedSessions.length)} sur{" "}
+								{filteredAndSortedSessions.length} session
+								{filteredAndSortedSessions.length > 1 ? "s" : ""} filtrée
+								{filteredAndSortedSessions.length > 1 ? "s" : ""}
 								{filteredAndSortedSessions.length !== sessions.length && (
 									<> sur {sessions.length} au total</>
 								)}
@@ -784,7 +791,7 @@ export function AllClubSessionsPage() {
 									</TableBody>
 								</Table>
 							</div>
-							
+
 							{/* Pagination Controls */}
 							{filteredAndSortedSessions.length > 0 && (
 								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
@@ -813,7 +820,7 @@ export function AllClubSessionsPage() {
 											éléments par page
 										</span>
 									</div>
-									
+
 									<div className="flex items-center gap-2">
 										<Button
 											variant="outline"
@@ -824,21 +831,26 @@ export function AllClubSessionsPage() {
 											<ChevronLeft className="h-4 w-4" />
 											Précédent
 										</Button>
-										
+
 										<div className="flex items-center gap-1">
 											{Array.from({ length: totalPages }, (_, i) => i + 1)
-												.filter(page => 
-													page === 1 || 
-													page === totalPages || 
-													Math.abs(page - currentPage) <= 2
+												.filter(
+													(page) =>
+														page === 1 ||
+														page === totalPages ||
+														Math.abs(page - currentPage) <= 2,
 												)
 												.map((page, index, array) => (
 													<div key={page} className="flex items-center">
 														{index > 0 && array[index - 1] !== page - 1 && (
-															<span className="px-2 text-muted-foreground">...</span>
+															<span className="px-2 text-muted-foreground">
+																...
+															</span>
 														)}
 														<Button
-															variant={currentPage === page ? "default" : "outline"}
+															variant={
+																currentPage === page ? "default" : "outline"
+															}
 															size="sm"
 															onClick={() => handlePageChange(page)}
 															className="w-8 h-8 p-0"
@@ -848,7 +860,7 @@ export function AllClubSessionsPage() {
 													</div>
 												))}
 										</div>
-										
+
 										<Button
 											variant="outline"
 											size="sm"

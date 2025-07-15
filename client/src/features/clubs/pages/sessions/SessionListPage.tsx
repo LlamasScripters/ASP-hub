@@ -82,7 +82,7 @@ export function SessionsListPage() {
 	};
 
 	const formatDate = (date: string | Date) => {
-		const dateObj = typeof date === 'string' ? new Date(date) : date;
+		const dateObj = typeof date === "string" ? new Date(date) : date;
 		return dateObj.toLocaleDateString("fr-FR", {
 			day: "2-digit",
 			month: "2-digit",

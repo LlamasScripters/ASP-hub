@@ -1,13 +1,13 @@
-import type { 
-	Responsibility, 
-	EligibleUser,
-	AssignSectionManagerData,
+import type {
 	AssignCategoryCoachData,
+	AssignSectionManagerData,
+	EligibleUser,
+	Responsibility,
 	ResponsibilityAssignmentResponse,
-	UserResponsibilityWithDetails
+	UserResponsibilityWithDetails,
 } from "../../types";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;
@@ -28,14 +28,17 @@ export class ResponsibilitiesApiClient {
 		data: AssignSectionManagerData,
 		options?: ApiOptions,
 	): Promise<ResponsibilityAssignmentResponse> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/sections/${sectionId}/manager`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/sections/${sectionId}/manager`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				signal: options?.signal,
 			},
-			body: JSON.stringify(data),
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -47,11 +50,17 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Supprime un responsable de section
 	 */
-	async removeSectionManager(sectionId: string, options?: ApiOptions): Promise<void> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/sections/${sectionId}/manager`, {
-			method: "DELETE",
-			signal: options?.signal,
-		});
+	async removeSectionManager(
+		sectionId: string,
+		options?: ApiOptions,
+	): Promise<void> {
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/sections/${sectionId}/manager`,
+			{
+				method: "DELETE",
+				signal: options?.signal,
+			},
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -61,14 +70,20 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les responsabilités d'une section
 	 */
-	async getSectionResponsibilities(sectionId: string, options?: ApiOptions): Promise<Responsibility[]> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/sections/${sectionId}`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+	async getSectionResponsibilities(
+		sectionId: string,
+		options?: ApiOptions,
+	): Promise<Responsibility[]> {
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/sections/${sectionId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
 			},
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -85,14 +100,17 @@ export class ResponsibilitiesApiClient {
 		data: AssignCategoryCoachData,
 		options?: ApiOptions,
 	): Promise<ResponsibilityAssignmentResponse> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/categories/${categoryId}/coach`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/categories/${categoryId}/coach`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				signal: options?.signal,
 			},
-			body: JSON.stringify(data),
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -104,11 +122,17 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Supprime un coach d'une catégorie
 	 */
-	async removeCategoryCoach(categoryId: string, options?: ApiOptions): Promise<void> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/categories/${categoryId}/coach`, {
-			method: "DELETE",
-			signal: options?.signal,
-		});
+	async removeCategoryCoach(
+		categoryId: string,
+		options?: ApiOptions,
+	): Promise<void> {
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/categories/${categoryId}/coach`,
+			{
+				method: "DELETE",
+				signal: options?.signal,
+			},
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -119,13 +143,16 @@ export class ResponsibilitiesApiClient {
 	 * Récupère les utilisateurs éligibles
 	 */
 	async getEligibleUsers(options?: ApiOptions): Promise<EligibleUser[]> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/eligible-users`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/eligible-users`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
 			},
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -137,11 +164,14 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les utilisateurs éligibles pour une section
 	 */
-	async getEligibleUsersForSection(sectionId?: string, options?: ApiOptions): Promise<EligibleUser[]> {
-		const url = sectionId 
+	async getEligibleUsersForSection(
+		sectionId?: string,
+		options?: ApiOptions,
+	): Promise<EligibleUser[]> {
+		const url = sectionId
 			? `${this.baseUrl}/responsibilities/eligible-users/section/${sectionId}`
 			: `${this.baseUrl}/responsibilities/eligible-users/section`;
-		
+
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -160,11 +190,14 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les utilisateurs éligibles pour une catégorie
 	 */
-	async getEligibleUsersForCategory(categoryId?: string, options?: ApiOptions): Promise<EligibleUser[]> {
-		const url = categoryId 
+	async getEligibleUsersForCategory(
+		categoryId?: string,
+		options?: ApiOptions,
+	): Promise<EligibleUser[]> {
+		const url = categoryId
 			? `${this.baseUrl}/responsibilities/eligible-users/category/${categoryId}`
 			: `${this.baseUrl}/responsibilities/eligible-users/category`;
-		
+
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -183,14 +216,20 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les responsabilités d'une catégorie
 	 */
-	async getCategoryResponsibilities(categoryId: string, options?: ApiOptions): Promise<Responsibility[]> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/categories/${categoryId}`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+	async getCategoryResponsibilities(
+		categoryId: string,
+		options?: ApiOptions,
+	): Promise<Responsibility[]> {
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/categories/${categoryId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
 			},
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -202,14 +241,20 @@ export class ResponsibilitiesApiClient {
 	/**
 	 * Récupère les responsabilités d'un utilisateur
 	 */
-	async getUserResponsibilities(userId: string, options?: ApiOptions): Promise<UserResponsibilityWithDetails[]> {
-		const response = await fetch(`${this.baseUrl}/responsibilities/users/${userId}`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+	async getUserResponsibilities(
+		userId: string,
+		options?: ApiOptions,
+	): Promise<UserResponsibilityWithDetails[]> {
+		const response = await fetch(
+			`${this.baseUrl}/responsibilities/users/${userId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
 			},
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);

@@ -8,11 +8,8 @@ export const clubsService = {
 	 * Récupère tous les clubs avec pagination et filtres
 	 */
 	async getAll(): Promise<ClubsPaginatedResponse> {
-
 		// Récupération des données
-		const data = await db
-			.select()
-			.from(clubs);
+		const data = await db.select().from(clubs);
 
 		// Comptage total
 		const [{ count }] = await db
@@ -21,7 +18,7 @@ export const clubsService = {
 
 		return {
 			data,
-			total: count
+			total: count,
 		};
 	},
 
@@ -29,10 +26,7 @@ export const clubsService = {
 	 * Récupère un club par son ID
 	 */
 	async getById(id: string): Promise<SelectClub | undefined> {
-		const [club] = await db
-			.select()
-			.from(clubs)
-			.where(eq(clubs.id, id));
+		const [club] = await db.select().from(clubs).where(eq(clubs.id, id));
 		return club;
 	},
 
@@ -47,7 +41,10 @@ export const clubsService = {
 	/**
 	 * Met à jour un club
 	 */
-	async update(id: string, data: Partial<InsertClub>): Promise<SelectClub | undefined> {
+	async update(
+		id: string,
+		data: Partial<InsertClub>,
+	): Promise<SelectClub | undefined> {
 		const [club] = await db
 			.update(clubs)
 			.set({ ...data, updatedAt: new Date() })

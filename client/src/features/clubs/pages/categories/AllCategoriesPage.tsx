@@ -52,9 +52,9 @@ import {
 	Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useSectionsByClub } from "../../hooks/useSections";
-import { useCategories, useDeleteCategory } from "../../hooks/useCategories";
 import { SectionSelectionModal } from "../../components/categories/SectionSelectionModal";
+import { useCategories, useDeleteCategory } from "../../hooks/useCategories";
+import { useSectionsByClub } from "../../hooks/useSections";
 import type { Category } from "../../types";
 
 interface EnrichedCategory extends Category {
@@ -78,18 +78,21 @@ export function AllCategoriesPage() {
 	});
 
 	// Hooks pour récupérer les données
-	const { data: sectionsResponse, isLoading: isLoadingSections } = useSectionsByClub(clubId);
+	const { data: sectionsResponse, isLoading: isLoadingSections } =
+		useSectionsByClub(clubId);
 	const sections = sectionsResponse?.data || [];
 
-	const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories();
+	const { data: categoriesResponse, isLoading: isLoadingCategories } =
+		useCategories();
 	const categories = categoriesResponse?.data || [];
 
 	const { mutateAsync: deleteCategory } = useDeleteCategory();
 
 	const [showSectionModal, setShowSectionModal] = useState(false);
-	const [deleteCategoryState, setDeleteCategoryState] = useState<EnrichedCategory | null>(null);
+	const [deleteCategoryState, setDeleteCategoryState] =
+		useState<EnrichedCategory | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
-	
+
 	// Sorting and filtering state
 	const [sortField, setSortField] = useState<SortField>("name");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -99,7 +102,7 @@ export function AllCategoriesPage() {
 		ageRange: "",
 		coach: "",
 	});
-	
+
 	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -143,22 +146,23 @@ export function AllCategoriesPage() {
 			const nameMatch = category.name
 				.toLowerCase()
 				.includes(filters.name.toLowerCase());
-			const sectionMatch = 
+			const sectionMatch =
 				filters.sectionName === "" ||
 				category.section.name
 					.toLowerCase()
 					.includes(filters.sectionName.toLowerCase());
-			const ageRangeMatch = 
+			const ageRangeMatch =
 				filters.ageRange === "" ||
 				getAgeRangeText(category.ageMin, category.ageMax)
 					.toLowerCase()
 					.includes(filters.ageRange.toLowerCase());
-			const coachMatch = 
+			const coachMatch =
 				filters.coach === "" ||
-				(category.coach?.firstName && category.coach?.lastName && 
-				 `${category.coach.firstName} ${category.coach.lastName}`
-					.toLowerCase()
-					.includes(filters.coach.toLowerCase())) ||
+				(category.coach?.firstName &&
+					category.coach?.lastName &&
+					`${category.coach.firstName} ${category.coach.lastName}`
+						.toLowerCase()
+						.includes(filters.coach.toLowerCase())) ||
 				(filters.coach.toLowerCase().includes("aucun") && !category.coach);
 
 			return nameMatch && sectionMatch && ageRangeMatch && coachMatch;
@@ -187,8 +191,12 @@ export function AllCategoriesPage() {
 					bValue = b.ageMax || -1;
 					break;
 				case "coach":
-					aValue = a.coach ? `${a.coach.firstName} ${a.coach.lastName}`.toLowerCase() : "";
-					bValue = b.coach ? `${b.coach.firstName} ${b.coach.lastName}`.toLowerCase() : "";
+					aValue = a.coach
+						? `${a.coach.firstName} ${a.coach.lastName}`.toLowerCase()
+						: "";
+					bValue = b.coach
+						? `${b.coach.firstName} ${b.coach.lastName}`.toLowerCase()
+						: "";
 					break;
 				default:
 					return 0;
@@ -203,10 +211,15 @@ export function AllCategoriesPage() {
 	}, [categories, filters, sortField, sortDirection]);
 
 	// Pagination logic
-	const totalPages = Math.ceil(filteredAndSortedCategories.length / itemsPerPage);
+	const totalPages = Math.ceil(
+		filteredAndSortedCategories.length / itemsPerPage,
+	);
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const endIndex = startIndex + itemsPerPage;
-	const paginatedCategories = filteredAndSortedCategories.slice(startIndex, endIndex);
+	const paginatedCategories = filteredAndSortedCategories.slice(
+		startIndex,
+		endIndex,
+	);
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
@@ -234,13 +247,21 @@ export function AllCategoriesPage() {
 	};
 
 	const sectionsCount = sections.length;
-	const categoriesWithCoach = categories.filter(cat => cat.coach?.firstName && cat.coach?.lastName).length;
-	const avgAge = categories.length > 0 
-		? Math.round(categories
-			.filter(cat => cat.ageMin && cat.ageMax)
-			.reduce((sum, cat) => sum + (((cat.ageMin || 0) + (cat.ageMax || 0)) / 2), 0) / 
-			categories.filter(cat => cat.ageMin && cat.ageMax).length || 0)
-		: 0;
+	const categoriesWithCoach = categories.filter(
+		(cat) => cat.coach?.firstName && cat.coach?.lastName,
+	).length;
+	const avgAge =
+		categories.length > 0
+			? Math.round(
+					categories
+						.filter((cat) => cat.ageMin && cat.ageMax)
+						.reduce(
+							(sum, cat) => sum + ((cat.ageMin || 0) + (cat.ageMax || 0)) / 2,
+							0,
+						) / categories.filter((cat) => cat.ageMin && cat.ageMax).length ||
+						0,
+				)
+			: 0;
 
 	if (isLoadingSections || isLoadingCategories) {
 		return (
@@ -440,7 +461,11 @@ export function AllCategoriesPage() {
 								Liste des catégories ({filteredAndSortedCategories.length})
 							</CardTitle>
 							<CardDescription>
-								Affichage de {startIndex + 1} à {Math.min(endIndex, filteredAndSortedCategories.length)} sur {filteredAndSortedCategories.length} catégorie{filteredAndSortedCategories.length > 1 ? "s" : ""} filtrée{filteredAndSortedCategories.length > 1 ? "s" : ""}
+								Affichage de {startIndex + 1} à{" "}
+								{Math.min(endIndex, filteredAndSortedCategories.length)} sur{" "}
+								{filteredAndSortedCategories.length} catégorie
+								{filteredAndSortedCategories.length > 1 ? "s" : ""} filtrée
+								{filteredAndSortedCategories.length > 1 ? "s" : ""}
 								{filteredAndSortedCategories.length !== categories.length && (
 									<> sur {categories.length} au total</>
 								)}
@@ -475,7 +500,9 @@ export function AllCategoriesPage() {
 											id="name"
 											placeholder="Rechercher par nom..."
 											value={filters.name}
-											onChange={(e) => handleFilterChange("name", e.target.value)}
+											onChange={(e) =>
+												handleFilterChange("name", e.target.value)
+											}
 											className="h-8"
 										/>
 									</div>
@@ -490,7 +517,9 @@ export function AllCategoriesPage() {
 											id="sectionName"
 											placeholder="Filtrer par section..."
 											value={filters.sectionName}
-											onChange={(e) => handleFilterChange("sectionName", e.target.value)}
+											onChange={(e) =>
+												handleFilterChange("sectionName", e.target.value)
+											}
 											className="h-8"
 										/>
 									</div>
@@ -505,7 +534,9 @@ export function AllCategoriesPage() {
 											id="ageRange"
 											placeholder="Ex: 12-18 ans"
 											value={filters.ageRange}
-											onChange={(e) => handleFilterChange("ageRange", e.target.value)}
+											onChange={(e) =>
+												handleFilterChange("ageRange", e.target.value)
+											}
 											className="h-8"
 										/>
 									</div>
@@ -520,7 +551,9 @@ export function AllCategoriesPage() {
 											id="coach"
 											placeholder="Nom du coach..."
 											value={filters.coach}
-											onChange={(e) => handleFilterChange("coach", e.target.value)}
+											onChange={(e) =>
+												handleFilterChange("coach", e.target.value)
+											}
 											className="h-8"
 										/>
 									</div>
@@ -531,7 +564,7 @@ export function AllCategoriesPage() {
 								<Table>
 									<TableHeader>
 										<TableRow className="hover:bg-transparent">
-											<TableHead 
+											<TableHead
 												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
 												onClick={() => handleSort("name")}
 											>
@@ -540,7 +573,7 @@ export function AllCategoriesPage() {
 													{getSortIcon("name")}
 												</div>
 											</TableHead>
-											<TableHead 
+											<TableHead
 												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
 												onClick={() => handleSort("sectionName")}
 											>
@@ -549,7 +582,7 @@ export function AllCategoriesPage() {
 													{getSortIcon("sectionName")}
 												</div>
 											</TableHead>
-											<TableHead 
+											<TableHead
 												className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
 												onClick={() => handleSort("coach")}
 											>
@@ -583,97 +616,98 @@ export function AllCategoriesPage() {
 											</TableRow>
 										) : (
 											paginatedCategories.map((cat) => (
-											<TableRow
-												key={cat.id}
-												className="hover:bg-muted/30 transition-colors"
-											>
-												<TableCell className="font-medium">
-													<div className="flex items-center gap-2">
-														<Users className="h-4 w-4 text-muted-foreground" />
-														{cat.name}
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														<div
-															className="w-3 h-3 rounded-full border border-primary/20"
-															style={{
-																backgroundColor: cat.section.color || "#3b82f6",
-															}}
-														/>
-														<Badge variant="secondary" className="text-xs">
-															{cat.section.name}
-														</Badge>
-													</div>
-												</TableCell>
-												<TableCell>
-													{cat.coach?.firstName && cat.coach?.lastName ? (
+												<TableRow
+													key={cat.id}
+													className="hover:bg-muted/30 transition-colors"
+												>
+													<TableCell className="font-medium">
 														<div className="flex items-center gap-2">
-															<User className="h-4 w-4 text-muted-foreground" />
-															<div className="flex flex-col">
-																<span className="text-sm font-medium">
-																	{cat.coach.firstName} {cat.coach.lastName}
-																</span>
-																<span className="text-xs text-muted-foreground">
-																	{cat.coach.email}
-																</span>
-															</div>
+															<Users className="h-4 w-4 text-muted-foreground" />
+															{cat.name}
 														</div>
-													) : (
-														<div className="flex items-center gap-2 text-muted-foreground">
-															<User className="h-4 w-4" />
-															<span className="text-sm">Aucun coach</span>
-														</div>
-													)}
-												</TableCell>
-												<TableCell>
-													<Badge variant="outline" className="text-xs">
-														{getAgeRangeText(cat.ageMin, cat.ageMax)}
-													</Badge>
-												</TableCell>
-												<TableCell className="max-w-xs">
-													<p className="text-sm text-muted-foreground line-clamp-2">
-														{cat.description || "Aucune description"}
-													</p>
-												</TableCell>
-												<TableCell className="text-right">
-													<div className="flex items-center justify-end gap-2">
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
-															asChild
-														>
-															<Link
-																to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
-																params={{
-																	clubId,
-																	sectionId: cat.sectionId,
-																	categoryId: cat.id,
+													</TableCell>
+													<TableCell>
+														<div className="flex items-center gap-2">
+															<div
+																className="w-3 h-3 rounded-full border border-primary/20"
+																style={{
+																	backgroundColor:
+																		cat.section.color || "#3b82f6",
 																}}
+															/>
+															<Badge variant="secondary" className="text-xs">
+																{cat.section.name}
+															</Badge>
+														</div>
+													</TableCell>
+													<TableCell>
+														{cat.coach?.firstName && cat.coach?.lastName ? (
+															<div className="flex items-center gap-2">
+																<User className="h-4 w-4 text-muted-foreground" />
+																<div className="flex flex-col">
+																	<span className="text-sm font-medium">
+																		{cat.coach.firstName} {cat.coach.lastName}
+																	</span>
+																	<span className="text-xs text-muted-foreground">
+																		{cat.coach.email}
+																	</span>
+																</div>
+															</div>
+														) : (
+															<div className="flex items-center gap-2 text-muted-foreground">
+																<User className="h-4 w-4" />
+																<span className="text-sm">Aucun coach</span>
+															</div>
+														)}
+													</TableCell>
+													<TableCell>
+														<Badge variant="outline" className="text-xs">
+															{getAgeRangeText(cat.ageMin, cat.ageMax)}
+														</Badge>
+													</TableCell>
+													<TableCell className="max-w-xs">
+														<p className="text-sm text-muted-foreground line-clamp-2">
+															{cat.description || "Aucune description"}
+														</p>
+													</TableCell>
+													<TableCell className="text-right">
+														<div className="flex items-center justify-end gap-2">
+															<Button
+																variant="ghost"
+																size="sm"
+																className="h-8 px-3 hover:bg-primary/10 hover:text-primary"
+																asChild
 															>
-																<Edit className="h-4 w-4 mr-1" />
-																Modifier
-															</Link>
-														</Button>
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-															onClick={() => setDeleteCategoryState(cat)}
-														>
-															<Trash2 className="mr-1 h-3 w-3" />
-															Supprimer
-														</Button>
-													</div>
-												</TableCell>
-											</TableRow>
-										))
+																<Link
+																	to="/admin/dashboard/clubs/$clubId/sections/$sectionId/categories/$categoryId/edit"
+																	params={{
+																		clubId,
+																		sectionId: cat.sectionId,
+																		categoryId: cat.id,
+																	}}
+																>
+																	<Edit className="h-4 w-4 mr-1" />
+																	Modifier
+																</Link>
+															</Button>
+															<Button
+																variant="ghost"
+																size="sm"
+																className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
+																onClick={() => setDeleteCategoryState(cat)}
+															>
+																<Trash2 className="mr-1 h-3 w-3" />
+																Supprimer
+															</Button>
+														</div>
+													</TableCell>
+												</TableRow>
+											))
 										)}
 									</TableBody>
 								</Table>
 							</div>
-							
+
 							{/* Pagination Controls */}
 							{filteredAndSortedCategories.length > 0 && (
 								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
@@ -702,7 +736,7 @@ export function AllCategoriesPage() {
 											éléments par page
 										</span>
 									</div>
-									
+
 									<div className="flex items-center gap-2">
 										<Button
 											variant="outline"
@@ -713,21 +747,26 @@ export function AllCategoriesPage() {
 											<ChevronLeft className="h-4 w-4" />
 											Précédent
 										</Button>
-										
+
 										<div className="flex items-center gap-1">
 											{Array.from({ length: totalPages }, (_, i) => i + 1)
-												.filter(page => 
-													page === 1 || 
-													page === totalPages || 
-													Math.abs(page - currentPage) <= 2
+												.filter(
+													(page) =>
+														page === 1 ||
+														page === totalPages ||
+														Math.abs(page - currentPage) <= 2,
 												)
 												.map((page, index, array) => (
 													<div key={page} className="flex items-center">
 														{index > 0 && array[index - 1] !== page - 1 && (
-															<span className="px-2 text-muted-foreground">...</span>
+															<span className="px-2 text-muted-foreground">
+																...
+															</span>
 														)}
 														<Button
-															variant={currentPage === page ? "default" : "outline"}
+															variant={
+																currentPage === page ? "default" : "outline"
+															}
 															size="sm"
 															onClick={() => handlePageChange(page)}
 															className="w-8 h-8 p-0"
@@ -737,7 +776,7 @@ export function AllCategoriesPage() {
 													</div>
 												))}
 										</div>
-										
+
 										<Button
 											variant="outline"
 											size="sm"

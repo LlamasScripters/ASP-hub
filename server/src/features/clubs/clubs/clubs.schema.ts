@@ -6,8 +6,16 @@ export const createClubSchema = z.object({
 	description: z.string().max(500, "La description est trop longue").optional(),
 	address: z.string().max(255, "L'adresse est trop longue").optional(),
 	phone: z.string().max(20, "Le numéro de téléphone est trop long").optional(),
-	email: z.string().email("Email invalide").max(255, "L'email est trop long").optional(),
-	website: z.string().url("URL invalide").max(255, "L'URL est trop longue").optional(),
+	email: z
+		.string()
+		.email("Email invalide")
+		.max(255, "L'email est trop long")
+		.optional(),
+	website: z
+		.string()
+		.url("URL invalide")
+		.max(255, "L'URL est trop longue")
+		.optional(),
 });
 
 // Schema pour la modification d'un club

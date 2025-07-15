@@ -14,7 +14,9 @@ export function handleClubError(error: unknown, operation?: string): void {
 	if (isClubManagementError(error)) {
 		toast.error(error.message);
 	} else if (error instanceof Error) {
-		toast.error(`Erreur lors de ${operation || "l'opération"}: ${error.message}`);
+		toast.error(
+			`Erreur lors de ${operation || "l'opération"}: ${error.message}`,
+		);
 	} else {
 		toast.error(`Erreur lors de ${operation || "l'opération"}`);
 	}

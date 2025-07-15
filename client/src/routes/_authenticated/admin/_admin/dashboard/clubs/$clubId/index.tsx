@@ -10,6 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Club } from "@/features/clubs/types";
+import { API_BASE_URL } from "@/lib/config";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowLeft,
@@ -26,7 +27,6 @@ import {
 	Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { API_CONFIG } from "@/lib/config";
 
 export const Route = createFileRoute(
 	"/_authenticated/admin/_admin/dashboard/clubs/$clubId/",
@@ -40,7 +40,7 @@ function ClubOverviewPage() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		fetch(`${API_CONFIG.FULL_URL}/clubs/${clubId}`)
+		fetch(`${API_BASE_URL}/clubs/${clubId}`)
 			.then((res) => res.json())
 			.then((data) => {
 				setClub(data);

@@ -1,11 +1,11 @@
-import type { 
-	Category, 
-	CreateCategoryData, 
-	UpdateCategoryData, 
-	CategoriesPaginatedResponse 
+import type {
+	CategoriesPaginatedResponse,
+	Category,
+	CreateCategoryData,
+	UpdateCategoryData,
 } from "../../types";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;
@@ -88,7 +88,10 @@ export class CategoriesApiClient {
 	/**
 	 * Crée une nouvelle catégorie
 	 */
-	async createCategory(data: CreateCategoryData, options?: ApiOptions): Promise<Category> {
+	async createCategory(
+		data: CreateCategoryData,
+		options?: ApiOptions,
+	): Promise<Category> {
 		const response = await fetch(`${this.baseUrl}/categories`, {
 			method: "POST",
 			headers: {

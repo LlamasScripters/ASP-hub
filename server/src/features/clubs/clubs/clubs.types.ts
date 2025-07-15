@@ -24,4 +24,3 @@ export interface ClubsPaginatedResponse {
 	data: ClubResponse[];
 	total: number;
 }
-

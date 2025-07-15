@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clubsApi } from "./../lib/api";
 import type { CreateClubData, UpdateClubData } from "./../types";
 
 // Query keys
 export const clubsQueryKeys = {
-	all: ['clubs'] as const,
-	lists: () => [...clubsQueryKeys.all, 'list'] as const,
+	all: ["clubs"] as const,
+	lists: () => [...clubsQueryKeys.all, "list"] as const,
 	list: () => [...clubsQueryKeys.lists()] as const,
-	details: () => [...clubsQueryKeys.all, 'detail'] as const,
+	details: () => [...clubsQueryKeys.all, "detail"] as const,
 	detail: (id: string) => [...clubsQueryKeys.details(), id] as const,
 };
 
@@ -40,20 +40,18 @@ export function useCreateClub() {
 		onSuccess: (newClub) => {
 			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
-			
+
 			// Invalidate all clubs queries
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
-			
+
 			// Optimistically update the cache
-			queryClient.setQueryData(
-				clubsQueryKeys.detail(newClub.id),
-				newClub
-			);
-			
+			queryClient.setQueryData(clubsQueryKeys.detail(newClub.id), newClub);
+
 			toast.success("Association créée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la création";
+			const errorMessage =
+				error instanceof Error ? error.message : "Erreur lors de la création";
 			toast.error(errorMessage);
 		},
 	});
@@ -67,25 +65,25 @@ export function useUpdateClub() {
 			clubsApi.updateClub(id, data),
 		onSuccess: (updatedClub, { id }) => {
 			// Update the specific club in the cache
-			queryClient.setQueryData(
-				clubsQueryKeys.detail(id),
-				updatedClub
-			);
-			
+			queryClient.setQueryData(clubsQueryKeys.detail(id), updatedClub);
+
 			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
-			
+
 			// Invalidate all clubs queries
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
-			
+
 			// Invalidate related sections and categories data
-			queryClient.invalidateQueries({ queryKey: ['sections'] });
-			queryClient.invalidateQueries({ queryKey: ['categories'] });
-			
+			queryClient.invalidateQueries({ queryKey: ["sections"] });
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+
 			toast.success("Association modifiée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la modification";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la modification";
 			toast.error(errorMessage);
 		},
 	});
@@ -99,22 +97,25 @@ export function useDeleteClub() {
 		onSuccess: (_, id) => {
 			// Remove the club from the cache
 			queryClient.removeQueries({ queryKey: clubsQueryKeys.detail(id) });
-			
+
 			// Invalidate all clubs lists
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.lists() });
-			
+
 			// Invalidate all clubs queries
 			queryClient.invalidateQueries({ queryKey: clubsQueryKeys.all });
-			
+
 			// Invalidate related sections and categories data (cascade delete)
-			queryClient.invalidateQueries({ queryKey: ['sections'] });
-			queryClient.invalidateQueries({ queryKey: ['categories'] });
-			queryClient.invalidateQueries({ queryKey: ['sessions'] });
-			
+			queryClient.invalidateQueries({ queryKey: ["sections"] });
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+			queryClient.invalidateQueries({ queryKey: ["sessions"] });
+
 			toast.success("Association supprimée avec succès");
 		},
 		onError: (error) => {
-			const errorMessage = error instanceof Error ? error.message : "Erreur lors de la suppression";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Erreur lors de la suppression";
 			toast.error(errorMessage);
 		},
 	});

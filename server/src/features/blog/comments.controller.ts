@@ -1,12 +1,12 @@
+import { UserRole } from "@/lib/roles.js";
+import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import { type Request, type Response, Router } from "express";
 import {
 	type CreateCommentData,
 	type UpdateCommentData,
 	commentsService,
 } from "./comments.service.js";
-import { requireAuth, requireRole } from "@/middleware/auth.middleware.js";
-import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
-import { UserRole } from "@/lib/roles.js";
 
 const commentsRouter = Router();
 commentsRouter.use(requireAuth);
@@ -50,45 +50,49 @@ commentsRouter.get(
 );
 
 // POST /api/comments - Create new comment
-commentsRouter.post("/", requireMemberAccess(), async (req: Request, res: Response): Promise<void> => {
-	try {
-		const { articleId, authorId, content }: CreateCommentData = req.body;
+commentsRouter.post(
+	"/",
+	requireMemberAccess(),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const { articleId, authorId, content }: CreateCommentData = req.body;
 
-		// Validation
-		if (!articleId || !authorId || !content) {
-			res
-				.status(400)
-				.json({ error: "articleId, authorId et content sont requis" });
-			return;
+			// Validation
+			if (!articleId || !authorId || !content) {
+				res
+					.status(400)
+					.json({ error: "articleId, authorId et content sont requis" });
+				return;
+			}
+
+			if (typeof content !== "string" || content.trim().length === 0) {
+				res
+					.status(400)
+					.json({ error: "Le contenu du commentaire ne peut pas être vide" });
+				return;
+			}
+
+			if (content.trim().length > 1000) {
+				res.status(400).json({
+					error: "Le commentaire ne peut pas dépasser 1000 caractères",
+				});
+				return;
+			}
+
+			const commentData: CreateCommentData = {
+				articleId,
+				authorId,
+				content: content.trim(),
+			};
+
+			const comment = await commentsService.createComment(commentData);
+			res.status(201).json(comment);
+		} catch (error) {
+			console.error("Erreur lors de la création du commentaire:", error);
+			res.status(500).json({ error: "Erreur interne du serveur" });
 		}
-
-		if (typeof content !== "string" || content.trim().length === 0) {
-			res
-				.status(400)
-				.json({ error: "Le contenu du commentaire ne peut pas être vide" });
-			return;
-		}
-
-		if (content.trim().length > 1000) {
-			res
-				.status(400)
-				.json({ error: "Le commentaire ne peut pas dépasser 1000 caractères" });
-			return;
-		}
-
-		const commentData: CreateCommentData = {
-			articleId,
-			authorId,
-			content: content.trim(),
-		};
-
-		const comment = await commentsService.createComment(commentData);
-		res.status(201).json(comment);
-	} catch (error) {
-		console.error("Erreur lors de la création du commentaire:", error);
-		res.status(500).json({ error: "Erreur interne du serveur" });
-	}
-});
+	},
+);
 
 // PUT /api/comments/:id - Update comment
 commentsRouter.put(

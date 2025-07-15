@@ -1,10 +1,10 @@
 import { auth } from "@/lib/auth.js";
+import { requireAuth } from "@/middleware/auth.middleware.js";
+import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 import { fromNodeHeaders } from "better-auth/node";
 import { type Request, type Response, Router } from "express";
 import { z } from "zod";
 import { reactionsService } from "./reactions.service.js";
-import { requireAuth } from "@/middleware/auth.middleware.js";
-import { requireMemberAccess } from "@/middleware/role-specific.middleware.js";
 
 const reactionsRouter = Router();
 reactionsRouter.use(requireAuth);

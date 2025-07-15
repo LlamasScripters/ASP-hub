@@ -1,5 +1,5 @@
 // lib/api/blog.ts
-import { API_CONFIG } from "@/lib/config";
+import { API_BASE_URL } from "@/lib/config";
 
 type ArticleState = "draft" | "published" | "archived";
 type CommentState = "published" | "archived";
@@ -139,7 +139,7 @@ export interface ToggleCommentReactionData {
 }
 
 export class BlogApi {
-	private baseUrl = `${API_CONFIG.FULL_URL}/articles`;
+	private baseUrl = `${API_BASE_URL}/articles`;
 
 	async getBlogs(): Promise<{ data: Blog[] }> {
 		const response = await fetch(this.baseUrl);
@@ -226,7 +226,7 @@ export class BlogApi {
 }
 
 export class TagsApi {
-	private baseUrl = `${API_CONFIG.FULL_URL}/tags`;
+	private baseUrl = `${API_BASE_URL}/tags`;
 
 	async getTags(): Promise<{ data: Tag[] }> {
 		const response = await fetch(this.baseUrl);
@@ -303,7 +303,7 @@ export class TagsApi {
 }
 
 export class CommentsApi {
-	private baseUrl = `${API_CONFIG.FULL_URL}/comments`;
+	private baseUrl = `${API_BASE_URL}/comments`;
 
 	async getCommentsByArticleId(
 		articleId: string,
@@ -387,7 +387,7 @@ export class CommentsApi {
 }
 
 export class ReactionsApi {
-	private baseUrl = `${API_CONFIG.FULL_URL}/reactions`;
+	private baseUrl = `${API_BASE_URL}/reactions`;
 
 	async getReactionTypes(): Promise<{ data: Reaction[] }> {
 		const response = await fetch(`${this.baseUrl}/types`);

@@ -15,9 +15,9 @@ export * from "./responsibilities/index.js";
 
 // Export sélectif des constants et utils existants (pour éviter les conflits avec nos nouveaux helpers)
 export * from "./constants.js";
-export { 
-	isValidUuid, 
-	validateUuids, 
+export {
+	isValidUuid,
+	validateUuids,
 	validateResponsibilityAssignment,
 } from "./utils.js";
 

@@ -7,7 +7,13 @@ import articlesRouter from "./features/blog/article.controller.js";
 import commentsRouter from "./features/blog/comments.controller.js";
 import reactionsRouter from "./features/blog/reactions.controller.js";
 import tagsRouter from "./features/blog/tags.controller.js";
-import { clubsRouter, sectionsRouter, categoriesRouter, sessionsRouter, responsibilitiesRouter } from "./features/clubs/index.js"
+import {
+	categoriesRouter,
+	clubsRouter,
+	responsibilitiesRouter,
+	sectionsRouter,
+	sessionsRouter,
+} from "./features/clubs/index.js";
 import firstLoginRouter from "./features/first-login/first-login.controller.js";
 import minibusReservationsRouter from "./features/minibus-booking/minibusReservations.controller.js";
 import minibusesRouter from "./features/minibus-booking/minibuses.controller.js";

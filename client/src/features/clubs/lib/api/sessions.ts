@@ -1,14 +1,14 @@
-import type { 
-	SessionSport, 
-	CreateSessionData, 
-	UpdateSessionData, 
-	SessionsPaginatedResponse,
-	SessionStats,
+import type {
+	CreateSessionData,
+	ParticipantAction,
 	SessionConflict,
-	ParticipantAction
+	SessionSport,
+	SessionStats,
+	SessionsPaginatedResponse,
+	UpdateSessionData,
 } from "../../types";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;
@@ -43,7 +43,10 @@ export class SessionsApiClient {
 	/**
 	 * Récupère une session par son ID
 	 */
-	async getSessionById(id: string, options?: ApiOptions): Promise<SessionSport> {
+	async getSessionById(
+		id: string,
+		options?: ApiOptions,
+	): Promise<SessionSport> {
 		const response = await fetch(`${this.baseUrl}/sessionsSport/${id}`, {
 			method: "GET",
 			headers: {
@@ -62,14 +65,20 @@ export class SessionsApiClient {
 	/**
 	 * Récupère les sessions d'une catégorie
 	 */
-	async getSessionsByCategory(categoryId: string, options?: ApiOptions): Promise<SessionSport[]> {
-		const response = await fetch(`${this.baseUrl}/sessionsSport/category/${categoryId}`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+	async getSessionsByCategory(
+		categoryId: string,
+		options?: ApiOptions,
+	): Promise<SessionSport[]> {
+		const response = await fetch(
+			`${this.baseUrl}/sessionsSport/category/${categoryId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
 			},
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -81,8 +90,14 @@ export class SessionsApiClient {
 	/**
 	 * Récupère les statistiques des sessions
 	 */
-	async getSessionStats(categoryId?: string, options?: ApiOptions): Promise<SessionStats> {
-		const url = new URL(`${this.baseUrl}/sessionsSport/stats`, window.location.origin);
+	async getSessionStats(
+		categoryId?: string,
+		options?: ApiOptions,
+	): Promise<SessionStats> {
+		const url = new URL(
+			`${this.baseUrl}/sessionsSport/stats`,
+			window.location.origin,
+		);
 		if (categoryId) {
 			url.searchParams.append("categoryId", categoryId);
 		}
@@ -109,14 +124,17 @@ export class SessionsApiClient {
 		sessionData: CreateSessionData,
 		options?: ApiOptions,
 	): Promise<{ hasConflicts: boolean; conflicts: SessionConflict[] }> {
-		const response = await fetch(`${this.baseUrl}/sessionsSport/check-conflicts`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
+		const response = await fetch(
+			`${this.baseUrl}/sessionsSport/check-conflicts`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(sessionData),
+				signal: options?.signal,
 			},
-			body: JSON.stringify(sessionData),
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
@@ -128,7 +146,10 @@ export class SessionsApiClient {
 	/**
 	 * Crée une nouvelle session
 	 */
-	async createSession(data: CreateSessionData, options?: ApiOptions): Promise<SessionSport> {
+	async createSession(
+		data: CreateSessionData,
+		options?: ApiOptions,
+	): Promise<SessionSport> {
 		const response = await fetch(`${this.baseUrl}/sessionsSport`, {
 			method: "POST",
 			headers: {
@@ -191,14 +212,17 @@ export class SessionsApiClient {
 		action: ParticipantAction,
 		options?: ApiOptions,
 	): Promise<void> {
-		const response = await fetch(`${this.baseUrl}/sessionsSport/${sessionId}/participants`, {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json",
+		const response = await fetch(
+			`${this.baseUrl}/sessionsSport/${sessionId}/participants`,
+			{
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(action),
+				signal: options?.signal,
 			},
-			body: JSON.stringify(action),
-			signal: options?.signal,
-		});
+		);
 
 		if (!response.ok) {
 			throw new Error(`Erreur HTTP: ${response.status}`);
