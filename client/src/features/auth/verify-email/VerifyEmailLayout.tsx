@@ -1,3 +1,4 @@
+import AuthFooter from "@/components/AuthFooter";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -19,6 +20,7 @@ export default function VerifyEmailLayout({ children }: PropsWithChildren) {
 
 				{children}
 			</div>
+			<AuthFooter />
 		</div>
 	);
 }
