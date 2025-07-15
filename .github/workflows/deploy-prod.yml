@@ -189,10 +189,8 @@ jobs:
             --image "${CLIENT_IMAGE_WITH_TAG}" \
             asphub_application_client
 
-          echo "📦 Updating server migrator service..."
-          docker service update \
-            --image "${SERVER_MIGRATOR_IMAGE_WITH_TAG}" \
-            asphub_init_db
+          echo "📦 Executing database migrations..."
+          docker run --rm --network asphub_backend --env DATABASE_URL="${{ secrets.DATABASE_URL }}" ${SERVER_MIGRATOR_IMAGE_WITH_TAG} npx drizzle-kit migrate
 
           echo "📦 Updating server service..."
           docker service update \
