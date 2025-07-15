@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/lib/config";
 import {
 	type CreateRoomData,
 	type Room,
@@ -7,8 +8,6 @@ import {
 	roomSchema,
 	roomsPaginatedResponseSchema,
 } from "@room-booking/hooks/useRooms";
-
-const API_BASE_URL = "/api";
 
 export interface ApiOptions {
 	signal?: AbortSignal;

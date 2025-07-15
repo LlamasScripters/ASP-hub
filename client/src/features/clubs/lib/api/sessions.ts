@@ -8,7 +8,7 @@ import type {
 	UpdateSessionData,
 } from "../../types";
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;

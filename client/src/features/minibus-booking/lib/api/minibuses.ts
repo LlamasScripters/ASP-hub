@@ -105,7 +105,7 @@ export type MinibusesPaginatedResponse = z.infer<
 export type Disponibility = z.infer<typeof disponibilitySchema>;
 export type DisponibilityEntry = z.infer<typeof disponibilityEntrySchema>;
 
-const API_BASE_URL = "/api";
+import { API_BASE_URL } from "@/lib/config";
 
 export interface ApiOptions {
 	signal?: AbortSignal;

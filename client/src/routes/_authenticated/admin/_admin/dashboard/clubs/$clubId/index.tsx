@@ -10,6 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Club } from "@/features/clubs/types";
+import { API_BASE_URL } from "@/lib/config";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowLeft,
@@ -39,7 +40,7 @@ function ClubOverviewPage() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		fetch(`/api/clubs/${clubId}`)
+		fetch(`${API_BASE_URL}/clubs/${clubId}`)
 			.then((res) => res.json())
 			.then((data) => {
 				setClub(data);

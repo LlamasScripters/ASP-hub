@@ -1,3 +1,4 @@
+import AuthFooter from "@/components/AuthFooter";
 import {
 	Card,
 	CardContent,
@@ -48,6 +49,7 @@ export function ResetPasswordPage({ token }: ResetPasswordPageProps) {
 					</CardContent>
 				</Card>
 			</div>
+			<AuthFooter />
 		</div>
 	);
 }

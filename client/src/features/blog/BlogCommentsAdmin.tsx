@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { API_BASE_URL } from "@/lib/config";
 import {
 	AlertTriangle,
 	Calendar,
@@ -46,7 +47,9 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 	const fetchComments = useCallback(async () => {
 		try {
 			setLoading(true);
-			const response = await fetch(`/api/comments/admin/article/${blogId}`);
+			const response = await fetch(
+				`${API_BASE_URL}/comments/admin/article/${blogId}`,
+			);
 			if (!response.ok) {
 				throw new Error("Erreur lors du chargement des commentaires");
 			}
@@ -69,7 +72,7 @@ export function BlogCommentsAdmin({ blogId }: BlogCommentsAdminProps) {
 
 			const action = currentState === "published" ? "hide" : "show";
 			const response = await fetch(
-				`/api/comments/admin/${commentId}/${action}`,
+				`${API_BASE_URL}/comments/admin/${commentId}/${action}`,
 				{
 					method: "PUT",
 					headers: {

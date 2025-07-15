@@ -6,8 +6,34 @@ To run this application:
 
 ```bash
 npm install
-npm run start  
+npm run dev  
 ```
+
+## Configuration API
+
+Ce projet utilise une variable d'environnement `VITE_API_BASE_URL` pour configurer l'URL de base de l'API selon l'environnement.
+
+### Configuration manuelle
+
+Modifiez le fichier `.env` avec l'URL appropriée :
+
+```bash
+# Pour développement web local
+VITE_API_BASE_URL=http://localhost:8080
+
+# Pour mobile/capacitor - émulateur Android
+VITE_API_BASE_URL=http://10.0.2.2:8080
+
+# Pour mobile/capacitor - device physique (réseau local)
+VITE_API_BASE_URL=http://192.168.1.100:8080
+
+# Pour serveur distant
+VITE_API_BASE_URL=https://api.example.com
+```
+
+Redémarrez le serveur de développement après modification.
+
+Pour plus d'informations, consultez [API_CONFIG.md](./API_CONFIG.md).
 
 # Building For Production
 

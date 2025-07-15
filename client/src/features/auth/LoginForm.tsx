@@ -30,6 +30,7 @@ export function LoginForm() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 	const { handlePostLoginRedirection } = usePostLoginRedirection();
 	const { isPending: isPendingSession } = authClient.useSession();
 

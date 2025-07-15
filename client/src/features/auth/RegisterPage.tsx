@@ -1,3 +1,4 @@
+import AuthFooter from "@/components/AuthFooter";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +49,7 @@ export default function RegisterPage() {
 					</CardFooter>
 				</Card>
 			</div>
+			<AuthFooter />
 		</div>
 	);
 }

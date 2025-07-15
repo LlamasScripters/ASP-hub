@@ -12,3 +12,10 @@ dist-ssr
 tests/.auth
 
 .tanstack
+# Environment files
+.env.local
+.env.production.local
+.env.development.local
+
+# Test files
+src/lib/api-test.ts

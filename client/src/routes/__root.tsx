@@ -1,3 +1,4 @@
+import { CookieConsent } from "@/components/blocks/cookie-consent";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { QueryClient } from "@tanstack/react-query";
@@ -25,6 +26,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			<Outlet />
 			<TanStackRouterDevtools position="bottom-right" />
 			<Toaster visibleToasts={1} />
+			<CookieConsent
+				variant="mini"
+				description="Pour assurer son bon fonctionnement, le site utilise des cookies. En continuant votre navigation, vous acceptez leur utilisation."
+				learnMoreHref="/privacy"
+			/>
 		</ThemeProvider>
 	),
 	notFoundComponent: NotFoundPage,

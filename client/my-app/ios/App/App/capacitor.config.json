@@ -1,0 +1,11 @@
+{
+	"appId": "com.example.app",
+	"appName": "ASP-hub",
+	"webDir": "../dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchAutoHide": false
+		}
+	},
+	"packageClassList": ["CAPCameraPlugin", "SplashScreenPlugin"]
+}
