@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import Logo from "./Logo";
 
 export default function Footer() {
@@ -6,7 +5,6 @@ export default function Footer() {
 		<footer className="py-8 bg-gray-900 dark:bg-black">
 			<div className="container px-4 mx-auto sm:px-6">
 				<div className="grid md:grid-cols-4 gap-8 mb-8">
-					{/* Logo et description */}
 					<div className="md:col-span-2">
 						<div className="flex items-center mb-4">
 							<Logo className="w-8 h-8" />
@@ -21,7 +19,6 @@ export default function Footer() {
 						</p>
 					</div>
 
-					{/* Liens légaux */}
 					<div>
 						<h3 className="text-white font-semibold mb-4">
 							Informations légales
@@ -54,7 +51,6 @@ export default function Footer() {
 						</ul>
 					</div>
 
-					{/* Contact rapide */}
 					<div>
 						<h3 className="text-white font-semibold mb-4">Contact</h3>
 						<ul className="space-y-2 text-sm text-gray-400">
@@ -76,7 +72,6 @@ export default function Footer() {
 					</div>
 				</div>
 
-				{/* Séparateur et copyright */}
 				<div className="border-t border-gray-800 pt-6">
 					<div className="flex flex-col md:flex-row items-center justify-between">
 						<div className="text-sm text-gray-400 mb-4 md:mb-0">

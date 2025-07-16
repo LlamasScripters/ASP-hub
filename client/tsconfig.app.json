@@ -28,5 +28,6 @@
 			"@minibus-booking/*": ["./src/features/minibus-booking/*"]
 		}
 	},
-	"include": ["src", "src/types/**/*"]
+	"include": ["src"],
+	"exclude": ["tests"]
 }

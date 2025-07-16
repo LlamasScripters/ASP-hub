@@ -1,3 +1,4 @@
+import { UserRole } from "@/lib/roles.js";
 import { requireAuth } from "@/middleware/auth.middleware.js";
 import { requireRole } from "@/middleware/auth.middleware.js";
 import { Router } from "express";
@@ -16,7 +17,7 @@ const categoriesService = new CategoriesService();
  * @description Récupère toutes les catégories avec pagination et filtres
  * @access Public
  */
-//@ts-ignore
+
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		const result = await categoriesService.getCategories();
@@ -34,7 +35,7 @@ router.get("/", async (req: Request, res: Response) => {
  * @description Récupère une catégorie par son ID
  * @access Public
  */
-//@ts-ignore
+
 router.get("/:id", async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
@@ -98,28 +99,31 @@ router.get("/:id/stats", async (req: Request, res: Response) => {
  * @description Créer une nouvelle catégorie
  * @access Private - Admin, Section Manager
  */
-//@ts-ignore
+
 router.post(
 	"/",
 	requireAuth,
-	requireRole("section_manager"),
+	requireRole(UserRole.SECTION_MANAGER),
 	async (req: Request, res: Response) => {
 		try {
 			const body = createCategorySchema.safeParse(req.body);
 			if (!body.success) {
-				return res.status(400).json({
+				res.status(400).json({
 					message: "Données invalides",
 					errors: body.error.issues,
 				});
+				return;
 			}
 
 			const category = await categoriesService.createCategory(body.data);
 			res.status(201).json(category);
+			return;
 		} catch (error) {
 			console.error("Erreur lors de la création de la catégorie:", error);
 			res.status(500).json({
 				message: "Erreur lors de la création de la catégorie",
 			});
+			return;
 		}
 	},
 );
@@ -129,20 +133,20 @@ router.post(
  * @description Mettre à jour une catégorie
  * @access Private - Admin, Section Manager
  */
-//@ts-ignore
 router.put(
 	"/:id",
 	requireAuth,
-	requireRole("section_manager"),
+	requireRole(UserRole.SECTION_MANAGER),
 	async (req: Request, res: Response) => {
 		try {
 			const { id } = req.params;
 			const body = updateCategorySchema.safeParse(req.body);
 			if (!body.success) {
-				return res.status(400).json({
+				res.status(400).json({
 					message: "Données invalides",
 					errors: body.error.issues,
 				});
+				return;
 			}
 
 			const category = await categoriesService.updateCategory(id, body.data);
@@ -150,12 +154,15 @@ router.put(
 		} catch (error) {
 			console.error("Erreur lors de la mise à jour de la catégorie:", error);
 			if (error instanceof Error && error.message === "Catégorie non trouvée") {
-				return res.status(404).json({ message: error.message });
+				res.status(404).json({ message: error.message });
+				return;
 			}
 			res.status(500).json({
 				message: "Erreur lors de la mise à jour de la catégorie",
 			});
+			return;
 		}
+		return;
 	},
 );
 
@@ -164,20 +171,21 @@ router.put(
  * @description Activer/désactiver une catégorie
  * @access Private - Admin, Section Manager
  */
-//@ts-ignore
+
 router.patch(
 	"/:id/status",
 	requireAuth,
-	requireRole("section_manager"),
+	requireRole(UserRole.SECTION_MANAGER),
 	async (req: Request, res: Response) => {
 		try {
 			const { id } = req.params;
 			const { isActive } = req.body;
 
 			if (typeof isActive !== "boolean") {
-				return res.status(400).json({
+				res.status(400).json({
 					message: "Le statut doit être un booléen",
 				});
+				return;
 			}
 
 			const category = await categoriesService.toggleCategoryStatus(
@@ -185,14 +193,17 @@ router.patch(
 				isActive,
 			);
 			res.json(category);
+			return;
 		} catch (error) {
 			console.error("Erreur lors du changement de statut:", error);
 			if (error instanceof Error && error.message === "Catégorie non trouvée") {
-				return res.status(404).json({ message: error.message });
+				res.status(404).json({ message: error.message });
+				return;
 			}
 			res.status(500).json({
 				message: "Erreur lors du changement de statut",
 			});
+			return;
 		}
 	},
 );
@@ -202,11 +213,11 @@ router.patch(
  * @description Supprimer une catégorie
  * @access Private - Admin, Section Manager
  */
-//@ts-ignore
+
 router.delete(
 	"/:id",
 	requireAuth,
-	requireRole("section_manager"),
+	requireRole(UserRole.SECTION_MANAGER),
 	async (req: Request, res: Response) => {
 		try {
 			const { id } = req.params;
@@ -214,26 +225,31 @@ router.delete(
 			// Vérifier si la catégorie peut être supprimée
 			const canDelete = await categoriesService.canDeleteCategory(id);
 			if (!canDelete) {
-				return res.status(400).json({
+				res.status(400).json({
 					message:
 						"Impossible de supprimer une catégorie qui contient des sessions",
 				});
+				return;
 			}
 
 			await categoriesService.deleteCategory(id);
 			res.status(204).send();
+			return;
 		} catch (error) {
 			console.error("Erreur lors de la suppression de la catégorie:", error);
 			if (error instanceof Error && error.message === "Catégorie non trouvée") {
-				return res.status(404).json({ message: error.message });
+				res.status(404).json({ message: error.message });
+				return;
 			}
 			if (error instanceof Error && error.message.includes("sessions")) {
-				return res.status(400).json({ message: error.message });
+				res.status(400).json({ message: error.message });
+				return;
 			}
 			res.status(500).json({
 				message: "Erreur lors de la suppression de la catégorie",
 			});
 		}
+		return;
 	},
 );
 

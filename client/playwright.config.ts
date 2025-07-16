@@ -24,6 +24,7 @@ process.loadEnvFile(".env");
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+	tsconfig: "./tsconfig.test.json",
 	testDir: "./tests",
 	/* Run tests in files in parallel */
 	fullyParallel: true,

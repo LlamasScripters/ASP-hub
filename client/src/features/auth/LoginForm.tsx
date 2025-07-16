@@ -29,7 +29,6 @@ type FormValues = z.infer<typeof formSchema>;
 export function LoginForm() {
 	const location = useLocation();
 	const queryClient = useQueryClient();
-	const navigate = useNavigate();
 	const { handlePostLoginRedirection } = usePostLoginRedirection();
 	const { isPending: isPendingSession } = authClient.useSession();
 

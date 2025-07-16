@@ -11,6 +11,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as TermsRouteImport } from "./routes/terms"
+import { Route as PrivacyRouteImport } from "./routes/privacy"
+import { Route as ContactRouteImport } from "./routes/contact"
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as IndexRouteImport } from "./routes/index"
@@ -86,6 +89,21 @@ const AuthenticatednonadminNonadminUserRouteImport = createFileRoute(
   "/_authenticated/(nonadmin)/_nonadmin/user",
 )()
 
+const TermsRoute = TermsRouteImport.update({
+  id: "/terms",
+  path: "/terms",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: "/privacy",
+  path: "/privacy",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: "/contact",
+  path: "/contact",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: "/_authenticated",
   getParentRoute: () => rootRouteImport,
@@ -510,6 +528,9 @@ const AuthenticatedAdminAdminDashboardClubsClubIdSectionsSectionIdCategoriesCate
 
 export interface FileRoutesByFullPath {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
+  "/contact": typeof ContactRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/auth/login": typeof AuthAuthLoginRoute
@@ -574,6 +595,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof AuthenticatednonadminNonadminRouteWithChildren
+  "/contact": typeof ContactRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/auth/login": typeof AuthAuthLoginRoute
@@ -639,6 +663,9 @@ export interface FileRoutesById {
   "/": typeof IndexRoute
   "/_auth": typeof AuthRouteWithChildren
   "/_authenticated": typeof AuthenticatedRouteWithChildren
+  "/contact": typeof ContactRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/_auth/auth/account-created": typeof AuthAuthAccountCreatedRoute
   "/_auth/auth/forgot-password": typeof AuthAuthForgotPasswordRoute
   "/_auth/auth/login": typeof AuthAuthLoginRoute
@@ -710,6 +737,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | "/"
+    | "/contact"
+    | "/privacy"
+    | "/terms"
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -774,6 +804,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
+    | "/contact"
+    | "/privacy"
+    | "/terms"
     | "/auth/account-created"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -838,6 +871,9 @@ export interface FileRouteTypes {
     | "/"
     | "/_auth"
     | "/_authenticated"
+    | "/contact"
+    | "/privacy"
+    | "/terms"
     | "/_auth/auth/account-created"
     | "/_auth/auth/forgot-password"
     | "/_auth/auth/login"
@@ -910,10 +946,34 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/terms": {
+      id: "/terms"
+      path: "/terms"
+      fullPath: "/terms"
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/privacy": {
+      id: "/privacy"
+      path: "/privacy"
+      fullPath: "/privacy"
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/contact": {
+      id: "/contact"
+      path: "/contact"
+      fullPath: "/contact"
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/_authenticated": {
       id: "/_authenticated"
       path: ""
@@ -1690,6 +1750,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
