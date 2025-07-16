@@ -192,6 +192,7 @@ jobs:
           echo "📦 Executing database migrations..."
           docker run --rm --network asphub_backend --env DATABASE_URL="${{ secrets.DATABASE_URL }}" ${SERVER_MIGRATOR_IMAGE_WITH_TAG} npx drizzle-kit migrate
 
+          echo ""
           echo "📦 Seeding database..."
           docker run --rm --network asphub_backend --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --env ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
