@@ -4,14 +4,14 @@ import {
 	type SelectComplex,
 	type SelectRoom,
 	rooms,
-} from "../../schema.js";
+} from "../../../schema.js";
 import {
 	AQUATIC_HOURS,
 	EXTENDED_HOURS,
 	STADIUM_HOURS,
 	STANDARD_HOURS,
 	type WeekSchedule,
-} from "../utils/openingHours.js";
+} from "../../utils/openingHours.js";
 
 const createRoom = (
 	name: string,

@@ -4,7 +4,7 @@ import {
 	type SelectClub,
 	type SelectSection,
 	sections,
-} from "../../schema.js";
+} from "../../../schema.js";
 
 const createSection = (
 	clubId: string,

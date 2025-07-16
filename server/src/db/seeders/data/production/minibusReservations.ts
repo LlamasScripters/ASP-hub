@@ -5,8 +5,8 @@ import {
 	type SelectMinibus,
 	minibusReservations,
 	users,
-} from "../../schema.js";
-import type { WeekSchedule } from "../utils/openingHours.js";
+} from "../../../schema.js";
+import type { WeekSchedule } from "../../utils/openingHours.js";
 
 const activityTitles = [
 	"Déplacement tournoi de football",

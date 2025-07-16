@@ -6,7 +6,7 @@ import {
 	type SelectSessionSport,
 	sessionsSport,
 	users,
-} from "../../schema.js";
+} from "../../../schema.js";
 
 const sessionTitles = {
 	"U6-U8 Baby Foot": [

@@ -6,18 +6,30 @@ import { eq } from "drizzle-orm";
 export async function seedUsers(database: typeof db) {
 	console.log("Creating test users...");
 
+	if (
+		!process.env.ADMIN_EMAIL ||
+		!process.env.ADMIN_PASSWORD ||
+		!process.env.ADMIN_PHONE ||
+		!process.env.JURY_EMAIL ||
+		!process.env.JURY_PASSWORD
+	) {
+		throw new Error(
+			"Ensure that ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_PHONE, JURY_EMAIL and JURY_PASSWORD are set in environment variables",
+		);
+	}
+
 	try {
 		// Create admin user for E2E tests
 		const adminData = {
-			email: "admin@admin.com",
-			password: "admin123456789",
-			name: "Admin Test",
+			email: process.env.ADMIN_EMAIL,
+			password: process.env.ADMIN_PASSWORD,
+			name: "Admin ASPHub",
 			firstName: "Admin",
-			lastName: "Test",
+			lastName: "ASPHub",
 			acceptTerms: true,
 			dateOfBirth: new Date("1990-01-01"),
-			civility: "monsieur",
-			phone: "+33123456789",
+			civility: "autre",
+			phone: process.env.ADMIN_PHONE,
 		};
 
 		// Check if admin user already exists
@@ -55,14 +67,14 @@ export async function seedUsers(database: typeof db) {
 
 		// Create regular user for testing
 		const userData = {
-			email: "user@example.com",
-			password: "user123456789",
-			name: "User Test",
-			firstName: "User",
-			lastName: "Test",
+			email: process.env.JURY_EMAIL,
+			password: process.env.JURY_PASSWORD,
+			name: "Jury ASPHub",
+			firstName: "Jury",
+			lastName: "ASPHub",
 			acceptTerms: true,
 			dateOfBirth: new Date("1995-05-15"),
-			civility: "madame",
+			civility: "autre",
 			phone: "+33987654321",
 		};
 

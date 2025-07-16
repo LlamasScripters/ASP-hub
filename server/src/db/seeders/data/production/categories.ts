@@ -4,7 +4,7 @@ import {
 	type SelectCategory,
 	type SelectSection,
 	categories,
-} from "../../schema.js";
+} from "../../../schema.js";
 
 const createCategory = (
 	sectionId: string,
