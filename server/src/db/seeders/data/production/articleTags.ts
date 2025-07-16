@@ -23,7 +23,7 @@ export async function seedArticleTags(
 
 		// Helper function to find tag by name
 		const findTagByName = (name: string) =>
-			tags.find((tag) => tag.name === name);
+			tags.find((tag) => tag.name === name) as SelectTag;
 
 		// Define article-tag relationships
 		const articleTagData = [
