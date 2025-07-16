@@ -177,9 +177,6 @@ jobs:
           SERVER_IMAGE_WITH_TAG="${{ env.SERVER_IMAGE }}:main"
           SERVER_MIGRATOR_IMAGE_WITH_TAG="${{ env.SERVER_IMAGE }}:main"
 
-          
-          echo ${{ secrets.ENV_FILE }} >> /tmp/.env
-
           echo "🚀 Deployment summary:"
           echo "  Trigger: ${{ github.ref_type }}"
           echo "  Branch: ${{ github.ref_name }}"
@@ -201,7 +198,17 @@ jobs:
           echo ""
           echo "📦 Seeding database..."
           docker run --rm --network asphub_backend \
-            --env-file /tmp/.env \
+            --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --env ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+            --env ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}" \
+            --env ADMIN_PHONE="${{ secrets.ADMIN_PHONE }}" \
+            --env JURY_EMAIL="${{ secrets.JURY_EMAIL }}" \
+            --env JURY_PASSWORD="${{ secrets.JURY_PASSWORD }}" \
+            --env GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            --env GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            --env BREVO_API_KEY="${{ secrets.BREVO_API_KEY }}" \
+            --env BETTER_AUTH_SECRET="${{ secrets.BETTER_AUTH_SECRET }}" \
+            --env BETTER_AUTH_HOST="${{ secrets.BETTER_AUTH_HOST }}" \
             ${SERVER_MIGRATOR_IMAGE_WITH_TAG} \
             node /app/dist/db/seed.js seed production
 

@@ -1,13 +1,17 @@
 import { db } from "@/db/index.js";
+import { seedArticleTags } from "./articleTags.js";
+import { seedArticles } from "./articles.js";
 import { seedCategories } from "./categories.js";
 import { seedClubs } from "./clubs.js";
 import { seedComplexes } from "./complexes.js";
 import { seedMinibusReservations } from "./minibusReservations.js";
 import { seedMinibuses } from "./minibuses.js";
+import { seedReactions } from "./reactions.js";
 import { seedRoomReservations } from "./roomReservations.js";
 import { seedRooms } from "./rooms.js";
 import { seedSections } from "./sections.js";
 import { seedSessionsSport } from "./sessionsSport.js";
+import { seedTags } from "./tags.js";
 import { seedUsers } from "./users.js";
 
 export async function seedDatabase() {
@@ -16,7 +20,7 @@ export async function seedDatabase() {
 	try {
 		// Seeding dans l'ordre des dépendances
 		console.log("Seeding Users...");
-		await seedUsers(db);
+		const users = await seedUsers(db);
 
 		console.log("Seeding Complexes...");
 		const complexes = await seedComplexes(db);
@@ -44,6 +48,19 @@ export async function seedDatabase() {
 
 		console.log("Seeding Sports Sessions...");
 		await seedSessionsSport(db, categories);
+
+		// Blog-related seeding
+		console.log("Seeding Blog Reactions...");
+		await seedReactions(db);
+
+		console.log("Seeding Blog Tags...");
+		const tags = await seedTags(db);
+
+		console.log("Seeding Blog Articles...");
+		const articles = await seedArticles(db, users);
+
+		console.log("Seeding Article Tags...");
+		await seedArticleTags(db, articles, tags);
 
 		console.log("All seeders have been executed successfully!");
 	} catch (error) {
