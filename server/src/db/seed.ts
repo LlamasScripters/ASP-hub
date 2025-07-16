@@ -1,9 +1,4 @@
 import "dotenv/config";
-import {
-	resetDatabase as resetDatabaseLocal,
-	seedDatabase as seedDatabaseLocal,
-} from "./seeders/data/local/index.js";
-import { seedDatabase as seedDatabaseProduction } from "./seeders/data/production/index.js";
 
 async function main() {
 	const command = process.argv[2];
@@ -15,14 +10,14 @@ async function main() {
 		process.exit(1);
 	}
 
-	const resetDatabase = resetDatabaseLocal;
-	const seedDatabase =
-		environment === "production" ? seedDatabaseProduction : seedDatabaseLocal;
+	const { resetDatabase, seedDatabase } = await import(
+		`./seeders/data/${environment}/index.js`
+	);
 
 	try {
 		switch (command) {
 			case "reset":
-				if (environment === "production") {
+				if (environment === "production" || resetDatabase === undefined) {
 					console.error(
 						"Error: Reset is not available for production environment",
 					);
@@ -40,7 +35,7 @@ async function main() {
 				break;
 
 			case "fresh":
-				if (environment === "production") {
+				if (environment === "production" || resetDatabase === undefined) {
 					console.error(
 						"Error: Fresh is not available for production environment",
 					);
