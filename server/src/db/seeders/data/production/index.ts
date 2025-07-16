@@ -1,15 +1,14 @@
-import { db } from "../index.js";
-import { seedCategories } from "./data/categories.js";
-import { seedClubs } from "./data/clubs.js";
-import { seedComplexes } from "./data/complexes.js";
-import { seedMinibusReservations } from "./data/minibusReservations.js";
-import { seedMinibuses } from "./data/minibuses.js";
-import { seedRoomReservations } from "./data/roomReservations.js";
-import { seedRooms } from "./data/rooms.js";
-import { seedSections } from "./data/sections.js";
-import { seedSessionsSport } from "./data/sessionsSport.js";
-import { seedUsers } from "./data/users.js";
-import { resetAllTables } from "./reset.js";
+import { db } from "@/db/index.js";
+import { seedCategories } from "./categories.js";
+import { seedClubs } from "./clubs.js";
+import { seedComplexes } from "./complexes.js";
+import { seedMinibusReservations } from "./minibusReservations.js";
+import { seedMinibuses } from "./minibuses.js";
+import { seedRoomReservations } from "./roomReservations.js";
+import { seedRooms } from "./rooms.js";
+import { seedSections } from "./sections.js";
+import { seedSessionsSport } from "./sessionsSport.js";
+import { seedUsers } from "./users.js";
 
 export async function seedDatabase() {
 	console.log("Begin of database seeding...");
@@ -49,18 +48,6 @@ export async function seedDatabase() {
 		console.log("All seeders have been executed successfully!");
 	} catch (error) {
 		console.error("Error during seeding:", error);
-		throw error;
-	}
-}
-
-export async function resetDatabase() {
-	console.log("Begin of data deletion...");
-
-	try {
-		await resetAllTables(db);
-		console.log("All tables have been emptied!");
-	} catch (error) {
-		console.error("Error during the reset:", error);
 		throw error;
 	}
 }

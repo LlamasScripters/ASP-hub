@@ -1,14 +1,15 @@
 import type { db } from "@/db/index.js";
+import { DrizzleQueryError } from "drizzle-orm/errors";
 import {
 	type InsertMinibus,
 	type SelectMinibus,
 	minibuses,
-} from "../../schema.js";
+} from "../../../schema.js";
 import {
 	ALTERNATIVE_MINIBUS_HOURS,
 	STANDARD_MINIBUS_HOURS,
 	type WeekSchedule,
-} from "../utils/openingHours.js";
+} from "../../utils/openingHours.js";
 
 const createMinibus = (
 	name: string,
@@ -67,11 +68,22 @@ export async function seedMinibuses(
 		const insertedMinibuses = await database
 			.insert(minibuses)
 			.values(minibusesData)
+			.onConflictDoNothing()
 			.returning();
 
 		console.log(`${insertedMinibuses.length} minibuses created successfully`);
 		return insertedMinibuses;
 	} catch (error) {
+		if (
+			error instanceof DrizzleQueryError &&
+			error.cause &&
+			"code" in error.cause &&
+			error.cause.code === "23505"
+		) {
+			console.warn(
+				"Minibus with license plate already exists, skipping insertion",
+			);
+		}
 		console.error("Error during the insertion of minibuses:", error);
 		throw error;
 	}

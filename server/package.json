@@ -17,9 +17,12 @@
 		"db:generate:dev": "drizzle-kit generate --config drizzle-dev.config.ts",
 		"db:migrate:dev": "drizzle-kit migrate --config drizzle-dev.config.ts",
 		"db:studio:dev": "drizzle-kit studio --config drizzle-dev.config.ts",
-		"db:seed": "tsx src/db/seed.ts seed",
-		"db:reset": "tsx src/db/seed.ts reset",
-		"db:fresh": "tsx src/db/seed.ts fresh"
+		"db:seed": "tsx src/db/seed.ts seed production",
+		"db:seed:dev": "tsx src/db/seed.ts seed local",
+		"db:reset": "tsx src/db/seed.ts reset production",
+		"db:reset:dev": "tsx src/db/seed.ts reset local",
+		"db:fresh": "tsx src/db/seed.ts fresh production",
+		"db:fresh:dev": "tsx src/db/seed.ts fresh local"
 	},
 	"keywords": [],
 	"author": "",

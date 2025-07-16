@@ -3,14 +3,14 @@ import {
 	type InsertComplex,
 	type SelectComplex,
 	complexes,
-} from "../../schema.js";
+} from "../../../schema.js";
 import {
 	AQUATIC_HOURS,
 	EXTENDED_HOURS,
 	STADIUM_HOURS,
 	STANDARD_HOURS,
 	type WeekSchedule,
-} from "../utils/openingHours.js";
+} from "../../utils/openingHours.js";
 
 const createComplex = (
 	name: string,

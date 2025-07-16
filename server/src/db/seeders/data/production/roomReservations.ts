@@ -5,8 +5,8 @@ import {
 	type SelectRoom,
 	roomReservations,
 	users,
-} from "../../schema.js";
-import type { WeekSchedule } from "../utils/openingHours.js";
+} from "../../../schema.js";
+import type { WeekSchedule } from "../../utils/openingHours.js";
 
 const activityTitles = {
 	natation: [

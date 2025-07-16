@@ -1,5 +1,5 @@
 import type { db } from "@/db/index.js";
-import { type InsertClub, type SelectClub, clubs } from "../../schema.js";
+import { type InsertClub, type SelectClub, clubs } from "../../../schema.js";
 
 const createClub = (
 	name: string,
