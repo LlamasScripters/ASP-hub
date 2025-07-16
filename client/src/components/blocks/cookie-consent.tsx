@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -10,10 +8,9 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Check, Cookie, X } from "lucide-react";
+import { Cookie } from "lucide-react";
 import * as React from "react";
 
-// Define prop types
 interface CookieConsentProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant?: "default" | "small" | "mini";
 	demo?: boolean;
