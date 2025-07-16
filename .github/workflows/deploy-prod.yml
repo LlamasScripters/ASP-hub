@@ -199,7 +199,7 @@ jobs:
             --env ADMIN_PHONE="${{ secrets.ADMIN_PHONE }}" \
             --env JURY_EMAIL="${{ secrets.JURY_EMAIL }}" \
             --env JURY_PASSWORD="${{ secrets.JURY_PASSWORD }}" \
-            ${SERVER_MIGRATOR_IMAGE_WITH_TAG} npm run db:seed
+            ${SERVER_MIGRATOR_IMAGE_WITH_TAG} node dist/db/seed.js production
 
           echo "📦 Updating server service..."
           docker service update \
