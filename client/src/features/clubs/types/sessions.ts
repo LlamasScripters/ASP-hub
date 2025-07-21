@@ -23,6 +23,7 @@ export interface SessionSport {
 	notes: string | null;
 	coachId: string | null;
 	responsibleId: string | null;
+	roomReservationId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 	// Relations
@@ -52,6 +53,26 @@ export interface SessionSport {
 		firstName: string;
 		lastName: string;
 		email: string;
+	};
+	roomReservation?: {
+		id: string;
+		title: string;
+		startAt: Date;
+		endAt: Date;
+		room: {
+			id: string;
+			name: string;
+			description: string;
+			sportType: string;
+			complex: {
+				id: string;
+				name: string;
+				description: string;
+				street: string;
+				city: string;
+				postalCode: string;
+			};
+		};
 	};
 	participants?: {
 		id: string;
@@ -85,6 +106,12 @@ export interface CreateSessionData {
 	location?: string;
 	maxParticipants?: number;
 	notes?: string;
+	roomReservationId?: string;
+}
+
+export interface CreateSessionWithRoomData extends CreateSessionData {
+	roomId: string;
+	bookerId: string;
 }
 
 export interface UpdateSessionData {
@@ -97,6 +124,7 @@ export interface UpdateSessionData {
 	location?: string;
 	maxParticipants?: number;
 	notes?: string;
+	roomReservationId?: string;
 }
 
 export interface SessionsPaginatedResponse {

@@ -1,35 +1,16 @@
-import { db } from "@/db/index.js";
-import {
-	categories,
-	clubs,
-	sectionResponsibilities,
-	sections,
-	sessionParticipants,
-	sessionsSport,
-	users,
-} from "@/db/schema.js";
-import {
-	and,
-	between,
-	count,
-	desc,
-	eq,
-	gte,
-	like,
-	lte,
-	or,
-	sql,
-} from "drizzle-orm";
-import type { ParticipantActionData } from "./sessions.schema.js";
-import type {
-	CreateSessionData,
-	ParticipantAction,
-	SessionConflict,
-	SessionResponse,
-	SessionStats,
-	SessionsPaginatedResponse,
+import type { 
+	SessionResponse, 
+	CreateSessionData, 
 	UpdateSessionData,
+	SessionStats,
+	SessionConflict,
+	ParticipantAction, 
+	SessionsPaginatedResponse
 } from "./sessions.types.js";
+import { db } from "@/db/index.js";
+import { sessionsSport, categories, sections, clubs, users, sessionParticipants, roomReservations, rooms, complexes } from "@/db/schema.js";
+import { eq, and, count, sql, gte, desc } from "drizzle-orm";
+import { roomReservationsService } from "@/features/room-booking/roomReservations.service.js";
 
 export class SessionsService {
 	/**
@@ -52,6 +33,7 @@ export class SessionsService {
 				notes: sessionsSport.notes,
 				coachId: sessionsSport.coachId,
 				responsibleId: sessionsSport.responsibleId,
+				roomReservationId: sessionsSport.roomReservationId,
 				createdAt: sessionsSport.createdAt,
 				updatedAt: sessionsSport.updatedAt,
 				// Category relation
@@ -69,12 +51,29 @@ export class SessionsService {
 				coachFirstName: users.firstName,
 				coachLastName: users.lastName,
 				coachEmail: users.email,
+				// Room reservation relation
+				roomReservationTitle: roomReservations.title,
+				roomReservationStartAt: roomReservations.startAt,
+				roomReservationEndAt: roomReservations.endAt,
+				roomId: rooms.id,
+				roomName: rooms.name,
+				roomDescription: rooms.description,
+				roomSportType: rooms.sportType,
+				complexId: complexes.id,
+				complexName: complexes.name,
+				complexDescription: complexes.description,
+				complexStreet: complexes.street,
+				complexCity: complexes.city,
+				complexPostalCode: complexes.postalCode,
 			})
 			.from(sessionsSport)
 			.leftJoin(categories, eq(sessionsSport.categoryId, categories.id))
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(users, eq(sessionsSport.coachId, users.id))
+			.leftJoin(roomReservations, eq(sessionsSport.roomReservationId, roomReservations.id))
+			.leftJoin(rooms, eq(roomReservations.roomId, rooms.id))
+			.leftJoin(complexes, eq(rooms.complexId, complexes.id))
 			.where(eq(sessionsSport.id, sessionId));
 
 		if (!result) return null;
@@ -100,6 +99,7 @@ export class SessionsService {
 			notes: result.notes,
 			coachId: result.coachId,
 			responsibleId: result.responsibleId,
+			roomReservationId: result.roomReservationId,
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
 			category: {
@@ -121,14 +121,32 @@ export class SessionsService {
 						}
 					: undefined,
 			},
-			coach: result.coachId
-				? {
-						id: result.coachId,
-						firstName: result.coachFirstName || "",
-						lastName: result.coachLastName || "",
-						email: result.coachEmail || "",
-					}
-				: undefined,
+			coach: result.coachId ? {
+				id: result.coachId,
+				firstName: result.coachFirstName || '',
+				lastName: result.coachLastName || '',
+				email: result.coachEmail || '',
+			} : undefined,
+			roomReservation: result.roomReservationId ? {
+				id: result.roomReservationId,
+				title: result.roomReservationTitle || '',
+				startAt: result.roomReservationStartAt || new Date(),
+				endAt: result.roomReservationEndAt || new Date(),
+				room: {
+					id: result.roomId || '',
+					name: result.roomName || '',
+					description: result.roomDescription || '',
+					sportType: result.roomSportType || '',
+					complex: {
+						id: result.complexId || '',
+						name: result.complexName || '',
+						description: result.complexDescription || '',
+						street: result.complexStreet || '',
+						city: result.complexCity || '',
+						postalCode: result.complexPostalCode || '',
+					},
+				},
+			} : undefined,
 			participantsCount: participantsCount?.count || 0,
 		};
 	}
@@ -154,6 +172,7 @@ export class SessionsService {
 				notes: sessionsSport.notes,
 				coachId: sessionsSport.coachId,
 				responsibleId: sessionsSport.responsibleId,
+				roomReservationId: sessionsSport.roomReservationId,
 				createdAt: sessionsSport.createdAt,
 				updatedAt: sessionsSport.updatedAt,
 				// Category relation
@@ -171,12 +190,29 @@ export class SessionsService {
 				coachFirstName: users.firstName,
 				coachLastName: users.lastName,
 				coachEmail: users.email,
+				// Room reservation relation
+				roomReservationTitle: roomReservations.title,
+				roomReservationStartAt: roomReservations.startAt,
+				roomReservationEndAt: roomReservations.endAt,
+				roomId: rooms.id,
+				roomName: rooms.name,
+				roomDescription: rooms.description,
+				roomSportType: rooms.sportType,
+				complexId: complexes.id,
+				complexName: complexes.name,
+				complexDescription: complexes.description,
+				complexStreet: complexes.street,
+				complexCity: complexes.city,
+				complexPostalCode: complexes.postalCode,
 			})
 			.from(sessionsSport)
 			.leftJoin(categories, eq(sessionsSport.categoryId, categories.id))
 			.leftJoin(sections, eq(categories.sectionId, sections.id))
 			.leftJoin(clubs, eq(sections.clubId, clubs.id))
 			.leftJoin(users, eq(sessionsSport.coachId, users.id))
+			.leftJoin(roomReservations, eq(sessionsSport.roomReservationId, roomReservations.id))
+			.leftJoin(rooms, eq(roomReservations.roomId, rooms.id))
+			.leftJoin(complexes, eq(rooms.complexId, complexes.id))
 			.orderBy(desc(sessionsSport.startDate));
 
 		// Transformation des données
@@ -203,6 +239,7 @@ export class SessionsService {
 				notes: row.notes,
 				coachId: row.coachId,
 				responsibleId: row.responsibleId,
+				roomReservationId: row.roomReservationId,
 				createdAt: row.createdAt,
 				updatedAt: row.updatedAt,
 				category: {
@@ -224,14 +261,32 @@ export class SessionsService {
 							}
 						: undefined,
 				},
-				coach: row.coachId
-					? {
-							id: row.coachId,
-							firstName: row.coachFirstName || "",
-							lastName: row.coachLastName || "",
-							email: row.coachEmail || "",
-						}
-					: undefined,
+				coach: row.coachId ? {
+					id: row.coachId,
+					firstName: row.coachFirstName || '',
+					lastName: row.coachLastName || '',
+					email: row.coachEmail || '',
+				} : undefined,
+				roomReservation: row.roomReservationId ? {
+					id: row.roomReservationId,
+					title: row.roomReservationTitle || '',
+					startAt: row.roomReservationStartAt || new Date(),
+					endAt: row.roomReservationEndAt || new Date(),
+					room: {
+						id: row.roomId || '',
+						name: row.roomName || '',
+						description: row.roomDescription || '',
+						sportType: row.roomSportType || '',
+						complex: {
+							id: row.complexId || '',
+							name: row.complexName || '',
+							description: row.complexDescription || '',
+							street: row.complexStreet || '',
+							city: row.complexCity || '',
+							postalCode: row.complexPostalCode || '',
+						},
+					},
+				} : undefined,
 				participantsCount: participantsCount?.count || 0,
 			});
 		}
@@ -305,6 +360,58 @@ export class SessionsService {
 	}
 
 	/**
+	 * Créer une session avec réservation de salle automatique
+	 */
+	async createSessionWithRoomReservation(
+		sessionData: CreateSessionData,
+		roomId: string,
+		bookerId: string
+	): Promise<SessionResponse> {
+		// Vérifier les conflits pour la session
+		const conflicts = await this.checkSessionConflicts(sessionData);
+		if (conflicts.length > 0) {
+			throw new Error(`Conflits détectés: ${conflicts.map(c => c.conflictType).join(", ")}`);
+		}
+
+		// Créer la réservation de salle
+		const roomReservation = await roomReservationsService.create({
+				title: sessionData.title,
+				startAt: sessionData.startDate,
+				endAt: sessionData.endDate,
+				roomId,
+				bookerId,
+				status: "confirmed",
+		});
+
+		if (!roomReservation) {
+			throw new Error("Erreur lors de la création de la réservation de salle");
+		}
+
+		// Créer la session avec l'ID de la réservation
+		const [newSession] = await db
+			.insert(sessionsSport)
+			.values({
+				...sessionData,
+				roomReservationId: roomReservation.id,
+			})
+			.returning();
+
+		if (!newSession) {
+			// Supprimer la réservation si la création de la session échoue
+			await db.delete(roomReservations).where(eq(roomReservations.id, roomReservation.id));
+			throw new Error("Erreur lors de la création de la session");
+		}
+
+		// Récupérer la session créée avec ses relations
+		const session = await this.getSessionById(newSession.id);
+		if (!session) {
+			throw new Error("Erreur lors de la création de la session");
+		}
+
+		return session;
+	}
+
+	/**
 	 * Mettre à jour une session
 	 */
 	async updateSession(
@@ -342,6 +449,86 @@ export class SessionsService {
 
 		if (!updatedSession) {
 			throw new Error("Erreur lors de la mise à jour");
+		}
+
+		// Récupérer la session mise à jour avec ses relations
+		const session = await this.getSessionById(updatedSession.id);
+		if (!session) {
+			throw new Error("Erreur lors de la mise à jour de la session");
+		}
+
+		return session;
+	}
+
+	/**
+	 * Lier une session existante à une réservation de salle
+	 */
+	async linkSessionToRoomReservation(
+		sessionId: string,
+		roomReservationId: string
+	): Promise<SessionResponse> {
+		const existingSession = await this.getSessionById(sessionId);
+		if (!existingSession) {
+			throw new Error("Session non trouvée");
+		}
+
+		// Vérifier que la réservation existe
+		const roomReservation = await roomReservationsService.getById(roomReservationId);
+
+		if (!roomReservation) {
+			throw new Error("Réservation de salle non trouvée");
+		}
+
+		// Vérifier que les horaires correspondent
+		if (existingSession.startDate.getTime() !== roomReservation.startAt.getTime() ||
+			existingSession.endDate.getTime() !== roomReservation.endAt.getTime()) {
+			throw new Error("Les horaires de la session et de la réservation ne correspondent pas");
+		}
+
+		// Mettre à jour la session
+		const [updatedSession] = await db
+			.update(sessionsSport)
+			.set({
+				roomReservationId,
+				updatedAt: new Date(),
+			})
+			.where(eq(sessionsSport.id, sessionId))
+			.returning();
+
+		if (!updatedSession) {
+			throw new Error("Erreur lors de la mise à jour de la session");
+		}
+
+		// Récupérer la session mise à jour avec ses relations
+		const session = await this.getSessionById(updatedSession.id);
+		if (!session) {
+			throw new Error("Erreur lors de la mise à jour de la session");
+		}
+
+		return session;
+	}
+
+	/**
+	 * Délier une session d'une réservation de salle
+	 */
+	async unlinkSessionFromRoomReservation(sessionId: string): Promise<SessionResponse> {
+		const existingSession = await this.getSessionById(sessionId);
+		if (!existingSession) {
+			throw new Error("Session non trouvée");
+		}
+
+		// Mettre à jour la session
+		const [updatedSession] = await db
+			.update(sessionsSport)
+			.set({
+				roomReservationId: null,
+				updatedAt: new Date(),
+			})
+			.where(eq(sessionsSport.id, sessionId))
+			.returning();
+
+		if (!updatedSession) {
+			throw new Error("Erreur lors de la mise à jour de la session");
 		}
 
 		// Récupérer la session mise à jour avec ses relations
