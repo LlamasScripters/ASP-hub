@@ -35,18 +35,22 @@ import {
 } from "@/components/ui/table";
 import { Link, useParams } from "@tanstack/react-router";
 import {
-	ArrowLeft,
 	Calendar,
 	ChevronDown,
 	ChevronUp,
+	ChevronLeft,
+	ChevronRight,
 	Edit,
-	Plus,
 	Search,
 	Trash2,
+	Plus,
+	ArrowLeft,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { Category, Section, SessionSport } from "../../types";
+import { useMemo, useState } from "react";
+import { useSessionsBySection, useDeleteSession } from "../../hooks/useSessions";
+import { useSection } from "../../hooks/useSections";
+import { useCategoriesBySection } from "../../hooks/useCategories";
+import type { SessionSport } from "../../types";
 
 type SortField = "title" | "categoryName" | "type" | "status" | "startDate";
 type SortDirection = "asc" | "desc";
@@ -58,65 +62,34 @@ interface Filters {
 	status: string;
 }
 
-interface EnrichedSession extends Omit<SessionSport, "categoryId"> {
-	categoryName: string;
-	categoryId: string;
-}
-
 export function SectionSessionsListPage() {
 	const { clubId, sectionId } = useParams({
 		from: "/_authenticated/admin/_admin/dashboard/clubs/$clubId/sections/$sectionId/sessions/",
 	});
-	const [sessions, setSessions] = useState<EnrichedSession[]>([]);
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [sectionName, setSectionName] = useState("");
+	const { data: section, isLoading: sectionLoading } = useSection(sectionId);
+	const sectionName = section?.name || "Section inconnue";
+	const { data: sessions = [], isLoading: sessionsLoading } = useSessionsBySection(sectionId);
+	const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesBySection(sectionId);
+	const categories = categoriesData?.data || [];
+
+	const { mutateAsync: deleteSession, status: deleteStatus } = useDeleteSession();
+	const isDeleting = deleteStatus === "pending";
+
 	const [sortField, setSortField] = useState<SortField>("startDate");
-	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 	const [filters, setFilters] = useState<Filters>({
 		title: "",
 		categoryName: "",
 		type: "all",
 		status: "all",
 	});
-	const [deleteSession, setDeleteSession] = useState<EnrichedSession | null>(
-		null,
-	);
-	const [isDeleting, setIsDeleting] = useState(false);
+	const [deleteSessionState, setDeleteSessionState] = useState<SessionSport | null>(null);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			// Fetch categories
-			const categoriesData: Category[] = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}/categories`,
-			).then((res) => res.json());
-			setCategories(categoriesData);
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
-			const result: EnrichedSession[] = [];
-
-			for (const cat of categoriesData) {
-				const catSessions: SessionSport[] = await fetch(
-					`/api/clubs/${clubId}/sections/${sectionId}/categories/${cat.id}/sessions`,
-				).then((res) => res.json());
-				result.push(
-					...catSessions.map((s) => ({
-						...s,
-						categoryName: cat.name,
-						categoryId: cat.id,
-					})),
-				);
-			}
-
-			setSessions(result);
-
-			// Fetch section name for better context
-			const sectionData: Section = await fetch(
-				`/api/clubs/${clubId}/sections/${sectionId}`,
-			).then((res) => res.json());
-			setSectionName(sectionData.name);
-		};
-
-		fetchData();
-	}, [clubId, sectionId]);
+	const isLoading = sectionLoading || sessionsLoading || categoriesLoading;
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -129,6 +102,7 @@ export function SectionSessionsListPage() {
 
 	const handleFilterChange = (field: keyof Filters, value: string) => {
 		setFilters((prev) => ({ ...prev, [field]: value }));
+		setCurrentPage(1); // Reset to first page when filtering
 	};
 
 	const getSortIcon = (field: SortField) => {
@@ -193,8 +167,8 @@ export function SectionSessionsListPage() {
 				.includes(filters.title.toLowerCase());
 			const categoryMatch =
 				filters.categoryName === "" ||
-				session.categoryName
-					.toLowerCase()
+				session.category?.name
+					?.toLowerCase()
 					.includes(filters.categoryName.toLowerCase());
 			const typeMatch =
 				filters.type === "" ||
@@ -208,7 +182,6 @@ export function SectionSessionsListPage() {
 			return titleMatch && categoryMatch && typeMatch && statusMatch;
 		});
 
-		// Sort
 		filtered.sort((a, b) => {
 			let aValue: string | number | Date;
 			let bValue: string | number | Date;
@@ -219,8 +192,8 @@ export function SectionSessionsListPage() {
 					bValue = b.title.toLowerCase();
 					break;
 				case "categoryName":
-					aValue = (a.categoryName || "").toLowerCase();
-					bValue = (b.categoryName || "").toLowerCase();
+					aValue = (a.category?.name || "").toLowerCase();
+					bValue = (b.category?.name || "").toLowerCase();
 					break;
 				case "type":
 					aValue = a.type;
@@ -246,6 +219,12 @@ export function SectionSessionsListPage() {
 		return filtered;
 	}, [sessions, filters, sortField, sortDirection]);
 
+	// Pagination logic
+	const totalPages = Math.ceil(filteredAndSortedSessions.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedSessions = filteredAndSortedSessions.slice(startIndex, endIndex);
+
 	const clearFilters = () => {
 		setFilters({
 			title: "",
@@ -253,37 +232,33 @@ export function SectionSessionsListPage() {
 			type: "all",
 			status: "all",
 		});
+		setCurrentPage(1);
+	};
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
 	};
 
 	const handleDeleteSession = async () => {
-		if (!deleteSession) return;
-
-		setIsDeleting(true);
+		if (!deleteSessionState) return;
 		try {
-			const response = await fetch(`/api/clubs/sessions/${deleteSession.id}`, {
-				method: "DELETE",
-			});
-
-			if (!response.ok) {
-				throw new Error("Erreur lors de la suppression");
-			}
-
-			// Retirer la session de la liste
-			setSessions((prev) =>
-				prev.filter((session) => session.id !== deleteSession.id),
-			);
-			setDeleteSession(null);
-			toast.success("Session supprimée avec succès");
+			await deleteSession(deleteSessionState.id);
+			setDeleteSessionState(null);
 		} catch (error) {
-			console.error("Erreur lors de la suppression:", error);
-			toast.error("Erreur lors de la suppression");
-		} finally {
-			setIsDeleting(false);
+			// toast error déjà géré dans le hook
 		}
 	};
 
 	const uniqueTypes = [...new Set(sessions.map((s) => s.type))];
 	const uniqueStatuses = [...new Set(sessions.map((s) => s.status))];
+
+	if (isLoading) {
+		return (
+			<div className="container mx-auto p-6">
+				<div className="text-center">Chargement...</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto p-6 space-y-8">
@@ -340,10 +315,14 @@ export function SectionSessionsListPage() {
 						Liste des sessions
 					</CardTitle>
 					<CardDescription>
+						Affichage de {filteredAndSortedSessions.length === 0 ? 0 : startIndex + 1} à{" "}
+						{Math.min(endIndex, filteredAndSortedSessions.length)} sur{" "}
 						{filteredAndSortedSessions.length} session
-						{filteredAndSortedSessions.length > 1 ? "s" : ""} affichée
-						{filteredAndSortedSessions.length > 1 ? "s" : ""} sur{" "}
-						{sessions.length} au total
+						{filteredAndSortedSessions.length > 1 ? "s" : ""} filtrée
+						{filteredAndSortedSessions.length > 1 ? "s" : ""}
+						{filteredAndSortedSessions.length !== sessions.length && (
+							<> sur {sessions.length} au total</>
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -516,7 +495,7 @@ export function SectionSessionsListPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{filteredAndSortedSessions.length === 0 ? (
+								{paginatedSessions.length === 0 ? (
 									<TableRow>
 										<TableCell
 											colSpan={6}
@@ -528,7 +507,7 @@ export function SectionSessionsListPage() {
 										</TableCell>
 									</TableRow>
 								) : (
-									filteredAndSortedSessions.map((s) => (
+									paginatedSessions.map((s) => (
 										<TableRow
 											key={s.id}
 											className="hover:bg-muted/50 transition-colors"
@@ -538,7 +517,7 @@ export function SectionSessionsListPage() {
 											</TableCell>
 											<TableCell>
 												<Badge variant="outline" className="font-medium">
-													{s.categoryName}
+													{s.category?.name}
 												</Badge>
 											</TableCell>
 											<TableCell>{getTypeBadge(s.type)}</TableCell>
@@ -597,7 +576,7 @@ export function SectionSessionsListPage() {
 														variant="ghost"
 														size="sm"
 														className="h-8 px-3 hover:cursor-pointer hover:bg-destructive/10 hover:text-destructive"
-														onClick={() => setDeleteSession(s)}
+														onClick={() => setDeleteSessionState(s)}
 													>
 														<Trash2 className="mr-1 h-3 w-3" />
 														Supprimer
@@ -610,20 +589,102 @@ export function SectionSessionsListPage() {
 							</TableBody>
 						</Table>
 					</div>
+
+					{/* Pagination Controls */}
+					{filteredAndSortedSessions.length > 0 && (
+						<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+							<div className="flex items-center gap-2">
+								<span className="text-sm text-muted-foreground">
+									Afficher :
+								</span>
+								<Select
+									value={itemsPerPage.toString()}
+									onValueChange={(value) => {
+										setItemsPerPage(Number(value));
+										setCurrentPage(1);
+									}}
+								>
+									<SelectTrigger className="w-16 h-8">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="5">5</SelectItem>
+										<SelectItem value="10">10</SelectItem>
+										<SelectItem value="20">20</SelectItem>
+										<SelectItem value="50">50</SelectItem>
+									</SelectContent>
+								</Select>
+								<span className="text-sm text-muted-foreground">
+									éléments par page
+								</span>
+							</div>
+
+							<div className="flex items-center gap-2">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handlePageChange(currentPage - 1)}
+									disabled={currentPage === 1}
+								>
+									<ChevronLeft className="h-4 w-4" />
+									Précédent
+								</Button>
+
+								<div className="flex items-center gap-1">
+									{Array.from({ length: totalPages }, (_, i) => i + 1)
+										.filter(
+											(page) =>
+												page === 1 ||
+												page === totalPages ||
+												Math.abs(page - currentPage) <= 2,
+										)
+										.map((page, index, array) => (
+											<div key={page} className="flex items-center">
+												{index > 0 && array[index - 1] !== page - 1 && (
+													<span className="px-2 text-muted-foreground">
+														...
+													</span>
+												)}
+												<Button
+													variant={
+														currentPage === page ? "default" : "outline"
+													}
+													size="sm"
+													onClick={() => handlePageChange(page)}
+													className="w-8 h-8 p-0"
+												>
+													{page}
+												</Button>
+											</div>
+										))}
+								</div>
+
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handlePageChange(currentPage + 1)}
+									disabled={currentPage === totalPages}
+								>
+									Suivant
+									<ChevronRight className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 
 			{/* Modal de confirmation de suppression */}
 			<AlertDialog
-				open={!!deleteSession}
-				onOpenChange={() => setDeleteSession(null)}
+				open={!!deleteSessionState}
+				onOpenChange={() => setDeleteSessionState(null)}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Supprimer la session</AlertDialogTitle>
 						<AlertDialogDescription>
 							Êtes-vous sûr de vouloir supprimer la session{" "}
-							<strong>"{deleteSession?.title}"</strong> ?
+							<strong>"{deleteSessionState?.title}"</strong> ?
 							<br />
 							<br />
 							<span className="text-destructive font-medium">
@@ -663,6 +724,6 @@ export function SectionSessionsListPage() {
 			</AlertDialog>
 		</div>
 	);
-}
+};
 
 export default SectionSessionsListPage;

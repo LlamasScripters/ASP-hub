@@ -89,6 +89,56 @@ export class SessionsApiClient {
 	}
 
 	/**
+	 * Récupère les sessions d'une section
+	 */
+	async getSessionsBySection(	
+		sectionId: string,
+		options?: ApiOptions,
+	): Promise<SessionSport[]> {
+		const response = await fetch(
+			`${this.baseUrl}/sessionsSport/section/${sectionId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Récupère les sessions d'un coach
+	 */
+	async getSessionsByCoach(
+		coachId: string,
+		options?: ApiOptions,
+	): Promise<SessionSport[]> {
+		const response = await fetch(
+			`${this.baseUrl}/sessionsSport/coach/${coachId}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				signal: options?.signal,
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Erreur HTTP: ${response.status}`);
+		}
+
+		return response.json();
+	}
+
+	/**
 	 * Récupère les statistiques des sessions
 	 */
 	async getSessionStats(

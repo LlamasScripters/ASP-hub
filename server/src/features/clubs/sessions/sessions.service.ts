@@ -306,6 +306,14 @@ export class SessionsService {
 	}
 
 	/**
+	 * Récupère les sessions d'une section
+	 */
+	async getSessionsBySection(sectionId: string): Promise<SessionResponse[]> {
+		const result = await this.getSessions();
+		return result.data.filter((session) => session.category.section && session.category.section.id === sectionId);
+	}
+
+	/**
 	 * Récupère les sessions d'un coach
 	 */
 	async getSessionsByCoach(coachId: string): Promise<SessionResponse[]> {

@@ -54,6 +54,15 @@ export function useSessionsByCategory(categoryId: string) {
 	});
 }
 
+export function useSessionsBySection(sectionId: string) {
+	return useQuery({
+		queryKey: [...sessionsQueryKeys.all, "section", sectionId],
+		queryFn: () => sessionsApi.getSessionsBySection(sectionId),
+		enabled: !!sectionId,
+		staleTime: 2 * 60 * 1000,
+	});
+}
+
 export function useSessionConflicts(data: CreateSessionData) {
 	return useQuery({
 		queryKey: sessionsQueryKeys.conflicts(data),

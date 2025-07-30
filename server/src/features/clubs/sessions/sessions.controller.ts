@@ -128,6 +128,26 @@ sessionsRouter.get(
 );
 
 /**
+ * @route GET /api/sessions/section/:sectionId
+ * @description Récupère les sessions d'une section
+ */
+sessionsRouter.get("/section/:sectionId", async (req: Request, res: Response) => {
+	try {
+		const { sectionId } = req.params;
+
+		const sessions = await sessionsService.getSessionsBySection(sectionId);
+
+		res.json(sessions);
+	} catch (error) {
+		console.error(
+			"Erreur lors de la récupération des sessions par section:",
+			error,
+		);
+		res.status(500).json({ error: "Erreur serveur" });
+	}
+});
+
+/**
  * @route GET /api/sessions/coach/:coachId
  * @description Récupère les sessions d'un coach
  */
