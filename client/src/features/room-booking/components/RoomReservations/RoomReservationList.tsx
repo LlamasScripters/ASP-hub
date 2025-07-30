@@ -57,8 +57,7 @@ const isRoomOpenOnDay = (
 const getRoomHoursForDay = (date: Date, openingHours: RoomOpeningHours) => {
 	const dayKey = getDayOfWeekKey(date);
 	const dayHours = openingHours[dayKey];
-	if (!dayHours || dayHours.closed) return null;
-
+	if (!dayHours || dayHours.closed) return { openTime: null, closeTime: null };
 	return {
 		openTime: dayHours.open,
 		closeTime: dayHours.close,
@@ -79,24 +78,27 @@ const formatDateKey = (date: Date): string => {
 
 const getStatusColor = (status: string) => {
 	switch (status.toLowerCase()) {
-		case "confirmed":
-		case "confirmé":
-			return "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-800 text-green-800 dark:text-green-200";
 		case "pending":
 		case "en_attente":
-			return "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200";
+			return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800";
+		case "confirmed":
+		case "confirmé":
+			return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800";
 		case "cancelled":
 		case "annulé":
-			return "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-800 text-red-800 dark:text-red-200";
+			return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800";
+		case "completed":
+		case "terminée":
+			return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800";
 		default:
-			return "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-200";
+			return "bg-muted dark:bg-muted text-muted-foreground border-border";
 	}
 };
 
 const HOUR_HEIGHT = 60;
 const MIN_RESERVATION_HEIGHT = 20;
-const START_HOUR = 5; // 5h du matin
-const END_HOUR = 24; // Minuit
+const START_HOUR = 5;
+const END_HOUR = 24;
 
 export function RoomReservationList({
 	roomId,
@@ -105,14 +107,6 @@ export function RoomReservationList({
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
 	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
 
-	const now = new Date();
-	const currentHour = now.getHours();
-	// Utiliser le fuseau horaire local pour la date actuelle
-	const currentYear = now.getFullYear();
-	const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
-	const currentDay = String(now.getDate()).padStart(2, "0");
-	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
-
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
 			return getWeekBounds(referenceDate);
@@ -120,53 +114,61 @@ export function RoomReservationList({
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
 
-	const { roomReservations, totalCount, loading, error } = useRoomReservations({
-		roomId,
-		startDate,
-		endDate,
+	const { roomReservations, loading, error } = useRoomReservations({
+		roomId: undefined,
 	});
 
-	const goPrevious = useCallback(() => {
-		setReferenceDate((prev) => {
-			const next = new Date(prev);
-			if (viewMode === "week") {
-				next.setDate(prev.getDate() - 7);
-			} else {
-				next.setMonth(prev.getMonth() - 1);
-			}
-			return next;
+	// Filtrage local pour la période affichée (comme dans MinibusReservationList)
+	const filteredReservations = useMemo(() => {
+		return roomReservations.filter((reservation) => {
+			const reservationDate = new Date(reservation.startAt);
+			return reservationDate >= startDate && reservationDate <= endDate;
 		});
-	}, [viewMode]);
+	}, [roomReservations, startDate, endDate]);
+
+	const now = new Date();
+	const currentHour = now.getHours();
+	const currentYear = now.getFullYear();
+	const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+	const currentDay = String(now.getDate()).padStart(2, "0");
+	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
+
+	const goPrevious = useCallback(() => {
+		if (viewMode === "week") {
+			const newDate = new Date(referenceDate);
+			newDate.setDate(newDate.getDate() - 7);
+			setReferenceDate(newDate);
+		} else {
+			const newDate = new Date(referenceDate);
+			newDate.setMonth(newDate.getMonth() - 1);
+			setReferenceDate(newDate);
+		}
+	}, [viewMode, referenceDate]);
 
 	const goNext = useCallback(() => {
-		setReferenceDate((prev) => {
-			const next = new Date(prev);
-			if (viewMode === "week") {
-				next.setDate(prev.getDate() + 7);
-			} else {
-				next.setMonth(prev.getMonth() + 1);
-			}
-			return next;
-		});
-	}, [viewMode]);
+		if (viewMode === "week") {
+			const newDate = new Date(referenceDate);
+			newDate.setDate(newDate.getDate() + 7);
+			setReferenceDate(newDate);
+		} else {
+			const newDate = new Date(referenceDate);
+			newDate.setMonth(newDate.getMonth() + 1);
+			setReferenceDate(newDate);
+		}
+	}, [viewMode, referenceDate]);
 
 	const roomReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, RoomReservation[]> = {};
-
-		for (const reservation of roomReservations) {
+		for (const reservation of filteredReservations) {
 			const date = new Date(reservation.startAt);
-			// Utiliser le fuseau horaire local au lieu d'UTC
 			const dateKey = formatDateKey(date);
-
 			if (!reservationsByDay[dateKey]) {
 				reservationsByDay[dateKey] = [];
 			}
-
 			reservationsByDay[dateKey].push(reservation);
 		}
-
 		return reservationsByDay;
-	}, [roomReservations]);
+	}, [filteredReservations]);
 
 	const formatPeriod = () => {
 		if (viewMode === "week") {
@@ -229,11 +231,11 @@ export function RoomReservationList({
 							Planning des réservations
 						</CardTitle>
 						<CardDescription className="text-sm text-muted-foreground">
-							Total : {totalCount} réservation{totalCount > 1 ? "s" : ""}
+							Total : {filteredReservations.length} réservation
+							{filteredReservations.length > 1 ? "s" : ""} sur la période
 						</CardDescription>
 					</div>
 					<div className="flex items-center gap-2">
-						{/* Sélecteur de vue */}
 						<div className="flex rounded-md border">
 							<Button
 								variant={viewMode === "week" ? "default" : "ghost"}
@@ -252,8 +254,6 @@ export function RoomReservationList({
 								Mois
 							</Button>
 						</div>
-
-						{/* Navigation */}
 						<div className="flex items-center gap-1">
 							<Button variant="outline" size="sm" onClick={goPrevious}>
 								<ChevronLeft className="h-4 w-4" />
@@ -288,7 +288,9 @@ export function RoomReservationList({
 									<div
 										key={`day-header-${dateKey}`}
 										className={`p-2 text-center border-b border-border ${
-											isOpen ? "bg-green-50 dark:bg-green-950/30" : "bg-muted"
+											isOpen
+												? "bg-green-50 dark:bg-green-950/30"
+												: "bg-muted"
 										} ${isToday ? "ring-2 ring-primary bg-primary/10 dark:bg-primary/20" : ""}`}
 									>
 										<div
@@ -314,7 +316,7 @@ export function RoomReservationList({
 														date,
 														roomOpeningHours,
 													);
-													return hours?.openTime && hours?.closeTime
+													return hours.openTime && hours.closeTime
 														? `${hours.openTime}-${hours.closeTime}`
 														: "Ouvert";
 												})()}
@@ -359,13 +361,13 @@ export function RoomReservationList({
 												roomOpeningHours,
 											);
 											const isHourInAvailableRange =
-												roomHours?.openTime && roomHours?.closeTime
+												roomHours.openTime && roomHours.closeTime
 													? hour >=
-															Math.floor(
-																timeToMinutes(roomHours.openTime) / 60,
-															) &&
-														hour <
-															Math.ceil(timeToMinutes(roomHours.closeTime) / 60)
+														  Math.floor(
+															  timeToMinutes(roomHours.openTime) / 60,
+														  ) &&
+													  hour <
+														  Math.ceil(timeToMinutes(roomHours.closeTime) / 60)
 													: false;
 
 											const hourReservations = dayRoomReservations.filter(
@@ -442,7 +444,7 @@ export function RoomReservationList({
 																	variant="ghost"
 																	asChild
 																	title="Modifier"
-																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background"
+																	className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background/80 dark:hover:bg-background/60"
 																>
 																	<Link
 																		to="/admin/facilities/roomReservations/$roomReservationId/edit"
@@ -565,16 +567,20 @@ export function RoomReservationList({
 						<div className="flex items-center gap-4">
 							<span className="font-medium text-foreground">Statuts :</span>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-800" />
+								<div className="w-3 h-3 rounded bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800" />
 								<span>En attente</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-800" />
+								<div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800" />
 								<span>Confirmée</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-800" />
+								<div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800" />
 								<span>Annulée</span>
+							</div>
+							<div className="flex items-center gap-1">
+								<div className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800" />
+								<span>Terminée</span>
 							</div>
 						</div>
 					</div>
@@ -586,7 +592,7 @@ export function RoomReservationList({
 								Disponibilités :
 							</span>
 							<div className="flex items-center gap-1">
-								<div className="w-3 h-3 rounded bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" />
+								<div className="w-3 h-3 rounded bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800" />
 								<span>Heures d'ouverture</span>
 							</div>
 							<div className="flex items-center gap-1">
