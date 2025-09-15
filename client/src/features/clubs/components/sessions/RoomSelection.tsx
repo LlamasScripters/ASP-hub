@@ -55,9 +55,7 @@ export function RoomSelection({
 
 	// Vérification de la disponibilité des salles
 	const { roomReservations } = useRoomReservations({
-		roomId: selectedRoomId_,
-		startDate: sessionStartDate,
-		endDate: sessionEndDate,
+		roomId: selectedRoomId_
 	});
 
 	const isRoomAvailable = (roomId: string) => {
