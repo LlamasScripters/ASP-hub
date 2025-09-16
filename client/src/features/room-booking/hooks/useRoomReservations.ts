@@ -1,11 +1,12 @@
-import { roomReservationsApi } from "@room-booking/lib/api/roomReservations";
+import { roomReservationsApi, getSixMonthsBounds } from "@room-booking/lib/api/roomReservations";
 import {
 	useMutation,
 	useQueryClient,
 	useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { Route as RoomsReservationsRoute } from "../../../routes/_authenticated/admin/_admin/facilities/rooms/$roomId/index";
 import { z } from "zod";
 
 export const roomReservationStatusEnumTranslated = {
@@ -117,30 +118,43 @@ export const filteredRoomReservationsQueryOptions = ({
 
 interface UseRoomReservationsOptions {
 	roomId?: string;
-	startDate?: Date;
-	endDate?: Date;
+	searchParams?: Record<string, unknown>;
+	routeParams?: Record<string, unknown>;
 }
 
 export function useRoomReservations(options?: UseRoomReservationsOptions) {
-	const roomId = options?.roomId;
-	const startDate = options?.startDate || new Date();
-	const endDate =
-		options?.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+	const fallbackSearchParams = options?.searchParams;
+	const fallbackRouteParams = options?.routeParams;
+
+	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+
+	let searchParams: Record<string, unknown>;
+	let routeParams: Record<string, unknown>;
+
+	try {
+		searchParams = fallbackSearchParams || RoomsReservationsRoute.useSearch();
+		routeParams = fallbackRouteParams || RoomsReservationsRoute.useParams();
+	} catch (error) {
+		searchParams = fallbackSearchParams || {};
+		routeParams = fallbackRouteParams || {};
+	}
+	const roomId = options?.roomId || (routeParams.roomId as string);
+
 	const queryClient = useQueryClient();
 
 	const { data: fetchedData, refetch } = useSuspenseQuery({
-		queryKey: ["roomReservations", roomId, startDate, endDate],
+		queryKey: ["roomReservations", roomId],
 		queryFn: () => {
-			if (!roomId) {
-				return { data: [], total: 0 };
-			}
+			if (!roomId) return Promise.resolve({ data: [], total: 0 });
+
+			const { start, end } = getSixMonthsBounds(referenceDate);
+
 			return roomReservationsApi.getRoomReservationsByRoomId(
 				roomId,
-				startDate,
-				endDate,
+				start,
+				end,
 			);
 		},
-		initialData: { data: [], total: 0 },
 	});
 
 	// Create mutation
@@ -148,7 +162,7 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 		mutationFn: (data: CreateRoomReservationData) =>
 			roomReservationsApi.createRoomReservation(data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+			queryClient.invalidateQueries({ queryKey: ["roomReservations", roomId] });
 			toast.success("Réservation créée avec succès");
 		},
 		onError: (error: Error) => {
@@ -171,7 +185,7 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 			data: UpdateRoomReservationData;
 		}) => roomReservationsApi.updateRoomReservation(id, data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+			queryClient.invalidateQueries({ queryKey: ["roomReservations", roomId] });
 			toast.success("Réservation modifiée avec succès");
 		},
 		onError: (error: Error) => {
@@ -188,7 +202,7 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => roomReservationsApi.deleteRoomReservation(id),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["roomReservations"] });
+			queryClient.invalidateQueries({ queryKey: ["roomReservations", roomId] });
 			toast.success("Réservation supprimée avec succès");
 		},
 		onError: (error: Error) => {
@@ -245,15 +259,22 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 		[deleteMutation],
 	);
 
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
+
 	return {
 		roomReservations: fetchedData.data,
 		totalCount: fetchedData.total,
 		loading: false,
 		error: null,
+		referenceDate,
+		setReferenceDate,
 		createRoomReservation,
 		updateRoomReservation,
 		deleteRoomReservation,
 		updateFilters: () => {}, // Placeholder pour compatibilité
 		refetch,
+		refresh,
 	};
 }

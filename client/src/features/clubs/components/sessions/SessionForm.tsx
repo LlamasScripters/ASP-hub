@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
@@ -30,15 +31,12 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
+import type { SessionSport } from "../../types";
+import { useSessions, useSession, useCreateSession, useUpdateSession, useCreateSessionWithRoomReservation } from "../../hooks/useSessions";
 import { useCategoriesBySection } from "../../hooks/useCategories";
 import { useSection } from "../../hooks/useSections";
-import {
-	useCreateSession,
-	useSession,
-	useSessions,
-	useUpdateSession,
-} from "../../hooks/useSessions";
-import type { SessionSport } from "../../types";
+import { RoomSelection } from "./RoomSelection";
+import { Route as AuthenticatedRoute } from "@/routes/_authenticated";
 
 const sessionSchema = z
 	.object({
@@ -114,7 +112,8 @@ export function SessionForm({
 	sessionId?: string;
 }) {
 	const navigate = useNavigate();
-
+	const { user } = AuthenticatedRoute.useLoaderData();
+	
 	// Use hooks for data fetching and mutations
 	const { data: allSessions } = useSessions();
 	const { data: existingSession, isLoading: isLoadingSession } = useSession(
@@ -124,13 +123,18 @@ export function SessionForm({
 	const { data: sectionData } = useSection(sectionId);
 	const createSessionMutation = useCreateSession();
 	const updateSessionMutation = useUpdateSession();
-
+	const createSessionWithRoomMutation = useCreateSessionWithRoomReservation();
+	
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [dateValidation, setDateValidation] = useState<{
 		isValid: boolean;
 		message: string;
 		type: "error" | "warning" | "info" | null;
 	}>({ isValid: true, message: "", type: null });
+
+	// États pour la sélection de salle
+	const [useRoomReservation, setUseRoomReservation] = useState(false);
+	const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
 	const [form, setForm] = useState<{
 		categoryId: string;
@@ -179,6 +183,7 @@ export function SessionForm({
 				maxParticipants: existingSession.maxParticipants || undefined,
 				notes: existingSession.notes || "",
 			});
+			setUseRoomReservation(!!existingSession.location);
 		}
 	}, [mode, existingSession]);
 
@@ -261,10 +266,16 @@ export function SessionForm({
 
 		const normalizedTitle = title.trim().toLowerCase();
 		const duplicateSession = existingSessions.find(
-			(session) =>
-				session.title.trim().toLowerCase() === normalizedTitle &&
-				session.categoryId === selectedCategoryId &&
-				session.id !== sessionId, // exclusion la session actuelle en mode édition
+			(session) => {
+				// Vérifie si le titre et la catégorie correspondent
+				const titleMatches = session.title.trim().toLowerCase() === normalizedTitle;
+				const categoryMatches = session.categoryId === selectedCategoryId;
+				
+				// En mode édition, exclut la session actuelle
+				const isCurrentSession = mode === "edit" && sessionId && session.id === sessionId;
+				
+				return titleMatches && categoryMatches && !isCurrentSession;
+			}
 		);
 
 		return duplicateSession
@@ -320,6 +331,14 @@ export function SessionForm({
 			return;
 		}
 
+		// Validation de la salle si l'option est activée
+		if (useRoomReservation && !selectedRoomId) {
+			setErrors({
+				general: "Veuillez sélectionner une salle pour continuer",
+			});
+			return;
+		}
+
 		const formData = {
 			...form,
 			startDate: form.startDate ? formatDateForAPI(form.startDate) : undefined,
@@ -343,7 +362,20 @@ export function SessionForm({
 
 		try {
 			if (mode === "create") {
-				await createSessionMutation.mutateAsync(parsed.data);
+				if (useRoomReservation && selectedRoomId) {
+					// Création avec réservation de salle
+					if (!user?.id) {
+						throw new Error("Utilisateur non authentifié");
+					}
+					await createSessionWithRoomMutation.mutateAsync({
+						...parsed.data,
+						roomId: selectedRoomId,
+						bookerId: user.id,
+					});
+				} else {
+					// Création sans réservation de salle
+					await createSessionMutation.mutateAsync(parsed.data);
+				}
 			} else if (sessionId) {
 				await updateSessionMutation.mutateAsync({
 					id: sessionId,
@@ -734,6 +766,45 @@ export function SessionForm({
 										className="resize-none"
 									/>
 								</div>
+							</div>
+
+							<Separator />
+
+							{/* Room Selection */}
+							<div className="space-y-6">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+									</div>
+									<div className="flex items-center gap-2">
+										<Label htmlFor="use-room" className="text-sm">
+											Réserver une salle
+										</Label>
+										<Switch
+											id="use-room"
+											checked={useRoomReservation}
+											onCheckedChange={setUseRoomReservation}
+										/>
+									</div>
+								</div>
+
+								{useRoomReservation && (
+									<RoomSelection
+										onRoomSelect={(roomId) => setSelectedRoomId(roomId)}
+										selectedRoomId={selectedRoomId}
+										sessionStartDate={form.startDate ? new Date(form.startDate) : undefined}
+										sessionEndDate={form.endDate ? new Date(form.endDate) : undefined}
+									/>
+								)}
+
+								{!useRoomReservation && (
+									<div className="p-4 bg-muted/50 rounded-lg">
+										<p className="text-sm text-muted-foreground">
+											Activez l'option ci-dessus pour réserver automatiquement une salle 
+											lors de la création de cette session. Vous pourrez sélectionner 
+											un complexe sportif et une salle disponible.
+										</p>
+									</div>
+								)}
 							</div>
 
 							<Separator />

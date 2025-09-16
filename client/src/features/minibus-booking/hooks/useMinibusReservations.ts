@@ -3,7 +3,7 @@ import {
 	useQueryClient,
 	useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Route as MinibusReservationsRoute } from "../../../routes/_authenticated/admin/_admin/assets/minibuses/$minibusId/index";
 import { minibusReservationsApi } from "../lib/api/minibusReservations";
@@ -14,6 +14,8 @@ import type {
 	MinibusReservationsPaginatedResponse,
 	UpdateMinibusReservationData,
 } from "../lib/api/minibusReservations";
+
+import { getSixMonthsBounds } from "@room-booking/lib/api/roomReservations";
 
 export const minibusReservationStatusEnumTranslated = {
 	pending: "En attente",
@@ -61,6 +63,8 @@ export function useMinibusReservations(
 	const fallbackSearchParams = options?.searchParams;
 	const fallbackRouteParams = options?.routeParams;
 
+	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+	
 	let searchParams: Record<string, unknown>;
 	let routeParams: Record<string, unknown>;
 
@@ -81,15 +85,12 @@ export function useMinibusReservations(
 		queryFn: () => {
 			if (!minibusId) return Promise.resolve({ data: [], total: 0 });
 
-			const sixMonthsAgo = new Date();
-			sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-			const sixMonthsFromNow = new Date();
-			sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+			const { start, end } = getSixMonthsBounds(referenceDate);
 
 			return minibusReservationsApi.getMinibusReservationsByMinibusId(
 				minibusId,
-				sixMonthsAgo,
-				sixMonthsFromNow,
+				start,
+				end,
 			);
 		},
 	});
@@ -197,15 +198,23 @@ export function useMinibusReservations(
 		[deleteMutation],
 	);
 
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
+
 	return {
 		minibusReservations: fetchedData.data,
 		totalCount: fetchedData.total,
 		loading: !fetchedData.data,
 		filters: searchParams,
+		referenceDate,
+		setReferenceDate,
+		error: null,
 		updateFilters,
 		createMinibusReservation,
 		updateMinibusReservation,
 		deleteMinibusReservation,
 		refetch,
+		refresh,
 	};
 }

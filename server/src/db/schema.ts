@@ -328,6 +328,9 @@ export const sessionsSport = pgTable("sessions_sport", {
 	responsibleId: uuid("responsible_id").references(() => users.id, {
 		onDelete: "set null",
 	}),
+	roomReservationId: uuid("room_reservation_id").references(() => roomReservations.id, {
+		onDelete: "set null",
+	}),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => new Date())
