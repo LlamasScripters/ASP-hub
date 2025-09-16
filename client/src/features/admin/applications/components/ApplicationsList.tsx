@@ -1100,10 +1100,14 @@ export function ApplicationsList({
 														</DropdownMenuTrigger>
 														<DropdownMenuContent align="end">
 															<DropdownMenuItem
-																onClick={() => handleViewDetails(application)}
+																onClick={() => console.log('Option 1 clicked')}
 															>
-																<Eye className="w-4 h-4 mr-2" />
-																Voir les détails
+																Option 1
+															</DropdownMenuItem>
+															<DropdownMenuItem
+																onClick={() => console.log('Option 2 clicked')}
+															>
+																Option 2
 															</DropdownMenuItem>
 															<DropdownMenuSeparator />
 															<DropdownMenuItem
@@ -1114,7 +1118,7 @@ export function ApplicationsList({
 																	);
 																}}
 															>
-																Copier l'email
+																Copier l'adresse email
 															</DropdownMenuItem>
 														</DropdownMenuContent>
 													</DropdownMenu>
