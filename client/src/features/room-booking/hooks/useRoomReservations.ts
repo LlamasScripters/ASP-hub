@@ -1,10 +1,10 @@
-import { roomReservationsApi } from "@room-booking/lib/api/roomReservations";
+import { roomReservationsApi, getSixMonthsBounds } from "@room-booking/lib/api/roomReservations";
 import {
 	useMutation,
 	useQueryClient,
 	useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Route as RoomsReservationsRoute } from "../../../routes/_authenticated/admin/_admin/facilities/rooms/$roomId/index";
 import { z } from "zod";
@@ -126,6 +126,8 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 	const fallbackSearchParams = options?.searchParams;
 	const fallbackRouteParams = options?.routeParams;
 
+	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+
 	let searchParams: Record<string, unknown>;
 	let routeParams: Record<string, unknown>;
 
@@ -145,20 +147,12 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 		queryFn: () => {
 			if (!roomId) return Promise.resolve({ data: [], total: 0 });
 
-			const sixMonthsAgo = new Date();
-			sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-			const startDate = searchParams.startDate
-				? new Date(searchParams.startDate as string)
-				: sixMonthsAgo;
-			const endDate = searchParams.endDate
-				? new Date(searchParams.endDate as string)
-				: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // +30 days
+			const { start, end } = getSixMonthsBounds(referenceDate);
 
 			return roomReservationsApi.getRoomReservationsByRoomId(
 				roomId,
-				startDate,
-				endDate,
+				start,
+				end,
 			);
 		},
 	});
@@ -265,15 +259,22 @@ export function useRoomReservations(options?: UseRoomReservationsOptions) {
 		[deleteMutation],
 	);
 
+	const refresh = useCallback(async () => {
+		await refetch();
+	}, [refetch]);
+
 	return {
 		roomReservations: fetchedData.data,
 		totalCount: fetchedData.total,
 		loading: false,
 		error: null,
+		referenceDate,
+		setReferenceDate,
 		createRoomReservation,
 		updateRoomReservation,
 		deleteRoomReservation,
 		updateFilters: () => {}, // Placeholder pour compatibilité
 		refetch,
+		refresh,
 	};
 }

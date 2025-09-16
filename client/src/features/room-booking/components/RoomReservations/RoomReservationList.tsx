@@ -105,7 +105,11 @@ export function RoomReservationList({
 	roomOpeningHours,
 }: RoomReservationListProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
-	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+	const [navIndex, setNavIndex] = useState(0); 
+
+	const { roomReservations, loading, error, referenceDate, setReferenceDate, refresh } = useRoomReservations({
+		roomId: undefined,
+	});
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -114,9 +118,7 @@ export function RoomReservationList({
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
 
-	const { roomReservations, loading, error } = useRoomReservations({
-		roomId: undefined,
-	});
+	
 
 	// Filtrage local pour la période affichée (comme dans MinibusReservationList)
 	const filteredReservations = useMemo(() => {
@@ -134,28 +136,39 @@ export function RoomReservationList({
 	const currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 	const goPrevious = useCallback(() => {
+		let newDate: Date;
 		if (viewMode === "week") {
-			const newDate = new Date(referenceDate);
+			newDate = new Date(referenceDate);
 			newDate.setDate(newDate.getDate() - 7);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx - 0.25);
 		} else {
-			const newDate = new Date(referenceDate);
+			newDate = new Date(referenceDate);
 			newDate.setMonth(newDate.getMonth() - 1);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx - 1);
 		}
-	}, [viewMode, referenceDate]);
+	}, [viewMode, referenceDate, setReferenceDate]);
 
 	const goNext = useCallback(() => {
+		let newDate: Date;
 		if (viewMode === "week") {
-			const newDate = new Date(referenceDate);
+			newDate = new Date(referenceDate);
 			newDate.setDate(newDate.getDate() + 7);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx + 0.25);
 		} else {
-			const newDate = new Date(referenceDate);
+			newDate = new Date(referenceDate);
 			newDate.setMonth(newDate.getMonth() + 1);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx + 1);
 		}
-	}, [viewMode, referenceDate]);
+	}, [viewMode, referenceDate, setReferenceDate]);
+
+	if (navIndex === 3 || navIndex === -3) {
+		refresh();
+		setNavIndex(0);
+	}
 
 	const roomReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, RoomReservation[]> = {};

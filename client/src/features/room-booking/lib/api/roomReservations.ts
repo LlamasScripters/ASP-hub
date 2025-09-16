@@ -44,6 +44,19 @@ export function getMonthBounds(date: Date): { start: Date; end: Date } {
 }
 
 /**
+ * Get the start and end dates covering a 6-month period centered around today.
+ * The start date is the first day of that month at 00:00:00,
+ * and the end date is the last day of that month at 23:59:59.
+ */
+export function getSixMonthsBounds(date: Date): { start: Date; end: Date } {
+	const start = new Date(date.getFullYear(), date.getMonth() - 3, 1);
+	start.setHours(0, 0, 0, 0);
+	const end = new Date(date.getFullYear(), date.getMonth() + 4, 0);
+	end.setHours(23, 59, 59, 999);
+	return { start, end };
+}
+
+/**
  * Formats a date string to "DD/MM/YYYY HH:mm" in French locale.
  */
 export function formatDateTime(dateString: string): string {

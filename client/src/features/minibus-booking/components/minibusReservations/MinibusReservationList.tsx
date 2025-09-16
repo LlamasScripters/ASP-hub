@@ -103,7 +103,11 @@ export function MinibusReservationList({
 	minibusDisponibility,
 }: MinibusReservationListProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
-	const [referenceDate, setReferenceDate] = useState<Date>(new Date());
+	const [navIndex, setNavIndex] = useState(0);
+
+	const { minibusReservations, loading, error, referenceDate, setReferenceDate, refresh } = useMinibusReservations({
+		minibusId: undefined,
+	});
 
 	const { start: startDate, end: endDate } = useMemo(() => {
 		if (viewMode === "week") {
@@ -111,10 +115,6 @@ export function MinibusReservationList({
 		}
 		return getMonthBounds(referenceDate);
 	}, [viewMode, referenceDate]);
-
-	const { minibusReservations, loading } = useMinibusReservations({
-		minibusId: undefined,
-	});
 
 	const filteredReservations = useMemo(() => {
 		return minibusReservations.filter((reservation) => {
@@ -136,24 +136,33 @@ export function MinibusReservationList({
 			const newDate = new Date(referenceDate);
 			newDate.setDate(newDate.getDate() - 7);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx - 0.25);
 		} else {
 			const newDate = new Date(referenceDate);
 			newDate.setMonth(newDate.getMonth() - 1);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx - 1);
 		}
-	}, [viewMode, referenceDate]);
+	}, [viewMode, referenceDate, setReferenceDate]);
 
 	const goNext = useCallback(() => {
 		if (viewMode === "week") {
 			const newDate = new Date(referenceDate);
 			newDate.setDate(newDate.getDate() + 7);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx + 0.25);
 		} else {
 			const newDate = new Date(referenceDate);
 			newDate.setMonth(newDate.getMonth() + 1);
 			setReferenceDate(newDate);
+			setNavIndex((idx) => idx + 1);
 		}
-	}, [viewMode, referenceDate]);
+	}, [viewMode, referenceDate, setReferenceDate]);
+
+	if (navIndex === 3 || navIndex === -3) {
+		refresh();
+		setNavIndex(0);
+	}
 
 	const minibusReservationsByDay = useMemo(() => {
 		const reservationsByDay: Record<string, MinibusReservation[]> = {};
@@ -199,6 +208,24 @@ export function MinibusReservationList({
 				<CardContent>
 					<div className="flex items-center justify-center py-8">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (error) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<CalendarIcon className="w-4 h-4" />
+						Planning des réservations
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="text-red-600">
+						Une erreur est survenue lors du chargement des réservations.
 					</div>
 				</CardContent>
 			</Card>
